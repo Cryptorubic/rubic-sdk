@@ -13,6 +13,7 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -59,7 +60,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult> {
+    ): Promise<CalculationResult<EvmEncodeConfig>> {
         const fromBlockchain = fromToken.blockchain as CbridgeCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as CbridgeCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;

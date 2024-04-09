@@ -81,7 +81,7 @@ export class BridgersTrade extends TronOnChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkWalletState();
+        await this.checkWalletState(options?.testMode);
         await this.checkAllowanceAndApprove(options);
 
         try {

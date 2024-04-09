@@ -4,11 +4,8 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
@@ -28,7 +25,7 @@ import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/
 import { DebridgeEvmCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/debridge-cross-chain-trade-constructor';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { DlnEvmTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
-import { convertGasDataToBN } from 'src/features/cross-chain/calculation-manager/utils/convert-gas-price';
+import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
@@ -36,8 +33,6 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
  * Calculated DeBridge cross-chain trade.
  */
 export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
-    protected useProxyByDefault = false;
-
     /** @internal */
     public readonly transitAmount: BigNumber;
 
@@ -49,8 +44,6 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly onChainTrade: EvmOnChainTrade | null;
 
-    private latestFixedFee: string | null = null;
-
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -60,99 +53,26 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain &
-            EvmBlockchainName;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
         try {
-            let gasLimit: BigNumber | null;
-            let gasDetails: GasPriceBN | BigNumber | null;
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
-                const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new DebridgeEvmCrossChainTrade(
-                        {
-                            from,
-                            to: toToken,
-                            transactionRequest,
-                            gasData: null,
-                            priceImpact: 0,
-                            allowanceTarget: '',
-                            slippage: 0,
-                            feeInfo,
-                            transitAmount: new BigNumber(NaN),
-                            toTokenAmountMin: new BigNumber(NaN),
-                            cryptoFeeToken: from,
-                            onChainTrade: null
-                        },
-                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                        []
-                    ).getContractParams({ receiverAddress }, true);
-
-                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
-                    web3Public.getEstimatedGas(
-                        contractAbi,
-                        contractAddress,
-                        methodName,
-                        methodArguments,
-                        walletAddress,
-                        value
-                    ),
-                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-                ]);
-
-                gasLimit = proxyGasLimit;
-                gasDetails = proxyGasDetails;
-            } else {
-                const { tx } = await new DebridgeEvmCrossChainTrade(
-                    {
-                        from,
-                        to: toToken,
-                        transactionRequest,
-                        gasData: null,
-                        priceImpact: 0,
-                        allowanceTarget: '',
-                        slippage: 0,
-                        feeInfo,
-                        transitAmount: new BigNumber(NaN),
-                        toTokenAmountMin: new BigNumber(NaN),
-                        cryptoFeeToken: from,
-                        onChainTrade: null
-                    },
-                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                    []
-                ).getTransactionRequest(receiverAddress, null, true);
-
-                const defaultGasLimit = await web3Public.getEstimatedGasByData(
-                    walletAddress,
-                    tx.to,
-                    {
-                        data: tx.data,
-                        value: tx.value
-                    }
-                );
-                const defaultGasDetails = convertGasDataToBN(
-                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
-                );
-
-                gasLimit = defaultGasLimit;
-                gasDetails = defaultGasDetails;
-            }
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-            return {
-                gasLimit: increasedGasLimit,
-                ...gasDetails
-            };
+            const trade = new DebridgeEvmCrossChainTrade(
+                {
+                    from,
+                    to: toToken,
+                    transactionRequest,
+                    gasData: null,
+                    priceImpact: 0,
+                    allowanceTarget: '',
+                    slippage: 0,
+                    feeInfo,
+                    transitAmount: new BigNumber(NaN),
+                    toTokenAmountMin: new BigNumber(NaN),
+                    cryptoFeeToken: from,
+                    onChainTrade: null
+                },
+                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                []
+            );
+            return getCrossChainGasData(trade, receiverAddress);
         } catch (_err) {
             return null;
         }
@@ -225,11 +145,11 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
         let transactionHash: string;
 
         try {
-            const { tx } = await this.getTransactionRequest(
-                options?.receiverAddress,
-                options?.directTransaction
+            const { data, value, to } = await this.setTransactionConfig(
+                false,
+                options?.useCacheData || false,
+                options?.receiverAddress
             );
-            const { data, value, to } = tx;
             const { onConfirm } = options;
             const onTransactionHash = (hash: string) => {
                 if (onConfirm) {
@@ -257,16 +177,16 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(
-        options: GetContractParamsOptions,
-        skipAmountChangeCheck: boolean = false
-    ): Promise<ContractParams> {
-        const { tx, fixFee } = await this.getTransactionRequest(
-            options?.receiverAddress,
-            options?.directTransaction,
-            skipAmountChangeCheck
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+        const {
+            data,
+            value: providerValue,
+            to
+        } = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress
         );
-        const { data, value: providerValue, to } = tx;
 
         const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
         const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
@@ -290,6 +210,9 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
+        const fixFee = this.from.isNative
+            ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+            : new BigNumber(providerValue).toFixed();
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             to,
             data! as string,
@@ -323,28 +246,9 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async getTransactionRequest(
-        receiverAddress?: string,
-        transactionConfig?: EvmEncodeConfig | null,
-        skipAmountChangeCheck: boolean = false
-    ): Promise<{
-        tx: {
-            data: string;
-            value: string;
-            to: string;
-        };
-        fixFee: string;
-    }> {
-        if (transactionConfig && this.latestFixedFee) {
-            return {
-                tx: {
-                    data: transactionConfig.data,
-                    value: transactionConfig.value,
-                    to: transactionConfig.to
-                },
-                fixFee: this.latestFixedFee
-            };
-        }
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const sameChain =
             BlockchainsInfo.getChainType(this.from.blockchain) ===
             BlockchainsInfo.getChainType(this.to.blockchain);
@@ -364,15 +268,10 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
             referralCode: '4350'
         };
 
-        const { tx, estimation, fixFee } =
+        const { tx, estimation } =
             await DlnApiService.fetchCrossChainSwapData<DlnEvmTransactionResponse>(params);
-        this.latestFixedFee = Boolean(fixFee) ? fixFee : '0';
 
-        if (!skipAmountChangeCheck) {
-            this.checkAmountChange(tx, estimation.dstChainTokenOut.amount, this.to.stringWeiAmount);
-        }
-
-        return { tx, fixFee };
+        return { config: tx, amount: estimation.dstChainTokenOut.maxTheoreticalAmount };
     }
 
     public getTradeInfo(): TradeInfo {

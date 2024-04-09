@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { parseError } from 'src/common/utils/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -80,39 +79,10 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
         this.quoteRequestParams = quoteRequestParams;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
-
-        try {
-            const transactionData = await this.getTxConfigAndCheckAmount(
-                options.receiverAddress,
-                options.fromAddress,
-                options.directTransaction
-            );
-
-            const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gas,
-                gasPrice: transactionData.gasPrice
-            });
-
-            return {
-                to: transactionData.to,
-                data: transactionData.data,
-                value: transactionData.value,
-                gas,
-                gasPrice
-            };
-        } catch (error) {
-            throw parseError(error);
-        }
-    }
-
-    public async getToAmountAndTxData(
-        receiverAddress?: string,
-        fromAddress?: string
+    protected async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
-        const account = receiverAddress || fromAddress;
+        const account = options.receiverAddress || options.fromAddress;
         try {
             const { destAmount, gasUseEstimate, methodParameters } =
                 await PiteasApiService.fetchQuote({

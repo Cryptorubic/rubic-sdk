@@ -7,13 +7,13 @@ import {
     SwapChainWithExactInputParams
 } from 'iziswap-sdk/lib/swap';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { IzumiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/models/izumi-trade-struct';
@@ -68,7 +68,9 @@ export class IzumiTrade extends EvmOnChainTrade {
 
     private readonly strictERC20Token: boolean = false;
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    protected async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
+    ): Promise<GetToAmountAndTxDataResponse> {
         const tokenChain = blockchainId[this.from.blockchain];
         const swapParams = {
             feeChain: this.swapConfig.feeChain,
@@ -96,11 +98,13 @@ export class IzumiTrade extends EvmOnChainTrade {
             gasPriceInfo.gasPrice.toFixed()
         );
 
-        return {
+        const config = {
             to: this.dexContractAddress,
             value: data.value,
             data: swapCalling.encodeABI()
         };
+
+        return { tx: config, toAmount: this.to.stringWeiAmount };
     }
 
     constructor(tradeStruct: IzumiTradeStruct, providerAddress: string) {

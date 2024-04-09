@@ -103,6 +103,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             const bridgeSubtype = (
                 routePath.find(el => el.type === 'cross-chain') as CrossChainStep
             )?.provider;
+            const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
             const tradeParams = await RangoCrossChainParser.getTradeConstructorParams({
                 fromToken: from,
                 toToken: to,
@@ -111,7 +112,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 feeInfo,
                 toTokenAmountMin,
                 swapQueryParams,
-                bridgeSubtype
+                bridgeSubtype,
+                receiverAddress: options?.receiverAddress || fakeAddress
             });
 
             const trade = new RangoCrossChainTrade(tradeParams);

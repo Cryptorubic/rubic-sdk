@@ -4,7 +4,7 @@ import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-pr
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
 import { SolanaTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/solana-web3-private/models/solana-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
-import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/solana-web3-pure';
+import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { SolanaWeb3 } from 'src/core/sdk/models/solana-web3';
 

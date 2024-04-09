@@ -11,11 +11,11 @@ import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { defaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
@@ -155,7 +155,9 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return { amountIn, amountOut };
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    protected async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
+    ): Promise<GetToAmountAndTxDataResponse> {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
 
@@ -176,28 +178,30 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
             }
         }
 
-        try {
-            const methodName = await this.getMethodName(
-                options,
-                options.fromAddress,
-                options.supportFee
-            );
-            const gasParams = this.getGasParams(options);
+        const methodName = await this.getMethodName(
+            options,
+            options.fromAddress,
+            options.supportFee
+        );
+        const gasParams = this.getGasParams(options);
 
-            return EvmWeb3Pure.encodeMethodCall(
-                this.dexContractAddress,
-                (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
-                methodName,
-                this.getCallParameters(options.receiverAddress || options.fromAddress),
-                this.nativeValueToSend,
-                gasParams
-            );
-        } catch (err) {
-            if (this.isDeflationError()) {
-                throw new LowSlippageDeflationaryTokenError();
-            }
-            throw parseError(err);
+        const config = EvmWeb3Pure.encodeMethodCall(
+            this.dexContractAddress,
+            (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
+            methodName,
+            this.getCallParameters(options.receiverAddress || options.fromAddress),
+            this.nativeValueToSend,
+            gasParams
+        );
+
+        return { tx: config, toAmount: this.to.stringWeiAmount };
+    }
+
+    protected getSwapError(err: Error & { code: number }): Error {
+        if (this.isDeflationError()) {
+            throw new LowSlippageDeflationaryTokenError();
         }
+        throw parseError(err);
     }
 
     protected getCallParameters(receiverAddress?: string): unknown[] {

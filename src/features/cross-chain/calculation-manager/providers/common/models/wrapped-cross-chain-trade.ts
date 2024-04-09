@@ -8,7 +8,7 @@ export interface WrappedCrossChainTrade {
      * Sometimes trade can be calculated even if error was thrown.
      * Equals `null` in case error is critical and trade cannot be calculated.
      */
-    trade: CrossChainTrade | null;
+    trade: CrossChainTrade<unknown> | null;
 
     /**
      * Type of calculated trade.

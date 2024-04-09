@@ -3,8 +3,7 @@ import { solidityPack } from 'ethers/lib/utils';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -14,8 +13,8 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { ALGB_TOKEN } from './constants/algb-token-addresses';
 import { layerZeroProxyOFT } from './constants/layerzero-bridge-address';
 import { layerZeroChainIds } from './constants/layzerzero-chain-ids';
@@ -29,53 +28,19 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
         to: PriceTokenAmount<EvmBlockchainName>,
         options: SwapTransactionOptions
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as LayerZeroBridgeSupportedBlockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
-        try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new LayerZeroBridgeTrade(
-                    {
-                        from,
-                        to,
-                        gasData: {
-                            gasLimit: new BigNumber(0),
-                            gasPrice: new BigNumber(0)
-                        }
-                    },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
-                    []
-                ).getContractParams(options);
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
-                    value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-            ]);
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-            return {
-                gasLimit: increasedGasLimit,
-                ...gasDetails
-            };
-        } catch (_err) {
-            return null;
-        }
+        const trade = new LayerZeroBridgeTrade(
+            {
+                from,
+                to,
+                gasData: {
+                    gasLimit: new BigNumber(0),
+                    gasPrice: new BigNumber(0)
+                }
+            },
+            EvmWeb3Pure.EMPTY_ADDRESS,
+            []
+        );
+        return getCrossChainGasData(trade, options?.receiverAddress);
     }
 
     public readonly onChainSubtype = { from: undefined, to: undefined };
@@ -146,14 +111,10 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const params = await this.getContractParams(options);
-
-            const { data, to, value } = EvmWeb3Pure.encodeMethodCall(
-                params.contractAddress,
-                params.contractAbi,
-                params.methodName,
-                params.methodArguments,
-                params.value
+            const { data, value, to } = await this.setTransactionConfig(
+                false,
+                options?.useCacheData || false,
+                options.receiverAddress
             );
 
             const tx = await this.web3Private.trySendTransaction(to, {
@@ -196,6 +157,20 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
             methodArguments,
             value: fee || '0x'
         };
+    }
+
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        const params = await this.getContractParams({ receiverAddress });
+        const config = EvmWeb3Pure.encodeMethodCall(
+            params.contractAddress,
+            params.contractAbi,
+            params.methodName,
+            params.methodArguments,
+            params.value
+        );
+        return { config, amount: this.to.stringWeiAmount };
     }
 
     private async estimateSendFee(options: SwapTransactionOptions) {

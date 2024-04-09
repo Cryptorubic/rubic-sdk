@@ -12,7 +12,6 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -158,10 +157,12 @@ export abstract class OnChainTrade {
      */
     public abstract encode(options: EncodeTransactionOptions): Promise<unknown>;
 
-    protected async checkWalletState(): Promise<void> {
+    protected async checkWalletState(testMode: boolean = false): Promise<void> {
         this.checkWalletConnected();
         await this.checkBlockchainCorrect();
-        await this.checkBalance();
+        if (!testMode) {
+            await this.checkBalance();
+        }
     }
 
     protected checkWalletConnected(): never | void {
@@ -246,14 +247,10 @@ export abstract class OnChainTrade {
         };
     }
 
-    protected checkAmountChange(
-        transactionRequest: EvmEncodeConfig,
-        newWeiAmount: string,
-        oldWeiAmount: string
-    ): void {
+    protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.1;
+        const changePercent = 0.5;
         const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
@@ -265,11 +262,7 @@ export abstract class OnChainTrade {
             newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
 
         if (shouldThrowError) {
-            throw new UpdatedRatesError({
-                ...transactionRequest,
-                newAmount: newWeiAmount,
-                oldAmount: oldWeiAmount
-            });
+            throw new UpdatedRatesError(oldWeiAmount, newWeiAmount);
         }
     }
 }

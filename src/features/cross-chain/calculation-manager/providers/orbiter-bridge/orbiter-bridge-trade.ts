@@ -1,16 +1,13 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -35,24 +32,11 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         fromToken,
         toToken,
         feeInfo,
-        receiverAddress,
         providerAddress,
         quoteConfig
     }: OrbiterGetGasDataParams): Promise<GasData | null> {
-        const fromBlockchain = fromToken.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-
-        if (!walletAddress) {
-            return null;
-        }
-
         try {
-            let gasLimit: BigNumber | null;
-            let gasDetails: GasPriceBN | BigNumber | null;
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-            const tradeParams = {
+            const trade = new OrbiterBridgeTrade({
                 crossChainTrade: {
                     from: fromToken,
                     to: toToken,
@@ -63,54 +47,9 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                 },
                 routePath: [],
                 providerAddress
-            } as OrbiterTradeParams;
+            });
 
-            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
-                const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new OrbiterBridgeTrade(tradeParams).getContractParams({
-                        receiverAddress
-                    });
-                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
-                    web3Public.getEstimatedGas(
-                        contractAbi,
-                        contractAddress,
-                        methodName,
-                        methodArguments,
-                        walletAddress,
-                        value
-                    ),
-                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
-                ]);
-                gasLimit = proxyGasLimit;
-                gasDetails = proxyGasDetails;
-            } else {
-                const { data, value, to } = await new OrbiterBridgeTrade(
-                    tradeParams
-                ).callOrbiterContract(receiverAddress);
-
-                const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
-                    data,
-                    value
-                });
-                const defaultGasDetails = convertGasDataToBN(
-                    await Injector.gasPriceApi.getGasPrice(fromBlockchain)
-                );
-
-                gasLimit = defaultGasLimit;
-                gasDetails = defaultGasDetails;
-            }
-
-            //@ts-ignore
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-            return {
-                gasLimit: increasedGasLimit,
-                //@ts-ignore
-                ...gasDetails
-            };
+            return getCrossChainGasData(trade);
         } catch (err) {
             return null;
         }
@@ -181,9 +120,10 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, to, value } = await this.callOrbiterContract(
-                options.receiverAddress,
-                options.directTransaction
+            const { data, to, value } = await this.setTransactionConfig(
+                false,
+                options?.useCacheData || false,
+                options?.receiverAddress || this.walletAddress
             );
 
             await this.web3Private.trySendTransaction(to, {
@@ -206,7 +146,11 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.callOrbiterContract(receiverAddress, options.directTransaction);
+        } = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress || this.walletAddress
+        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -249,18 +193,10 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async callOrbiterContract(
-        receiverAddress?: string,
-        transactionConfig?: EvmEncodeConfig
-    ): Promise<EvmEncodeConfig> {
-        if (transactionConfig) {
-            return {
-                data: transactionConfig.data,
-                to: transactionConfig.to,
-                value: transactionConfig.value
-            };
-        }
-
+    protected async getTransactionConfigAndAmount(receiverAddress?: string): Promise<{
+        config: EvmEncodeConfig;
+        amount: string;
+    }> {
         // Orbiter deposit address to send funds money to receiverWalletAddress after transfer confirmation
         const orbiterTokensDispenser = this.quoteConfig.endpoint;
 
@@ -285,9 +221,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         );
 
         return {
-            to: config.to,
-            value: config.value,
-            data: config.data
+            config,
+            amount: this.to.stringWeiAmount
         };
     }
 

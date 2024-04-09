@@ -1,17 +1,11 @@
 import BigNumber from 'bignumber.js';
-import {
-    LowSlippageDeflationaryTokenError,
-    RubicSdkError,
-    SwapRequestError
-} from 'src/common/errors';
-import { parseError } from 'src/common/utils/errors';
+import { RubicSdkError } from 'src/common/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { SymbiosisParser } from 'src/features/common/providers/symbiosis/services/symbiosis-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -24,39 +18,13 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
         tradeStruct: SymbiosisTradeStruct,
         providerGateway: string
     ): Promise<BigNumber | null> {
-        const fromBlockchain = tradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-
-        if (!walletAddress) {
-            return null;
-        }
-
         const symbiosisTrade = new SymbiosisOnChainTrade(
             tradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS,
             providerGateway
         );
-        try {
-            const transactionConfig = await symbiosisTrade.encode({ fromAddress: walletAddress });
 
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = (
-                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-            )[0];
-
-            if (gasLimit?.isFinite()) {
-                return gasLimit;
-            }
-        } catch {}
-        try {
-            const transactionData = await symbiosisTrade.getTxConfigAndCheckAmount();
-
-            if (transactionData.gas) {
-                return new BigNumber(transactionData.gas);
-            }
-        } catch {}
-        return null;
+        return getOnChainGasData(symbiosisTrade);
     }
 
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
@@ -83,50 +51,13 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
         this.providerGateway = providerGateway;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
-
-        try {
-            const transactionData = await this.getTxConfigAndCheckAmount(
-                options.receiverAddress,
-                options.fromAddress,
-                options.directTransaction
-            );
-
-            const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gas,
-                gasPrice: transactionData.gasPrice
-            });
-
-            const value = this.getSwapValue(transactionData.value);
-
-            return {
-                to: transactionData.to,
-                data: transactionData.data,
-                value,
-                gas,
-                gasPrice
-            };
-        } catch (err) {
-            if ([400, 500, 503].includes(err.code)) {
-                throw new SwapRequestError();
-            }
-            if (this.isDeflationError()) {
-                throw new LowSlippageDeflationaryTokenError();
-            }
-            throw parseError(err);
-        }
-    }
-
     //@TODO - CHECK IF we need to pass fromAddress with proxy or remove it after listing
-    protected async getToAmountAndTxData(
-        receiverAddress?: string,
-        fromAddress?: string
+    protected async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
         const requestBody = await SymbiosisParser.getSwapRequestBody(this.from, this.to, {
-            receiverAddress,
-            fromAddress,
+            receiverAddress: options.receiverAddress,
+            fromAddress: options.fromAddress,
             slippage: this.slippageTolerance
         });
 
