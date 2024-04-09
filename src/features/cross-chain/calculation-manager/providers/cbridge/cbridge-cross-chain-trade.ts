@@ -174,8 +174,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
 
     protected get methodName(): string {
         return this.onChainTrade
-            ? 'swapAndStartBridgeTokensViaGenericCrossChain'
-            : 'startBridgeTokensViaGenericCrossChain';
+            ? 'swapAndStartBridgeTokensViaGenericCrossChainV2'
+            : 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     constructor(

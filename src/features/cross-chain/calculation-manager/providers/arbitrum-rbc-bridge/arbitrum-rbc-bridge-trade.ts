@@ -121,8 +121,8 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
 
     protected get methodName(): string {
         return this.onChainTrade
-            ? 'swapAndStartBridgeTokensViaGenericCrossChain'
-            : 'startBridgeTokensViaGenericCrossChain';
+            ? 'swapAndStartBridgeTokensViaGenericCrossChainV2'
+            : 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     private readonly bridge: Erc20Bridger;

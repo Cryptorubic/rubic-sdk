@@ -61,12 +61,10 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
 
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
 
-    public readonly providerGateway: string;
-
     protected get spenderAddress(): string {
         return this.useProxy
             ? rubicProxyContractAddress[this.from.blockchain].gateway
-            : this.providerGateway;
+            : this.providerGateway!;
     }
 
     public get dexContractAddress(): string {
@@ -81,6 +79,7 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
         super(tradeStruct, providerAddress);
 
         this.providerGateway = providerGateway;
+        this.providerExtraFee = tradeStruct.extraFee;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {

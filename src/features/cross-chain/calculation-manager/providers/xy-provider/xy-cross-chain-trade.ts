@@ -167,7 +167,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     private readonly slippage: number;
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        return 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     private readonly onChainTrade: EvmOnChainTrade | null;

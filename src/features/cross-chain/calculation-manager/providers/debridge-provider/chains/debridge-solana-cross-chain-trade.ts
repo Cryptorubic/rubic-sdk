@@ -70,7 +70,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
     public readonly feeInfo: FeeInfo;
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        return 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     constructor(

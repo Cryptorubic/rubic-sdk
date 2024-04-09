@@ -177,8 +177,8 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
                 : 'startBridgeTokensViaTransferAndCall';
         }
         return this.onChainTrade
-            ? 'swapAndStartBridgeTokensViaGenericCrossChain'
-            : 'startBridgeTokensViaGenericCrossChain';
+            ? 'swapAndStartBridgeTokensViaGenericCrossChainV2'
+            : 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     private readonly isTokenRegistered: boolean;

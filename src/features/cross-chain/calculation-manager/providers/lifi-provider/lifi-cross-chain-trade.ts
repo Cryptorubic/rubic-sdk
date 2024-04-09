@@ -178,7 +178,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        return 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     constructor(

@@ -40,6 +40,8 @@ import { utf8ToHex } from 'web3-utils';
 import { Permit2ApproveConfig } from './models/permit2-approve-config';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
+    public providerExtraFee = '0';
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -96,6 +98,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
+
+    protected providerGateway: string | null = null;
 
     protected constructor(
         evmOnChainTradeStruct: OnChainTradeStruct<EvmBlockchainName>,
@@ -322,15 +326,16 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
         const nativeToken = nativeTokensList[this.from.blockchain];
         const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
+        const extraFee = Web3Pure.fromWei(this.providerExtraFee, nativeToken.decimals);
         const value = Web3Pure.toWei(
-            proxyFee.plus(this.from.isNative ? this.from.tokenAmount : '0'),
+            proxyFee.plus(this.from.isNative ? this.from.tokenAmount : '0').plus(extraFee),
             nativeToken.decimals
         );
 
         const txConfig = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
             evmCommonCrossChainAbi,
-            'swapTokensGeneric',
+            'swapTokensGenericV2',
             methodArguments,
             value
         );
@@ -409,13 +414,18 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         return [
             [
                 routerAddress,
-                routerAddress,
-                this.from.address,
+                this.providerGateway || routerAddress,
+                this.getSwapFromAddress(),
                 this.to.address,
                 this.from.stringWeiAmount,
+                this.providerExtraFee,
                 directTransactionConfig.data,
                 true
             ]
         ];
+    }
+
+    protected getSwapFromAddress(): string {
+        return this.from.address;
     }
 }

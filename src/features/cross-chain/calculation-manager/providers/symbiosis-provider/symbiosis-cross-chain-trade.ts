@@ -192,7 +192,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        return 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     private get tronWeb3Public(): TronWeb3Public {

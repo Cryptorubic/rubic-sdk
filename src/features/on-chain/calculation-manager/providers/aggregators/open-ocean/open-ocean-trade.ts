@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import {
     LowSlippageDeflationaryTokenError,
-    NotWhitelistedProviderError,
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
@@ -19,8 +18,6 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
-import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { openOceanApiUrl } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/get-open-ocean-api-url';
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-blockchain';
 import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
@@ -198,41 +195,9 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         return token.address;
     }
 
-    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
-        const directTransactionConfig = await this.encodeDirect({
-            ...options,
-            fromAddress: rubicProxyContractAddress[this.from.blockchain].router,
-            supportFee: false,
-            receiverAddress: rubicProxyContractAddress[this.from.blockchain].router
-        });
-        const availableDexs = (
-            await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
-        ).map(address => address.toLowerCase());
-
-        const routerAddress = directTransactionConfig.to;
-        const method = directTransactionConfig.data.slice(0, 10);
-
-        if (!availableDexs.includes(routerAddress.toLowerCase())) {
-            throw new NotWhitelistedProviderError(routerAddress, undefined, 'dex');
-        }
-        await ProxyCrossChainEvmTrade.checkDexWhiteList(
-            this.from.blockchain,
-            routerAddress,
-            method
-        );
-
-        return [
-            [
-                routerAddress,
-                routerAddress,
-                this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
-                    ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
-                    : this.from.address,
-                this.to.address,
-                this.from.stringWeiAmount,
-                directTransactionConfig.data,
-                true
-            ]
-        ];
+    protected getSwapFromAddress(): string {
+        return this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
+            ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+            : this.from.address;
     }
 }

@@ -165,7 +165,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        return 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     constructor(params: RangoCrossChainTradeConstructorParams) {

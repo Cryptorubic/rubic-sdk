@@ -186,7 +186,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     public readonly feeInfo: FeeInfo;
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        return 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     constructor(

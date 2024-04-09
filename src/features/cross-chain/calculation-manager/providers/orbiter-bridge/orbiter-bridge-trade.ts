@@ -152,7 +152,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
     }
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        return 'startBridgeTokensViaGenericCrossChainV2';
     }
 
     constructor(params: OrbiterTradeParams) {
