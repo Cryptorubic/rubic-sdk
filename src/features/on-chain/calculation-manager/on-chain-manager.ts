@@ -42,14 +42,14 @@ import { AggregatorOnChainProvider } from './providers/common/on-chain-aggregato
  * Contains methods to calculate on-chain trades.
  */
 export class OnChainManager {
-    public static readonly defaultCalculationTimeout = 20_000;
+    private static readonly defaultCalculationTimeout = 20_000;
 
     /**
      * List of all on-chain trade providers, combined by blockchains.
      */
-    public readonly tradeProviders: OnChainTypedTradeProviders = typedTradeProviders;
+    private readonly tradeProviders: OnChainTypedTradeProviders = typedTradeProviders;
 
-    public readonly deflationTokenManager = new DeflationTokenManager();
+    private readonly deflationTokenManager = new DeflationTokenManager();
 
     private readonly AGGREGATORS = AGGREGATORS_ON_CHAIN;
 

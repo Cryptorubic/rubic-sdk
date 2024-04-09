@@ -9,12 +9,11 @@ import {
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
@@ -30,34 +29,8 @@ interface LifiTransactionRequest {
 export class LifiTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(lifiTradeStruct: LifiTradeStruct): Promise<BigNumber | null> {
-        const fromBlockchain = lifiTradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
         const lifiTrade = new LifiTrade(lifiTradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
-        try {
-            const transactionConfig = await lifiTrade.encode({ fromAddress: walletAddress });
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = (
-                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-            )[0];
-
-            if (gasLimit?.isFinite()) {
-                return gasLimit;
-            }
-        } catch {}
-        try {
-            const transactionData = await lifiTrade.getTxConfigAndCheckAmount();
-
-            if (transactionData.gas) {
-                return new BigNumber(transactionData.gas);
-            }
-        } catch {}
-        return null;
+        return getOnChainGasData(lifiTrade);
     }
 
     public readonly providerGateway: string;
@@ -94,53 +67,29 @@ export class LifiTrade extends AggregatorEvmOnChainTrade {
         this.providerGateway = this.route.steps[0]!.estimate.approvalAddress;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
-
-        try {
-            const transactionData = await this.getTxConfigAndCheckAmount(
-                options.receiverAddress,
-                options.fromAddress,
-                options.directTransaction
-            );
-            const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gas,
-                gasPrice: transactionData.gasPrice
-            });
-
-            return {
-                to: transactionData.to,
-                data: transactionData.data,
-                value: this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
-                gas,
-                gasPrice
-            };
-        } catch (err) {
-            if ([400, 500, 503].includes(err.code)) {
-                throw new SwapRequestError();
-            }
-            if (this.isDeflationError()) {
-                throw new LowSlippageDeflationaryTokenError();
-            }
-            if (err instanceof UpdatedRatesError || err instanceof RubicSdkError) {
-                throw err;
-            }
-            throw new LifiPairIsUnavailableError();
+    protected getSwapError(err: unknown & { code: number }): Error {
+        if ('code' in err && [400, 500, 503].includes(err.code)) {
+            throw new SwapRequestError();
         }
+        if (this.isDeflationError()) {
+            throw new LowSlippageDeflationaryTokenError();
+        }
+        if (err instanceof UpdatedRatesError || err instanceof RubicSdkError) {
+            throw err;
+        }
+        throw new LifiPairIsUnavailableError();
     }
 
-    protected async getToAmountAndTxData(
-        receiverAddress?: string,
-        fromAddress?: string
+    protected async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
             action: {
                 ...firstStep.action,
-                fromAddress: fromAddress || this.walletAddress,
-                toAddress: receiverAddress || this.walletAddress
+                fromAddress: options.fromAddress || this.walletAddress,
+                toAddress: options.receiverAddress || this.walletAddress
             },
             execution: {
                 status: 'NOT_STARTED',

@@ -1,7 +1,9 @@
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
+    LowSlippageDeflationaryTokenError,
     NotWhitelistedProviderError,
+    SwapRequestError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
@@ -26,6 +28,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
@@ -40,6 +43,8 @@ import { utf8ToHex } from 'web3-utils';
 import { Permit2ApproveConfig } from './models/permit2-approve-config';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
+    protected lastTransactionConfig: EvmEncodeConfig | null = null;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -231,10 +236,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkWalletState();
+        await this.checkWalletState(options?.testMode);
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, directTransaction } = options;
+        const { onConfirm } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -244,25 +249,14 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         };
 
         const fromAddress = this.walletAddress;
-        const receiverAddress = options.receiverAddress || this.walletAddress;
+        const { data, value, to } = await this.encode({ ...options, fromAddress });
+        const method = options?.testMode ? 'trySendTransaction' : 'sendTransaction';
 
         try {
-            const transactionConfig = await this.encode({
-                fromAddress,
-                receiverAddress,
-                ...(directTransaction && { directTransaction }),
-                ...(options?.referrer && { referrer: options?.referrer })
-            });
-
-            let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
-            if (options?.testMode) {
-                console.info(transactionConfig, options.gasLimit);
-                method = 'sendTransaction';
-            }
-            await this.web3Private[method](transactionConfig.to, {
+            await this.web3Private[method](to, {
+                data,
+                value,
                 onTransactionHash,
-                data: transactionConfig.data,
-                value: transactionConfig.value,
                 gas: options.gasLimit,
                 gasPriceOptions: options.gasPriceOptions
             });
@@ -284,7 +278,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         if (this.useProxy) {
             return this.encodeProxy(options);
         }
-        return this.encodeDirect(options);
+        return this.setTransactionConfig(options);
     }
 
     /**
@@ -357,8 +351,31 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     /**
      * Encodes trade to swap it directly through dex contract.
+     * @param options Encode options.
      */
-    public abstract encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig>;
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+        await this.checkFromAddress(options.fromAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress);
+
+        try {
+            const transactionData = await this.setTransactionConfig(options);
+
+            const { gas, gasPrice } = this.getGasParams(options, {
+                gasLimit: transactionData.gas,
+                gasPrice: transactionData.gasPrice
+            });
+
+            return {
+                to: transactionData.to,
+                data: transactionData.data,
+                value: this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
+                gas,
+                gasPrice
+            };
+        } catch (err) {
+            throw this.getSwapError(err);
+        }
+    }
 
     protected isDeflationError(): boolean {
         return (
@@ -417,5 +434,38 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 true
             ]
         ];
+    }
+
+    protected abstract getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
+    ): Promise<GetToAmountAndTxDataResponse>;
+
+    protected async setTransactionConfig(
+        options: EncodeTransactionOptions
+    ): Promise<EvmEncodeConfig> {
+        if (this.lastTransactionConfig && options.useCacheData) {
+            return this.lastTransactionConfig;
+        }
+
+        const { tx, toAmount } = await this.getTransactionConfigAndAmount(options);
+        this.lastTransactionConfig = tx;
+        setTimeout(() => {
+            this.lastTransactionConfig = null;
+        }, 15_000);
+
+        if (!options.skipAmountCheck) {
+            this.checkAmountChange(toAmount, this.to.stringWeiAmount);
+        }
+        return tx;
+    }
+
+    protected getSwapError(err: Error & { code: number }): Error {
+        if ([400, 500, 503].includes(err.code)) {
+            throw new SwapRequestError();
+        }
+        if (this.isDeflationError()) {
+            throw new LowSlippageDeflationaryTokenError();
+        }
+        throw parseError(err);
     }
 }

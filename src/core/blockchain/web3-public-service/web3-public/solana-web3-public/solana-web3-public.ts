@@ -16,7 +16,7 @@ import {
     TxStatus
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/solana-web3-pure';
+import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
 import { AbiItem } from 'web3-utils';
 
 /**

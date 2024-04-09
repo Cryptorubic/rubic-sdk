@@ -1,19 +1,11 @@
 import BigNumber from 'bignumber.js';
-import {
-    LowSlippageDeflationaryTokenError,
-    RubicSdkError,
-    SwapRequestError,
-    UnnecessaryApproveError
-} from 'src/common/errors';
-import { parseError } from 'src/common/utils/errors';
+import { RubicSdkError, UnnecessaryApproveError } from 'src/common/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 import { TransactionReceipt } from 'web3-eth';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
@@ -30,51 +22,21 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         tradeStruct: OkuSwapOnChainTradeStruct,
         providerGateway: string
     ): Promise<BigNumber | null> {
-        const fromBlockchain = tradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-
-        if (!walletAddress) {
-            return null;
-        }
-
         const okuswapTrade = new OkuSwapOnChainTrade(
             tradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS,
             providerGateway
         );
-
-        try {
-            const transactionConfig = await okuswapTrade.encode({ fromAddress: walletAddress });
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = (
-                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-            )[0];
-
-            if (gasLimit?.isFinite()) {
-                return gasLimit;
-            }
-        } catch {}
-
-        try {
-            const transactionData = await okuswapTrade.getTxConfigAndCheckAmount();
-
-            if (transactionData.gas) {
-                return new BigNumber(transactionData.gas);
-            }
-        } catch {}
-
-        return null;
+        return getOnChainGasData(okuswapTrade);
     }
 
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.OKU_SWAP;
 
-    private okuSubProvider: string;
+    private readonly okuSubProvider: string;
 
-    private quoteReqBody: OkuQuoteRequestBody;
+    private readonly quoteReqBody: OkuQuoteRequestBody;
 
-    private swapReqBody: OkuSwapRequestBody;
+    private readonly swapReqBody: OkuSwapRequestBody;
 
     protected readonly providerGateway: string;
 
@@ -105,49 +67,10 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         this.swapReqBody = tradeStruct.swapReqBody;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await this.checkFromAddress(options.fromAddress, true);
-        checkUnsupportedReceiverAddress(
-            options?.receiverAddress,
-            options?.fromAddress || this.walletAddress
-        );
-
-        try {
-            const transactionData = await this.getTxConfigAndCheckAmount(
-                options.receiverAddress,
-                options.fromAddress,
-                options.directTransaction
-            );
-
-            const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gas,
-                gasPrice: transactionData.gasPrice
-            });
-
-            const value = this.getSwapValue(transactionData.value);
-
-            return {
-                to: transactionData.to,
-                data: transactionData.data,
-                value,
-                gas,
-                gasPrice
-            };
-        } catch (err) {
-            if ([400, 500, 503].includes(err.code)) {
-                throw new SwapRequestError();
-            }
-            if (this.isDeflationError()) {
-                throw new LowSlippageDeflationaryTokenError();
-            }
-            throw parseError(err);
-        }
-    }
-
     /**
      * Sends approve and if needed permit2Approve on UniswapV3Like-contract
      */
-    public override async approve(
+    public async approve(
         options: EvmBasicTransactionOptions,
         checkNeedApprove = true,
         amount: BigNumber | 'infinity' = 'infinity'
@@ -183,7 +106,7 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         return this.web3Private.approveTokens(this.from.address, permit2Address, amount, options);
     }
 
-    public override async needApprove(fromAddress?: string): Promise<boolean> {
+    public async needApprove(fromAddress?: string): Promise<boolean> {
         if (!fromAddress) {
             this.checkWalletConnected();
         }
@@ -215,6 +138,20 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         );
 
         return this.from.weiAmount.gt(allowance) || new BigNumber(Date.now()).gt(expiration);
+    }
+
+    protected async getTransactionConfigAndAmount(
+        _options: EncodeTransactionOptions
+    ): Promise<GetToAmountAndTxDataResponse> {
+        const [{ outAmount, estimatedGas }, evmConfig] = await Promise.all([
+            OkuSwapApiService.makeQuoteRequest(this.okuSubProvider, this.quoteReqBody),
+            OkuSwapApiService.makeSwapRequest(this.okuSubProvider, this.swapReqBody)
+        ]);
+
+        return {
+            toAmount: Web3Pure.toWei(outAmount, this.to.decimals),
+            tx: { ...evmConfig, gas: estimatedGas }
+        };
     }
 
     protected async getToAmountAndTxData(): Promise<GetToAmountAndTxDataResponse> {

@@ -21,8 +21,8 @@ import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/
 import { ProxySwapParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-swap-params';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/constants';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { AbiItem, utf8ToHex } from 'web3-utils';
 
 type BridgeParams = [

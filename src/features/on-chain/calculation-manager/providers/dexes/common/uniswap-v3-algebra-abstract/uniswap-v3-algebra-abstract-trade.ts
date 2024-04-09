@@ -6,10 +6,10 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { UniswapV3AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
@@ -208,7 +208,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
      */
     protected abstract getSwapRouterExactInputMethodData(walletAddress: string): MethodData;
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    protected async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
+    ): Promise<GetToAmountAndTxDataResponse> {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
 
@@ -217,7 +219,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         );
         const gasParams = this.getGasParams(options);
 
-        return EvmWeb3Pure.encodeMethodCall(
+        const config = EvmWeb3Pure.encodeMethodCall(
             this.dexContractAddress,
             this.contractAbi,
             methodName,
@@ -225,6 +227,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
             this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
             gasParams
         );
+
+        return { tx: config, toAmount: this.to.stringWeiAmount };
     }
 
     private getSwapRouterMethodData(fromAddress?: string): MethodData {

@@ -4,7 +4,6 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -32,9 +31,9 @@ import {
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
 import { StargateCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/stargate-cross-chain-provider';
+import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { stargateChainId } from './constants/stargate-chain-id';
 import {
@@ -63,95 +62,24 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-
-        if (!walletAddress) {
-            return null;
-        }
-
         try {
-            let gasLimit: BigNumber | null;
-            let gasDetails: GasPriceBN | BigNumber | null;
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
-                const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new StargateCrossChainTrade(
-                        {
-                            from,
-                            to: toToken,
-                            slippageTolerance,
-                            priceImpact: null,
-                            gasData: {
-                                gasLimit: new BigNumber(0),
-                                gasPrice: new BigNumber(0)
-                            },
-                            feeInfo,
-                            srcChainTrade,
-                            dstChainTrade,
-                            cryptoFeeToken: null
-                        },
-                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                        []
-                    ).getContractParams({});
-
-                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
-                    web3Public.getEstimatedGas(
-                        contractAbi,
-                        contractAddress,
-                        methodName,
-                        methodArguments,
-                        walletAddress,
-                        value
-                    ),
-                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
-                ]);
-
-                gasLimit = proxyGasLimit;
-                gasDetails = proxyGasDetails;
-            } else {
-                const toTokenAmountMin = toToken.tokenAmount.multipliedBy(
-                    1 - (srcChainTrade ? slippageTolerance / 2 : slippageTolerance)
-                );
-
-                const { data, to } = await StargateCrossChainTrade.getLayerZeroSwapData(
+            const trade = new StargateCrossChainTrade(
+                {
                     from,
-                    toToken,
-                    Web3Pure.toWei(toTokenAmountMin, toToken.decimals),
-                    receiverAddress
-                );
+                    to: toToken,
+                    slippageTolerance,
+                    priceImpact: null,
+                    gasData: null,
+                    feeInfo,
+                    srcChainTrade,
+                    dstChainTrade,
+                    cryptoFeeToken: null
+                },
+                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                []
+            );
 
-                const lzFeeWei = Web3Pure.toWei(
-                    feeInfo.provider!.cryptoFee!.amount,
-                    nativeTokensList[from.blockchain].decimals
-                );
-
-                const value = from.isNative ? from.weiAmount.plus(lzFeeWei).toFixed() : lzFeeWei;
-
-                const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
-                    data,
-                    value
-                });
-                const defaultGasDetails = convertGasDataToBN(
-                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
-                );
-
-                gasLimit = defaultGasLimit;
-                gasDetails = defaultGasDetails;
-            }
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-
-            return {
-                gasLimit: increasedGasLimit,
-                ...gasDetails
-            };
+            return getCrossChainGasData(trade, receiverAddress);
         } catch (_err) {
             return null;
         }
@@ -279,6 +207,23 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        const fromToken = (
+            this.onChainTrade ? this.onChainTrade.toTokenAmountMin : this.from
+        ) as PriceTokenAmount<EvmBlockchainName>;
+
+        const config = await StargateCrossChainTrade.getLayerZeroSwapData(
+            fromToken,
+            this.to,
+            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
+            receiverAddress
+        );
+
+        return { config, amount: this.to.stringWeiAmount };
+    }
+
     public static async getLayerZeroSwapData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
@@ -357,25 +302,10 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const dstSwapData = this.dstChainTrade
-            ? (
-                  await this.dstChainTrade.encodeDirect({
-                      supportFee: false,
-                      fromAddress: options?.fromAddress || EvmWeb3Pure.EMPTY_ADDRESS
-                  })
-              ).data
-            : undefined;
-
-        const fromToken = (
-            this.onChainTrade ? this.onChainTrade.toTokenAmountMin : this.from
-        ) as PriceTokenAmount<EvmBlockchainName>;
-
-        const lzTxConfig = await StargateCrossChainTrade.getLayerZeroSwapData(
-            fromToken,
-            this.to,
-            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-            options?.receiverAddress,
-            dstSwapData
+        const { data } = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress
         );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
@@ -398,19 +328,20 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
 
-        let dstSwapConfiguration: string | undefined;
-        if (dstSwapData) {
-            const txId = bridgeData[0];
-            const reveivedToken = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d';
-
-            dstSwapConfiguration = EvmWeb3Pure.encodeParameters(
-                ['bytes32', 'bytes', 'address', 'address'],
-                [txId, dstSwapData, reveivedToken, options.receiverAddress || this.walletAddress]
-            );
-        }
+        const dstSwapConfiguration: string | undefined = undefined;
+        // Uncomment when dst swap is ready
+        // if (dstSwapData) {
+        //     const txId = bridgeData[0];
+        //     const reveivedToken = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d';
+        //
+        //     dstSwapConfiguration = EvmWeb3Pure.encodeParameters(
+        //         ['bytes32', 'bytes', 'address', 'address'],
+        //         [txId, dstSwapData, reveivedToken, options.receiverAddress || this.walletAddress]
+        //     );
+        // }
 
         const providerData = this.getProviderData(
-            lzTxConfig.data,
+            data,
             dstSwapConfiguration,
             options.receiverAddress
         );
@@ -468,13 +399,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             slippage: this.slippageTolerance * 100,
             routePath: this.routePath
         };
-    }
-
-    protected async checkProviderIsWhitelisted(
-        _providerRouter: string,
-        _providerGateway?: string
-    ): Promise<void> {
-        return undefined;
     }
 
     private getProviderData(

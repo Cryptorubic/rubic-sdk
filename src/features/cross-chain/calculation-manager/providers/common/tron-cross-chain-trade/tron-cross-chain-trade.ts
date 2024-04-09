@@ -18,7 +18,7 @@ import { TronContractParams } from 'src/features/cross-chain/calculation-manager
 import { TronGetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
 import { MarkRequired } from 'ts-essentials';
 
-export abstract class TronCrossChainTrade extends CrossChainTrade {
+export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactionConfig> {
     public abstract readonly from: PriceTokenAmount<TronBlockchainName>;
 
     protected get fromWeb3Public(): TronWeb3Public {

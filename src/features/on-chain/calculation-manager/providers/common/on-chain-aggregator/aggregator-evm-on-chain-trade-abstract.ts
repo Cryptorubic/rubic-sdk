@@ -1,26 +1,24 @@
 import BigNumber from 'bignumber.js';
 import { TokenUtils } from 'src/common/utils/token-utils';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 import { EvmOnChainTrade } from '../on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { GetToAmountAndTxDataResponse } from './models/aggregator-on-chain-types';
 
 export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
-    protected async getTxConfigAndCheckAmount(
-        receiverAddress?: string,
-        fromAddress?: string,
-        directTransaction?: EvmEncodeConfig
+    public async getTxConfigAndCheckAmount(
+        options: EncodeTransactionOptions
     ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return directTransaction;
+        if (this.lastTransactionConfig && options.useCacheData) {
+            return this.lastTransactionConfig;
         }
 
-        const { tx, toAmount } = await this.getToAmountAndTxData(receiverAddress, fromAddress);
+        const { tx, toAmount } = await this.getTransactionConfigAndAmount(options);
 
         const gasLimit = tx.gas && parseInt(tx.gas, 16).toString();
         const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
 
-        const evmEncodeConfig = {
+        const config = {
             data: tx.data,
             to: tx.to,
             value: tx.value,
@@ -33,20 +31,15 @@ export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
             this.slippageTolerance
         );
 
-        this.checkAmountChange(
-            evmEncodeConfig,
-            newToTokenAmountMin,
-            this.toTokenAmountMin.stringWeiAmount
-        );
+        this.lastTransactionConfig = config;
+        setTimeout(() => {
+            this.lastTransactionConfig = null;
+        }, 15_000);
 
-        return evmEncodeConfig;
+        if (!options.skipAmountCheck) {
+            this.checkAmountChange(newToTokenAmountMin, this.toTokenAmountMin.stringWeiAmount);
+        }
+
+        return config;
     }
-
-    /**
-     * @description Returns data for method OnChainTrade.checkAmountChange and EvmEncodeConfig value
-     */
-    protected abstract getToAmountAndTxData(
-        receiverAddress?: string,
-        fromAddress?: string
-    ): Promise<GetToAmountAndTxDataResponse>;
 }
