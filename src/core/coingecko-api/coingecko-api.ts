@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
+import { Cache } from 'src/common/utils/decorators';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 
@@ -72,6 +73,9 @@ export class CoingeckoApi {
 
     constructor(private readonly httpClient: HttpClient) {}
 
+    @Cache({
+        maxAge: 1000 * 60 * 5
+    })
     private async getTokenPriceFromBackend(
         blockchain: BlockchainName,
         tokenAddress: string
@@ -81,11 +85,13 @@ export class CoingeckoApi {
         );
 
         try {
-            return this.httpClient.get<TokenPriceFromBackend>(
+            const result = await this.httpClient.get<TokenPriceFromBackend>(
                 `https://dev-tokens.rubic.exchange/api/v1/tokens/price/${network
                     ?.toLowerCase()
                     .replaceAll('_', '-')}/${tokenAddress}`
             );
+
+            return result;
         } catch (error) {
             console.debug(error);
 
