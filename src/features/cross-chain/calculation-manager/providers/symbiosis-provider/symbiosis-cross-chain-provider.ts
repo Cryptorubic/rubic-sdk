@@ -154,7 +154,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             disabledTrade = this.getEmptyTrade(from, mockTo, swapParams, feeInfo);
 
-            const { tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
+            const { rewards, tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
                 await SymbiosisApiService.getCrossChainSwapTx(swapParams);
 
             const to = new PriceTokenAmount({
@@ -190,7 +190,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         contractAddresses: {
                             providerRouter: tx.to!,
                             providerGateway: approveTo
-                        }
+                        },
+                        ...(toBlockchain === BLOCKCHAIN_NAME.MANTLE &&
+                            rewards.length && { promotions: this.getPromotions(rewards) })
                     },
                     options.providerAddress,
                     await this.getRoutePath(from, to, route)
@@ -208,6 +210,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         }
+    }
+
+    private getPromotions(rewards: SymbiosisTokenAmount[]): string[] {
+        return rewards.map(promo => promo.symbol!);
     }
 
     protected async getFeeInfo(

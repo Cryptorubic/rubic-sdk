@@ -25,4 +25,5 @@ export interface SymbiosisTradeData {
     route: SymbiosisToken[];
     inTradeType: SymbiosisTradeType;
     outTradeType: SymbiosisTradeType;
+    rewards: SymbiosisTokenAmount[];
 }
