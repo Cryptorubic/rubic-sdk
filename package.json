@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.15.0-alpha-zkfair-network.0",
+    "version": "5.15.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
