@@ -36,20 +36,12 @@ export class CoingeckoApi {
             return result;
         } catch (error) {
             console.debug(error);
-            const nonPriceToken = {
+
+            return {
                 network: blockchain,
                 address: tokenAddress,
                 usd_price: null
             };
-
-            if (
-                error.message.includes('Network not found.') ||
-                error.message.includes('Token not found.')
-            ) {
-                return nonPriceToken;
-            }
-
-            return nonPriceToken;
         }
     }
 
