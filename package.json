@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.14.2-alpha-fix-cg-api-response",
+    "version": "5.14.2",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
