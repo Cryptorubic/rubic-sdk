@@ -424,10 +424,10 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.ZK_FAIR]: new Token({
-      blockchain: BLOCKCHAIN_NAME.ZK_FAIR,
-      address: '0xD33Db7EC50A98164cC865dfaa64666906d79319C',
-      name: 'Wrapped USDC',
-      symbol: 'WUSDC',
-      decimals: 18
+        blockchain: BLOCKCHAIN_NAME.ZK_FAIR,
+        address: '0xD33Db7EC50A98164cC865dfaa64666906d79319C',
+        name: 'Wrapped USDC',
+        symbol: 'WUSDC',
+        decimals: 18
     })
 };
