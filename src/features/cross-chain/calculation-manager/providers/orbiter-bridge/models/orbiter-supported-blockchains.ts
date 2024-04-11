@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 export const orbiterSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.ARBITRUM,
-    // BLOCKCHAIN_NAME.ZK_SYNC,
+    BLOCKCHAIN_NAME.ZK_SYNC,
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.OPTIMISM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
