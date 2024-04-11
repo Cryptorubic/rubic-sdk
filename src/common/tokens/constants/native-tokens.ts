@@ -439,5 +439,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZK_FAIR]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZK_FAIR,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 18
     })
 };

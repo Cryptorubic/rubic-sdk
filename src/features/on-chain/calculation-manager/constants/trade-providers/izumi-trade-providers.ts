@@ -5,6 +5,7 @@ import { IzumiMantaPacificProvider } from 'src/features/on-chain/calculation-man
 import { IzumiMantleProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mantle/izumi-mantle/izumi-mantle-provider';
 import { MerlinSwapMerlinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/merlin/merlin-swap/merlin-swap-merlin-provider';
 import { IzumiZetachainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/izumi-zetachain/izumi-zetachain-provider';
+import { IzumiZkfairProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zkfair/izumi-zkfair/izumi-zkfair-provider';
 import { IzumiZksyncProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/izumi-zksync/izumi-zksync-provider';
 
 import { IzumiArbitrumProvider } from '../../providers/dexes/arbitrum/izumi-arbitrum/izumi-arbitrum-provider';
@@ -20,6 +21,7 @@ export const izumiTradeProviders = [
     IzumiZetachainProvider,
     IzumiKromaProvider,
     IzumiArbitrumProvider,
-    MerlinSwapMerlinProvider
+    MerlinSwapMerlinProvider,
+    IzumiZkfairProvider
     // IzumiBlastProvider
 ];

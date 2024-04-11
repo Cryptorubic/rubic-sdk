@@ -63,7 +63,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     HORIZEN_EON: 'HORIZEN_EON',
     MERLIN: 'MERLIN',
     ROOTSTOCK: 'ROOTSTOCK',
-    MODE: 'MODE'
+    MODE: 'MODE',
+    ZK_FAIR: 'ZK_FAIR'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
