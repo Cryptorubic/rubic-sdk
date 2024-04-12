@@ -11,6 +11,7 @@ import {
     SolanaBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { rpcErrors } from 'src/core/blockchain/web3-public-service/constants/rpc-errors';
 import { CreateWeb3Public } from 'src/core/blockchain/web3-public-service/models/create-web3-public-proxy';
 import {
     Web3PublicStorage,
@@ -157,12 +158,7 @@ export class Web3PublicService {
                                 e instanceof TimeoutError ||
                                 e instanceof HealthcheckError ||
                                 e.message?.toLowerCase().includes(rpcString.toLowerCase()) ||
-                                e?.message?.toLowerCase()?.includes('not authorized') ||
-                                e?.message
-                                    ?.toLowerCase()
-                                    ?.includes('daily request count exceeded') ||
-                                e?.message?.toLowerCase()?.includes('invalid json rpc response') ||
-                                e?.message?.toLowerCase()?.includes("we can't execute this request")
+                                rpcErrors.some(error => e.message?.toLowerCase().includes(error))
                             ) {
                                 if (curRpc === rpcProvider.rpcList[0]) {
                                     rpcProvider.rpcList.shift();
