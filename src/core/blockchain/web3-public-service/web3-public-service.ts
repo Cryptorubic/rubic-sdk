@@ -158,7 +158,7 @@ export class Web3PublicService {
                                 e instanceof TimeoutError ||
                                 e instanceof HealthcheckError ||
                                 e.message?.toLowerCase().includes(rpcString.toLowerCase()) ||
-                                rpcErrors.includes(e.message?.toLowerCase())
+                                rpcErrors.some(error => e.message?.toLowerCase().includes(error))
                             ) {
                                 if (curRpc === rpcProvider.rpcList[0]) {
                                     rpcProvider.rpcList.shift();
