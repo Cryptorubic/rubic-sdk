@@ -11,7 +11,8 @@ export const oneInchSupportedBlockchains = [
     BLOCKCHAIN_NAME.OPTIMISM,
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.PULSECHAIN,
-    BLOCKCHAIN_NAME.ZK_SYNC
+    BLOCKCHAIN_NAME.ZK_SYNC,
+    BLOCKCHAIN_NAME.GNOSIS
 ] as const;
 
 export type OneInchSupportedBlockchains = (typeof oneInchSupportedBlockchains)[number];
