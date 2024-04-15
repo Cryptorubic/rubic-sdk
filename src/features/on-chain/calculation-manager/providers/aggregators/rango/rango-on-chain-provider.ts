@@ -3,7 +3,6 @@ import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
-import { RangoTransaction } from 'src/features/common/providers/rango/models/rango-api-swap-types';
 import { rangoSupportedBlockchains } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 
@@ -48,7 +47,8 @@ export class RangoOnChainProvider extends AggregatorOnChainProvider {
 
             const { route, tx } = await RangoOnChainApiService.getSwapTransaction(swapParams);
             const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
-            const { approveTo: providerGateway } = tx as RangoTransaction;
+
+            const providerGateway = tx!.approveTo || tx!.txTo;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,

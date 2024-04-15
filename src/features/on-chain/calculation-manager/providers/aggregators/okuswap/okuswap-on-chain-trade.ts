@@ -153,16 +153,4 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
             tx: { ...evmConfig, gas: estimatedGas }
         };
     }
-
-    protected async getToAmountAndTxData(): Promise<GetToAmountAndTxDataResponse> {
-        const [{ outAmount, estimatedGas }, evmConfig] = await Promise.all([
-            OkuSwapApiService.makeQuoteRequest(this.okuSubProvider, this.quoteReqBody),
-            OkuSwapApiService.makeSwapRequest(this.okuSubProvider, this.swapReqBody)
-        ]);
-
-        return {
-            toAmount: Web3Pure.toWei(outAmount, this.to.decimals),
-            tx: { ...evmConfig, gas: estimatedGas }
-        };
-    }
 }
