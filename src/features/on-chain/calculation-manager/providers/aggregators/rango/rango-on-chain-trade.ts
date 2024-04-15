@@ -1,13 +1,7 @@
 import BigNumber from 'bignumber.js';
-import {
-    LowSlippageDeflationaryTokenError,
-    RubicSdkError,
-    SwapRequestError
-} from 'src/common/errors';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
@@ -74,36 +68,6 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
         this.providerGateway = providerGateway;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
-
-        try {
-            const transactionData = await this.setTransactionConfig(options);
-
-            const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gas,
-                gasPrice: transactionData.gasPrice
-            });
-
-            return {
-                to: transactionData.to,
-                data: transactionData.data,
-                value: this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
-                gas,
-                gasPrice
-            };
-        } catch (err) {
-            if ([400, 500, 503].includes(err.code)) {
-                throw new SwapRequestError();
-            }
-            if (this.isDeflationError()) {
-                throw new LowSlippageDeflationaryTokenError();
-            }
-            throw parseError(err);
-        }
-    }
-
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
@@ -122,7 +86,7 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
             tx: {
                 data: transaction!.txData!,
                 to: transaction!.txTo!,
-                value: transaction!.value!,
+                value: transaction!.value || '0',
                 gas: transaction!.gasLimit ?? undefined,
                 gasPrice: transaction!.gasPrice ?? undefined
             },
