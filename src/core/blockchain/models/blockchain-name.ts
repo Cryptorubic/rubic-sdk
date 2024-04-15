@@ -64,7 +64,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     MERLIN: 'MERLIN',
     ROOTSTOCK: 'ROOTSTOCK',
     MODE: 'MODE',
-    ZK_FAIR: 'ZK_FAIR'
+    ZK_FAIR: 'ZK_FAIR',
+    ZK_LINK: 'ZK_LINK'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
