@@ -38,9 +38,11 @@ import { ChangenowSwapRequestBody, ChangenowSwapResponse } from './models/change
 import { ChangeNowCrossChainApiService } from './services/changenow-cross-chain-api-service';
 
 export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
-    /* used in rubic-app to extract id and send as changenow_id  to backend */
     private paymentInfo: ChangenowSwapResponse | null = null;
 
+    /**
+     * used in rubic-app to send as changenow_id to backend
+     */
     public get changenowId(): string {
         return this.paymentInfo ? this.paymentInfo.id : '';
     }
