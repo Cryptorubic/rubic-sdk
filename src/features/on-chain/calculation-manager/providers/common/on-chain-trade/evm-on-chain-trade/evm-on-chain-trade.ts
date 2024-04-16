@@ -278,7 +278,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         if (this.useProxy) {
             return this.encodeProxy(options);
         }
-        return this.setTransactionConfig(options);
+        return this.encodeDirect(options);
     }
 
     /**
