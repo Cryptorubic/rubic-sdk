@@ -48,7 +48,7 @@ export class RangoOnChainProvider extends AggregatorOnChainProvider {
             const { route, tx } = await RangoOnChainApiService.getSwapTransaction(swapParams);
             const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
 
-            const providerGateway = tx!.approveTo || tx!.txTo;
+            const providerGateway = tx!.txTo;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
