@@ -429,5 +429,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped USDC',
         symbol: 'WUSDC',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZK_LINK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZK_LINK,
+        address: '0x8280a4e7d5b3b658ec4580d3bc30f5e50454f169',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
     })
 };
