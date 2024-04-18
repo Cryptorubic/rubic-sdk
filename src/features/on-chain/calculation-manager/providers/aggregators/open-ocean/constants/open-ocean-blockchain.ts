@@ -21,5 +21,7 @@ export const openOceanBlockchainName: Record<OpenoceanOnChainSupportedBlockchain
     [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta',
     [BLOCKCHAIN_NAME.METIS]: 'metis',
     [BLOCKCHAIN_NAME.SCROLL]: 'scroll',
-    [BLOCKCHAIN_NAME.BLAST]: 'blast'
+    [BLOCKCHAIN_NAME.BLAST]: 'blast',
+    [BLOCKCHAIN_NAME.MODE]: 'mode',
+    [BLOCKCHAIN_NAME.ROOTSTOCK]: 'rootstock'
 };
