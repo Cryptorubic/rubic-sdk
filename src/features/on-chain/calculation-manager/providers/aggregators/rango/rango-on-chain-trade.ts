@@ -75,7 +75,7 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
             slippageTolerance: this.slippageTolerance,
             receiverAddress: options.receiverAddress || this.walletAddress,
             swapperGroups: rangoOnChainDisabledProviders,
-            fromAddress: options.fromAddress
+            fromAddress: this.walletAddress
         });
 
         const { tx: transaction, route } = await RangoOnChainApiService.getSwapTransaction(params);

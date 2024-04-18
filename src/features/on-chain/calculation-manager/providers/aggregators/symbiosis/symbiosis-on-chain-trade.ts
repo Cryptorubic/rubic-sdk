@@ -57,7 +57,7 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
     ): Promise<GetToAmountAndTxDataResponse> {
         const requestBody = await SymbiosisParser.getSwapRequestBody(this.from, this.to, {
             receiverAddress: options.receiverAddress,
-            fromAddress: options.fromAddress,
+            fromAddress: this.walletAddress,
             slippage: this.slippageTolerance
         });
 
