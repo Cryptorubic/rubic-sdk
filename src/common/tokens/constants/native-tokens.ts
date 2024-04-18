@@ -446,5 +446,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'USDC',
         symbol: 'USDC',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZK_LINK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZK_LINK,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     })
 };

@@ -13,7 +13,8 @@ const ALTERNATIVE_ROUTER1_NETWORKS = [
     BLOCKCHAIN_NAME.HORIZEN_EON,
     BLOCKCHAIN_NAME.MERLIN,
     BLOCKCHAIN_NAME.MODE,
-    BLOCKCHAIN_NAME.ZK_FAIR
+    BLOCKCHAIN_NAME.ZK_FAIR,
+    BLOCKCHAIN_NAME.ZETACHAIN
 ] as const;
 
 function isAlternativeRouter1Network(blockchain: BlockchainName): boolean {

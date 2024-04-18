@@ -7098,10 +7098,10 @@ istanbul-reports@^3.1.3:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
 
-iziswap-sdk@1.4.9:
-  version "1.4.9"
-  resolved "https://registry.yarnpkg.com/iziswap-sdk/-/iziswap-sdk-1.4.9.tgz#4534081803addc6149d618b5971f715d3db74c89"
-  integrity sha512-0GkEkDBSksZ4lSSFHZD3ExzwLgffpoVOx3GLkpeKmFqOEn7HISk6IxG35aWI6pv7aRqijAXk8NH07KGoP6y9gQ==
+iziswap-sdk@1.4.11:
+  version "1.4.11"
+  resolved "https://registry.yarnpkg.com/iziswap-sdk/-/iziswap-sdk-1.4.11.tgz#730fe48a42e451cb842be91926fea135b6a6adbc"
+  integrity sha512-ddbzKSLuWtCYOszNUFgMOaBNISo4E4mbz3aWcv78W2k6CKzk4Vvbssd764S4GrifuV15hayttDNKZuGOVE348g==
   dependencies:
     bignumber.js "^9.0.2"
     http "^0.0.1-security"
