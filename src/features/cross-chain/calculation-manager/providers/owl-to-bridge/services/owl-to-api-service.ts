@@ -19,15 +19,18 @@ export class OwlToApiService {
     private static apiUrl = 'https://owlto.finance/';
 
     public static async getTxInfo(p: OwlToTxInfoParams): Promise<OwlToTxInfoResponse['msg']> {
-        const { msg } = await Injector.httpClient.get<OwlToTxInfoResponse>(`${this.apiUrl}`, {
-            params: {
-                token: p.tokenSymbol,
-                from_chainid: p.sourceChainId,
-                to_chainid: p.targetChainId,
-                user: p.walletAddress,
-                to_user_address: p.walletAddress
+        const { msg } = await Injector.httpClient.get<OwlToTxInfoResponse>(
+            `${this.apiUrl}/api/lp-info`,
+            {
+                params: {
+                    token: p.tokenSymbol,
+                    from_chainid: p.sourceChainId,
+                    to_chainid: p.targetChainId,
+                    user: p.walletAddress,
+                    to_user_address: p.walletAddress
+                }
             }
-        });
+        );
 
         return msg;
     }
