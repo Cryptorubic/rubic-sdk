@@ -18,39 +18,29 @@ import {
 export class OwlToApiService {
     private static apiUrl = 'https://owlto.finance/';
 
-    public static async getTxInfo({
-        sourceChainId,
-        targetChainId,
-        tokenSymbol,
-        walletAddress
-    }: OwlToTxInfoParams): Promise<OwlToTxInfoResponse['msg']> {
+    public static async getTxInfo(p: OwlToTxInfoParams): Promise<OwlToTxInfoResponse['msg']> {
         const { msg } = await Injector.httpClient.get<OwlToTxInfoResponse>(`${this.apiUrl}`, {
             params: {
-                token: tokenSymbol,
-                from_chainid: sourceChainId,
-                to_chainid: targetChainId,
-                user: walletAddress,
-                to_user_address: walletAddress
+                token: p.tokenSymbol,
+                from_chainid: p.sourceChainId,
+                to_chainid: p.targetChainId,
+                user: p.walletAddress,
+                to_user_address: p.walletAddress
             }
         });
 
         return msg;
     }
 
-    public static async getTransferFee({
-        fromAmount,
-        sourceChainName,
-        targetChainName,
-        tokenSymbol
-    }: OwlToTransferFeeParams): Promise<string> {
+    public static async getTransferFee(p: OwlToTransferFeeParams): Promise<string> {
         const { msg: fee } = await Injector.httpClient.get<OwlToTransferFeeResponse>(
             `${this.apiUrl}/api/dynamic-dtc`,
             {
                 params: {
-                    from: sourceChainName,
-                    to: targetChainName,
-                    amount: fromAmount,
-                    token: tokenSymbol
+                    from: p.sourceChainName,
+                    to: p.targetChainName,
+                    amount: p.fromAmount,
+                    token: p.tokenSymbol
                 }
             }
         );
