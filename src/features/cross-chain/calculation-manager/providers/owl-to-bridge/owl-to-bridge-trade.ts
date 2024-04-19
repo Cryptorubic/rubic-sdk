@@ -4,9 +4,11 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -21,7 +23,6 @@ import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { OwlToSupportedBlockchain } from './constants/owl-to-supported-chains';
 import { OwlToGetGasDataParams, OwlToTradeParams } from './models/owl-to-trade-types';
-import { OwlToUtils } from './services/owl-to-utils';
 
 export class OwlToBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -29,16 +30,19 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         feeInfo,
         fromToken,
         toToken,
-        providerAddress
+        providerAddress,
+        gasLimit,
+        makerAddress
     }: OwlToGetGasDataParams): Promise<GasData | null> {
         try {
             const trade = new OwlToBridgeTrade({
                 crossChainTrade: {
                     feeInfo,
-                    fromToken,
-                    toToken,
+                    from: fromToken,
+                    to: toToken,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                    gasData: null
+                    gasData: null,
+                    makerAddress
                 },
                 providerAddress,
                 routePath: []
@@ -46,7 +50,10 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
 
             return getCrossChainGasData(trade);
         } catch (_err) {
-            return null;
+            const gasDetails = await Injector.gasPriceApi.getGasPrice(fromToken.blockchain);
+            const gasDetailsBN = convertGasDataToBN(gasDetails);
+
+            return { gasLimit, ...gasDetailsBN };
         }
     }
 
@@ -72,6 +79,9 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
     public readonly priceImpact: number | null;
     /** */
 
+    /* OwlTo contract address, which gets tokens in source chains and sends them in target chain */
+    private makerAddress: string;
+
     private get fromBlockchain(): OwlToSupportedBlockchain {
         return this.from.blockchain as OwlToSupportedBlockchain;
     }
@@ -88,12 +98,13 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
     constructor({ crossChainTrade, providerAddress, routePath }: OwlToTradeParams) {
         super(providerAddress, routePath);
 
-        this.from = crossChainTrade.fromToken;
-        this.to = crossChainTrade.toToken;
+        this.from = crossChainTrade.from;
+        this.to = crossChainTrade.to;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
-        this.toTokenAmountMin = crossChainTrade.toToken.tokenAmount;
+        this.toTokenAmountMin = crossChainTrade.to.tokenAmount;
         this.feeInfo = crossChainTrade.feeInfo;
+        this.makerAddress = crossChainTrade.makerAddress;
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -153,12 +164,8 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         config: EvmEncodeConfig;
         amount: string;
     }> {
-        const owlToTokensDispenser = '';
-        const amountWithCode = OwlToUtils.getAmountWithCode(this.from.stringWeiAmount, '');
-
-        // @TODO Check - send this.from.stringWeiAmount or amountWithCode for Native
         const value = this.from.isNative ? this.from.stringWeiAmount : '0';
-        const methodArgs = [amountWithCode, owlToTokensDispenser];
+        const methodArgs = [this.from.stringWeiAmount, this.makerAddress];
 
         const config = EvmWeb3Pure.encodeMethodCall(
             this.from.address,

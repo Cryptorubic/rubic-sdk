@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
@@ -10,15 +11,18 @@ export interface OwlToGetGasDataParams {
     toToken: PriceTokenAmount<EvmBlockchainName>;
     feeInfo: FeeInfo;
     providerAddress: string;
+    gasLimit: BigNumber;
+    makerAddress: string;
 }
 
 export interface OwlToTradeParams {
     crossChainTrade: {
-        fromToken: PriceTokenAmount<EvmBlockchainName>;
-        toToken: PriceTokenAmount<EvmBlockchainName>;
+        from: PriceTokenAmount<EvmBlockchainName>;
+        to: PriceTokenAmount<EvmBlockchainName>;
         gasData: GasData | null;
         feeInfo: FeeInfo;
         priceImpact: number | null;
+        makerAddress: string;
     };
     providerAddress: string;
     routePath: RubicStep[];

@@ -91,7 +91,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE]: this.getOrbiterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LAYERZERO]: this.getLayerZeroDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.ARCHON_BRIDGE]: this.getLayerZeroDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.ARCHON_BRIDGE]: this.getLayerZeroDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE]: this.getOwlToDstSwapStatus
     };
 
     /**
@@ -700,5 +701,10 @@ export class CrossChainStatusManager {
         const txStatusData = await OrbiterApiService.getTxStatus(data.srcTxHash);
 
         return txStatusData;
+    }
+
+    // @TODO implement getOwlToDstSwapStatus
+    private async getOwlToDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
+        return { hash: '', status: TX_STATUS.PENDING };
     }
 }

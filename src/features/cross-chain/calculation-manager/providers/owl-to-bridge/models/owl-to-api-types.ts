@@ -1,9 +1,16 @@
-export interface OwlToAllChainsResponse {
+interface OwlToBaseResponse<T> {
     code: number;
-    msg: OwlToChainInfo[];
+    msg: T;
 }
 
-interface OwlToChainInfo {
+export type OwlToAllChainsResponse = OwlToBaseResponse<OwlToChainInfo[]>;
+
+export interface OwlToSwappingChainsInfo {
+    sourceChain: OwlToChainInfo;
+    targetChain: OwlToChainInfo;
+}
+
+export interface OwlToChainInfo {
     name: string;
     chainId: number;
     isTestnet: number;
@@ -16,12 +23,9 @@ interface OwlToChainInfo {
     order: number;
 }
 
-export interface OwlToTokensResponse {
-    code: number;
-    msg: OwlToTokenInfo[];
-}
+export type OwlToTokensResponse = OwlToBaseResponse<OwlToTokenInfo[]>;
 
-interface OwlToTokenInfo {
+export interface OwlToTokenInfo {
     symbol: string;
     decimal: number;
     fromChainId: number;
@@ -31,3 +35,24 @@ interface OwlToTokenInfo {
     minValue: number;
     maxValue: number;
 }
+
+export interface OwlToTransferFeeParams {
+    sourceChainName: string;
+    targetChainName: string;
+    fromAmount: number;
+    tokenSymbol: string;
+}
+
+export type OwlToTransferFeeResponse = OwlToBaseResponse<string>;
+
+export interface OwlToTxInfoParams {
+    tokenSymbol: string;
+    sourceChainId: number;
+    targetChainId: number;
+    walletAddress: string;
+}
+
+export type OwlToTxInfoResponse = OwlToBaseResponse<{
+    maker_address: string;
+    estimated_gas: string;
+}>;

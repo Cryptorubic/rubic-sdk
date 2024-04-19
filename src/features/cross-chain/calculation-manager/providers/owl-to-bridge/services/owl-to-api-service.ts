@@ -4,28 +4,81 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Injector } from 'src/core/injector/injector';
 
-import { OwlToAllChainsResponse, OwlToTokensResponse } from '../models/owl-to-api-types';
+import {
+    OwlToAllChainsResponse,
+    OwlToSwappingChainsInfo,
+    OwlToTokenInfo,
+    OwlToTokensResponse,
+    OwlToTransferFeeParams,
+    OwlToTransferFeeResponse,
+    OwlToTxInfoParams,
+    OwlToTxInfoResponse
+} from '../models/owl-to-api-types';
 
 export class OwlToApiService {
     private static apiUrl = 'https://owlto.finance/';
 
-    public static async getTargetNetworkCode(targetChainId: number): Promise<string> {
+    public static async getTxInfo({
+        sourceChainId,
+        targetChainId,
+        tokenSymbol,
+        walletAddress
+    }: OwlToTxInfoParams): Promise<OwlToTxInfoResponse['msg']> {
+        const { msg } = await Injector.httpClient.get<OwlToTxInfoResponse>(`${this.apiUrl}`, {
+            params: {
+                token: tokenSymbol,
+                from_chainid: sourceChainId,
+                to_chainid: targetChainId,
+                user: walletAddress,
+                to_user_address: walletAddress
+            }
+        });
+
+        return msg;
+    }
+
+    public static async getTransferFee({
+        fromAmount,
+        sourceChainName,
+        targetChainName,
+        tokenSymbol
+    }: OwlToTransferFeeParams): Promise<string> {
+        const { msg: fee } = await Injector.httpClient.get<OwlToTransferFeeResponse>(
+            `${this.apiUrl}/api/dynamic-dtc`,
+            {
+                params: {
+                    from: sourceChainName,
+                    to: targetChainName,
+                    amount: fromAmount,
+                    token: tokenSymbol
+                }
+            }
+        );
+
+        return fee;
+    }
+
+    public static async getSwappingChainsInfo(
+        sourceChainId: number,
+        targetChainId: number
+    ): Promise<OwlToSwappingChainsInfo> {
         const { msg: chains } = await Injector.httpClient.get<OwlToAllChainsResponse>(
             `${this.apiUrl}/api/config/all-chains`
         );
 
-        const chain = chains.find(c => c.chainId === targetChainId);
+        const sourceChain = chains.find(c => c.chainId === sourceChainId);
+        const targetChain = chains.find(c => c.chainId === targetChainId);
 
-        if (!chain) {
+        if (!sourceChain || !targetChain) {
             throw new RubicSdkError('[OWL_TO_BRIDGE] Unsupported chain!');
         }
 
-        return chain.networkCode.toString();
+        return { sourceChain, targetChain };
     }
 
-    public static async getSourceTokenMinMaxAmounts(
+    public static async getSourceTokenInfo(
         sourceToken: PriceTokenAmount<EvmBlockchainName>
-    ): Promise<{ min: number; max: number }> {
+    ): Promise<OwlToTokenInfo> {
         const sourceChainId = blockchainId[sourceToken.blockchain];
 
         const { msg: tokens } = await Injector.httpClient.get<OwlToTokensResponse>(
@@ -57,6 +110,6 @@ export class OwlToApiService {
             throw new RubicSdkError('[OWL_TO_BRIDGE] Unsupported token!');
         }
 
-        return { max: foundToken.maxValue, min: foundToken.minValue };
+        return foundToken;
     }
 }
