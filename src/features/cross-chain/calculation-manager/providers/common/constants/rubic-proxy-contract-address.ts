@@ -44,6 +44,10 @@ export const rubicProxyContractAddress: Record<
         if (isAlternativeRouter1Network(blockchain)) {
             router = '0xAf14797CcF963B1e3d028a9d51853acE16aedBA1';
         }
+        if (blockchain === BLOCKCHAIN_NAME.ZK_LINK) {
+            router = '0x1a979E2386595837BaAB90Ba12B2E2a71C652576';
+            gateway = '0x72f4Cd2a1707CbecE96E82be21f243fdF93867ee';
+        }
 
         return { ...acc, [blockchain]: { gateway, router } };
     },
