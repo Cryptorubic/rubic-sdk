@@ -26,8 +26,9 @@ export class CoingeckoApi {
     ): Promise<TokenPriceFromBackend> {
         try {
             const backendBlockchain = TO_BACKEND_BLOCKCHAINS[blockchain];
+            // @TODO set prod api
             const result = await this.httpClient.get<TokenPriceFromBackend>(
-                `https://tokens.rubic.exchange/api/v1/tokens/price/${backendBlockchain}/${tokenAddress}`
+                `https://dev-tokens.rubic.exchange/api/v1/tokens/price/${backendBlockchain}/${tokenAddress}`
             );
 
             return result;
