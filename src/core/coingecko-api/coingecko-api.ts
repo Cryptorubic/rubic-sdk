@@ -1,7 +1,9 @@
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common/utils/decorators';
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { HttpClient } from 'src/core/http-client/models/http-client';
+
+import { TO_BACKEND_BLOCKCHAINS } from '../blockchain/models/backend-blockchains';
 
 interface TokenPriceFromBackend {
     network: string;
@@ -22,15 +24,10 @@ export class CoingeckoApi {
         blockchain: BlockchainName,
         tokenAddress: string
     ): Promise<TokenPriceFromBackend> {
-        const network = Object.keys(BLOCKCHAIN_NAME).find(
-            chain => BLOCKCHAIN_NAME[chain as keyof typeof BLOCKCHAIN_NAME] === blockchain
-        );
-
         try {
+            const backendBlockchain = TO_BACKEND_BLOCKCHAINS[blockchain];
             const result = await this.httpClient.get<TokenPriceFromBackend>(
-                `https://tokens.rubic.exchange/api/v1/tokens/price/${network
-                    ?.toLowerCase()
-                    .replaceAll('_', '-')}/${tokenAddress}`
+                `https://tokens.rubic.exchange/api/v1/tokens/price/${backendBlockchain}/${tokenAddress}`
             );
 
             return result;
