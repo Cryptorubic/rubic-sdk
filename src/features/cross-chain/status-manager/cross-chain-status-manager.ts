@@ -64,6 +64,7 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
 
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
+import { OwlToApiService } from '../calculation-manager/providers/owl-to-bridge/services/owl-to-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
@@ -704,7 +705,9 @@ export class CrossChainStatusManager {
     }
 
     // @TODO implement getOwlToDstSwapStatus
-    private async getOwlToDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
-        return { hash: '', status: TX_STATUS.PENDING };
+    private async getOwlToDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const txStatusData = await OwlToApiService.getTxStatus(data.fromBlockchain, data.srcTxHash);
+
+        return txStatusData;
     }
 }

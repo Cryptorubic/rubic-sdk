@@ -56,3 +56,9 @@ export type OwlToTxInfoResponse = OwlToBaseResponse<{
     maker_address: string;
     estimated_gas: string;
 }>;
+
+export type OwlToStatusResponse = OwlToBaseResponse<{
+    is_verified: boolean;
+    dst_chainid: number;
+    dst_tx_hash: string;
+}>;

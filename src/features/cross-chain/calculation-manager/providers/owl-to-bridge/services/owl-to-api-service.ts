@@ -1,11 +1,14 @@
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
+import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 
 import {
     OwlToAllChainsResponse,
+    OwlToStatusResponse,
     OwlToSwappingChainsInfo,
     OwlToTokenInfo,
     OwlToTokensResponse,
@@ -16,7 +19,7 @@ import {
 } from '../models/owl-to-api-types';
 
 export class OwlToApiService {
-    private static apiUrl = 'https://owlto.finance/';
+    private static apiUrl = 'https://owlto.finance';
 
     public static async getTxInfo(p: OwlToTxInfoParams): Promise<OwlToTxInfoResponse['msg']> {
         const { msg } = await Injector.httpClient.get<OwlToTxInfoResponse>(
@@ -104,5 +107,36 @@ export class OwlToApiService {
         }
 
         return foundToken;
+    }
+
+    public static async getTxStatus(
+        sourceChain: BlockchainName,
+        txHash: string
+    ): Promise<TxStatusData> {
+        const sourceChainId = blockchainId[sourceChain];
+        const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
+            sourceChain as EvmBlockchainName
+        ).address;
+
+        try {
+            const { msg } = await Injector.httpClient.get<OwlToStatusResponse>(
+                `${this.apiUrl}/api/verify`,
+                {
+                    params: {
+                        chainid: sourceChainId,
+                        user: walletAddress,
+                        tx_hash: txHash
+                    }
+                }
+            );
+
+            if (msg.is_verified && msg.dst_tx_hash) {
+                return { hash: msg.dst_tx_hash, status: TX_STATUS.SUCCESS };
+            }
+
+            return { status: TX_STATUS.PENDING, hash: null };
+        } catch {
+            return { status: TX_STATUS.PENDING, hash: null };
+        }
     }
 }

@@ -15,8 +15,8 @@ import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
-    OWL_TO_SUPPORTED_BLOCKCHAINS,
-    OwlToSupportedBlockchain
+    OwlToSupportedBlockchain,
+    owlToSupportedBlockchains
 } from './constants/owl-to-supported-chains';
 import { OwlToTradeData } from './models/owl-to-provider-types';
 import { OwlToBridgeTrade } from './owl-to-bridge-trade';
@@ -26,7 +26,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
     public type: CrossChainTradeType = BRIDGE_TYPE.OWL_TO_BRIDGE;
 
     public isSupportedBlockchain(blockchain: BlockchainName): boolean {
-        return OWL_TO_SUPPORTED_BLOCKCHAINS.some(chain => chain === blockchain);
+        return owlToSupportedBlockchains.some(chain => chain === blockchain);
     }
 
     public async calculate(
@@ -73,7 +73,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
 
             const fromWithoutFeeWithCode = new PriceTokenAmount({
                 ...fromWithoutFee.asStruct,
-                weiAmount: this.getFromWeiAmountWithCode(from, targetChainCode)
+                weiAmount: this.getFromWeiAmountWithCode(from, targetChainCode, transferFee)
             });
 
             const gasData =
@@ -150,9 +150,13 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         };
     }
 
-    private getFromWeiAmountWithCode(from: PriceTokenAmount, code: string): BigNumber {
-        const decrementCode = `0.${code.padStart(from.decimals, '0')}`;
-        const sendingAmount = from.tokenAmount.minus(decrementCode);
+    private getFromWeiAmountWithCode(
+        from: PriceTokenAmount,
+        code: string,
+        transferFee: string
+    ): BigNumber {
+        // const decrementCode = `0.${code.padStart(from.decimals, '0')}`;
+        const sendingAmount = from.tokenAmount.minus(transferFee);
         const sendingStringWeiAmount = Web3Pure.toWei(sendingAmount, from.decimals);
         const validCode = code.padStart(4, '0');
         const amount = sendingStringWeiAmount.replace(/\d{4}$/g, validCode);

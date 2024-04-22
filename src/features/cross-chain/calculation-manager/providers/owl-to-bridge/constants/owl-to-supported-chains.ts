@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const OWL_TO_SUPPORTED_BLOCKCHAINS = [
+export const owlToSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.ZK_FAIR,
@@ -17,4 +17,4 @@ export const OWL_TO_SUPPORTED_BLOCKCHAINS = [
     BLOCKCHAIN_NAME.MANTA_PACIFIC
 ] as const;
 
-export type OwlToSupportedBlockchain = (typeof OWL_TO_SUPPORTED_BLOCKCHAINS)[number];
+export type OwlToSupportedBlockchain = (typeof owlToSupportedBlockchains)[number];
