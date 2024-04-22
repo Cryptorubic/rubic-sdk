@@ -73,7 +73,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
 
             const fromWithoutFeeWithCode = new PriceTokenAmount({
                 ...fromWithoutFee.asStruct,
-                weiAmount: this.getFromWeiAmountWithCode(from, targetChainCode, transferFee)
+                weiAmount: this.getFromWeiAmountWithCode(from, targetChainCode)
             });
 
             const gasData =
@@ -150,13 +150,9 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         };
     }
 
-    private getFromWeiAmountWithCode(
-        from: PriceTokenAmount,
-        code: string,
-        transferFee: string
-    ): BigNumber {
-        // const decrementCode = `0.${code.padStart(from.decimals, '0')}`;
-        const sendingAmount = from.tokenAmount.minus(transferFee);
+    private getFromWeiAmountWithCode(from: PriceTokenAmount, code: string): BigNumber {
+        const decrementCode = `0.${code.padStart(from.decimals, '0')}`;
+        const sendingAmount = from.tokenAmount.minus(decrementCode);
         const sendingStringWeiAmount = Web3Pure.toWei(sendingAmount, from.decimals);
         const validCode = code.padStart(4, '0');
         const amount = sendingStringWeiAmount.replace(/\d{4}$/g, validCode);

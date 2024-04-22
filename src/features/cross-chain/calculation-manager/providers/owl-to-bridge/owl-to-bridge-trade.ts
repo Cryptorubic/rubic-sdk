@@ -164,15 +164,23 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         config: EvmEncodeConfig;
         amount: string;
     }> {
-        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
-        const methodArgs = [this.makerAddress, this.from.stringWeiAmount];
+        if (this.from.isNative) {
+            return {
+                config: {
+                    data: '0x',
+                    to: this.makerAddress,
+                    value: this.from.stringWeiAmount
+                },
+                amount: this.to.stringWeiAmount
+            };
+        }
 
         const config = EvmWeb3Pure.encodeMethodCall(
             this.from.address,
             ERC20_TOKEN_ABI,
             'transfer',
-            methodArgs,
-            value
+            [this.makerAddress, this.from.stringWeiAmount],
+            '0'
         );
 
         return {

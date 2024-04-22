@@ -290,7 +290,6 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
             fromToken as Token<PulseChainCrossChainSupportedBlockchain>,
             toToken as Token<PulseChainCrossChainSupportedBlockchain>
         );
-        const tokenAddress = this.getTokenAddress(fromToken);
         const amount = this.to.stringWeiAmount;
 
         if (fromToken.isNative) {
@@ -308,17 +307,10 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
                 receiverAddress,
                 fromToken.stringWeiAmount,
                 this.isErc677,
-                tokenAddress
+                fromToken.address
             ),
             amount
         };
-    }
-
-    private getTokenAddress(token: Token): string {
-        if (token.blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
-            return token.isNative ? '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' : token.address;
-        }
-        return token.isNative ? '0xA1077a294dDE1B09bB078844df40758a5D0f9a27' : token.address;
     }
 
     private getProviderDataForErc677(
