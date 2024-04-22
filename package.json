@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.16.3-alpha-zklink-proxy.0",
+    "version": "5.17.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
