@@ -88,14 +88,14 @@ export class OwlToApiService {
             }
         );
 
-        const foundToken = tokens.find(t => {
+        const foundToken = tokens.find(token => {
             const sourceSymbol = sourceToken.symbol.toLowerCase();
-            const symbol = t.symbol.toLowerCase();
+            const symbol = token.symbol.toLowerCase();
 
-            if (compareAddresses(sourceToken.address, t.fromAddress)) {
+            if (compareAddresses(sourceToken.address, token.fromAddress)) {
                 return true;
             }
-            if (t.fromChainId === sourceChainId && sourceSymbol.includes(symbol)) {
+            if (token.fromChainId === sourceChainId && sourceSymbol.includes(symbol)) {
                 return true;
             }
             return false;

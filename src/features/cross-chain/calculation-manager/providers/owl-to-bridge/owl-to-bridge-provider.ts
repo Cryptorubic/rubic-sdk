@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -38,6 +38,10 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
+            if (from.symbol !== toToken.symbol) {
+                throw new NotSupportedTokensError();
+            }
+
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
