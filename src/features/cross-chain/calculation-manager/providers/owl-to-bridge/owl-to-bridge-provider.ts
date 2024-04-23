@@ -61,7 +61,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
             if (pureAmount.gt(maxAmountBN)) {
                 throw new MaxAmountError(maxAmountBN, from.symbol);
             }
-            if (pureAmount.lt(minAmountBN.plus(minAmountBN.multipliedBy(0.05)))) {
+            if (pureAmount.lt(minAmountBN) || pureAmount.lt(transferFee + transferFee * 0.05)) {
                 throw new MinAmountError(minAmountBN, from.symbol);
             }
 
@@ -83,8 +83,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                           toToken: to,
                           providerAddress: options.providerAddress,
                           gasLimit: new BigNumber(gas),
-                          makerAddress,
-                          owlToTransferFee: transferFee
+                          makerAddress
                       })
                     : null;
 
@@ -95,8 +94,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                     to,
                     gasData,
                     priceImpact: from.calculatePriceImpactPercent(to),
-                    makerAddress,
-                    owlToTransferFee: transferFee
+                    makerAddress
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
@@ -145,7 +143,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         return {
             maxAmountBN: new BigNumber(sourceToken.maxValue),
             minAmountBN: new BigNumber(sourceToken.minValue),
-            transferFee,
+            transferFee: Number(transferFee || 0),
             targetChainCode: targetChain.networkCode.toString(),
             gas: txInfo.estimated_gas,
             makerAddress: txInfo.maker_address

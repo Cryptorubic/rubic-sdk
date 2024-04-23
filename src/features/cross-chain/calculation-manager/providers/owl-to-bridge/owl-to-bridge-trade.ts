@@ -32,8 +32,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         toToken,
         providerAddress,
         gasLimit,
-        makerAddress,
-        owlToTransferFee
+        makerAddress
     }: OwlToGetGasDataParams): Promise<GasData | null> {
         try {
             const trade = new OwlToBridgeTrade({
@@ -43,8 +42,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
                     to: toToken,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
                     gasData: null,
-                    makerAddress,
-                    owlToTransferFee
+                    makerAddress
                 },
                 providerAddress,
                 routePath: []
@@ -84,9 +82,6 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
     /* OwlTo contract address, which gets tokens in source chains and sends them in target chain */
     private makerAddress: string;
 
-    /* OwlTo fee in non-wei value - like '0.0012' */
-    private owlToTransferFee: string;
-
     private get fromBlockchain(): OwlToSupportedBlockchain {
         return this.from.blockchain as OwlToSupportedBlockchain;
     }
@@ -110,7 +105,6 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.to.tokenAmount;
         this.feeInfo = crossChainTrade.feeInfo;
         this.makerAddress = crossChainTrade.makerAddress;
-        this.owlToTransferFee = crossChainTrade.owlToTransferFee;
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {

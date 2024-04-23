@@ -13,7 +13,6 @@ export interface OwlToGetGasDataParams {
     providerAddress: string;
     gasLimit: BigNumber;
     makerAddress: string;
-    owlToTransferFee: string;
 }
 
 export interface OwlToTradeParams {
@@ -24,7 +23,6 @@ export interface OwlToTradeParams {
         feeInfo: FeeInfo;
         priceImpact: number | null;
         makerAddress: string;
-        owlToTransferFee: string;
     };
     providerAddress: string;
     routePath: RubicStep[];

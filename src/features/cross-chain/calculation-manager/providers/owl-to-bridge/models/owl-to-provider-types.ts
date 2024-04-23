@@ -4,7 +4,7 @@ export interface OwlToTradeData {
     targetChainCode: string;
     minAmountBN: BigNumber;
     maxAmountBN: BigNumber;
-    transferFee: string;
+    transferFee: number;
     gas: string;
     makerAddress: string;
 }
