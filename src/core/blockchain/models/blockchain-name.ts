@@ -65,7 +65,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     ROOTSTOCK: 'ROOTSTOCK',
     MODE: 'MODE',
     ZK_FAIR: 'ZK_FAIR',
-    ZK_LINK: 'ZK_LINK'
+    ZK_LINK: 'ZK_LINK',
+    XLAYER: 'XLAYER'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

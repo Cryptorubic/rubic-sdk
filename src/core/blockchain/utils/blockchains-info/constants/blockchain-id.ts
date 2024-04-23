@@ -63,6 +63,7 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.MODE]: 34443,
     [BLOCKCHAIN_NAME.ZK_FAIR]: 42766,
     [BLOCKCHAIN_NAME.ZK_LINK]: 810180,
+    [BLOCKCHAIN_NAME.XLAYER]: 196,
     // Tesnents
     [BLOCKCHAIN_NAME.GOERLI]: 5,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: 87,

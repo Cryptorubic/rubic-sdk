@@ -436,5 +436,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Ether',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.XLAYER]: new Token({
+        blockchain: BLOCKCHAIN_NAME.XLAYER,
+        address: '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
+        name: 'Wrapped OKB',
+        symbol: 'WOKB',
+        decimals: 18
     })
 };
