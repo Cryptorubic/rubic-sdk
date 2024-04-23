@@ -4,6 +4,7 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 
@@ -32,7 +33,8 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         toToken,
         providerAddress,
         gasLimit,
-        makerAddress
+        makerAddress,
+        owlToTransferFee
     }: OwlToGetGasDataParams): Promise<GasData | null> {
         try {
             const trade = new OwlToBridgeTrade({
@@ -42,7 +44,8 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
                     to: toToken,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
                     gasData: null,
-                    makerAddress
+                    makerAddress,
+                    owlToTransferFee
                 },
                 providerAddress,
                 routePath: []
@@ -82,6 +85,9 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
     /* OwlTo contract address, which gets tokens in source chains and sends them in target chain */
     private makerAddress: string;
 
+    /* OwlTo fee in non-wei value - like '0.0012' */
+    private owlToTransferFee: string;
+
     private get fromBlockchain(): OwlToSupportedBlockchain {
         return this.from.blockchain as OwlToSupportedBlockchain;
     }
@@ -92,7 +98,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
     }
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        return 'startBridgeTokensViaTransfer';
     }
 
     constructor({ crossChainTrade, providerAddress, routePath }: OwlToTradeParams) {
@@ -105,6 +111,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.to.tokenAmount;
         this.feeInfo = crossChainTrade.feeInfo;
         this.makerAddress = crossChainTrade.makerAddress;
+        this.owlToTransferFee = crossChainTrade.owlToTransferFee;
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -129,7 +136,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        const extraNativeFee = '0';
+        const extraNativeFee = Web3Pure.toWei(this.owlToTransferFee, this.from.decimals);
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data,

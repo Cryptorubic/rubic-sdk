@@ -1,5 +1,6 @@
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
@@ -90,13 +91,11 @@ export class OwlToApiService {
         const foundToken = tokens.find(t => {
             const sourceSymbolToLow = sourceToken.symbol.toLowerCase();
             const tSymbolToLow = t.symbol.toLowerCase();
-            const sourceAddrToLow = sourceToken.address.toLowerCase();
-            const tAddrToLow = t.fromAddress.toLowerCase();
 
-            if (tAddrToLow === sourceAddrToLow) {
+            if (compareAddresses(sourceToken.address, t.fromAddress)) {
                 return true;
             }
-            if (sourceSymbolToLow.includes(tSymbolToLow) && t.fromChainId === sourceChainId) {
+            if (t.fromChainId === sourceChainId && sourceSymbolToLow.includes(tSymbolToLow)) {
                 return true;
             }
             return false;

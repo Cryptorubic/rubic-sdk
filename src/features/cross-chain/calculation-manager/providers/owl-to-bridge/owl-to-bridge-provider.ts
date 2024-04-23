@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -38,22 +38,6 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
-            const {
-                sourceToken: { minValue, maxValue },
-                targetChainCode,
-                gas,
-                transferFee,
-                makerAddress
-            } = await this.fetchTradeData(from, toToken);
-
-            if (this.isInvalidAmount(from.tokenAmount, minValue, maxValue)) {
-                throw new RubicSdkError(`
-                    [OWL_TO_BRIDGE] Amount is out of range. 
-                    Min amount - ${minValue} ${from.symbol}.
-                    Max amount - ${maxValue} ${from.symbol}.
-                `);
-            }
-
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
@@ -66,6 +50,21 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
+            const {
+                sourceToken: { minValue, maxValue },
+                targetChainCode,
+                gas,
+                transferFee,
+                makerAddress
+            } = await this.fetchTradeData(fromWithoutFee, toToken);
+
+            if (fromWithoutFee.tokenAmount.gt(maxValue)) {
+                throw new MaxAmountError(new BigNumber(maxValue), from.symbol);
+            }
+            if (fromWithoutFee.tokenAmount.lt(minValue)) {
+                throw new MinAmountError(new BigNumber(minValue), from.symbol);
+            }
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: from.tokenAmount.minus(transferFee)
@@ -73,7 +72,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
 
             const fromWithoutFeeWithCode = new PriceTokenAmount({
                 ...fromWithoutFee.asStruct,
-                weiAmount: this.getFromWeiAmountWithCode(from, targetChainCode)
+                weiAmount: this.getFromWeiAmountWithCode(fromWithoutFee, targetChainCode)
             });
 
             const gasData =
@@ -84,7 +83,8 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                           toToken: to,
                           providerAddress: options.providerAddress,
                           gasLimit: new BigNumber(gas),
-                          makerAddress
+                          makerAddress,
+                          owlToTransferFee: transferFee
                       })
                     : null;
 
@@ -95,7 +95,8 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                     to,
                     gasData,
                     priceImpact: from.calculatePriceImpactPercent(to),
-                    makerAddress
+                    makerAddress,
+                    owlToTransferFee: transferFee
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
@@ -158,10 +159,6 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         const amount = sendingStringWeiAmount.replace(/\d{4}$/g, validCode);
 
         return new BigNumber(amount);
-    }
-
-    private isInvalidAmount(fromAmount: BigNumber, min: number, max: number): boolean {
-        return fromAmount.gt(max) || fromAmount.lt(min);
     }
 
     protected async getFeeInfo(
