@@ -4,7 +4,6 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 
@@ -136,7 +135,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        const extraNativeFee = Web3Pure.toWei(this.owlToTransferFee, this.from.decimals);
+        const extraNativeFee = '0';
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data,
