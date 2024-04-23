@@ -53,20 +53,16 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
+            const pureAmount = fromWithoutFee.tokenAmount;
 
-            const {
-                sourceToken: { minValue, maxValue },
-                targetChainCode,
-                gas,
-                transferFee,
-                makerAddress
-            } = await this.fetchTradeData(fromWithoutFee, toToken);
+            const { maxAmountBN, minAmountBN, targetChainCode, gas, transferFee, makerAddress } =
+                await this.fetchTradeData(fromWithoutFee, toToken);
 
-            if (fromWithoutFee.tokenAmount.gt(maxValue)) {
-                throw new MaxAmountError(new BigNumber(maxValue), from.symbol);
+            if (pureAmount.gt(maxAmountBN)) {
+                throw new MaxAmountError(maxAmountBN, from.symbol);
             }
-            if (fromWithoutFee.tokenAmount.lt(minValue)) {
-                throw new MinAmountError(new BigNumber(minValue), from.symbol);
+            if (pureAmount.lt(minAmountBN.plus(minAmountBN.multipliedBy(0.05)))) {
+                throw new MinAmountError(minAmountBN, from.symbol);
             }
 
             const to = new PriceTokenAmount({
@@ -147,7 +143,8 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         ]);
 
         return {
-            sourceToken,
+            maxAmountBN: new BigNumber(sourceToken.maxValue),
+            minAmountBN: new BigNumber(sourceToken.minValue),
             transferFee,
             targetChainCode: targetChain.networkCode.toString(),
             gas: txInfo.estimated_gas,

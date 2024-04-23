@@ -1,8 +1,9 @@
-import { OwlToTokenInfo } from './owl-to-api-types';
+import BigNumber from 'bignumber.js';
 
 export interface OwlToTradeData {
     targetChainCode: string;
-    sourceToken: OwlToTokenInfo;
+    minAmountBN: BigNumber;
+    maxAmountBN: BigNumber;
     transferFee: string;
     gas: string;
     makerAddress: string;
