@@ -18,15 +18,12 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
-import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-
-import { CCR_PROVIDERS_NOT_SUPPORTED_RECEIVER } from '../../constants/ccr-providers-unsupported-receiver';
 
 /**
  * Abstract class for all cross-chain providers' trades.
@@ -262,10 +259,6 @@ export abstract class CrossChainTrade<T = unknown> {
         isRequired = false,
         crossChainType?: CrossChainTradeType
     ): Promise<void | never> {
-        if (CCR_PROVIDERS_NOT_SUPPORTED_RECEIVER.some(type => type === crossChainType)) {
-            checkUnsupportedReceiverAddress(receiverAddress);
-        }
-
         if (!receiverAddress) {
             if (isRequired) {
                 throw new RubicSdkError(`'receiverAddress' is required option`);

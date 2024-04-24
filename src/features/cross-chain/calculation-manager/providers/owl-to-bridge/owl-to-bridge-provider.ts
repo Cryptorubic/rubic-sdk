@@ -4,6 +4,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -41,6 +42,8 @@ export class OwlToBridgeProvider extends CrossChainProvider {
             if (from.symbol !== toToken.symbol) {
                 throw new NotSupportedTokensError();
             }
+
+            checkUnsupportedReceiverAddress(options.receiverAddress);
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
