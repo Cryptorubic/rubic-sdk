@@ -109,15 +109,6 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const {
-            data,
-            value: providerValue,
-            to: providerRouter
-        } = await this.setTransactionConfig(
-            false,
-            options?.useCacheData || false,
-            options?.receiverAddress || this.walletAddress
-        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -129,17 +120,10 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        const extraNativeFee = '0';
-        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
-            providerRouter,
-            data,
-            this.from.blockchain,
-            providerRouter,
-            extraNativeFee
-        );
-
+        const providerData = [this.makerAddress];
         const methodArguments = [bridgeData, providerData];
-        const value = this.getSwapValue(providerValue);
+        const value = this.getSwapValue();
+
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
             evmCommonCrossChainAbi,
