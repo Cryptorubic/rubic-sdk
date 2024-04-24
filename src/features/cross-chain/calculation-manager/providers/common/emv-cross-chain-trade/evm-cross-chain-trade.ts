@@ -301,7 +301,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({
                 fromAddress: options.fromAddress,
-                receiverAddress: options.receiverAddress || options.fromAddress
+                receiverAddress: options.receiverAddress || options.fromAddress,
+                useCacheData: options?.useCacheData || false
             });
 
         return EvmWeb3Pure.encodeMethodCall(
