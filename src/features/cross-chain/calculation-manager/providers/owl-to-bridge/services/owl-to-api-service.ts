@@ -1,4 +1,4 @@
-import { RubicSdkError } from 'src/common/errors';
+import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -40,7 +40,7 @@ export class OwlToApiService {
     }
 
     public static async getTransferFee(p: OwlToTransferFeeParams): Promise<string> {
-        const { msg: fee } = await Injector.httpClient.get<OwlToTransferFeeResponse>(
+        const { msg } = await Injector.httpClient.get<OwlToTransferFeeResponse>(
             `${this.apiUrl}/api/dynamic-dtc`,
             {
                 params: {
@@ -52,7 +52,11 @@ export class OwlToApiService {
             }
         );
 
-        return fee;
+        if (msg.includes('not found') || isNaN(+msg)) {
+            throw new NotSupportedTokensError();
+        }
+
+        return msg;
     }
 
     public static async getSwappingChainsInfo(

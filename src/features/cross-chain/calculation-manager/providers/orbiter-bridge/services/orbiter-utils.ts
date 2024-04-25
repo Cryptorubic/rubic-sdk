@@ -43,10 +43,6 @@ export class OrbiterUtils {
         return config;
     }
 
-    public static isAmountCorrect(fromAmount: BigNumber, config: OrbiterQuoteConfig): boolean {
-        return fromAmount.lt(config.maxAmt) && fromAmount.gt(config.minAmt);
-    }
-
     /**
      *
      * @param code Orbiter identification code of chain(9001, 9002 etc), equals quoteConfig.vc
