@@ -250,7 +250,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
         const fromAddress = this.walletAddress;
         const { data, value, to } = await this.encode({ ...options, fromAddress });
-        const method = options?.testMode ? 'trySendTransaction' : 'sendTransaction';
+        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
 
         try {
             await this.web3Private[method](to, {
