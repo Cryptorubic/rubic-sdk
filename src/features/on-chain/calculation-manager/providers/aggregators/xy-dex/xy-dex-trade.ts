@@ -5,6 +5,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
+    XY_AFFILIATE_ADDRESS,
     XY_API_ENDPOINT,
     XY_NATIVE_ADDRESS
 } from 'src/features/common/providers/xy/constants/xy-api-params';
@@ -75,7 +76,8 @@ export class XyDexTrade extends AggregatorEvmOnChainTrade {
             dstQuoteTokenAddress,
             slippage: this.slippageTolerance * 100,
             receiver,
-            srcSwapProvider: this.provider
+            srcSwapProvider: this.provider,
+            affiliate: XY_AFFILIATE_ADDRESS
         };
 
         const tradeData = await this.getResponseFromApiToTransactionRequest(quoteTradeParams);
