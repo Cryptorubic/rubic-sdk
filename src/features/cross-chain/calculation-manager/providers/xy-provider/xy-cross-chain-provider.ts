@@ -8,6 +8,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import {
+    XY_AFFILIATE_ADDRESS,
     XY_API_ENDPOINT,
     XY_NATIVE_ADDRESS
 } from 'src/features/common/providers/xy/constants/xy-api-params';
@@ -83,7 +84,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 srcQuoteTokenAmount: fromWithoutFee.stringWeiAmount,
                 dstChainId: blockchainId[toBlockchain],
                 dstQuoteTokenAddress: toToken.isNative ? XY_NATIVE_ADDRESS : toToken.address,
-                slippage: slippageTolerance
+                slippage: slippageTolerance,
+                affiliate: XY_AFFILIATE_ADDRESS
             };
 
             const { success, routes, errorCode, errorMsg } =

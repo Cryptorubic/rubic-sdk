@@ -5,6 +5,7 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Injector } from 'src/core/injector/injector';
 import {
+    XY_AFFILIATE_ADDRESS,
     XY_API_ENDPOINT,
     XY_NATIVE_ADDRESS
 } from 'src/features/common/providers/xy/constants/xy-api-params';
@@ -102,7 +103,8 @@ export class XyDexProvider extends AggregatorOnChainProvider {
             srcQuoteTokenAmount: from.stringWeiAmount,
             dstChainId: chainId,
             dstQuoteTokenAddress,
-            slippage: options.slippageTolerance * 100
+            slippage: options.slippageTolerance * 100,
+            affiliate: XY_AFFILIATE_ADDRESS
         };
 
         const trade = await Injector.httpClient.get<XyQuoteResponse>(`${XY_API_ENDPOINT}/quote`, {
