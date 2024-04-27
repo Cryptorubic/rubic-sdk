@@ -26,8 +26,8 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
 import {
-    LIFI_BRIDGE_TYPES,
-    LifiBridgeTypes
+    LIFI_SUB_PROVIDERS,
+    LifiSubProvider
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import {
@@ -65,19 +65,15 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             };
         }
 
-        if (
-            options.lifiDisabledBridgeTypes?.length &&
-            !this.checkBridgeTypes(options.lifiDisabledBridgeTypes)
-        ) {
-            throw new RubicSdkError('Incorrect bridges filter param');
-        }
-
-        const denyBridges = options.lifiDisabledBridgeTypes || [];
+        const { disabledBridges, disabledDexes } = this.mapDisabledProviders(
+            options.lifiDisabledProviders || []
+        );
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
             allowSwitchChain: false,
-            bridges: { deny: denyBridges }
+            bridges: { deny: disabledBridges },
+            exchanges: { deny: disabledDexes }
         };
 
         const fromChainId = blockchainId[fromBlockchain];
@@ -264,9 +260,22 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         };
     }
 
-    private checkBridgeTypes(notAllowedBridgeTypes: LifiBridgeTypes[]): boolean {
-        const lifiBridgeTypesArray = Object.values(LIFI_BRIDGE_TYPES);
-        return notAllowedBridgeTypes.every(bridgeType => lifiBridgeTypesArray.includes(bridgeType));
+    private mapDisabledProviders(disabledProviders: LifiSubProvider[]): {
+        disabledBridges: LifiSubProvider[];
+        disabledDexes: LifiSubProvider[];
+    } {
+        const disabledBridges = [] as LifiSubProvider[];
+        const disabledDexes = [] as LifiSubProvider[];
+
+        disabledProviders.forEach(provider => {
+            const isBridge = Object.values(LIFI_SUB_PROVIDERS).includes(provider);
+            const isDex = Object.keys(lifiProviders).includes(provider);
+
+            if (isBridge) disabledBridges.push(provider);
+            if (isDex) disabledDexes.push(provider);
+        });
+
+        return { disabledBridges, disabledDexes };
     }
 
     protected async getRoutePath(

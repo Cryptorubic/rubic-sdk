@@ -1,4 +1,4 @@
-export const LIFI_BRIDGE_TYPES = {
+export const LIFI_SUB_PROVIDERS = {
     ACROSS: 'across',
     AMAROK: 'connext',
     ARBITRUM: 'arbitrum',
@@ -19,7 +19,33 @@ export const LIFI_BRIDGE_TYPES = {
     LI_FUEL: 'lifuel',
     WORMHOLE: 'portal',
     CELERIM: 'celerim',
-    THORSWAP: 'thorswap'
+    THORSWAP: 'thorswap',
+    // DEXES
+    CRONA_SWAP: 'cronaswap',
+    ODOS: 'odos',
+    UNI_SWAP_V3: 'uniswap',
+    APE_SWAP: 'apeswap',
+    VERSE: 'verse',
+    QUICK_SWAP: 'quickswap',
+    LIFI: 'lif3swap',
+    PANCAKE_SWAP: 'pancakeswap',
+    KYBER_SWAP: 'kyberswap',
+    SPOOKY_SWAP: 'spookyswap',
+    SPIRIT_SWAP: 'spiritswap',
+    PANGOLIN: 'pangolin',
+    SOLAR_BEAM: 'solarbeam',
+    VOLTAGE_SWAP: 'voltage',
+    OOLONG_SWAP: 'oolongswap',
+    TRISOLARIS: 'trisolaris',
+    TOMB_SWAP: 'tombswap',
+    SWAPR: 'swapr',
+    ARB_SWAP: 'arbswap',
+    DIFFUSION: 'diffusion',
+    CRONUS: 'cronus',
+    EVMO_SWAP: 'evmoswap',
+    STABLE: 'stable',
+    PROPELLER: 'propeller',
+    ENSO: 'enso'
 } as const;
 
-export type LifiBridgeTypes = (typeof LIFI_BRIDGE_TYPES)[keyof typeof LIFI_BRIDGE_TYPES];
+export type LifiSubProvider = (typeof LIFI_SUB_PROVIDERS)[keyof typeof LIFI_SUB_PROVIDERS];
