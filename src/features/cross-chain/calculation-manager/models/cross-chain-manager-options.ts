@@ -12,7 +12,7 @@ export type CrossChainManagerCalculationOptions = CrossChainOptions & {
      */
     readonly disabledProviders?: CrossChainTradeType[];
 
-    readonly lifiDisabledProviders?: LifiSubProvider[];
+    readonly lifiDisabledBridgeTypes?: LifiSubProvider[];
 };
 
 export type RequiredCrossChainManagerCalculationOptions = MarkRequired<

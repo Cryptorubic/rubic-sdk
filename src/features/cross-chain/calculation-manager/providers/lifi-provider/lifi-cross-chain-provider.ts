@@ -66,7 +66,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         }
 
         const { disabledBridges, disabledDexes } = this.mapDisabledProviders(
-            options.lifiDisabledProviders || []
+            options.lifiDisabledBridgeTypes || []
         );
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,

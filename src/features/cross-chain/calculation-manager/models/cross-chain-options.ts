@@ -53,7 +53,7 @@ export interface CrossChainOptions {
      */
     timeout?: number;
 
-    lifiDisabledProviders?: LifiSubProvider[];
+    lifiDisabledBridgeTypes?: LifiSubProvider[];
 
     /**
      * Providers disabled in platform config for rango
