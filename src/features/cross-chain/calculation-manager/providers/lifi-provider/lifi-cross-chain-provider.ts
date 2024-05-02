@@ -29,7 +29,10 @@ import {
     LIFI_API_CROSS_CHAIN_PROVIDERS,
     LifiSubProvider
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
-import { LIFI_API_ON_CHAIN_PROVIDERS } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
+import {
+    LIFI_API_ON_CHAIN_PROVIDERS,
+    LifiApiOnChainTrade
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
@@ -249,8 +252,12 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         subType = subType === 'amarok' ? BRIDGE_TYPE.AMAROK : subType;
 
         const onChainType = {
-            from: sourceDex ? LIFI_API_ON_CHAIN_PROVIDERS[sourceDex] : undefined,
-            to: targetDex ? LIFI_API_ON_CHAIN_PROVIDERS[targetDex] : undefined
+            from: sourceDex
+                ? LIFI_API_ON_CHAIN_PROVIDERS[sourceDex as LifiApiOnChainTrade]
+                : undefined,
+            to: targetDex
+                ? LIFI_API_ON_CHAIN_PROVIDERS[targetDex as LifiApiOnChainTrade]
+                : undefined
         };
         const bridgeType = bridges.find(bridge => bridge.toLowerCase() === subType);
 

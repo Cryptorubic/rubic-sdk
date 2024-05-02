@@ -1,9 +1,6 @@
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-export const LIFI_API_ON_CHAIN_PROVIDERS: Record<string, OnChainTradeType> = {
+export const LIFI_API_ON_CHAIN_PROVIDERS = {
     '0x': ON_CHAIN_TRADE_TYPE.ZRX,
     '1inch': ON_CHAIN_TRADE_TYPE.ONE_INCH,
     openocean: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
@@ -42,4 +39,8 @@ export const LIFI_API_ON_CHAIN_PROVIDERS: Record<string, OnChainTradeType> = {
     stable: ON_CHAIN_TRADE_TYPE.LIFI,
     propeller: ON_CHAIN_TRADE_TYPE.LIFI,
     enso: ON_CHAIN_TRADE_TYPE.LIFI
-};
+} as const;
+
+export const LIFI_DISABLED_ON_CHAIN_PROVIDERS: LifiApiOnChainTrade[] = ['openocean'];
+
+export type LifiApiOnChainTrade = keyof typeof LIFI_API_ON_CHAIN_PROVIDERS;
