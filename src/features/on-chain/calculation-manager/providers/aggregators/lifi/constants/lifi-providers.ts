@@ -3,7 +3,7 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-export const lifiProviders: Record<string, OnChainTradeType> = {
+export const LIFI_API_ON_CHAIN_PROVIDERS: Record<string, OnChainTradeType> = {
     '0x': ON_CHAIN_TRADE_TYPE.ZRX,
     '1inch': ON_CHAIN_TRADE_TYPE.ONE_INCH,
     openocean: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
@@ -31,6 +31,7 @@ export const lifiProviders: Record<string, OnChainTradeType> = {
     voltage: ON_CHAIN_TRADE_TYPE.VOLTAGE_SWAP,
     oolongswap: ON_CHAIN_TRADE_TYPE.OOLONG_SWAP,
     trisolaris: ON_CHAIN_TRADE_TYPE.TRISOLARIS,
+    soulswap: ON_CHAIN_TRADE_TYPE.SOUL_SWAP,
     // NONAME LIFI SUB-PROVIDERS
     tombswap: ON_CHAIN_TRADE_TYPE.LIFI,
     swapr: ON_CHAIN_TRADE_TYPE.LIFI,

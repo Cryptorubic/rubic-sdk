@@ -1,4 +1,4 @@
-export const LIFI_SUB_PROVIDERS = {
+export const LIFI_API_CROSS_CHAIN_PROVIDERS = {
     ACROSS: 'across',
     AMAROK: 'connext',
     ARBITRUM: 'arbitrum',
@@ -20,32 +20,8 @@ export const LIFI_SUB_PROVIDERS = {
     WORMHOLE: 'portal',
     CELERIM: 'celerim',
     THORSWAP: 'thorswap',
-    // DEXES
-    CRONA_SWAP: 'cronaswap',
-    ODOS: 'odos',
-    UNI_SWAP_V3: 'uniswap',
-    APE_SWAP: 'apeswap',
-    VERSE: 'verse',
-    QUICK_SWAP: 'quickswap',
-    LIFI: 'lif3swap',
-    PANCAKE_SWAP: 'pancakeswap',
-    KYBER_SWAP: 'kyberswap',
-    SPOOKY_SWAP: 'spookyswap',
-    SPIRIT_SWAP: 'spiritswap',
-    PANGOLIN: 'pangolin',
-    SOLAR_BEAM: 'solarbeam',
-    VOLTAGE_SWAP: 'voltage',
-    OOLONG_SWAP: 'oolongswap',
-    TRISOLARIS: 'trisolaris',
-    TOMB_SWAP: 'tombswap',
-    SWAPR: 'swapr',
-    ARB_SWAP: 'arbswap',
-    DIFFUSION: 'diffusion',
-    CRONUS: 'cronus',
-    EVMO_SWAP: 'evmoswap',
-    STABLE: 'stable',
-    PROPELLER: 'propeller',
-    ENSO: 'enso'
+    OPTIMISM: 'optimism'
 } as const;
 
-export type LifiSubProvider = (typeof LIFI_SUB_PROVIDERS)[keyof typeof LIFI_SUB_PROVIDERS];
+export type LifiSubProvider =
+    (typeof LIFI_API_CROSS_CHAIN_PROVIDERS)[keyof typeof LIFI_API_CROSS_CHAIN_PROVIDERS];

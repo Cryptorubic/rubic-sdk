@@ -26,10 +26,10 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
 import {
-    LIFI_SUB_PROVIDERS,
+    LIFI_API_CROSS_CHAIN_PROVIDERS,
     LifiSubProvider
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
+import { LIFI_API_ON_CHAIN_PROVIDERS } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
@@ -249,8 +249,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         subType = subType === 'amarok' ? BRIDGE_TYPE.AMAROK : subType;
 
         const onChainType = {
-            from: sourceDex ? lifiProviders[sourceDex] : undefined,
-            to: targetDex ? lifiProviders[targetDex] : undefined
+            from: sourceDex ? LIFI_API_ON_CHAIN_PROVIDERS[sourceDex] : undefined,
+            to: targetDex ? LIFI_API_ON_CHAIN_PROVIDERS[targetDex] : undefined
         };
         const bridgeType = bridges.find(bridge => bridge.toLowerCase() === subType);
 
@@ -269,12 +269,12 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         for (let i = 0; i < disabledProviders.length; i++) {
             const provider = disabledProviders[i] as LifiSubProvider;
-            const isBridge = Object.values(LIFI_SUB_PROVIDERS).includes(provider);
+            const isBridge = Object.values(LIFI_API_CROSS_CHAIN_PROVIDERS).includes(provider);
             if (isBridge) {
                 disabledBridges.push(provider);
                 continue;
             }
-            const isDex = Object.keys(lifiProviders).includes(provider);
+            const isDex = Object.keys(LIFI_API_ON_CHAIN_PROVIDERS).includes(provider);
             if (isDex) {
                 disabledDexes.push(provider);
             }

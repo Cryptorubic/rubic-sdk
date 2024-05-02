@@ -8,7 +8,7 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { lifiForbiddenBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-forbidden-blockchains';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
+import { LIFI_API_ON_CHAIN_PROVIDERS } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
 import {
     LifiCalculationOptions,
@@ -66,18 +66,19 @@ export class LifiProvider extends AggregatorOnChainProvider {
         const toChainId = blockchainId[toToken.blockchain];
 
         const { disabledProviders } = fullOptions;
-        const lifiDisabledProviders = Object.entries(lifiProviders)
-            .filter(([_lifiProviderKey, tradeType]: [string, OnChainTradeType]) =>
+        const lifiDisabledProviders = Object.entries(LIFI_API_ON_CHAIN_PROVIDERS)
+            .filter(([_, tradeType]: [string, OnChainTradeType]) =>
                 disabledProviders.includes(tradeType)
             )
-            .map(([lifiProviderKey]) => lifiProviderKey);
+            .map(([lifiProviderKey]) => lifiProviderKey)
+            .concat('openocean');
 
         const routeOptions: RouteOptions = {
             order: 'RECOMMENDED',
             slippage: fullOptions.slippageTolerance,
             maxPriceImpact: 0.5,
             exchanges: {
-                deny: lifiDisabledProviders.concat('openocean')
+                deny: lifiDisabledProviders
             }
         };
 
