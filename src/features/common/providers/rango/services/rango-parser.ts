@@ -7,7 +7,6 @@ import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-a
 import { RANGO_API_KEY } from '../constants/rango-api-common';
 import { RangoBestRouteRequestOptions } from '../models/rango-api-best-route-types';
 import { RangoSwapRequestOptions } from '../models/rango-api-swap-types';
-import { RubicTradeTypeForRango } from '../models/rango-api-trade-types';
 import {
     RangoBestRouteQueryParams,
     RangoSwapQueryParams,
@@ -31,9 +30,7 @@ export class RangoCommonParser {
 
         const apiKey = RANGO_API_KEY;
 
-        const swapperGroups = options.swapperGroups
-            ?.map(swapper => RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango))
-            .join(',');
+        const swapperGroups = options.swapperGroups?.join(',');
 
         return {
             apiKey,
@@ -41,7 +38,7 @@ export class RangoCommonParser {
             to: toParam,
             amount: amountParam,
             ...(options.slippageTolerance && { slippage: options.slippageTolerance * 100 }),
-            ...(swapperGroups?.length && { swapperGroups }),
+            ...(options.swapperGroups?.length && { swapperGroups }),
             swappersGroupsExclude: options?.swappersGroupsExclude ?? true,
             contractCall: true
         };
@@ -66,9 +63,7 @@ export class RangoCommonParser {
         const slippage = options.slippageTolerance * 100;
         const apiKey = RANGO_API_KEY;
 
-        const swapperGroups = options.swapperGroups
-            ?.map(swapper => RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango))
-            .join(',');
+        const swapperGroups = options.swapperGroups?.join(',');
 
         return {
             apiKey,
@@ -78,7 +73,7 @@ export class RangoCommonParser {
             fromAddress,
             slippage,
             toAddress,
-            ...(swapperGroups?.length && { swapperGroups }),
+            ...(options.swapperGroups?.length && { swapperGroups }),
             swappersGroupsExclude: options?.swappersGroupsExclude ?? true,
             contractCall: true
         };

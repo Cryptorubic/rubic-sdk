@@ -11,7 +11,7 @@ import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/uti
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
-import { rangoOnChainDisabledProviders } from './models/rango-on-chain-disabled-providers';
+import { RANGO_ON_CHAIN_DISABLED_PROVIDERS } from './models/rango-on-chain-disabled-providers';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
@@ -74,7 +74,7 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             slippageTolerance: this.slippageTolerance,
             receiverAddress: options.receiverAddress || this.walletAddress,
-            swapperGroups: rangoOnChainDisabledProviders,
+            swapperGroups: RANGO_ON_CHAIN_DISABLED_PROVIDERS,
             fromAddress: this.walletAddress
         });
 

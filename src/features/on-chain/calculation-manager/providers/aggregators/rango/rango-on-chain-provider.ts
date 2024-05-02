@@ -14,7 +14,7 @@ import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/model
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
-import { rangoOnChainDisabledProviders } from './models/rango-on-chain-disabled-providers';
+import { RANGO_ON_CHAIN_DISABLED_PROVIDERS } from './models/rango-on-chain-disabled-providers';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainTrade } from './rango-on-chain-trade';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
@@ -42,7 +42,7 @@ export class RangoOnChainProvider extends AggregatorOnChainProvider {
 
             const swapParams = await RangoCommonParser.getSwapQueryParams(fromWithoutFee, toToken, {
                 ...options,
-                swapperGroups: rangoOnChainDisabledProviders
+                swapperGroups: RANGO_ON_CHAIN_DISABLED_PROVIDERS
             });
 
             const { route, tx } = await RangoOnChainApiService.getSwapTransaction(swapParams);
