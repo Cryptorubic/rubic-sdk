@@ -12,6 +12,9 @@ export type CrossChainManagerCalculationOptions = CrossChainOptions & {
      */
     readonly disabledProviders?: CrossChainTradeType[];
 
+    /**
+     * @deprecated Will be renamed to `lifiDisabledProviders` in the next major update
+     */
     readonly lifiDisabledBridgeTypes?: LifiSubProvider[];
 };
 
