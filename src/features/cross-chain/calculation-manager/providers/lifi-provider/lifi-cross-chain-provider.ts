@@ -267,13 +267,18 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const disabledBridges = [] as LifiSubProvider[];
         const disabledDexes = [] as LifiSubProvider[];
 
-        disabledProviders.forEach(provider => {
+        for (let i = 0; i < disabledProviders.length; i++) {
+            const provider = disabledProviders[i] as LifiSubProvider;
             const isBridge = Object.values(LIFI_SUB_PROVIDERS).includes(provider);
+            if (isBridge) {
+                disabledBridges.push(provider);
+                continue;
+            }
             const isDex = Object.keys(lifiProviders).includes(provider);
-
-            if (isBridge) disabledBridges.push(provider);
-            if (isDex) disabledDexes.push(provider);
-        });
+            if (isDex) {
+                disabledDexes.push(provider);
+            }
+        }
 
         return { disabledBridges, disabledDexes };
     }
