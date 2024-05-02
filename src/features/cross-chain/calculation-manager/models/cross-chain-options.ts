@@ -53,6 +53,9 @@ export interface CrossChainOptions {
      */
     timeout?: number;
 
+    /**
+     * @deprecated Will be renamed to `lifiDisabledProviders` in the next major update
+     */
     lifiDisabledBridgeTypes?: LifiSubProvider[];
 
     /**
