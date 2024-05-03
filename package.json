@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.17.7-alpha.lifi-rango.5",
+    "version": "5.17.7-alpha.lifi-rango.6",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
