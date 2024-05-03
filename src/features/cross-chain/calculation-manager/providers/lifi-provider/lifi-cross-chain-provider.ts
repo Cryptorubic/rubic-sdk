@@ -26,10 +26,13 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
 import {
-    LIFI_BRIDGE_TYPES,
-    LifiBridgeTypes
+    LIFI_API_CROSS_CHAIN_PROVIDERS,
+    LifiSubProvider
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
+import {
+    LIFI_API_ON_CHAIN_PROVIDERS,
+    LifiApiOnChainTrade
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
@@ -65,19 +68,15 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             };
         }
 
-        if (
-            options.lifiDisabledBridgeTypes?.length &&
-            !this.checkBridgeTypes(options.lifiDisabledBridgeTypes)
-        ) {
-            throw new RubicSdkError('Incorrect bridges filter param');
-        }
-
-        const denyBridges = options.lifiDisabledBridgeTypes || [];
+        const { disabledBridges, disabledDexes } = this.mapDisabledProviders(
+            options.lifiDisabledBridgeTypes || []
+        );
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
             allowSwitchChain: false,
-            bridges: { deny: denyBridges }
+            bridges: { deny: disabledBridges },
+            exchanges: { deny: disabledDexes }
         };
 
         const fromChainId = blockchainId[fromBlockchain];
@@ -253,8 +252,12 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         subType = subType === 'amarok' ? BRIDGE_TYPE.AMAROK : subType;
 
         const onChainType = {
-            from: sourceDex ? lifiProviders[sourceDex] : undefined,
-            to: targetDex ? lifiProviders[targetDex] : undefined
+            from: sourceDex
+                ? LIFI_API_ON_CHAIN_PROVIDERS[sourceDex as LifiApiOnChainTrade]
+                : undefined,
+            to: targetDex
+                ? LIFI_API_ON_CHAIN_PROVIDERS[targetDex as LifiApiOnChainTrade]
+                : undefined
         };
         const bridgeType = bridges.find(bridge => bridge.toLowerCase() === subType);
 
@@ -264,9 +267,27 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         };
     }
 
-    private checkBridgeTypes(notAllowedBridgeTypes: LifiBridgeTypes[]): boolean {
-        const lifiBridgeTypesArray = Object.values(LIFI_BRIDGE_TYPES);
-        return notAllowedBridgeTypes.every(bridgeType => lifiBridgeTypesArray.includes(bridgeType));
+    private mapDisabledProviders(disabledProviders: LifiSubProvider[]): {
+        disabledBridges: LifiSubProvider[];
+        disabledDexes: LifiSubProvider[];
+    } {
+        const disabledBridges = [] as LifiSubProvider[];
+        const disabledDexes = [] as LifiSubProvider[];
+
+        for (let i = 0; i < disabledProviders.length; i++) {
+            const provider = disabledProviders[i] as LifiSubProvider;
+            const isBridge = Object.values(LIFI_API_CROSS_CHAIN_PROVIDERS).includes(provider);
+            if (isBridge) {
+                disabledBridges.push(provider);
+                continue;
+            }
+            const isDex = Object.keys(LIFI_API_ON_CHAIN_PROVIDERS).includes(provider);
+            if (isDex) {
+                disabledDexes.push(provider);
+            }
+        }
+
+        return { disabledBridges, disabledDexes };
     }
 
     protected async getRoutePath(

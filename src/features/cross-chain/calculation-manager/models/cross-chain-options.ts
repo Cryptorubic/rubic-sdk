@@ -1,6 +1,6 @@
-import { RubicTradeTypeForRango } from 'src/features/common/providers/rango/models/rango-api-trade-types';
+import { RangoTradeType } from 'src/features/common/providers/rango/models/rango-api-trade-types';
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { LifiBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
+import { LifiSubProvider } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
 import { MarkRequired } from 'ts-essentials';
 
 export interface CrossChainOptions {
@@ -53,12 +53,15 @@ export interface CrossChainOptions {
      */
     timeout?: number;
 
-    lifiDisabledBridgeTypes?: LifiBridgeTypes[];
+    /**
+     * @deprecated Will be renamed to `lifiDisabledProviders` in the next major update
+     */
+    lifiDisabledBridgeTypes?: LifiSubProvider[];
 
     /**
      * Providers disabled in platform config for rango
      */
-    rangoDisabledProviders?: RubicTradeTypeForRango[];
+    rangoDisabledProviders?: RangoTradeType[];
 
     /**
      * True, if changenow must be calculated for non-evm source blockchains.
