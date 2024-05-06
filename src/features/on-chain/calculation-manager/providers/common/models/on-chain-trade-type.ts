@@ -45,6 +45,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     ECHO_DEX: 'ECHO_DEX',
     ELK: 'ELK',
 
+    FENIX: 'FENIX',
     FINKUJIRA: 'FINKUJIRA',
     FUSIONX: 'FUSIONX',
 

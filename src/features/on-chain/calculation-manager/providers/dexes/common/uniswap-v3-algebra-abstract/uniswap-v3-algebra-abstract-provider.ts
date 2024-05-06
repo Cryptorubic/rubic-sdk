@@ -11,6 +11,7 @@ import { Exact } from 'src/features/on-chain/calculation-manager/providers/commo
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { CamelotArbitrumTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/camelot-arbitrum/camelot-arbitrum-trade';
 import { BerachainTestnetAlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/berachain-testnet/berachain-testnet-algebra/berachain-testnet-algebra-trade';
+import { BlastFenixTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/blast/fenix-blast/blast-fenix-trade';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
@@ -51,7 +52,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         | typeof CamelotArbitrumTrade
         | typeof UniSwapV3ScrollSepoliaTrade
         | typeof BerachainTestnetAlgebraTrade
-        | typeof ModeAlgebraTrade;
+        | typeof ModeAlgebraTrade
+        | typeof BlastFenixTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 
