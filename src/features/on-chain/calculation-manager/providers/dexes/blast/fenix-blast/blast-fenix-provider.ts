@@ -41,7 +41,7 @@ export class BlastFenixProvider extends UniswapV3AlgebraAbstractProvider<BlastFe
     );
 
     public get type(): OnChainTradeType {
-        return ON_CHAIN_TRADE_TYPE.FENIX;
+        return ON_CHAIN_TRADE_TYPE.FENIX_V2;
     }
 
     protected createTradeInstance(
