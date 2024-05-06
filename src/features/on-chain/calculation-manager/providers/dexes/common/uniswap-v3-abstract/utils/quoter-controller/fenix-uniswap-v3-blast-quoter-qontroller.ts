@@ -34,6 +34,8 @@ interface GetQuoterMethodsDataOptions {
 }
 
 export class UniswapV3BlastQuoterController extends UniswapV3QuoterController {
+    protected readonly feeAmounts: FeeAmount[] = [3000];
+
     constructor(
         blockchain: EvmBlockchainName,
         routerConfiguration: UniswapV3RouterConfiguration<string>
