@@ -7,11 +7,11 @@ import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
-import { lifiOnChainSupportedBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-forbidden-blockchains';
 import {
     LIFI_API_ON_CHAIN_PROVIDERS,
     LIFI_DISABLED_ON_CHAIN_PROVIDERS
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
+import { lifiOnChainSupportedBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-supported-blockchains';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
 import {
     LifiCalculationOptions,
