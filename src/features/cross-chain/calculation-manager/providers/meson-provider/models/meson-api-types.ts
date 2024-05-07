@@ -47,13 +47,15 @@ export interface MesonLimitsToken {
 }
 
 export interface FetchEncodedParamRequest {
-    sourceAssetInfo: string;
-    targetAssetInfo: string;
+    /* chain:token - example `bnb:usdc` */
+    sourceAssetString: string;
+    targetAssetString: string;
     /* in decimal number format - example 1.5, 0.001 etc   */
     amount: string;
     /* WalletAddress or rubic-multi-proxy-contract address */
     fromAddress: string;
     receiverAddress: string;
+    useProxy: boolean;
 }
 
 export type EncodeSwapResponse =

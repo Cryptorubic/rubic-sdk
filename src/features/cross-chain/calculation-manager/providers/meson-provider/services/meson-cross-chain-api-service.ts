@@ -1,50 +1,20 @@
-import { ethers } from 'ethers';
-import { NotSupportedBlockchain, NotSupportedTokensError } from 'src/common/errors';
-import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
-import Web3 from 'web3';
 
 import {
     EncodeSwapResponse,
     EncodeSwapSchema,
     FetchEncodedParamRequest,
-    MesonChainsInfo,
+    MesonLimitsChain,
     MesonLimitsResponse,
-    MesonLimitsToken,
-    SrcDstChainsIds,
     TxFeeResponse,
     TxStatusResponse
 } from '../models/meson-api-types';
 
 export class MesonCcrApiService {
     private static apiUrl = 'https://relayer.meson.fi/api/v1';
-
-    public static async fetchTxChainsSymbols(
-        sourceChain: BlockchainName,
-        targetChain: BlockchainName
-    ): Promise<SrcDstChainsIds> {
-        const { result: chains } = await Injector.httpClient.get<MesonChainsInfo>(
-            `${this.apiUrl}/list`
-        );
-        const sourceChainIdHex = Web3.utils.toHex(blockchainId[sourceChain]);
-        const targetChainIdHex = Web3.utils.toHex(blockchainId[targetChain]);
-
-        const ids = chains.reduce(
-            (acc, chain) => {
-                if (compareAddresses(chain.chainId, sourceChainIdHex)) acc[0] = chain.id;
-                if (compareAddresses(chain.chainId, targetChainIdHex)) acc[1] = chain.id;
-
-                return acc;
-            },
-            ['', ''] satisfies SrcDstChainsIds
-        );
-
-        return ids;
-    }
 
     public static async fetchMesonFee(
         sourceAssetString: string,
@@ -64,41 +34,21 @@ export class MesonCcrApiService {
         return res.result.totalFee;
     }
 
-    public static async fetchTokenInfo(
-        blockchain: BlockchainName,
-        tokenAddress: string,
-        isNative: boolean
-    ): Promise<MesonLimitsToken> {
+    public static async fetchChainsLimits(): Promise<MesonLimitsChain[]> {
         const { result: chains } = await Injector.httpClient.get<MesonLimitsResponse>(
             `${this.apiUrl}/limits`
         );
 
-        const chainId = blockchainId[blockchain];
-        const hexChainId = Web3.utils.toHex(chainId);
-        const foundChain = chains.find(chain => compareAddresses(chain.chainId, hexChainId));
-
-        if (!foundChain) {
-            throw new NotSupportedBlockchain();
-        }
-
-        const foundToken = isNative
-            ? foundChain.tokens.find(token => !Object.hasOwn(token, 'addr'))
-            : foundChain.tokens.find(token => compareAddresses(token.addr, tokenAddress));
-
-        if (!foundToken) {
-            throw new NotSupportedTokensError();
-        }
-
-        return foundToken;
+        return chains;
     }
 
     public static async fetchInfoForTx(p: FetchEncodedParamRequest): Promise<EncodeSwapSchema> {
         const res = await Injector.httpClient.post<EncodeSwapResponse>(`${this.apiUrl}/swap`, {
-            from: p.sourceAssetInfo,
-            to: p.targetAssetInfo,
+            from: p.sourceAssetString,
+            to: p.targetAssetString,
             amount: p.amount,
             fromAddress: p.fromAddress,
-            fromContract: true,
+            fromContract: p.useProxy,
             recipient: p.receiverAddress,
             dataToContract: ''
         });
@@ -121,12 +71,12 @@ export class MesonCcrApiService {
      * @param encoded The encoded swap data
      * @param initiator If on proxy - rubic-multiproxy address, if direct - wallet address
      */
-    public static async fetchTxStatus(encoded: string, initiator: string): Promise<TxStatusData> {
-        const packed = ethers.utils.solidityPack(['bytes32', 'address'], [encoded, initiator]);
-        const swapId = ethers.utils.keccak256(packed);
-        const res = await Injector.httpClient.get<TxStatusResponse>(
-            `${this.apiUrl}/swap/${swapId}`
-        );
+    public static async fetchTxStatus(srcTxHash: string): Promise<TxStatusData> {
+        const res = await Injector.httpClient.get<TxStatusResponse>(`${this.apiUrl}/swap`, {
+            params: {
+                hash: srcTxHash
+            }
+        });
 
         if ('error' in res || res.result.expired) {
             return {
