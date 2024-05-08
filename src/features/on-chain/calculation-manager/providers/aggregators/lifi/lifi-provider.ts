@@ -8,17 +8,16 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { lifiForbiddenBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-forbidden-blockchains';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
+import {
+    LIFI_API_ON_CHAIN_PROVIDERS,
+    LIFI_DISABLED_ON_CHAIN_PROVIDERS
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
 import {
     LifiCalculationOptions,
     RequiredLifiCalculationOptions
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
@@ -26,6 +25,7 @@ import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/provi
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
+import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 
 export class LifiProvider extends AggregatorOnChainProvider {
@@ -66,18 +66,19 @@ export class LifiProvider extends AggregatorOnChainProvider {
         const toChainId = blockchainId[toToken.blockchain];
 
         const { disabledProviders } = fullOptions;
-        const lifiDisabledProviders = Object.entries(lifiProviders)
-            .filter(([_lifiProviderKey, tradeType]: [string, OnChainTradeType]) =>
+        const lifiDisabledProviders = Object.entries(LIFI_API_ON_CHAIN_PROVIDERS)
+            .filter(([_, tradeType]: [string, OnChainTradeType]) =>
                 disabledProviders.includes(tradeType)
             )
-            .map(([lifiProviderKey]) => lifiProviderKey);
+            .map(([lifiProviderKey]) => lifiProviderKey)
+            .concat(LIFI_DISABLED_ON_CHAIN_PROVIDERS);
 
         const routeOptions: RouteOptions = {
             order: 'RECOMMENDED',
             slippage: fullOptions.slippageTolerance,
             maxPriceImpact: 0.5,
             exchanges: {
-                deny: lifiDisabledProviders.concat('openocean')
+                deny: lifiDisabledProviders
             }
         };
 

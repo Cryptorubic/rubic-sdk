@@ -17,6 +17,8 @@ export const DEFAULT_BRIDGE_TYPE = {
 
     IBC: 'ibc',
 
+    LI_FUEL: 'lifuel',
+
     MAKERS_WORMHOLE: 'maker',
     MAYA_PROTOCOL: 'mayaprotocol',
     MULTICHAIN: 'multichain',
