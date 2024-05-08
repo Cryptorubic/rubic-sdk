@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -31,8 +32,8 @@ export class OrbiterUtils {
             return (
                 this.compareChainId(conf.srcChain, from.blockchain) &&
                 this.compareChainId(conf.tgtChain, to.blockchain) &&
-                conf.srcToken.toLowerCase() === from.address.toLowerCase() &&
-                conf.tgtToken.toLowerCase() === to.address.toLowerCase()
+                compareAddresses(conf.srcToken, from.address) &&
+                compareAddresses(conf.tgtToken, to.address)
             );
         });
 
@@ -74,8 +75,7 @@ export class OrbiterUtils {
     }
 
     public static getAmountWithVcCode(fromWeiAmount: string, config: OrbiterQuoteConfig): string {
-        const pattern = `{${config.vc.length}}$`;
-        const regex = new RegExp(pattern, 'gi');
+        const regex = new RegExp(`\\d{${config.vc.length}}$`, 'g');
         const total = fromWeiAmount.replace(regex, config.vc);
 
         return total;
