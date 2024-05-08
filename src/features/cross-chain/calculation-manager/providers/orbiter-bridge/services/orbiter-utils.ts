@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -32,8 +31,8 @@ export class OrbiterUtils {
             return (
                 this.compareChainId(conf.srcChain, from.blockchain) &&
                 this.compareChainId(conf.tgtChain, to.blockchain) &&
-                compareAddresses(conf.srcToken, from.address) &&
-                compareAddresses(conf.tgtToken, to.address)
+                conf.srcToken.toLowerCase() === from.address.toLowerCase() &&
+                conf.tgtToken.toLowerCase() === to.address.toLowerCase()
             );
         });
 
