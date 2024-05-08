@@ -16,7 +16,7 @@ import {
 
 export class BlastFenixTrade extends UniswapV3AlgebraAbstractTrade {
     public static get type(): OnChainTradeType {
-        return ON_CHAIN_TRADE_TYPE.FENIX_V2;
+        return ON_CHAIN_TRADE_TYPE.FENIX_V3;
     }
 
     public readonly dexContractAddress = BLAST_FENIX_ROUTER_CONTRACT_ADDRESS;

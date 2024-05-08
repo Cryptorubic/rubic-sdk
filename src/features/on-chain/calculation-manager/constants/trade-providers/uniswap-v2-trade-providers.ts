@@ -7,6 +7,7 @@ import { PangolinProvider } from 'src/features/on-chain/calculation-manager/prov
 import { SushiSwapAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
 import { AerodromeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/aerodrome/aerodrome-provider';
 import { BaseSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/base-swap/base-swap-provider';
+import { UniSwapV2BlastProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/blast/uni-swap-v2-blast/uni-swap-v2-blast-provider';
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
 import { PancakeSwapTestnetProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/pancake-swap-testnet/pancake-swap-testnet-provider';
@@ -139,5 +140,7 @@ export const UniswapV2TradeProviders = [
     // UniSwapV2ScrollSepoliaProvider
     // horizen eon
     SpookySwapHorizenEonProvider,
-    AscentHorizenEonProvider
+    AscentHorizenEonProvider,
+    // Blast
+    UniSwapV2BlastProvider
 ] as const;
