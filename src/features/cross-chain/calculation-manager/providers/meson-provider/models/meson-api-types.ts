@@ -1,8 +1,16 @@
-type ErrorResponse<T> = {
-    error: T;
+export type MesonErrorRes<T> = {
+    error: {
+        error: {
+            code: number;
+            data: {
+                swapData: T;
+            };
+            message: string;
+        };
+    };
 };
 
-type SuccessResponse<T> = {
+export type MesonSuccessRes<T> = {
     result: T;
 };
 
@@ -58,10 +66,6 @@ export interface FetchEncodedParamRequest {
     useProxy: boolean;
 }
 
-export type EncodeSwapResponse =
-    | SuccessResponse<EncodeSwapSchema>
-    | ErrorResponse<EncodeSwapSchema>;
-
 export interface EncodeSwapSchema {
     encoded: string;
     fromAddress: string;
@@ -77,8 +81,6 @@ export interface EncodeSwapSchema {
     initiator: string;
 }
 
-export type TxFeeResponse = SuccessResponse<TxFeeSchema> | ErrorResponse<TxFeeSchema>;
-
 export interface TxFeeSchema {
     serviceFee: string;
     lpFee: string;
@@ -86,8 +88,6 @@ export interface TxFeeSchema {
     totalFee: string;
     converted?: { amount: string; token: string };
 }
-
-export type TxStatusResponse = SuccessResponse<TxStatusSchema> | ErrorResponse<TxStatusSchema>;
 
 export interface TxStatusSchema {
     expired?: boolean;
