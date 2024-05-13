@@ -165,14 +165,14 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await SymbiosisCrossChainTrade.getGasData(
-                          from,
-                          to,
-                          swapParams,
-                          feeInfo,
-                          approveTo,
-                          options.providerAddress,
-                          options.receiverAddress
-                      )
+                        from,
+                        to,
+                        swapParams,
+                        feeInfo,
+                        approveTo,
+                        options.providerAddress,
+                        options.receiverAddress
+                    )
                     : null;
 
             return {
@@ -213,7 +213,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private getPromotions(rewards: SymbiosisTokenAmount[]): string[] {
-        return rewards.map(promo => promo.symbol!);
+        return rewards.map(promo => Web3Pure.fromWei(promo.amount, promo.decimals).toFixed(1));
     }
 
     protected async getFeeInfo(
@@ -240,12 +240,12 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         const token = fromRouting.at(-1)!;
         return fromRouting.length !== 1
             ? {
-                  address: token.address,
-                  decimals: token.decimals,
-                  name: token.name!,
-                  blockchain: from.blockchain,
-                  symbol: token.symbol!
-              }
+                address: token.address,
+                decimals: token.decimals,
+                name: token.name!,
+                blockchain: from.blockchain,
+                symbol: token.symbol!
+            }
             : undefined;
     }
 
@@ -262,18 +262,18 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
         const fromTokenAmount = transitFrom
             ? await RubicTokenAmount.createToken({
-                  blockchain: fromToken.blockchain,
-                  address: transitFrom.address,
-                  weiAmount: new BigNumber(0)
-              })
+                blockchain: fromToken.blockchain,
+                address: transitFrom.address,
+                weiAmount: new BigNumber(0)
+            })
             : fromToken;
 
         const toTokenAmount = transitTo
             ? await RubicTokenAmount.createToken({
-                  blockchain: toToken.blockchain,
-                  address: transitTo.address,
-                  weiAmount: new BigNumber(0)
-              })
+                blockchain: toToken.blockchain,
+                address: transitTo.address,
+                weiAmount: new BigNumber(0)
+            })
             : toToken;
 
         const routePath: RubicStep[] = [];
