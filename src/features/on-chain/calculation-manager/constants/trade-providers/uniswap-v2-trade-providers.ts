@@ -52,6 +52,7 @@ import { SushiSwapTelosProvider } from 'src/features/on-chain/calculation-manage
 import { ZappyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/zappy/trisolaris-aurora-provider';
 import { AstroSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/velas/astro-swap/astro-swap-provider';
 import { WagyuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/velas/wagyu-swap/wagyu-swap-provider';
+import { EddyFinanceProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/eddy-finance/eddy-finance-provider';
 import { MuteSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/mute-swap/mute-swap-provider';
 
 export const UniswapV2TradeProviders = [
@@ -139,5 +140,7 @@ export const UniswapV2TradeProviders = [
     // UniSwapV2ScrollSepoliaProvider
     // horizen eon
     SpookySwapHorizenEonProvider,
-    AscentHorizenEonProvider
+    AscentHorizenEonProvider,
+    // ZetaChain
+    EddyFinanceProvider
 ] as const;

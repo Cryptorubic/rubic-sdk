@@ -258,7 +258,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         throw parseError(regularMethodResult.error);
     }
 
-    private getSwapParametersByMethod(
+    protected getSwapParametersByMethod(
         method: string,
         options: SwapTransactionOptions
     ): Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']> {
