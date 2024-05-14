@@ -31,7 +31,8 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
 import { XyCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-trade';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { BridgeType, BRIDGE_TYPE } from '../common/models/bridge-type';
+
+import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
 
 export class XyCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
@@ -125,8 +126,9 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 }),
                 receiver: receiverAddress
             };
-            const bridgeType = bridgeDescription.provider === "yBridge"
-            ? BRIDGE_TYPE.YPOOL : BRIDGE_TYPE.XY as BridgeType
+            const bridgeType = (
+                bridgeDescription.provider === 'yBridge' ? BRIDGE_TYPE.YPOOL : BRIDGE_TYPE.XY
+            ) as BridgeType;
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await XyCrossChainTrade.getGasData(
@@ -149,7 +151,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance,
                         feeInfo,
                         onChainTrade: null,
-                        bridgeType:bridgeType
+                        bridgeType: bridgeType
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, to, {
