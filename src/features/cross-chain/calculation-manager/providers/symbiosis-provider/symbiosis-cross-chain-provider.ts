@@ -213,7 +213,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private getPromotions(rewards: SymbiosisTokenAmount[]): string[] {
-        return rewards.map(promo => promo.symbol!);
+        return rewards.map(
+            promo => `${promo.symbol}_${Web3Pure.fromWei(promo.amount, promo.decimals).toFixed()}`
+        );
     }
 
     protected async getFeeInfo(
