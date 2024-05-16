@@ -43,7 +43,9 @@ export const DEFAULT_BRIDGE_TYPE = {
 
     WORMHOLE: 'wormhole',
 
-    YPOOL: 'ypool'
+    YPOOL: 'ypool',
+
+    ZETACHAIN: 'zetachain'
 } as const;
 
 export type DefaultBridgeType = (typeof DEFAULT_BRIDGE_TYPE)[keyof typeof DEFAULT_BRIDGE_TYPE];
