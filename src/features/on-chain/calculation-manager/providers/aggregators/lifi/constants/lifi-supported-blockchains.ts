@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const lifiCrossChainSupportedBlockchains = [
+export const lifiOnChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.POLYGON,
@@ -19,4 +19,4 @@ export const lifiCrossChainSupportedBlockchains = [
     // BLOCKCHAIN_NAME.MODE
 ] as const;
 
-export type LifiCrossChainSupportedBlockchain = (typeof lifiCrossChainSupportedBlockchains)[number];
+export type LifiOnChainSupportedBlockchain = (typeof lifiOnChainSupportedBlockchains)[number];

@@ -136,7 +136,7 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
         super();
     }
 
-    private async getOrCreateRouterTokensAndLiquidityPools(): Promise<{
+    protected async getOrCreateRouterTokensAndLiquidityPools(): Promise<{
         routerTokens: Token[];
         routerLiquidityPools: LiquidityPool[];
     }> {
