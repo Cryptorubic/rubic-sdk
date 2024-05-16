@@ -101,9 +101,9 @@ export class MesonCcrApiService {
                 };
             }
 
-            if (res.result.EXECUTED) {
+            if (res.result.RELEASED) {
                 return {
-                    hash: res.result.EXECUTED,
+                    hash: res.result.RELEASED,
                     status: TX_STATUS.SUCCESS
                 };
             }
