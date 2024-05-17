@@ -14,7 +14,10 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
@@ -146,6 +149,10 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     protected getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
         let amountIn = this.fromWithoutFee.stringWeiAmount;
         let amountOut = this.toTokenAmountMin.stringWeiAmount;
+
+        if (this.type === ON_CHAIN_TRADE_TYPE.EDDY_FINANCE && !this.from.isNative) {
+            amountIn = this.fromWithoutFee.weiAmount.minus(1).toFixed();
+        }
 
         if (this.exact === 'output') {
             amountIn = this.fromWithoutFee.weiAmountPlusSlippage(this.slippageTolerance).toFixed(0);
