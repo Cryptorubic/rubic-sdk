@@ -46,8 +46,10 @@ export class MesonCrossChainProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
+            const fromWith6Decimals = this.getFromWith6Decimals(from);
+
             const { max, min, mesonFee, sourceAssetString, targetAssetString } =
-                await this.fetchTradeInfo(from, toToken);
+                await this.fetchTradeInfo(fromWith6Decimals, toToken);
 
             if (from.tokenAmount.lt(min)) {
                 throw new MinAmountError(min, from.symbol);
@@ -64,7 +66,7 @@ export class MesonCrossChainProvider extends CrossChainProvider {
             );
 
             const fromWithoutFee = getFromWithoutFee(
-                from,
+                fromWith6Decimals,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
@@ -183,6 +185,19 @@ export class MesonCrossChainProvider extends CrossChainProvider {
         );
 
         return ids;
+    }
+
+    private getFromWith6Decimals(
+        from: PriceTokenAmount<EvmBlockchainName>
+    ): PriceTokenAmount<EvmBlockchainName> {
+        const stringAmount = from.tokenAmount.toFixed();
+        const [, decimals] = stringAmount.split('.');
+        const amount =
+            decimals && decimals.length > 6 ? from.tokenAmount.decimalPlaces(6) : from.tokenAmount;
+        return new PriceTokenAmount({
+            ...from.asStruct,
+            tokenAmount: amount
+        });
     }
 
     protected async getRoutePath(
