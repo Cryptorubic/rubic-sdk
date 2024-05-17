@@ -5,7 +5,11 @@ import { Cache } from 'src/common/utils/decorators';
 import { parseError } from 'src/common/utils/errors';
 import { tryExecuteAsync } from 'src/common/utils/functions';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
@@ -150,7 +154,11 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         let amountIn = this.fromWithoutFee.stringWeiAmount;
         let amountOut = this.toTokenAmountMin.stringWeiAmount;
 
-        if (this.type === ON_CHAIN_TRADE_TYPE.EDDY_FINANCE && !this.from.isNative) {
+        if (
+            this.from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
+            this.type === ON_CHAIN_TRADE_TYPE.EDDY_FINANCE &&
+            !this.from.isNative
+        ) {
             amountIn = this.fromWithoutFee.weiAmount.minus(1).toFixed();
         }
 
