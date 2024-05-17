@@ -192,8 +192,11 @@ export class MesonCrossChainProvider extends CrossChainProvider {
     ): PriceTokenAmount<EvmBlockchainName> {
         const stringAmount = from.tokenAmount.toFixed();
         const [, decimals] = stringAmount.split('.');
-        const amount =
-            decimals && decimals.length > 6 ? from.tokenAmount.decimalPlaces(6) : from.tokenAmount;
+        if (!decimals || decimals.length <= 6) {
+            return from;
+        }
+        const amount = new BigNumber(from.tokenAmount.toFixed(6));
+
         return new PriceTokenAmount({
             ...from.asStruct,
             tokenAmount: amount
