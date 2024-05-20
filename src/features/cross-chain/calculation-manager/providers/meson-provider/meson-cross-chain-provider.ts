@@ -200,7 +200,7 @@ export class MesonCrossChainProvider extends CrossChainProvider {
         if (!decimals || decimals.length <= 6) {
             return from;
         }
-        const amount = new BigNumber(from.tokenAmount.toFixed(6));
+        const amount = from.tokenAmount.decimalPlaces(6, BigNumber.ROUND_DOWN);
 
         return new PriceTokenAmount({
             ...from.asStruct,
