@@ -3,7 +3,8 @@ import {
     MaxAmountError,
     MinAmountError,
     NotSupportedBlockchain,
-    NotSupportedTokensError
+    NotSupportedTokensError,
+    RubicSdkError
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -46,6 +47,10 @@ export class MesonCrossChainProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
+            if (!useProxy) {
+                throw new RubicSdkError('Meson only supports proxy swaps!');
+            }
+
             const fromWith6Decimals = this.getFromWith6Decimals(from);
 
             const { max, min, mesonFee, sourceAssetString, targetAssetString } =
