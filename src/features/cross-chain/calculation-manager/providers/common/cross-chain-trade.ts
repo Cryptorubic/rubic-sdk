@@ -326,6 +326,14 @@ export abstract class CrossChainTrade<T = unknown> {
         }, 15_000);
 
         if (!skipAmountChangeCheck) {
+            if (this.type === 'lifi') {
+                console.log({
+                    to: this.to,
+                    slippage: this.getTradeInfo().slippage,
+                    amount,
+                    to__string_wei_amount: this.to.stringWeiAmount
+                });
+            }
             this.checkAmountChange(amount, this.to.stringWeiAmount);
         }
         return config;

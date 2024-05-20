@@ -39,6 +39,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         toToken: PriceTokenAmount<EvmBlockchainName>,
         route: Route,
         feeInfo: FeeInfo,
+        slippage: number,
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
@@ -56,7 +57,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     to: undefined
                 },
                 bridgeType: BRIDGE_TYPE.LIFI,
-                slippage: 0
+                slippage
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             []
