@@ -1,9 +1,11 @@
-import { RubicSdkError } from 'src/common/errors';
+import { NotWhitelistedProviderError, RubicSdkError } from 'src/common/errors';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
@@ -95,6 +97,44 @@ export class EddyFinanceTrade extends UniswapV2AbstractTrade {
             method,
             this.getCallParameters(),
             { value }
+        ];
+    }
+
+    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
+        const directTransactionConfig = await this.encodeDirect({
+            ...options,
+            fromAddress: rubicProxyContractAddress[this.from.blockchain].router,
+            supportFee: false,
+            receiverAddress:
+                options.receiverAddress || rubicProxyContractAddress[this.from.blockchain].router
+        });
+
+        const availableDexs = (
+            await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
+        ).map(address => address.toLowerCase());
+
+        const routerAddress = directTransactionConfig.to;
+        const method = directTransactionConfig.data.slice(0, 10);
+
+        if (!availableDexs.includes(routerAddress.toLowerCase())) {
+            throw new NotWhitelistedProviderError(routerAddress, undefined, 'dex');
+        }
+        await ProxyCrossChainEvmTrade.checkDexWhiteList(
+            this.from.blockchain,
+            routerAddress,
+            method
+        );
+
+        return [
+            [
+                routerAddress,
+                routerAddress,
+                this.from.address,
+                this.to.address,
+                this.from.stringWeiAmount,
+                directTransactionConfig.data,
+                true
+            ]
         ];
     }
 }
