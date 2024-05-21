@@ -56,21 +56,6 @@ export class MesonCrossChainProvider extends CrossChainProvider {
             const { max, min, mesonFee, sourceAssetString, targetAssetString } =
                 await this.fetchTradeInfo(fromWith6Decimals, toToken);
 
-            if (from.tokenAmount.lt(min)) {
-                return {
-                    trade: null,
-                    error: new MinAmountError(min, from.symbol),
-                    tradeType: this.type
-                };
-            }
-            if (from.tokenAmount.gt(max)) {
-                return {
-                    trade: null,
-                    error: new MaxAmountError(max, from.symbol),
-                    tradeType: this.type
-                };
-            }
-
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
@@ -115,6 +100,21 @@ export class MesonCrossChainProvider extends CrossChainProvider {
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
             });
+
+            if (from.tokenAmount.lt(min)) {
+                return {
+                    trade,
+                    error: new MinAmountError(min, from.symbol),
+                    tradeType: this.type
+                };
+            }
+            if (from.tokenAmount.gt(max)) {
+                return {
+                    trade,
+                    error: new MaxAmountError(max, from.symbol),
+                    tradeType: this.type
+                };
+            }
 
             return { trade, tradeType: this.type };
         } catch (err) {
