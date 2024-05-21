@@ -52,17 +52,19 @@ export class MesonCcrApiService {
         return chains;
     }
 
-    public static async fetchInfoForTx(p: FetchEncodedParamRequest): Promise<EncodeSwapSchema> {
+    public static async fetchInfoForTx(
+        params: FetchEncodedParamRequest
+    ): Promise<EncodeSwapSchema> {
         try {
             const res = await Injector.httpClient.post<MesonSuccessRes<EncodeSwapSchema>>(
                 `${this.apiUrl}/swap`,
                 {
-                    from: p.sourceAssetString,
-                    to: p.targetAssetString,
-                    amount: p.amount,
-                    fromAddress: p.fromAddress,
-                    fromContract: p.useProxy,
-                    recipient: p.receiverAddress
+                    from: params.sourceAssetString,
+                    to: params.targetAssetString,
+                    amount: params.amount,
+                    fromAddress: params.fromAddress,
+                    fromContract: params.useProxy,
+                    recipient: params.receiverAddress
                 }
             );
 
@@ -78,11 +80,6 @@ export class MesonCcrApiService {
         }
     }
 
-    /**
-     *
-     * @param encoded The encoded swap data
-     * @param initiator If on proxy - rubic-multiproxy address, if direct - wallet address
-     */
     public static async fetchTxStatus(srcTxHash: string): Promise<TxStatusData> {
         try {
             const res = await Injector.httpClient.get<MesonSuccessRes<TxStatusSchema>>(

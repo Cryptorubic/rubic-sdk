@@ -57,10 +57,18 @@ export class MesonCrossChainProvider extends CrossChainProvider {
                 await this.fetchTradeInfo(fromWith6Decimals, toToken);
 
             if (from.tokenAmount.lt(min)) {
-                throw new MinAmountError(min, from.symbol);
+                return {
+                    trade: null,
+                    error: new MinAmountError(min, from.symbol),
+                    tradeType: this.type
+                };
             }
             if (from.tokenAmount.gt(max)) {
-                throw new MaxAmountError(max, from.symbol);
+                return {
+                    trade: null,
+                    error: new MaxAmountError(max, from.symbol),
+                    tradeType: this.type
+                };
             }
 
             const feeInfo = await this.getFeeInfo(
@@ -162,7 +170,7 @@ export class MesonCrossChainProvider extends CrossChainProvider {
 
         const foundToken = token.isNative
             ? foundChain.tokens.find(apiToken => !Object.hasOwn(apiToken, 'addr'))
-            : foundChain.tokens.find(apiToken => compareAddresses(apiToken.addr, token.address));
+            : foundChain.tokens.find(apiToken => compareAddresses(apiToken.addr!, token.address));
 
         if (!foundToken) {
             throw new NotSupportedTokensError();
@@ -178,20 +186,20 @@ export class MesonCrossChainProvider extends CrossChainProvider {
     ): SrcDstChainsIds {
         const sourceChainIdHex = Web3.utils.toHex(blockchainId[sourceToken.blockchain]);
         const targetChainIdHex = Web3.utils.toHex(blockchainId[targetToken.blockchain]);
+        const ids = ['', ''] as SrcDstChainsIds;
 
-        const ids = apiChains.reduce(
-            (acc, chain) => {
-                if (compareAddresses(chain.chainId, sourceChainIdHex)) acc[0] = chain.id;
-                if (compareAddresses(chain.chainId, targetChainIdHex)) acc[1] = chain.id;
-
-                return acc;
-            },
-            ['', ''] satisfies SrcDstChainsIds
-        );
+        for (const chain of apiChains) {
+            if (ids[0] && ids[1]) break;
+            if (compareAddresses(chain.chainId, sourceChainIdHex)) ids[0] = chain.id;
+            if (compareAddresses(chain.chainId, targetChainIdHex)) ids[1] = chain.id;
+        }
 
         return ids;
     }
 
+    /**
+     * Meson inputs only value with 6 or less decimals in swap request
+     */
     private getFromWith6Decimals(
         from: PriceTokenAmount<EvmBlockchainName>
     ): PriceTokenAmount<EvmBlockchainName> {

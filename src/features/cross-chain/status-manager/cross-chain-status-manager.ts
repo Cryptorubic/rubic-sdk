@@ -705,8 +705,6 @@ export class CrossChainStatusManager {
     }
 
     private async getMesonDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await MesonCcrApiService.fetchTxStatus(data.srcTxHash);
-
-        return txStatusData;
+        return MesonCcrApiService.fetchTxStatus(data.srcTxHash);
     }
 }

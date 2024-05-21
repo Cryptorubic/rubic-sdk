@@ -4,7 +4,6 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { ContractParams } from 'src/features/common/models/contract-params';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
@@ -170,16 +169,14 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
         receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const rubicMultiProxyAddress = rubicProxyContractAddress[this.fromBlockchain].router;
-        const fromAddress = this.isProxyTrade
-            ? rubicMultiProxyAddress
-            : this.walletAddress || FAKE_WALLET_ADDRESS;
+        const fromAddress = this.isProxyTrade ? rubicMultiProxyAddress : this.walletAddress;
 
         const { encoded, initiator } = await MesonCcrApiService.fetchInfoForTx({
             sourceAssetString: this.sourceAssetString,
             targetAssetString: this.targetAssetString,
             amount: this.from.tokenAmount.toFixed(),
             fromAddress,
-            receiverAddress: receiverAddress || this.walletAddress || FAKE_WALLET_ADDRESS,
+            receiverAddress: receiverAddress || this.walletAddress,
             useProxy: this.isProxyTrade
         });
         const postingValue = ethers.utils.solidityPack(['address', 'uint40'], [initiator, 1]);
