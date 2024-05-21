@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.20.0-alpha-eddy-finance.4",
+    "version": "5.21.0-alpha-eddy-finance.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
