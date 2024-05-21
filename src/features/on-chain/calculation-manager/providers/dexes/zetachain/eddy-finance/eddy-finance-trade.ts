@@ -2,6 +2,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -36,7 +37,10 @@ export class EddyFinanceTrade extends UniswapV2AbstractTrade {
         options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
         await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
+        checkUnsupportedReceiverAddress(
+            options?.receiverAddress,
+            options?.fromAddress || this.walletAddress
+        );
 
         if (options.supportFee === undefined) {
             const needApprove = await this.needApprove(options.fromAddress);
