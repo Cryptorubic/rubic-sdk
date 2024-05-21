@@ -63,6 +63,7 @@ import {
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
+import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
@@ -91,7 +92,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE]: this.getOrbiterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LAYERZERO]: this.getLayerZeroDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.ARCHON_BRIDGE]: this.getLayerZeroDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.ARCHON_BRIDGE]: this.getLayerZeroDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.MESON]: this.getMesonDstSwapStatus
     };
 
     /**
@@ -700,5 +702,9 @@ export class CrossChainStatusManager {
         const txStatusData = await OrbiterApiService.getTxStatus(data.srcTxHash);
 
         return txStatusData;
+    }
+
+    private async getMesonDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return MesonCcrApiService.fetchTxStatus(data.srcTxHash);
     }
 }
