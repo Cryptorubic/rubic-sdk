@@ -16,7 +16,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     PULSE_CHAIN_BRIDGE: 'pulsechain_bridge',
     ORBITER_BRIDGE: 'orbiter_bridge',
     LAYERZERO: 'layerzero',
-    ARCHON_BRIDGE: 'archon_bridge'
+    ARCHON_BRIDGE: 'archon_bridge',
+    MESON: 'meson'
 } as const;
 
 export type CrossChainTradeType =
