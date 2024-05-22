@@ -9,6 +9,7 @@ import { AerodromeProvider } from 'src/features/on-chain/calculation-manager/pro
 import { BaseSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/base-swap/base-swap-provider';
 import { UniSwapV2BlastProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/blast/uni-swap-v2-blast/uni-swap-v2-blast-provider';
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
+import { EddyFinanceBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/eddy-finance-bsc/eddy-finance-bsc-provider';
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
 import { PancakeSwapTestnetProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/pancake-swap-testnet/pancake-swap-testnet-provider';
 import { TraderJoeBsctProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/trader-joe-bsct/trader-joe-bsct-provider';
@@ -63,6 +64,7 @@ export const UniswapV2TradeProviders = [
     VerseProvider,
     // bsc
     SushiSwapBscProvider,
+    EddyFinanceBscProvider,
     // polygon
     QuickSwapProvider,
     SushiSwapPolygonProvider,
