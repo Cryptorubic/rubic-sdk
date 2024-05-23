@@ -9,7 +9,6 @@ import { AerodromeProvider } from 'src/features/on-chain/calculation-manager/pro
 import { BaseSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/base-swap/base-swap-provider';
 import { UniSwapV2BlastProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/blast/uni-swap-v2-blast/uni-swap-v2-blast-provider';
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
-import { EddyFinanceBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/eddy-finance-bsc/eddy-finance-bsc-provider';
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
 import { PancakeSwapTestnetProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/pancake-swap-testnet/pancake-swap-testnet-provider';
 import { TraderJoeBsctProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/trader-joe-bsct/trader-joe-bsct-provider';
@@ -39,6 +38,7 @@ import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/pr
 import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
 import { ClaimSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/klaytn/claim-swap/claim-swap-provider';
 import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
+import { EddyFinanceModeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mode/eddy-finance-mode/eddy-finance-mode-provider';
 import { SolarbeamProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/solarbeam-provider';
 import { SushiSwapMoonriverProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
 import { QuickSwapMumbaiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mumbai/quick-swap-mumbai/quick-swap-mumbai-provider';
@@ -64,7 +64,6 @@ export const UniswapV2TradeProviders = [
     VerseProvider,
     // bsc
     SushiSwapBscProvider,
-    EddyFinanceBscProvider,
     // polygon
     QuickSwapProvider,
     SushiSwapPolygonProvider,
@@ -147,5 +146,7 @@ export const UniswapV2TradeProviders = [
     // Blast
     UniSwapV2BlastProvider,
     // ZetaChain
-    EddyFinanceProvider
+    EddyFinanceProvider,
+    // Mode
+    EddyFinanceModeProvider
 ] as const;
