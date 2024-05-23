@@ -20,7 +20,8 @@ export const getCrossChainGasData: (
         const tx = await trade.encode({
             receiverAddress: receiverAddress,
             fromAddress: walletAddress,
-            useCacheData: true
+            useCacheData: true,
+            skipAmountCheck: true
         });
 
         const [gasLimit, gasDetails] = await Promise.all([
