@@ -3,6 +3,7 @@ import { Estimate } from '@lifi/types/dist/step';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -277,6 +278,9 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
+    @Cache({
+        maxAge: 15_000
+    })
     private async getResponseFromApiToTransactionRequest(
         step: unknown
     ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {

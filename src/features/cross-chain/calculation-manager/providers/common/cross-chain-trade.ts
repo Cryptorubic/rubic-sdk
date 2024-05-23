@@ -325,10 +325,12 @@ export abstract class CrossChainTrade<T = unknown> {
             this.lastTransactionConfig = null;
         }, 15_000);
         if (this.type === 'lifi') {
+            console.log('----------------------------------');
             console.info('LIFI AMOUNTS - ', {
                 prev_amount: this.to.stringWeiAmount,
                 new_amount: amount
             });
+            console.log('----------------------------------');
         }
 
         if (!skipAmountChangeCheck) {
