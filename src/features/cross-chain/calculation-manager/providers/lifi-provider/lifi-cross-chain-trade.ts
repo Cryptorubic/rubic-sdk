@@ -107,6 +107,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
+    protected override get amountToCheck(): string {
+        return Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals);
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -277,27 +281,6 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             }
             throw err;
         }
-    }
-
-    protected override async setTransactionConfig(
-        skipAmountChangeCheck: boolean,
-        useCacheData: boolean,
-        receiverAddress?: string
-    ): Promise<EvmEncodeConfig> {
-        if (this.lastTransactionConfig && useCacheData) {
-            return this.lastTransactionConfig;
-        }
-
-        const { config, amount } = await this.getTransactionConfigAndAmount(receiverAddress);
-        this.lastTransactionConfig = config;
-        setTimeout(() => {
-            this.lastTransactionConfig = null;
-        }, 15_000);
-
-        if (!skipAmountChangeCheck) {
-            this.checkAmountChange(amount, Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals));
-        }
-        return config;
     }
 
     @Cache({
