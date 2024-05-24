@@ -7,6 +7,7 @@ import { Cache } from 'src/common/utils/decorators';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -39,6 +40,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         toToken: PriceTokenAmount<EvmBlockchainName>,
         route: Route,
         feeInfo: FeeInfo,
+        slippage: number,
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
@@ -56,7 +58,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     to: undefined
                 },
                 bridgeType: BRIDGE_TYPE.LIFI,
-                slippage: 0
+                slippage
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             []
@@ -103,6 +105,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     protected get methodName(): string {
         return 'startBridgeTokensViaGenericCrossChain';
+    }
+
+    protected override get amountToCheck(): string {
+        return Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals);
     }
 
     constructor(
@@ -267,7 +273,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
             return {
                 config: swapResponse.transactionRequest,
-                amount: swapResponse.estimate.toAmount
+                amount: swapResponse.estimate.toAmountMin
             };
         } catch (err) {
             if ('statusCode' in err && 'message' in err) {
