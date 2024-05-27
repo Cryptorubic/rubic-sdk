@@ -37,11 +37,9 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-
+import { LifiApiService } from './services/lifi-api-service'
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
-
-    private readonly lifi = new LiFi(getLifiConfig());
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
@@ -103,7 +101,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ...(toAddress && { toAddress })
         };
 
-        const result = await this.lifi.getRoutes(routesRequest);
+        const result = await LifiApiService.getRoutes(routesRequest);
+
         const { routes } = result;
 
         const bestRoute = routes.find(
@@ -144,13 +143,13 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const gasData =
             options.gasCalculation === 'enabled'
                 ? await LifiCrossChainTrade.getGasData(
-                      from,
-                      to,
-                      bestRoute,
-                      feeInfo,
-                      options.providerAddress,
-                      options.receiverAddress
-                  )
+                    from,
+                    to,
+                    bestRoute,
+                    feeInfo,
+                    options.providerAddress,
+                    options.receiverAddress
+                )
                 : null;
 
         const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute.steps);
