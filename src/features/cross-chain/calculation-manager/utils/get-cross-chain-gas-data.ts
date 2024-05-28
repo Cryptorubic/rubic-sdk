@@ -19,7 +19,9 @@ export const getCrossChainGasData: (
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const tx = await trade.encode({
             receiverAddress: receiverAddress,
-            fromAddress: walletAddress
+            fromAddress: walletAddress,
+            useCacheData: true,
+            skipAmountCheck: true
         });
 
         const [gasLimit, gasDetails] = await Promise.all([

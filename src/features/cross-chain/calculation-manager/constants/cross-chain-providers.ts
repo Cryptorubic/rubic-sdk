@@ -12,6 +12,7 @@ import { SymbiosisCrossChainProvider } from 'src/features/cross-chain/calculatio
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 
 import { LayerZeroBridgeProvider } from '../providers/layerzero-bridge/layerzero-bridge-provider';
+import { MesonCrossChainProvider } from '../providers/meson-provider/meson-cross-chain-provider';
 import { OrbiterBridgeProvider } from '../providers/orbiter-bridge/orbiter-bridge-provider';
 import { RangoCrossChainProvider } from '../providers/rango-provider/rango-cross-chain-provider';
 import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
@@ -27,7 +28,8 @@ const proxyProviders = [
     RangoCrossChainProvider,
     PulseChainCrossChainProvider,
     OrbiterBridgeProvider,
-    ArchonBridgeProvider
+    ArchonBridgeProvider,
+    MesonCrossChainProvider
 ] as const;
 
 const nonProxyProviders = [

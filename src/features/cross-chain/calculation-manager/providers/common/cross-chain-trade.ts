@@ -116,6 +116,10 @@ export abstract class CrossChainTrade<T = unknown> {
         return hasFixedFee || hasPlatformFee;
     }
 
+    protected get amountToCheck(): string {
+        return this.to.stringWeiAmount;
+    }
+
     protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
@@ -326,7 +330,7 @@ export abstract class CrossChainTrade<T = unknown> {
         }, 15_000);
 
         if (!skipAmountChangeCheck) {
-            this.checkAmountChange(amount, this.to.stringWeiAmount);
+            this.checkAmountChange(amount, this.amountToCheck);
         }
         return config;
     }

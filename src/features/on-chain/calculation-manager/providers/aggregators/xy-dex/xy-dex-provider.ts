@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -29,6 +30,8 @@ import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/provide
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
+import { OnChainTradeError } from '../../../models/on-chain-trade-error';
+
 export class XyDexProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions = evmProviderDefaultOptions;
 
@@ -42,7 +45,10 @@ export class XyDexProvider extends AggregatorOnChainProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
-    ): Promise<XyDexTrade> {
+    ): Promise<XyDexTrade | OnChainTradeError> {
+        if (!this.isSupportedBlockchain(from.blockchain)) {
+            throw new RubicSdkError('Blockchain is not supported');
+        }
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway
