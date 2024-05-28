@@ -125,7 +125,6 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.SCROLL_SEPOLIA]: 'scroll-sepolia-testnet',
     [BLOCKCHAIN_NAME.ARTHERA]: 'arthera-testnet',
     [BLOCKCHAIN_NAME.ZETACHAIN]: 'zetachain',
-    [BLOCKCHAIN_NAME.TAIKO]: 'taiko-jolnir',
     [BLOCKCHAIN_NAME.SEPOLIA]: 'sepolia',
     [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta-pacific',
     [BLOCKCHAIN_NAME.SCROLL]: 'scroll',
@@ -140,7 +139,8 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.MODE]: 'mode',
     [BLOCKCHAIN_NAME.ZK_FAIR]: 'zkfair',
     [BLOCKCHAIN_NAME.ZK_LINK]: 'zklink',
-    [BLOCKCHAIN_NAME.XLAYER]: 'xlayer'
+    [BLOCKCHAIN_NAME.XLAYER]: 'xlayer',
+    [BLOCKCHAIN_NAME.TAIKO]: 'taiko'
 } as const;
 
 export const TO_BACKEND_BLOCKCHAINS: Record<BlockchainName, BackendBlockchain> = {
