@@ -13,9 +13,9 @@ export class IzumiTaikoProvider extends IzumiProvider {
         liquidityManagerAddress: '0x33531bDBFE34fa6Fd5963D0423f7699775AacaaF',
         routingTokenAddresses: [
             wrappedNativeTokensList[BLOCKCHAIN_NAME.TAIKO]!.address, // WETH
-            '' // USDC.BSC
+            '0x07d83526730c7438048D55A4fc0b850e2aaB6f0b' // USDC
         ],
         multicallAddress: '0x7a524c7e82874226F0b51aade60A1BE4D430Cf0F',
-        supportedFees: []
+        supportedFees: [10000, 3000, 500]
     };
 }
