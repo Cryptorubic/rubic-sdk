@@ -1,6 +1,16 @@
-import { Action, AllowDenyPrefer, Insurance, LifiStep, Token } from "@lifi/sdk";
+import { LifiToken } from './lifi-cross-chain-token';
+import { Action, LifiStep } from './lifi-fee-cost';
 
-export declare const Orders: readonly ["RECOMMENDED", "FASTEST", "CHEAPEST", "SAFEST"];
+export interface AllowDenyPrefer {
+    allow?: string[];
+    deny?: string[];
+    prefer?: string[];
+}
+export interface Insurance {
+    state: 'INSURED' | 'INSURABLE' | 'NOT_INSURABLE';
+    feeAmountUsd: string;
+}
+export declare const Orders: readonly ['RECOMMENDED', 'FASTEST', 'CHEAPEST', 'SAFEST'];
 export type Order = (typeof Orders)[number];
 export interface RoutesRequest {
     fromChainId: number;
@@ -34,13 +44,13 @@ export interface Route {
     fromChainId: number;
     fromAmountUSD: string;
     fromAmount: string;
-    fromToken: Token;
+    fromToken: LifiToken;
     fromAddress?: string;
     toChainId: number;
     toAmountUSD: string;
     toAmount: string;
     toAmountMin: string;
-    toToken: Token;
+    toToken: LifiToken;
     toAddress?: string;
     gasCostUSD?: string;
     containsSwitchChain?: boolean;

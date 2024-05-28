@@ -1,6 +1,3 @@
-
-import { Route } from '@lifi/sdk';
-import { Estimate } from '@lifi/types/dist/step';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -29,6 +26,9 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
+
+import { Estimate } from './models/lifi-fee-cost';
+import { Route } from './models/lifi-route';
 import { LifiApiService } from './services/lifi-api-service';
 
 /**
@@ -272,9 +272,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     step.action.toToken.symbol,
                     step.action.fromAmount,
                     step.action.fromAddress
-                )
-            // await this.getResponseFromApiToTransactionRequest(step);
-
+                );
             return {
                 config: swapResponse.transactionRequest,
                 amount: swapResponse.estimate.toAmount
@@ -297,7 +295,6 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     //         ...(step as {})
     //     });
     // }
-
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }

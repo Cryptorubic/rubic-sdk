@@ -1,13 +1,16 @@
 import { Injector } from 'src/core/injector/injector';
+import {
+    Route,
+    RoutesRequest,
+    RoutesResponse
+} from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-route';
 
-import { Estimate } from '../models/lifi-fee-cost';
-import { RoutesRequest, RoutesResponse } from '../models/lifi-route';
-import { LifiTransactionRequest } from '../models/lifi-transaction-request';
+import { LifiOnChainTransactionRequest } from '../models/lifi-on-chain-transaction-request';
 
-export class LifiApiService {
+export class LifiOnChainApiService {
     private static LIFI_API_ENDPOINT = 'https://li.quest/v1';
 
-    public static LIFI_API_KEY =
+    private static LIFI_API_KEY =
         '0a1eec2c-b1bd-4dc1-81cf-c988f099c929.f5950d26-5955-4e21-9db2-77ad984ea575';
 
     public static async getQuote(
@@ -17,10 +20,10 @@ export class LifiApiService {
         toToken: string,
         fromAmount: string,
         fromAddress: string
-    ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {
+    ): Promise<{ transactionRequest: LifiOnChainTransactionRequest; estimate: Route }> {
         const result = await Injector.httpClient.get<{
-            transactionRequest: LifiTransactionRequest;
-            estimate: Estimate;
+            transactionRequest: LifiOnChainTransactionRequest;
+            estimate: Route;
         }>(`${this.LIFI_API_ENDPOINT}/quote`, {
             params: {
                 fromChain,

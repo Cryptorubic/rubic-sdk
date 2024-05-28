@@ -1,4 +1,3 @@
-import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
@@ -6,7 +5,6 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -37,7 +35,10 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { LifiApiService } from './services/lifi-api-service'
+
+import { FeeCost, LifiStep } from './models/lifi-fee-cost';
+import { Route, RouteOptions, RoutesRequest } from './models/lifi-route';
+import { LifiApiService } from './services/lifi-api-service';
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
@@ -143,13 +144,13 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const gasData =
             options.gasCalculation === 'enabled'
                 ? await LifiCrossChainTrade.getGasData(
-                    from,
-                    to,
-                    bestRoute,
-                    feeInfo,
-                    options.providerAddress,
-                    options.receiverAddress
-                )
+                      from,
+                      to,
+                      bestRoute,
+                      feeInfo,
+                      options.providerAddress,
+                      options.receiverAddress
+                  )
                 : null;
 
         const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute.steps);

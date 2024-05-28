@@ -1,4 +1,3 @@
-import { Route } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import {
     LifiPairIsUnavailableError,
@@ -11,20 +10,15 @@ import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { Route } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-route';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
-
-interface LifiTransactionRequest {
-    to: string;
-    data: string;
-    gasLimit?: string;
-    gasPrice?: string;
-    value: string;
-}
+import { LifiOnChainTransactionRequest } from './models/lifi-on-chain-transaction-request';
+import { LifiOnChainApiService } from './services/lifi-on-chain-api-service';
 
 export class LifiTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
@@ -106,11 +100,16 @@ export class LifiTrade extends AggregatorEvmOnChainTrade {
 
         try {
             const swapResponse: {
-                transactionRequest: LifiTransactionRequest;
+                transactionRequest: LifiOnChainTransactionRequest;
                 estimate: Route;
-            } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
-                ...step
-            });
+            } = await LifiOnChainApiService.getQuote(
+                step.action.fromChainId,
+                step.action.toChainId,
+                step.action.fromToken.symbol,
+                step.action.toToken.symbol,
+                step.action.fromAmount,
+                step.action.fromAddress
+            );
 
             const {
                 transactionRequest,

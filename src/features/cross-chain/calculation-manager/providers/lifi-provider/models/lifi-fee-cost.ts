@@ -1,5 +1,18 @@
-import { Bridge, CoinKey, Exchange, ExchangeAggregator, Substatus } from "@lifi/sdk";
-import { LifiTransactionRequest } from "./lifi-transaction-request";
+import { Bridge } from './lifi-bridge-types';
+import { CoinKey } from './lifi-cross-chain-token';
+import { Exchange, ExchangeAggregator } from './lifi-exchange-tools';
+import { LifiTransactionRequest } from './lifi-transaction-request';
+export type Substatus =
+    | 'WAIT_SOURCE_CONFIRMATIONS'
+    | 'WAIT_DESTINATION_TRANSACTION'
+    | 'BRIDGE_NOT_AVAILABLE'
+    | 'CHAIN_NOT_AVAILABLE'
+    | 'REFUND_IN_PROGRESS'
+    | 'UNKNOWN_ERROR'
+    | 'COMPLETED'
+    | 'PARTIAL'
+    | 'REFUNDED'
+    | 'NOT_PROCESSABLE_REFUND_NEEDED';
 
 export interface FeeCost {
     name: string;
@@ -52,8 +65,23 @@ export interface Estimate {
     gasCosts?: GasCost[];
     executionDuration: number;
 }
-export type Status = 'NOT_STARTED' | 'STARTED' | 'ACTION_REQUIRED' | 'CHAIN_SWITCH_REQUIRED' | 'PENDING' | 'FAILED' | 'DONE' | 'RESUME' | 'CANCELLED';
-export type ProcessType = 'TOKEN_ALLOWANCE' | 'SWITCH_CHAIN' | 'SWAP' | 'CROSS_CHAIN' | 'RECEIVING_CHAIN' | 'TRANSACTION';
+export type Status =
+    | 'NOT_STARTED'
+    | 'STARTED'
+    | 'ACTION_REQUIRED'
+    | 'CHAIN_SWITCH_REQUIRED'
+    | 'PENDING'
+    | 'FAILED'
+    | 'DONE'
+    | 'RESUME'
+    | 'CANCELLED';
+export type ProcessType =
+    | 'TOKEN_ALLOWANCE'
+    | 'SWITCH_CHAIN'
+    | 'SWAP'
+    | 'CROSS_CHAIN'
+    | 'RECEIVING_CHAIN'
+    | 'TRANSACTION';
 export interface Process {
     startedAt: number;
     doneAt?: number;
@@ -70,7 +98,7 @@ export interface Process {
         message: string;
         htmlMessage?: string;
     };
-    [key: string]: any;
+    [key: string]: unknown;
 }
 export interface Execution {
     status: Status;
@@ -85,7 +113,7 @@ export interface Execution {
     gasAmountUSD?: string;
 }
 export declare const emptyExecution: Execution;
-export declare const _StepType: readonly ["lifi", "swap", "cross", "protocol", "custom"];
+export declare const _StepType: readonly ['lifi', 'swap', 'cross', 'protocol', 'custom'];
 export type StepType = (typeof _StepType)[number];
 export type StepTool = string;
 export interface StepBase {
@@ -98,7 +126,7 @@ export interface StepBase {
     action: Action;
     estimate?: Estimate;
     execution?: Execution;
-    transactionRequest?: LifiTransactionRequest
+    transactionRequest?: LifiTransactionRequest;
 }
 export interface DestinationCallInfo {
     toContractAddress: string;
