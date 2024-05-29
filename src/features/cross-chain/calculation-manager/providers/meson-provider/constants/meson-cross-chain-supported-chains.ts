@@ -32,6 +32,7 @@ export const mesonCrossChainSupportedChains = [
     BLOCKCHAIN_NAME.ZK_FAIR,
     BLOCKCHAIN_NAME.ZK_LINK,
     BLOCKCHAIN_NAME.ZK_SYNC
+    // BLOCKCHAIN_NAME.TAIKO
 ] as const;
 
 export type MesonSupportedBlockchain = (typeof mesonCrossChainSupportedChains)[number];

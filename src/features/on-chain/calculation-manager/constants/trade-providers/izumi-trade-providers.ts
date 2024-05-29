@@ -7,6 +7,7 @@ import { IzumiMantleProvider } from 'src/features/on-chain/calculation-manager/p
 import { IzumiMerlinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/merlin/izumi-merlin/izumi-merlin-provider';
 import { MerlinSwapMerlinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/merlin/merlin-swap/merlin-swap-merlin-provider';
 import { IzumiModeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mode/izumi-mode/izumi-mode-provider';
+import { IzumiTaikoProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/taiko/izumi-taiko/izumi-taiko-provider';
 import { IzumiScrollProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll/izumi-scroll/izumi-scroll-provider';
 import { IzumiXlayerProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/xlayer/izumi-xlayer/izumi-xlayer-provider';
 import { IzumiZetachainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/izumi-zetachain/izumi-zetachain-provider';
@@ -31,6 +32,8 @@ export const izumiTradeProviders = [
     IzumiZkfairProvider,
     IzumiZkLinkProvider,
     IzumiModeProvider,
+    IzumiTaikoProvider,
+    // IzumiBlastProvider
     IzumiBlastProvider,
     IzumiMerlinProvider,
     IzumiScrollProvider,
