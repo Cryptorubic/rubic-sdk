@@ -4,11 +4,10 @@ import { IzumiBscProvider } from 'src/features/on-chain/calculation-manager/prov
 import { IzumiLineaProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/izumi-linea/izumi-linea-provider';
 import { IzumiMantaPacificProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/manta-pacific/izumi-manta-pacific/izumi-manta-pacific-provider';
 import { IzumiMantleProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mantle/izumi-mantle/izumi-mantle-provider';
-import { IzumiMerlinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/merlin/izumi-merlin/izumi-merlin-provider';
 import { MerlinSwapMerlinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/merlin/merlin-swap/merlin-swap-merlin-provider';
 import { IzumiModeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mode/izumi-mode/izumi-mode-provider';
-import { IzumiTaikoProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/taiko/izumi-taiko/izumi-taiko-provider';
 import { IzumiScrollProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll/izumi-scroll/izumi-scroll-provider';
+import { IzumiTaikoProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/taiko/izumi-taiko/izumi-taiko-provider';
 import { IzumiXlayerProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/xlayer/izumi-xlayer/izumi-xlayer-provider';
 import { IzumiZetachainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/izumi-zetachain/izumi-zetachain-provider';
 import { IzumiZkfairProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zkfair/izumi-zkfair/izumi-zkfair-provider';
@@ -35,7 +34,7 @@ export const izumiTradeProviders = [
     IzumiTaikoProvider,
     // IzumiBlastProvider
     IzumiBlastProvider,
-    IzumiMerlinProvider,
+    // IzumiMerlinProvider,
     IzumiScrollProvider,
     IzumiXlayerProvider
 ];
