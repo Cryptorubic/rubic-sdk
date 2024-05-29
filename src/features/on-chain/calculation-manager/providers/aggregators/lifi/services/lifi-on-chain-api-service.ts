@@ -32,7 +32,8 @@ export class LifiOnChainApiService {
                 toToken,
                 fromAmount,
                 fromAddress
-            }
+            },
+            headers: { 'x-lifi-api-key': this.LIFI_API_KEY }
         });
         return result;
     }

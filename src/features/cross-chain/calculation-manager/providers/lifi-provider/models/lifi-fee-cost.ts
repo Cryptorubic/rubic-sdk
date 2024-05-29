@@ -1,5 +1,4 @@
 import { Bridge } from './lifi-bridge-types';
-import { CoinKey } from './lifi-cross-chain-token';
 import { Exchange, ExchangeAggregator } from './lifi-exchange-tools';
 import { LifiTransactionRequest } from './lifi-transaction-request';
 export type Substatus =
@@ -29,7 +28,7 @@ interface Token {
     symbol: string;
     decimals: number;
     name: string;
-    coinKey?: CoinKey;
+    coinKey?: string;
     logoURI?: string;
     priceUSD: string;
 }
