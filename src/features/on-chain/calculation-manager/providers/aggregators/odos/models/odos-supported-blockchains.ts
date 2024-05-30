@@ -9,7 +9,10 @@ export const odosSupportedBlockchains = [
     BLOCKCHAIN_NAME.AVALANCHE,
     BLOCKCHAIN_NAME.ARBITRUM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
-    BLOCKCHAIN_NAME.FANTOM
+    BLOCKCHAIN_NAME.FANTOM,
+    BLOCKCHAIN_NAME.LINEA,
+    BLOCKCHAIN_NAME.MANTLE,
+    BLOCKCHAIN_NAME.MODE
 ] as const;
 
 export type OdosSupportedBlockchain = (typeof odosSupportedBlockchains)[number];

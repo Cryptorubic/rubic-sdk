@@ -20,7 +20,9 @@ export const orbiterSupportedBlockchains = [
     BLOCKCHAIN_NAME.MODE,
     BLOCKCHAIN_NAME.ZK_FAIR,
     BLOCKCHAIN_NAME.XLAYER,
-    BLOCKCHAIN_NAME.TAIKO
+    BLOCKCHAIN_NAME.TAIKO,
+    BLOCKCHAIN_NAME.ZK_LINK
+    // BLOCKCHAIN_NAME.MERLIN
 ] as const;
 
 export type OrbiterSupportedBlockchain = (typeof orbiterSupportedBlockchains)[number];
