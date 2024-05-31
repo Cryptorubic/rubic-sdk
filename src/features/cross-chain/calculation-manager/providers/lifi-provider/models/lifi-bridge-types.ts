@@ -15,7 +15,6 @@ export const LIFI_API_CROSS_CHAIN_PROVIDERS = {
     SYMBIOSIS: 'symbiosis',
     LI_FUEL: 'lifuel',
     THOR_SWAP: 'thorswap'
-
 } as const;
 
 export type LifiSubProvider =

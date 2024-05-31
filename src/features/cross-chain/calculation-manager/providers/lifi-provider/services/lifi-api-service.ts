@@ -28,11 +28,11 @@ export class LifiApiService {
                 fromToken,
                 toToken,
                 fromAmount,
-                fromAddress
+                fromAddress,
+                integrator: 'rubic'
             },
             headers: { 'x-lifi-api-key': this.LIFI_API_KEY }
-        }
-        );
+        });
         return result;
     }
 

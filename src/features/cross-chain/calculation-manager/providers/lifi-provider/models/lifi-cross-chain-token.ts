@@ -1,4 +1,3 @@
-
 export interface BaseToken {
     chainId: number;
     address: string;
