@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
@@ -11,6 +12,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-quote';
 import { PiteasTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-trade-struct';
 import { PiteasApiService } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-api-service';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
@@ -69,6 +71,8 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
         return piteasRouterAddress;
     }
 
+    private proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+
     constructor(
         tradeStruct: PiteasTradeStruct,
         providerAddress: string,
@@ -77,6 +81,7 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
         super(tradeStruct, providerAddress);
 
         this.quoteRequestParams = quoteRequestParams;
+        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
     }
 
     protected async getTransactionConfigAndAmount(
@@ -90,10 +95,17 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
                     account
                 });
 
+            const providerValue = new BigNumber(methodParameters.value);
+            const value = providerValue.minus(
+                providerValue.multipliedBy((this.proxyFeeInfo?.platformFee.percent || 0) / 100)
+            );
+
+            console.log('Provider value: ', Web3Pure.fromWei(value, this.from.decimals).toFixed());
+
             const tx: EvmEncodeConfig = {
                 to: piteasRouterAddress,
                 data: methodParameters.calldata,
-                value: methodParameters.value,
+                value: value.toString(),
                 gas: gasUseEstimate.toString()
             };
 

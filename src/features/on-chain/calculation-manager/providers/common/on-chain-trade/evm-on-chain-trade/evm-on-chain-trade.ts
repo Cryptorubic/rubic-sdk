@@ -232,7 +232,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             fromValue = new BigNumber(providerValue || 0);
         }
 
-        return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
+        return fromValue.plus(fixedFeeValue).toFixed(0, 0);
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -251,6 +251,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const fromAddress = this.walletAddress;
         const { data, value, to } = await this.encode({ ...options, fromAddress });
         const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
+
+        console.log('Value to swap: ', Web3Pure.fromWei(value, this.from.decimals).toFixed());
 
         try {
             await this.web3Private[method](to, {
@@ -321,12 +323,18 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             nativeToken.decimals
         );
 
+        const { tx } = await this.getTransactionConfigAndAmount(options);
+        const newValue = this.getSwapValue(tx.value);
+
+        console.log('Initial value: ', Web3Pure.fromWei(value, nativeToken.decimals).toFixed());
+        console.log('New value: ', Web3Pure.fromWei(newValue, nativeToken.decimals).toFixed());
+
         const txConfig = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
             evmCommonCrossChainAbi,
             'swapTokensGeneric',
             methodArguments,
-            value
+            newValue
         );
 
         const sendingToken = this.from.isNative ? [] : [this.from.address];
@@ -337,7 +345,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             contractAbi: gatewayRubicCrossChainAbi,
             methodName: 'startViaRubic',
             methodArguments: [sendingToken, sendingAmount, txConfig.data],
-            value
+            value: newValue
         };
     }
 
