@@ -79,7 +79,8 @@ export class LifiProvider extends AggregatorOnChainProvider {
             maxPriceImpact: 0.5,
             exchanges: {
                 deny: lifiDisabledProviders
-            }
+            },
+            integrator: 'rubic'
         };
 
         const routesRequest: RoutesRequest = {
