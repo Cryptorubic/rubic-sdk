@@ -252,8 +252,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const { data, value, to } = await this.encode({ ...options, fromAddress });
         const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
 
-        console.log('Value to swap: ', Web3Pure.fromWei(value, this.from.decimals).toFixed());
-
         try {
             await this.web3Private[method](to, {
                 data,
@@ -317,24 +315,18 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         ];
 
         const nativeToken = nativeTokensList[this.from.blockchain];
-        const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
+        const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0'); // Почему тут только FixedFee без %
         const value = Web3Pure.toWei(
             proxyFee.plus(this.from.isNative ? this.from.tokenAmount : '0'),
             nativeToken.decimals
         );
-
-        const { tx } = await this.getTransactionConfigAndAmount(options);
-        const newValue = this.getSwapValue(tx.value);
-
-        console.log('Initial value: ', Web3Pure.fromWei(value, nativeToken.decimals).toFixed());
-        console.log('New value: ', Web3Pure.fromWei(newValue, nativeToken.decimals).toFixed());
 
         const txConfig = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
             evmCommonCrossChainAbi,
             'swapTokensGeneric',
             methodArguments,
-            newValue
+            value
         );
 
         const sendingToken = this.from.isNative ? [] : [this.from.address];
@@ -345,7 +337,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             contractAbi: gatewayRubicCrossChainAbi,
             methodName: 'startViaRubic',
             methodArguments: [sendingToken, sendingAmount, txConfig.data],
-            value: newValue
+            value: value
         };
     }
 
