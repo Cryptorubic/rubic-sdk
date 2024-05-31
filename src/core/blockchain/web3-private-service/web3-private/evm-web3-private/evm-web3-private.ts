@@ -126,7 +126,8 @@ export class EvmWeb3Private extends Web3Private {
                     value: Web3Private.stringifyAmount(options.value || 0),
                     ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...getGasOptions(options),
-                    ...(options.data && { data: options.data })
+                    ...(options.data && { data: options.data }),
+                    ...(options.chainId && { chainId: options.chainId })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', receipt => resolve(receipt))
@@ -152,7 +153,8 @@ export class EvmWeb3Private extends Web3Private {
                 from: this.address,
                 to: toAddress,
                 value: Web3Private.stringifyAmount(options.value || 0),
-                ...(options.data && { data: options.data })
+                ...(options.data && { data: options.data }),
+                ...(options.chainId && { chainId: options.chainId })
             };
             const gas = await this.web3.eth.estimateGas(gaslessParams);
 
@@ -211,7 +213,8 @@ export class EvmWeb3Private extends Web3Private {
                     ...(options.gas && {
                         gas: Web3Private.stringifyAmount(options.gas)
                     }),
-                    ...getGasOptions(options)
+                    ...getGasOptions(options),
+                    ...(options.chainId && { chainId: options.chainId })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
@@ -244,7 +247,8 @@ export class EvmWeb3Private extends Web3Private {
         try {
             const gaslessParams = {
                 from: this.address,
-                ...(options.value && { value: Web3Private.stringifyAmount(options.value) })
+                ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
+                ...(options.chainId && { chainId: options.chainId })
             };
 
             const gas = await contract.methods[methodName](...methodArguments).estimateGas(
