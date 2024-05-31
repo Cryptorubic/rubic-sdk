@@ -232,7 +232,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             fromValue = new BigNumber(providerValue || 0);
         }
 
-        return fromValue.plus(fixedFeeValue).toFixed(0, 0);
+        return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -315,7 +315,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         ];
 
         const nativeToken = nativeTokensList[this.from.blockchain];
-        const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0'); // Почему тут только FixedFee без %
+        const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
         const value = Web3Pure.toWei(
             proxyFee.plus(this.from.isNative ? this.from.tokenAmount : '0'),
             nativeToken.decimals
@@ -337,7 +337,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             contractAbi: gatewayRubicCrossChainAbi,
             methodName: 'startViaRubic',
             methodArguments: [sendingToken, sendingAmount, txConfig.data],
-            value: value
+            value
         };
     }
 
