@@ -295,13 +295,6 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     @Cache({
         maxAge: 15_000
     })
-    // private async getResponseFromApiToTransactionRequest(
-    //     step: unknown
-    // ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {
-    //     return this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
-    //         ...(step as {})
-    //     });
-    // }
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
