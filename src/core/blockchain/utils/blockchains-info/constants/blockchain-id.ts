@@ -65,6 +65,7 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.ZK_LINK]: 810180,
     [BLOCKCHAIN_NAME.XLAYER]: 196,
     [BLOCKCHAIN_NAME.TAIKO]: 167000,
+    [BLOCKCHAIN_NAME.SEI]: 1329,
     // Tesnents
     [BLOCKCHAIN_NAME.GOERLI]: 5,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: 87,

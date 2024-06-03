@@ -443,5 +443,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Ether',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SEI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SEI,
+        address: '0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7',
+        name: 'Wrapped Sei',
+        symbol: 'WSEI',
+        decimals: 18
     })
 };
