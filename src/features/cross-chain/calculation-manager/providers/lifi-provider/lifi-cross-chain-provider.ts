@@ -1,4 +1,3 @@
-import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
@@ -6,7 +5,6 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -38,10 +36,11 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
+import { FeeCost, LifiStep } from './models/lifi-fee-cost';
+import { Route, RouteOptions, RoutesRequest } from './models/lifi-route';
+import { LifiApiService } from './services/lifi-api-service';
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
-
-    private readonly lifi = new LiFi(getLifiConfig());
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
@@ -76,7 +75,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             order: 'RECOMMENDED',
             allowSwitchChain: false,
             bridges: { deny: disabledBridges },
-            exchanges: { deny: disabledDexes }
+            exchanges: { deny: disabledDexes },
+            integrator: 'rubic'
         };
 
         const fromChainId = blockchainId[fromBlockchain];
@@ -103,7 +103,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ...(toAddress && { toAddress })
         };
 
-        const result = await this.lifi.getRoutes(routesRequest);
+        const result = await LifiApiService.getRoutes(routesRequest);
+
         const { routes } = result;
 
         const bestRoute = routes.find(
