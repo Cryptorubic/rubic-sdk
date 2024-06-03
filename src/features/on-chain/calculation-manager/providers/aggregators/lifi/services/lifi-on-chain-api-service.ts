@@ -20,7 +20,7 @@ export class LifiOnChainApiService {
         toToken: string,
         fromAmount: string,
         fromAddress: string,
-        slippage:number
+        slippage: number
     ): Promise<{ transactionRequest: LifiOnChainTransactionRequest; estimate: Route }> {
         const result = await Injector.httpClient.get<{
             transactionRequest: LifiOnChainTransactionRequest;
