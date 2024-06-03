@@ -21,6 +21,7 @@ import { UNI_V3_PERMIT_2_ABI } from 'src/core/blockchain/web3-public-service/web
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { proxyHashErrors } from 'src/features/cross-chain/calculation-manager/providers/common/constants/proxy-hash-errors';
+import { numberToHex } from 'viem';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
@@ -154,8 +155,9 @@ export class EvmWeb3Private extends Web3Private {
                 to: toAddress,
                 value: Web3Private.stringifyAmount(options.value || 0),
                 ...(options.data && { data: options.data }),
-                ...(options.chainId && { chainId: options.chainId })
+                ...(options?.chainId && { chainId: numberToHex(options.chainId) })
             };
+            // @ts-ignore
             const gas = await this.web3.eth.estimateGas(gaslessParams);
 
             const gasfulParams = {
@@ -164,6 +166,7 @@ export class EvmWeb3Private extends Web3Private {
                 gas: Web3Private.stringifyAmount(gas, 1.05)
             };
             try {
+                // @ts-ignore
                 await this.web3.eth.estimateGas(gasfulParams);
             } catch {
                 throw new RubicSdkError('Low native value');
@@ -174,6 +177,7 @@ export class EvmWeb3Private extends Web3Private {
                 ...gasfulParams
             };
 
+            // @ts-ignore
             return this.sendTransaction(toAddress, sendParams);
         } catch (err) {
             console.debug('Call tokens transfer error', err);
