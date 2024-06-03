@@ -19,7 +19,8 @@ export class LifiOnChainApiService {
         fromToken: string,
         toToken: string,
         fromAmount: string,
-        fromAddress: string
+        fromAddress: string,
+        slippage:number
     ): Promise<{ transactionRequest: LifiOnChainTransactionRequest; estimate: Route }> {
         const result = await Injector.httpClient.get<{
             transactionRequest: LifiOnChainTransactionRequest;
@@ -32,6 +33,7 @@ export class LifiOnChainApiService {
                 toToken,
                 fromAmount,
                 fromAddress,
+                slippage,
                 integrator: 'rubic'
             },
             headers: { 'x-lifi-api-key': this.LIFI_API_KEY }

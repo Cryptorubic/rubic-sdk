@@ -16,7 +16,8 @@ export class LifiApiService {
         fromToken: string,
         toToken: string,
         fromAmount: string,
-        fromAddress: string
+        fromAddress: string,
+        slippage: number
     ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {
         const result = await Injector.httpClient.get<{
             transactionRequest: LifiTransactionRequest;
@@ -29,6 +30,7 @@ export class LifiApiService {
                 toToken,
                 fromAmount,
                 fromAddress,
+                slippage,
                 integrator: 'rubic'
             },
             headers: { 'x-lifi-api-key': this.LIFI_API_KEY }

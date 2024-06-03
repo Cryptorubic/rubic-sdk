@@ -108,7 +108,8 @@ export class LifiTrade extends AggregatorEvmOnChainTrade {
                 step.action.fromToken.symbol,
                 step.action.toToken.symbol,
                 step.action.fromAmount,
-                step.action.fromAddress
+                step.action.fromAddress,
+                step.action.slippage
             );
 
             const {

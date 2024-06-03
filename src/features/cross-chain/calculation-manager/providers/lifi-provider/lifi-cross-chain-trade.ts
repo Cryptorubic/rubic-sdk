@@ -277,7 +277,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     step.action.fromToken.symbol,
                     step.action.toToken.symbol,
                     step.action.fromAmount,
-                    step.action.fromAddress
+                    step.action.fromAddress,
+                    step.action.slippage
                 );
             return {
                 config: swapResponse.transactionRequest,

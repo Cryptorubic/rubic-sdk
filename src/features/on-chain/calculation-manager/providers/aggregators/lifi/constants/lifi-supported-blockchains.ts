@@ -15,8 +15,10 @@ export const lifiOnChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.POLYGON_ZKEVM,
     BLOCKCHAIN_NAME.ZK_SYNC,
-    BLOCKCHAIN_NAME.LINEA
-    // BLOCKCHAIN_NAME.MODE
+    BLOCKCHAIN_NAME.LINEA,
+    BLOCKCHAIN_NAME.MODE,
+    BLOCKCHAIN_NAME.SCROLL,
+    BLOCKCHAIN_NAME.MANTLE
 ] as const;
 
 export type LifiOnChainSupportedBlockchain = (typeof lifiOnChainSupportedBlockchains)[number];

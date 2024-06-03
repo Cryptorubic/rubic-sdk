@@ -14,8 +14,8 @@ export const squidrouterCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.MANTLE,
-    BLOCKCHAIN_NAME.SCROLL
-    // BLOCKCHAIN_NAME.BLAST
+    BLOCKCHAIN_NAME.SCROLL,
+    BLOCKCHAIN_NAME.BLAST
 ] as const;
 
 export type SquidrouterCrossChainSupportedBlockchain =
