@@ -1,5 +1,3 @@
-import { Route } from '@lifi/sdk';
-import { Estimate } from '@lifi/types/dist/step';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -29,6 +27,10 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
+
+import { Estimate } from './models/lifi-fee-cost';
+import { Route } from './models/lifi-route';
+import { LifiApiService } from './services/lifi-api-service';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -269,8 +271,15 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
         try {
             const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
-                await this.getResponseFromApiToTransactionRequest(step);
-
+                await LifiApiService.getQuote(
+                    step.action.fromChainId,
+                    step.action.toChainId,
+                    step.action.fromToken.symbol,
+                    step.action.toToken.symbol,
+                    step.action.fromAmount,
+                    step.action.fromAddress,
+                    step.action.slippage
+                );
             return {
                 config: swapResponse.transactionRequest,
                 amount: swapResponse.estimate.toAmountMin
@@ -286,14 +295,6 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     @Cache({
         maxAge: 15_000
     })
-    private async getResponseFromApiToTransactionRequest(
-        step: unknown
-    ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {
-        return this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
-            ...(step as {})
-        });
-    }
-
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
