@@ -1,4 +1,3 @@
-import { LiFi, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
@@ -6,7 +5,10 @@ import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
+import {
+    RouteOptions,
+    RoutesRequest
+} from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-route';
 import {
     LIFI_API_ON_CHAIN_PROVIDERS,
     LIFI_DISABLED_ON_CHAIN_PROVIDERS
@@ -27,11 +29,9 @@ import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-man
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-
+import { LifiOnChainApiService } from './services/lifi-on-chain-api-service';
 export class LifiProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.LIFI;
-
-    private readonly lifi = new LiFi(getLifiConfig());
 
     private readonly defaultOptions: Omit<RequiredLifiCalculationOptions, 'disabledProviders'> = {
         ...evmProviderDefaultOptions,
@@ -79,7 +79,8 @@ export class LifiProvider extends AggregatorOnChainProvider {
             maxPriceImpact: 0.5,
             exchanges: {
                 deny: lifiDisabledProviders
-            }
+            },
+            integrator: 'rubic'
         };
 
         const routesRequest: RoutesRequest = {
@@ -91,7 +92,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
             options: routeOptions
         };
 
-        const result = await this.lifi.getRoutes(routesRequest);
+        const result = await LifiOnChainApiService.getRoutes(routesRequest);
         const { routes } = result;
         const allTrades = (
             await Promise.all(

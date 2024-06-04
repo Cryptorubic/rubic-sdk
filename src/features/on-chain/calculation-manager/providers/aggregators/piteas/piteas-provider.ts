@@ -58,19 +58,19 @@ export class PiteasProvider extends AggregatorOnChainProvider {
                 fromAddress
             });
 
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, {
+                ...fullOptions
+            });
+
             const quoteRequestParams: PiteasQuoteRequestParams = {
                 tokenInAddress: from.isNative ? 'PLS' : from.address,
                 tokenInChainId: blockchainId[from.blockchain],
                 tokenOutAddress: toToken.isNative ? 'PLS' : toToken.address,
                 tokenOutChainId: blockchainId[from.blockchain],
-                amount: from.stringWeiAmount,
+                amount: fromWithoutFee.stringWeiAmount,
                 allowedSlippage: 0.5,
                 ...(options?.fromAddress && { account: options.fromAddress })
             };
-
-            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, {
-                ...fullOptions
-            });
 
             const { destAmount, gasUseEstimate, methodParameters } =
                 await PiteasApiService.fetchQuote(quoteRequestParams);
