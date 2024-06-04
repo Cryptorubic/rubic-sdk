@@ -15,5 +15,5 @@ export interface EvmTransactionOptions extends EvmBasicTransactionOptions {
     /**
      * Use in case of eip-155
      */
-    chainId?: number;
+    chainId?: string;
 }

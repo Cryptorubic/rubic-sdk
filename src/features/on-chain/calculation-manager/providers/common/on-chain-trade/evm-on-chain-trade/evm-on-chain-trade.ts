@@ -37,6 +37,7 @@ import {
     TransactionGasParams
 } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-params';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import { numberToHex } from 'viem';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { utf8ToHex } from 'web3-utils';
@@ -260,7 +261,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 onTransactionHash,
                 gas: options.gasLimit,
                 gasPriceOptions: options.gasPriceOptions,
-                ...(options?.useEip155 && { chainId: blockchainId[this.from.blockchain] })
+                ...(options?.useEip155 && {
+                    chainId: numberToHex(blockchainId[this.from.blockchain])
+                })
             });
 
             return transactionHash!;

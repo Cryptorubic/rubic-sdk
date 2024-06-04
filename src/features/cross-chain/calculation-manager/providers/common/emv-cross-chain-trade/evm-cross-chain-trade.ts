@@ -22,6 +22,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { numberToHex } from 'viem';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
@@ -184,7 +185,9 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
                 onTransactionHash,
                 gas: gasLimit,
                 gasPriceOptions,
-                ...(options?.useEip155 && { chainId: blockchainId[this.from.blockchain] })
+                ...(options?.useEip155 && {
+                    chainId: numberToHex(blockchainId[this.from.blockchain])
+                })
             });
 
             return transactionHash!;
