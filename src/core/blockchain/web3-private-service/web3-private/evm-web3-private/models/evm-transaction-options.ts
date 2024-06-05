@@ -11,4 +11,9 @@ export interface EvmTransactionOptions extends EvmBasicTransactionOptions {
      * Native token amount in wei.
      */
     value?: BigNumber | string;
+
+    /**
+     * Use in case of eip-155
+     */
+    chainId?: string;
 }

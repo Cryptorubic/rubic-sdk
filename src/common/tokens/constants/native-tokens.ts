@@ -460,5 +460,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Ether',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SEI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SEI,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Sei',
+        symbol: 'SEI',
+        decimals: 18
     })
 };
