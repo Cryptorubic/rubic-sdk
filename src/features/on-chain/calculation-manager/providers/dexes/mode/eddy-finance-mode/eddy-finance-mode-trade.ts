@@ -68,7 +68,7 @@ export class EddyFinanceModeTrade extends UniswapV2AbstractTrade {
             EDDY_FINANCE_MODE_SWAP_CONTRACT_ADDRESS,
             EDDY_FINANCE_SWAP_CONTRACT_ABI,
             methodName,
-            this.getCallParameters(),
+            this.getCallParameters(options.receiverAddress),
             this.nativeValueToSend,
             gasParams
         );
@@ -76,14 +76,19 @@ export class EddyFinanceModeTrade extends UniswapV2AbstractTrade {
         return { tx: config, toAmount: this.to.stringWeiAmount };
     }
 
-    protected getCallParameters(): unknown[] {
+    protected getCallParameters(receiverAddress?: string): unknown[] {
         const { amountIn } = this.getAmountInAndAmountOut();
         // EddyFinance 13.05.2024::
         // amountOut is handled at our contracts for now so you can pass it as 0(Will be changed in future)
         const amountOut = '0';
         const amountParameters = this.from.isNative ? [amountOut] : [amountIn, amountOut];
 
-        return [...amountParameters, this.wrappedPath.map(t => t.address)];
+        return [
+            ...amountParameters,
+            this.wrappedPath.map(t => t.address),
+            receiverAddress || this.walletAddress,
+            this.deadlineMinutesTimestamp
+        ];
     }
 
     protected getSwapParametersByMethod(
