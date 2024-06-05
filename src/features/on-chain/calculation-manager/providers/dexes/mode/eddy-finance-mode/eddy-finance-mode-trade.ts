@@ -16,9 +16,9 @@ import { ExactInputOutputSwapMethodsList } from 'src/features/on-chain/calculati
 import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import {
     EDDY_FINANCE_MODE_CALCULATE_CONTRACT_ADDRESS,
+    EDDY_FINANCE_MODE_SWAP_CONTRACT_ABI,
     EDDY_FINANCE_MODE_SWAP_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/mode/eddy-finance-mode/constants';
-import { EDDY_FINANCE_SWAP_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/eddy-finance/constants';
 
 export class EddyFinanceModeTrade extends UniswapV2AbstractTrade {
     public static get type(): OnChainTradeType {
@@ -66,7 +66,7 @@ export class EddyFinanceModeTrade extends UniswapV2AbstractTrade {
 
         const config = EvmWeb3Pure.encodeMethodCall(
             EDDY_FINANCE_MODE_SWAP_CONTRACT_ADDRESS,
-            EDDY_FINANCE_SWAP_CONTRACT_ABI,
+            EDDY_FINANCE_MODE_SWAP_CONTRACT_ABI,
             methodName,
             this.getCallParameters(options.receiverAddress),
             this.nativeValueToSend,
@@ -98,7 +98,7 @@ export class EddyFinanceModeTrade extends UniswapV2AbstractTrade {
 
         return [
             EDDY_FINANCE_MODE_SWAP_CONTRACT_ADDRESS,
-            EDDY_FINANCE_SWAP_CONTRACT_ABI,
+            EDDY_FINANCE_MODE_SWAP_CONTRACT_ABI,
             method,
             this.getCallParameters(),
             { value }
