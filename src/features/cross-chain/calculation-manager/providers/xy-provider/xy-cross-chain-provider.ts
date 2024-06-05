@@ -8,6 +8,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import {
+    XY_AFFILIATE_ADDRESS,
     XY_API_ENDPOINT,
     XY_NATIVE_ADDRESS
 } from 'src/features/common/providers/xy/constants/xy-api-params';
@@ -30,6 +31,8 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
 import { XyCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-trade';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+
+import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
 
 export class XyCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
@@ -83,7 +86,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 srcQuoteTokenAmount: fromWithoutFee.stringWeiAmount,
                 dstChainId: blockchainId[toBlockchain],
                 dstQuoteTokenAddress: toToken.isNative ? XY_NATIVE_ADDRESS : toToken.address,
-                slippage: slippageTolerance
+                slippage: slippageTolerance,
+                affiliate: XY_AFFILIATE_ADDRESS
             };
 
             const { success, routes, errorCode, errorMsg } =
@@ -122,7 +126,9 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 }),
                 receiver: receiverAddress
             };
-
+            const bridgeType = (
+                bridgeDescription.provider === 'yBridge' ? BRIDGE_TYPE.YPOOL : BRIDGE_TYPE.XY
+            ) as BridgeType;
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await XyCrossChainTrade.getGasData(
@@ -144,7 +150,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo,
-                        onChainTrade: null
+                        onChainTrade: null,
+                        bridgeType: bridgeType
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, to, {

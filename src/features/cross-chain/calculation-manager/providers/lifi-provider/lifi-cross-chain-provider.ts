@@ -1,4 +1,3 @@
-import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
@@ -6,7 +5,6 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -26,19 +24,23 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
 import {
-    LIFI_BRIDGE_TYPES,
-    LifiBridgeTypes
+    LIFI_API_CROSS_CHAIN_PROVIDERS,
+    LifiSubProvider
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
+import {
+    LIFI_API_ON_CHAIN_PROVIDERS,
+    LifiApiOnChainTrade
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
+import { FeeCost, LifiStep } from './models/lifi-fee-cost';
+import { Route, RouteOptions, RoutesRequest } from './models/lifi-route';
+import { LifiApiService } from './services/lifi-api-service';
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
-
-    private readonly lifi = new LiFi(getLifiConfig());
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
@@ -65,19 +67,16 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             };
         }
 
-        if (
-            options.lifiDisabledBridgeTypes?.length &&
-            !this.checkBridgeTypes(options.lifiDisabledBridgeTypes)
-        ) {
-            throw new RubicSdkError('Incorrect bridges filter param');
-        }
-
-        const denyBridges = options.lifiDisabledBridgeTypes || [];
+        const { disabledBridges, disabledDexes } = this.mapDisabledProviders(
+            options.lifiDisabledBridgeTypes || []
+        );
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
             allowSwitchChain: false,
-            bridges: { deny: denyBridges }
+            bridges: { deny: disabledBridges },
+            exchanges: { deny: disabledDexes },
+            integrator: 'rubic'
         };
 
         const fromChainId = blockchainId[fromBlockchain];
@@ -104,7 +103,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ...(toAddress && { toAddress })
         };
 
-        const result = await this.lifi.getRoutes(routesRequest);
+        const result = await LifiApiService.getRoutes(routesRequest);
+
         const { routes } = result;
 
         const bestRoute = routes.find(
@@ -149,6 +149,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                       to,
                       bestRoute,
                       feeInfo,
+                      options.slippageTolerance,
                       options.providerAddress,
                       options.receiverAddress
                   )
@@ -253,8 +254,12 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         subType = subType === 'amarok' ? BRIDGE_TYPE.AMAROK : subType;
 
         const onChainType = {
-            from: sourceDex ? lifiProviders[sourceDex] : undefined,
-            to: targetDex ? lifiProviders[targetDex] : undefined
+            from: sourceDex
+                ? LIFI_API_ON_CHAIN_PROVIDERS[sourceDex as LifiApiOnChainTrade]
+                : undefined,
+            to: targetDex
+                ? LIFI_API_ON_CHAIN_PROVIDERS[targetDex as LifiApiOnChainTrade]
+                : undefined
         };
         const bridgeType = bridges.find(bridge => bridge.toLowerCase() === subType);
 
@@ -264,9 +269,27 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         };
     }
 
-    private checkBridgeTypes(notAllowedBridgeTypes: LifiBridgeTypes[]): boolean {
-        const lifiBridgeTypesArray = Object.values(LIFI_BRIDGE_TYPES);
-        return notAllowedBridgeTypes.every(bridgeType => lifiBridgeTypesArray.includes(bridgeType));
+    private mapDisabledProviders(disabledProviders: LifiSubProvider[]): {
+        disabledBridges: LifiSubProvider[];
+        disabledDexes: LifiSubProvider[];
+    } {
+        const disabledBridges = [] as LifiSubProvider[];
+        const disabledDexes = [] as LifiSubProvider[];
+
+        for (let i = 0; i < disabledProviders.length; i++) {
+            const provider = disabledProviders[i] as LifiSubProvider;
+            const isBridge = Object.values(LIFI_API_CROSS_CHAIN_PROVIDERS).includes(provider);
+            if (isBridge) {
+                disabledBridges.push(provider);
+                continue;
+            }
+            const isDex = Object.keys(LIFI_API_ON_CHAIN_PROVIDERS).includes(provider);
+            if (isDex) {
+                disabledDexes.push(provider);
+            }
+        }
+
+        return { disabledBridges, disabledDexes };
     }
 
     protected async getRoutePath(

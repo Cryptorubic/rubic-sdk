@@ -1,5 +1,3 @@
-import { Route } from '@lifi/sdk';
-import { Estimate } from '@lifi/types/dist/step';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -7,6 +5,7 @@ import { Cache } from 'src/common/utils/decorators';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -29,6 +28,10 @@ import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calc
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
+import { Estimate } from './models/lifi-fee-cost';
+import { Route } from './models/lifi-route';
+import { LifiApiService } from './services/lifi-api-service';
+
 /**
  * Calculated Celer cross-chain trade.
  */
@@ -39,6 +42,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         toToken: PriceTokenAmount<EvmBlockchainName>,
         route: Route,
         feeInfo: FeeInfo,
+        slippage: number,
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
@@ -56,7 +60,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     to: undefined
                 },
                 bridgeType: BRIDGE_TYPE.LIFI,
-                slippage: 0
+                slippage
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             []
@@ -103,6 +107,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     protected get methodName(): string {
         return 'startBridgeTokensViaGenericCrossChain';
+    }
+
+    protected override get amountToCheck(): string {
+        return Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals);
     }
 
     constructor(
@@ -263,11 +271,18 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
         try {
             const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
-                await this.getResponseFromApiToTransactionRequest(step);
-
+                await LifiApiService.getQuote(
+                    step.action.fromChainId,
+                    step.action.toChainId,
+                    step.action.fromToken.symbol,
+                    step.action.toToken.symbol,
+                    step.action.fromAmount,
+                    step.action.fromAddress,
+                    step.action.slippage
+                );
             return {
                 config: swapResponse.transactionRequest,
-                amount: swapResponse.estimate.toAmount
+                amount: swapResponse.estimate.toAmountMin
             };
         } catch (err) {
             if ('statusCode' in err && 'message' in err) {
@@ -280,14 +295,6 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     @Cache({
         maxAge: 15_000
     })
-    private async getResponseFromApiToTransactionRequest(
-        step: unknown
-    ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {
-        return this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
-            ...(step as {})
-        });
-    }
-
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }

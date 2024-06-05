@@ -7,6 +7,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { getGasOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
@@ -161,7 +162,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             options.receiverAddress,
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );
-        const method = options?.testMode ? 'trySendTransaction' : 'sendTransaction';
+        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
 
         const fromAddress = this.walletAddress;
 
@@ -182,7 +183,10 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPriceOptions
+                gasPriceOptions,
+                ...(options?.useEip155 && {
+                    chainId: `0x${blockchainId[this.from.blockchain].toString(16)}`
+                })
             });
 
             return transactionHash!;
@@ -301,7 +305,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({
                 fromAddress: options.fromAddress,
-                receiverAddress: options.receiverAddress || options.fromAddress
+                receiverAddress: options.receiverAddress || options.fromAddress,
+                useCacheData: options?.useCacheData || false
             });
 
         return EvmWeb3Pure.encodeMethodCall(

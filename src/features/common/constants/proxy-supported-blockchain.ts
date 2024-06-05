@@ -29,7 +29,9 @@ export const proxySupportedBlockchains = [
     BLOCKCHAIN_NAME.MODE,
     BLOCKCHAIN_NAME.ZK_FAIR,
     BLOCKCHAIN_NAME.ZETACHAIN,
-    BLOCKCHAIN_NAME.ZK_LINK
+    BLOCKCHAIN_NAME.ZK_LINK,
+    BLOCKCHAIN_NAME.XLAYER,
+    BLOCKCHAIN_NAME.TAIKO
     // BLOCKCHAIN_NAME.OKE_X_CHAIN,
     // BLOCKCHAIN_NAME.GNOSIS,
     // BLOCKCHAIN_NAME.FUSE,
@@ -44,6 +46,6 @@ export const proxySupportedBlockchains = [
     // BLOCKCHAIN_NAME.OASIS
 ] as const;
 
-export const ON_CHAIN_PROXY_DISABLED_CHAINS = [BLOCKCHAIN_NAME.ROOTSTOCK] as const;
+export const ON_CHAIN_PROXY_DISABLED_CHAINS = [] as const;
 
 export type ProxySupportedBlockchain = (typeof proxySupportedBlockchains)[number];

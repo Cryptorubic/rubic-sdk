@@ -53,4 +53,9 @@ export interface SwapTransactionOptions {
     useCacheData?: boolean;
 
     referrer?: string;
+
+    /**
+     * Use in case of eip-155
+     */
+    useEip155?: boolean;
 }

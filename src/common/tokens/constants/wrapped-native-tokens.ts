@@ -290,13 +290,6 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WAA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.TAIKO]: new Token({
-        blockchain: BLOCKCHAIN_NAME.TAIKO,
-        address: '0x0011E559da84dde3f841e22dc33F3adbF184D84A',
-        name: 'Wrapped Ether',
-        symbol: 'WETH',
-        decimals: 18
-    }),
     [BLOCKCHAIN_NAME.SEPOLIA]: new Token({
         blockchain: BLOCKCHAIN_NAME.SEPOLIA,
         address: '0xfff9976782d46cc05630d1f6ebab18b2324d6b14',
@@ -442,6 +435,20 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         address: '0xe538905cf8410324e03A5A23C1c177a474D59b2b',
         name: 'Wrapped OKB',
         symbol: 'WOKB',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.TAIKO]: new Token({
+        blockchain: BLOCKCHAIN_NAME.TAIKO,
+        address: '0xa51894664a773981c6c112c43ce576f315d5b1b6',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SEI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SEI,
+        address: '0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7',
+        name: 'Wrapped Sei',
+        symbol: 'WSEI',
         decimals: 18
     })
 };

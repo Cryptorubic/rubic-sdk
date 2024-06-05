@@ -18,7 +18,10 @@ import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-man
 import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
-import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import {
+    BRIDGE_TYPE,
+    BridgeType
+} from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
@@ -51,7 +54,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                     priceImpact: 0,
                     slippage: 0,
                     feeInfo,
-                    onChainTrade: null
+                    onChainTrade: null,
+                    bridgeType: BRIDGE_TYPE.XY
                 },
                 providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                 []
@@ -72,7 +76,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         to: undefined
     };
 
-    public readonly bridgeType = BRIDGE_TYPE.XY;
+    public readonly bridgeType: BridgeType;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -116,6 +120,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
             feeInfo: FeeInfo;
             onChainTrade: EvmOnChainTrade | null;
+            bridgeType: BridgeType;
         },
         providerAddress: string,
         routePath: RubicStep[]
@@ -131,6 +136,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
         this.onChainTrade = crossChainTrade.onChainTrade;
+        this.bridgeType = crossChainTrade.bridgeType;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {

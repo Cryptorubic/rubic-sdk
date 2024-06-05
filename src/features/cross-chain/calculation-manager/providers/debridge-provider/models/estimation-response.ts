@@ -1,8 +1,9 @@
-import { BaseToken } from '@lifi/sdk';
 import {
     DlnMaxTheoreticalAmountToken,
     DlnTokenMinAmount
 } from 'src/features/common/providers/dln/models/dln-estimation';
+
+import { BaseToken } from '../../lifi-provider/models/lifi-cross-chain-token';
 
 /**
  * Estimation object.

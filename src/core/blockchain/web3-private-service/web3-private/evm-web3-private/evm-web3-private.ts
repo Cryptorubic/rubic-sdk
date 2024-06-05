@@ -126,8 +126,9 @@ export class EvmWeb3Private extends Web3Private {
                     value: Web3Private.stringifyAmount(options.value || 0),
                     ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...getGasOptions(options),
-                    ...(options.data && { data: options.data })
-                })
+                    ...(options.data && { data: options.data }),
+                    ...(options.chainId && { chainId: options.chainId })
+                } as TransactionConfig)
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', receipt => resolve(receipt))
                 .on('error', err => {
@@ -152,17 +153,20 @@ export class EvmWeb3Private extends Web3Private {
                 from: this.address,
                 to: toAddress,
                 value: Web3Private.stringifyAmount(options.value || 0),
-                ...(options.data && { data: options.data })
+                ...(options.data && { data: options.data }),
+                ...(options?.chainId && { chainId: options.chainId })
             };
-            const gas = await this.web3.eth.estimateGas(gaslessParams);
+
+            const gas = await this.web3.eth.estimateGas(gaslessParams as TransactionConfig);
 
             const gasfulParams = {
                 ...gaslessParams,
                 ...getGasOptions(options),
                 gas: Web3Private.stringifyAmount(gas, 1.05)
             };
+
             try {
-                await this.web3.eth.estimateGas(gasfulParams);
+                await this.web3.eth.estimateGas(gasfulParams as TransactionConfig);
             } catch {
                 throw new RubicSdkError('Low native value');
             }
@@ -211,7 +215,8 @@ export class EvmWeb3Private extends Web3Private {
                     ...(options.gas && {
                         gas: Web3Private.stringifyAmount(options.gas)
                     }),
-                    ...getGasOptions(options)
+                    ...getGasOptions(options),
+                    ...(options.chainId && { chainId: options.chainId })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
@@ -244,7 +249,8 @@ export class EvmWeb3Private extends Web3Private {
         try {
             const gaslessParams = {
                 from: this.address,
-                ...(options.value && { value: Web3Private.stringifyAmount(options.value) })
+                ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
+                ...(options.chainId && { chainId: options.chainId })
             };
 
             const gas = await contract.methods[methodName](...methodArguments).estimateGas(

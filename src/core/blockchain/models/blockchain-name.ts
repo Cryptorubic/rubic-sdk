@@ -5,7 +5,6 @@ export const TEST_EVM_BLOCKCHAIN_NAME = {
     FUJI: 'FUJI',
     SCROLL_SEPOLIA: 'SCROLL_SEPOLIA',
     ARTHERA: 'ARTHERA',
-    TAIKO: 'TAIKO',
     SEPOLIA: 'SEPOLIA',
     BERACHAIN: 'BERACHAIN',
     BLAST_TESTNET: 'BLAST_TESTNET',
@@ -66,7 +65,9 @@ export const EVM_BLOCKCHAIN_NAME = {
     MODE: 'MODE',
     ZK_FAIR: 'ZK_FAIR',
     ZK_LINK: 'ZK_LINK',
-    XLAYER: 'XLAYER'
+    XLAYER: 'XLAYER',
+    TAIKO: 'TAIKO',
+    SEI: 'SEI'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

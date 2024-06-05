@@ -54,13 +54,6 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         symbol: 'AA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.TAIKO]: new Token({
-        blockchain: BLOCKCHAIN_NAME.TAIKO,
-        address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'Ether',
-        symbol: 'ETH',
-        decimals: 18
-    }),
     [BLOCKCHAIN_NAME.SEPOLIA]: new Token({
         blockchain: BLOCKCHAIN_NAME.SEPOLIA,
         address: EvmWeb3Pure.nativeTokenAddress,
@@ -459,6 +452,20 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'OK Token',
         symbol: 'OKB',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.TAIKO]: new Token({
+        blockchain: BLOCKCHAIN_NAME.TAIKO,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SEI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SEI,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Sei',
+        symbol: 'SEI',
         decimals: 18
     })
 };

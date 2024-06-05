@@ -10,6 +10,7 @@ import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
@@ -250,7 +251,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
         const fromAddress = this.walletAddress;
         const { data, value, to } = await this.encode({ ...options, fromAddress });
-        const method = options?.testMode ? 'trySendTransaction' : 'sendTransaction';
+        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
 
         try {
             await this.web3Private[method](to, {
@@ -258,7 +259,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 value,
                 onTransactionHash,
                 gas: options.gasLimit,
-                gasPriceOptions: options.gasPriceOptions
+                gasPriceOptions: options.gasPriceOptions,
+                ...(options?.useEip155 && {
+                    chainId: `0x${blockchainId[this.from.blockchain].toString(16)}`
+                })
             });
 
             return transactionHash!;
