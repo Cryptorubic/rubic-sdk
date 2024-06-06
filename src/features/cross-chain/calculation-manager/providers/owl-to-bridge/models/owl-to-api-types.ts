@@ -28,11 +28,53 @@ interface OwlToAmountInfo {
     ui_value: string;
 }
 
-export interface RequiredPairInfo {
+export interface RequiredPairInfoFields {
     contractAddress: string;
     srcChainName: string;
     dstChainName: string;
     tokenSymbol: string;
     minAmount: string;
     maxAmount: string;
+}
+
+export interface OwlTopSwapRequest {
+    srcTokenAddress: string;
+    srcChainName: string;
+    dstTokenAddress: string;
+    dstChainName: string;
+    amount: string;
+    tokenSymbol: string;
+    walletAddress: string;
+    receiverAddress: string;
+}
+
+export interface OwlToSwapResponse {
+    data: {
+        bridge_fee: OwlToAmountInfo;
+        from_chain_name: string;
+        gas_fee: OwlToAmountInfo;
+        input_value: OwlToAmountInfo;
+        max_value: OwlToAmountInfo;
+        min_value: OwlToAmountInfo;
+        network_type: number;
+        /* receive_value.raw_value is toStringWeiAmount */
+        receive_value: OwlToAmountInfo;
+        send_value: OwlToAmountInfo;
+        to_chain_name: string;
+        token_name: string;
+        txs: {
+            approve_body: object;
+            transfer_body: {
+                data: string;
+                to: string;
+                value: string;
+            };
+        };
+    };
+}
+
+export interface OwlToStatusResponse {
+    data: {
+        to_chain_hash: string;
+    };
 }
