@@ -1,64 +1,38 @@
-interface OwlToBaseResponse<T> {
-    code: number;
-    msg: T;
+export interface OwlToAllPairsInfoResponse {
+    data: {
+        pair_infos: OwlToPairInfo[];
+    };
 }
 
-export type OwlToAllChainsResponse = OwlToBaseResponse<OwlToChainInfo[]>;
-
-export interface OwlToSwappingChainsInfo {
-    sourceChain: OwlToChainInfo;
-    targetChain: OwlToChainInfo;
+export interface OwlToPairInfo {
+    contract_address: string;
+    from_chain_id: string;
+    /* required to get tx-data */
+    from_chain_name: string;
+    from_token_address: string;
+    from_token_decimals: number;
+    max_value: OwlToAmountInfo;
+    min_value: OwlToAmountInfo;
+    to_chain_id: string;
+    /* required to get tx-data */
+    to_chain_name: string;
+    to_token_address: string;
+    to_token_decimals: number;
+    /* required to get tx-data */
+    token_name: string;
 }
 
-export interface OwlToChainInfo {
-    name: string;
-    chainId: number;
-    isTestnet: number;
-    networkCode: number;
-    aliasName: string;
-    text: string;
-    icon: string;
-    explorerUrl: string;
-    baseChainId: number;
-    order: number;
+interface OwlToAmountInfo {
+    decimals: number;
+    raw_value: string;
+    ui_value: string;
 }
 
-export type OwlToTokensResponse = OwlToBaseResponse<OwlToTokenInfo[]>;
-
-export interface OwlToTokenInfo {
-    symbol: string;
-    decimal: number;
-    fromChainId: number;
-    fromAddress: string;
-    toChainId: number;
-    toAddress: string;
-    minValue: number;
-    maxValue: number;
-}
-
-export interface OwlToTransferFeeParams {
-    sourceChainName: string;
-    targetChainName: string;
-    fromAmount: number;
+export interface RequiredPairInfo {
+    contractAddress: string;
+    srcChainName: string;
+    dstChainName: string;
     tokenSymbol: string;
+    minAmount: string;
+    maxAmount: string;
 }
-
-export type OwlToTransferFeeResponse = OwlToBaseResponse<string>;
-
-export interface OwlToTxInfoParams {
-    tokenSymbol: string;
-    sourceChainId: number;
-    targetChainId: number;
-    walletAddress: string;
-}
-
-export type OwlToTxInfoResponse = OwlToBaseResponse<{
-    maker_address: string;
-    estimated_gas: string;
-}>;
-
-export type OwlToStatusResponse = OwlToBaseResponse<{
-    is_verified: boolean;
-    dst_chainid: number;
-    dst_tx_hash: string;
-}>;
