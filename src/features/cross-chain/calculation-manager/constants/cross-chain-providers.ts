@@ -15,12 +15,12 @@ import { LayerZeroBridgeProvider } from '../providers/layerzero-bridge/layerzero
 import { MesonCrossChainProvider } from '../providers/meson-provider/meson-cross-chain-provider';
 import { OrbiterBridgeProvider } from '../providers/orbiter-bridge/orbiter-bridge-provider';
 import { RangoCrossChainProvider } from '../providers/rango-provider/rango-cross-chain-provider';
-import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
+// import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
 import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-provider';
 
 const proxyProviders = [
     SymbiosisCrossChainProvider,
-    StargateCrossChainProvider,
+    // StargateCrossChainProvider,
     XyCrossChainProvider,
     CbridgeCrossChainProvider,
     LifiCrossChainProvider,
