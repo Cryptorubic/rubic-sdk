@@ -1,88 +1,22 @@
-import { NativeRouterChain } from '../models/native-router-transaction-request';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const nativeRouterAbstractSupportedBlockchains: NativeRouterChain[] = [
-    {
-        chainId: 56,
-        chain: 'bsc',
-        label: 'Binance',
-        token: 'BNB',
-        isMainnet: true
-    },
-    {
-        chainId: 1,
-        chain: 'ethereum',
-        label: 'Ethereum',
-        token: 'ETH',
-        isMainnet: true
-    },
-    {
-        chainId: 137,
-        chain: 'polygon',
-        label: 'Polygon',
-        token: 'MATIC',
-        isMainnet: true
-    },
-    {
-        chainId: 42161,
-        chain: 'arbitrum',
-        label: 'Arbitrum',
-        token: 'ETH',
-        isMainnet: true
-    },
-    {
-        chainId: 43114,
-        chain: 'avalanche',
-        label: 'Avalanche',
-        token: 'AVAX',
-        isMainnet: true
-    },
-    {
-        chainId: 5000,
-        chain: 'mantle',
-        label: 'Mantle',
-        token: 'MNT',
-        isMainnet: true
-    },
-    {
-        chainId: 8453,
-        chain: 'base',
-        label: 'Base',
-        token: 'ETH',
-        isMainnet: true
-    },
-    {
-        chainId: 534352,
-        chain: 'scroll',
-        label: 'Scroll',
-        token: 'ETH',
-        isMainnet: true
-    },
-    {
-        chainId: 169,
-        chain: 'manta',
-        label: 'Manta',
-        token: 'ETH',
-        isMainnet: true
-    },
-    {
-        chainId: 7000,
-        chain: 'zetachain',
-        label: 'Zetachain Mainnet',
-        token: 'ZETA',
-        isMainnet: true
-    },
-    {
-        chainId: 59144,
-        chain: 'linea',
-        label: 'Linea',
-        token: 'ETH',
-        isMainnet: true
-    },
-    {
-        chainId: 810180,
-        chain: 'zklink',
-        label: 'ZkLink',
-        token: 'ETH',
-        isMainnet: true
-    }
-];
+import { NativeRouterSupportedBlockchains } from '../../../native-router/constants/native-router-supported-blockchains';
+import { ZetaswapOnChainSupportedBlockchains } from '../../../zetaswap/constants/zetaswap-supported-blockchains';
+
+export type AllSupportedNetworks =
+    | ZetaswapOnChainSupportedBlockchains
+    | NativeRouterSupportedBlockchains;
+export const blockchainNameMapping: Record<AllSupportedNetworks, string> = {
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'bsc',
+    [BLOCKCHAIN_NAME.ETHEREUM]: 'ethereum',
+    [BLOCKCHAIN_NAME.POLYGON]: 'polygon',
+    [BLOCKCHAIN_NAME.ARBITRUM]: 'arbitrum',
+    [BLOCKCHAIN_NAME.AVALANCHE]: 'avalanche',
+    [BLOCKCHAIN_NAME.MANTLE]: 'mantle',
+    [BLOCKCHAIN_NAME.BASE]: 'base',
+    [BLOCKCHAIN_NAME.SCROLL]: 'scroll',
+    [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta',
+    [BLOCKCHAIN_NAME.ZETACHAIN]: 'zetachain',
+    [BLOCKCHAIN_NAME.LINEA]: 'linea',
+    [BLOCKCHAIN_NAME.ZK_LINK]: 'zkLink'
+} as const;

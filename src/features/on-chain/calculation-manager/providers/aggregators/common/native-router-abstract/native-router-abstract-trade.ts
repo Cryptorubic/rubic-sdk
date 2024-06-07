@@ -9,10 +9,13 @@ import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type'
 import { AggregatorEvmOnChainTrade } from '../../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { NativeRouterQuoteRequestParams } from './models/native-router-quote';
-import { NativeRouterTradeStruct } from './models/native-router-trade-struct';
+import {
+    NativeRouterTradeInstance,
+    NativeRouterTradeStruct
+} from './models/native-router-trade-struct';
 import { NativeRouterApiService } from './services/native-router-api-service';
 
-export class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrade {
+export abstract class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrade {
     public static async getGasLimit(
         tradeStruct: NativeRouterTradeStruct,
         providerGateway: string
@@ -59,15 +62,10 @@ export class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrade {
         throw new RubicSdkError('Dex address is unknown before swap is started');
     }
 
-    constructor(
-        nativeRouterTradeStruct: NativeRouterTradeStruct,
-        providerAddress: string,
-        nativeRouterQuoteParams: NativeRouterQuoteRequestParams,
-        providerGateway: string
-    ) {
-        super(nativeRouterTradeStruct, providerAddress);
-        this.providerGateway = providerGateway;
-        this.nativeRouterQuoteParams = nativeRouterQuoteParams;
+    constructor(tradeInstance: NativeRouterTradeInstance) {
+        super(tradeInstance.tradeStruct, tradeInstance.providerAddress);
+        this.providerGateway = tradeInstance.providerGateway;
+        this.nativeRouterQuoteParams = tradeInstance.nativeRouterQuoteParams;
     }
 
     protected async getTransactionConfigAndAmount(
