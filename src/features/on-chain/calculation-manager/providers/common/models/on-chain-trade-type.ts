@@ -74,6 +74,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     MUTE_SWAP: 'MUTE_SWAP',
 
     NET_SWAP: 'NET_SWAP',
+    NATIVE_ROUTER: 'NATIVE_ROUTER',
 
     ODOS: 'ODOS',
     OKC_SWAP: 'OKC_SWAP',
@@ -156,7 +157,8 @@ export const ON_CHAIN_TRADE_TYPE = {
 
     ZAPPY: 'ZAPPY',
     ZIP_SWAP: 'ZIP_SWAP',
-    ZRX: 'ZRX'
+    ZRX: 'ZRX',
+    ZETA_SWAP: 'ZETA_SWAP'
 } as const;
 
 /**
