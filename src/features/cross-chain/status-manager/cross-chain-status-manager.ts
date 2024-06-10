@@ -710,9 +710,8 @@ export class CrossChainStatusManager {
         return MesonCcrApiService.fetchTxStatus(data.srcTxHash);
     }
 
-    // @TODO implement getOwlToDstSwapStatus
     private async getOwlToDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await OwlToApiService.getTxStatus(data.fromBlockchain, data.srcTxHash);
+        const txStatusData = await OwlToApiService.getTxStatus(data.srcTxHash);
 
         return txStatusData;
     }

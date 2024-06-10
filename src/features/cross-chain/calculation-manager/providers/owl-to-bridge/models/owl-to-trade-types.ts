@@ -5,6 +5,7 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasData } from '../../common/emv-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../../common/models/fee-info';
 import { RubicStep } from '../../common/models/rubicStep';
+import { OwlTopSwapRequest } from './owl-to-api-types';
 
 export interface OwlToGetGasDataParams {
     fromToken: PriceTokenAmount<EvmBlockchainName>;
@@ -12,7 +13,7 @@ export interface OwlToGetGasDataParams {
     feeInfo: FeeInfo;
     providerAddress: string;
     gasLimit: BigNumber;
-    makerAddress: string;
+    swapParams: OwlTopSwapRequest;
 }
 
 export interface OwlToTradeParams {
@@ -22,7 +23,7 @@ export interface OwlToTradeParams {
         gasData: GasData | null;
         feeInfo: FeeInfo;
         priceImpact: number | null;
-        makerAddress: string;
+        swapParams: OwlTopSwapRequest;
     };
     providerAddress: string;
     routePath: RubicStep[];

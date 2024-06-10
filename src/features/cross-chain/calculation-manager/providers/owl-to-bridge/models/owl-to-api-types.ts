@@ -24,7 +24,9 @@ export interface OwlToPairInfo {
 
 interface OwlToAmountInfo {
     decimals: number;
+    // wei-amount
     raw_value: string;
+    // "1.2"
     ui_value: string;
 }
 
@@ -38,9 +40,7 @@ export interface RequiredPairInfoFields {
 }
 
 export interface OwlTopSwapRequest {
-    srcTokenAddress: string;
     srcChainName: string;
-    dstTokenAddress: string;
     dstChainName: string;
     amount: string;
     tokenSymbol: string;
