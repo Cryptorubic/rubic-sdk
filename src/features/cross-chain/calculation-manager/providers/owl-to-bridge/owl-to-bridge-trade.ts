@@ -34,7 +34,8 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         toToken,
         providerAddress,
         gasLimit,
-        swapParams
+        swapParams,
+        approveAddress
     }: OwlToGetGasDataParams): Promise<GasData | null> {
         try {
             const trade = new OwlToBridgeTrade({
@@ -44,7 +45,8 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
                     to: toToken,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
                     gasData: null,
-                    swapParams
+                    swapParams,
+                    approveAddress
                 },
                 providerAddress,
                 routePath: []
@@ -83,13 +85,17 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
 
     private readonly swapParams: OwlTopSwapRequest;
 
+    private readonly providerGateway: string;
+
     private get fromBlockchain(): OwlToSupportedBlockchain {
         return this.from.blockchain as OwlToSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {
         // @TODO Add owl-to contract addresses
-        return this.isProxyTrade ? rubicProxyContractAddress[this.fromBlockchain].gateway : '';
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : this.providerGateway;
     }
 
     protected get methodName(): string {
@@ -106,6 +112,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.to.tokenAmount;
         this.feeInfo = crossChainTrade.feeInfo;
         this.swapParams = crossChainTrade.swapParams;
+        this.providerGateway = crossChainTrade.approveAddress;
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
