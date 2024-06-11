@@ -38,6 +38,7 @@ import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/pr
 import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
 import { ClaimSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/klaytn/claim-swap/claim-swap-provider';
 import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
+import { EddyFinanceModeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mode/eddy-finance-mode/eddy-finance-mode-provider';
 import { SolarbeamProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/solarbeam-provider';
 import { SushiSwapMoonriverProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
 import { QuickSwapMumbaiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mumbai/quick-swap-mumbai/quick-swap-mumbai-provider';
@@ -53,6 +54,7 @@ import { SushiSwapTelosProvider } from 'src/features/on-chain/calculation-manage
 import { ZappyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/zappy/trisolaris-aurora-provider';
 import { AstroSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/velas/astro-swap/astro-swap-provider';
 import { WagyuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/velas/wagyu-swap/wagyu-swap-provider';
+import { EddyFinanceProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/eddy-finance/eddy-finance-provider';
 import { MuteSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/mute-swap/mute-swap-provider';
 
 export const UniswapV2TradeProviders = [
@@ -142,5 +144,9 @@ export const UniswapV2TradeProviders = [
     SpookySwapHorizenEonProvider,
     AscentHorizenEonProvider,
     // Blast
-    UniSwapV2BlastProvider
+    UniSwapV2BlastProvider,
+    // ZetaChain
+    EddyFinanceProvider,
+    // Mode
+    EddyFinanceModeProvider
 ] as const;
