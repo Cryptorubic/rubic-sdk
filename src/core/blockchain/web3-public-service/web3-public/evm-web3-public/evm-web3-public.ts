@@ -107,6 +107,10 @@ export class EvmWeb3Public extends Web3Public {
         return new BigNumber(balance);
     }
 
+    public async getTransactionCount(walletAddress: string): Promise<number> {
+        return this.web3.eth.getTransactionCount(walletAddress);
+    }
+
     public async getAllowance(
         tokenAddress: string,
         ownerAddress: string,
