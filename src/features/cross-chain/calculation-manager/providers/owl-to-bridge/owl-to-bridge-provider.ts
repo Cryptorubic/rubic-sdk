@@ -104,14 +104,14 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 routePath: await this.getRoutePath(from, to)
             });
 
-            if (from.tokenAmount.lt(minAmountBN)) {
+            if (fromWithoutFee.tokenAmount.lt(minAmountBN)) {
                 return {
                     trade,
                     error: new MinAmountError(minAmountBN, from.symbol),
                     tradeType: this.type
                 };
             }
-            if (from.tokenAmount.gt(maxAmountBN)) {
+            if (fromWithoutFee.tokenAmount.gt(maxAmountBN)) {
                 return {
                     trade,
                     error: new MaxAmountError(maxAmountBN, from.symbol),
