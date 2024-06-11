@@ -8,6 +8,7 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { SeiWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/sei-web3-public/sei-web3-public';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -128,6 +129,10 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         return Injector.web3PrivateService.getWeb3Private('EVM');
     }
 
+    private get seiWeb3Public(): SeiWeb3Public {
+        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SEI);
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -177,7 +182,13 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
         let receiverAddress = options.receiverAddress;
         let toAddress = '';
-
+        const isLinkedAddress = await this.seiWeb3Public.isLinkedAddress(
+            this.walletAddress,
+            this.from.address
+        );
+        if (this.from.blockchain === BLOCKCHAIN_NAME.SEI && !isLinkedAddress) {
+            console.log('Not a linked Address');
+        }
         if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
             const tronHexReceiverAddress = await this.tronWeb3Public.convertTronAddressToHex(
                 options.receiverAddress!

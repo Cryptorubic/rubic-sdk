@@ -8,6 +8,7 @@ import {
     BlockchainName,
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName,
+    SeiBlockchainName,
     SolanaBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
@@ -24,6 +25,8 @@ import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-pub
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 import Web3 from 'web3';
+
+import { SeiWeb3Public } from './web3-public/sei-web3-public/sei-web3-public';
 
 export class Web3PublicService {
     public static isSupportedBlockchain(
@@ -46,6 +49,7 @@ export class Web3PublicService {
         this.web3PublicStorage = this.createWeb3PublicStorage();
     }
 
+    public getWeb3Public(blockchainName: SeiBlockchainName): SeiWeb3Public;
     public getWeb3Public(blockchainName: EvmBlockchainName): EvmWeb3Public;
     public getWeb3Public(blockchainName: TronBlockchainName): TronWeb3Public;
     public getWeb3Public(blockchainName: SolanaBlockchainName): SolanaWeb3Public;
