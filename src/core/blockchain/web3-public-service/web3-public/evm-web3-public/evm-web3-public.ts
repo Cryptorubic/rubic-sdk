@@ -52,7 +52,7 @@ export class EvmWeb3Public extends Web3Public {
     }
 
     constructor(
-        protected readonly web3: Web3,
+        private readonly web3: Web3,
         blockchainName: EvmBlockchainName,
         private httpClient?: HttpClient
     ) {

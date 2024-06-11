@@ -12,4 +12,5 @@
 stats.json
 .DS_Store
 /docs/
+/src/index.ts
 .eslintignore

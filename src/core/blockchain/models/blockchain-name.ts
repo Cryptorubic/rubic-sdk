@@ -160,4 +160,3 @@ export type NearBlockchainName = typeof BLOCKCHAIN_NAME.NEAR;
 export type BitcoinBlockchainName = typeof BLOCKCHAIN_NAME.BITCOIN;
 export type TronBlockchainName = typeof BLOCKCHAIN_NAME.TRON;
 export type IcpBlockchainName = typeof BLOCKCHAIN_NAME.ICP;
-export type SeiBlockchainName = typeof BLOCKCHAIN_NAME.SEI;
