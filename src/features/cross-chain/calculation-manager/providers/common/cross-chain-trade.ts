@@ -235,7 +235,6 @@ export abstract class CrossChainTrade<T = unknown> {
             const web3 = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SEI);
             const transactionCount = await web3.getTransactionCount(this.walletAddress);
             const balance = await web3.getBalance(this.walletAddress, this.to.address);
-            console.log(balance, transactionCount);
             if (new BigNumber(balance).eq(0) && transactionCount === 0) {
                 throw new NoLinkedAccountError();
             }
