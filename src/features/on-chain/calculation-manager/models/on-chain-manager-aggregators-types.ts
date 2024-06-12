@@ -10,7 +10,7 @@ import { OdosOnChainProvider } from '../providers/aggregators/odos/odos-on-chain
 import { OkuSwapOnChainProvider } from '../providers/aggregators/okuswap/okuswap-on-chain-provider';
 import { OpenOceanProvider } from '../providers/aggregators/open-ocean/open-ocean-provider';
 import { RangoOnChainProvider } from '../providers/aggregators/rango/rango-on-chain-provider';
-import { ZetaswapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
+import { ZetaSwapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
     LIFI: LifiProvider,
@@ -23,7 +23,7 @@ export const AGGREGATORS_ON_CHAIN = {
     XY: XyDexProvider,
     ZRX: ZrxProvider,
     ONE_INCH: OneInchProvider,
-    ZETA_SWAP: ZetaswapProvider,
+    ZETA_SWAP: ZetaSwapProvider,
     NATIVE_ROUTER: NativeRouterProvider
     // SYMBIOSIS: SymbiosisOnChainProvider
 } as const;

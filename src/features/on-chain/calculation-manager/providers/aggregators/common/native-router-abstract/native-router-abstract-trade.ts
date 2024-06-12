@@ -5,7 +5,6 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
-import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { NativeRouterQuoteRequestParams } from './models/native-router-quote';
@@ -46,8 +45,6 @@ export abstract class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrad
         }
     }
 
-    public readonly type = ON_CHAIN_TRADE_TYPE.NATIVE_ROUTER;
-
     public readonly providerGateway: string;
 
     private readonly nativeRouterQuoteParams: NativeRouterQuoteRequestParams;
@@ -71,7 +68,7 @@ export abstract class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrad
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
-        const account = options.receiverAddress || options.fromAddress;
+        const account = options.fromAddress;
         try {
             const { amountOut, txRequest } = await NativeRouterApiService.getFirmQuote({
                 ...this.nativeRouterQuoteParams,
