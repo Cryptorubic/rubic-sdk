@@ -52,7 +52,12 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
                 routePath: []
             });
 
-            return getCrossChainGasData(trade);
+            const gasData = await getCrossChainGasData(trade);
+            if (!gasData) {
+                throw new Error('gasData is null');
+            }
+
+            return gasData;
         } catch (_err) {
             const gasDetails = await Injector.gasPriceApi.getGasPrice(fromToken.blockchain);
             const gasDetailsBN = convertGasDataToBN(gasDetails);
@@ -182,13 +187,6 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
             },
             amount: this.to.stringWeiAmount
         };
-    }
-
-    public override async needApprove(): Promise<boolean> {
-        if (this.isProxyTrade) {
-            return super.needApprove();
-        }
-        return false;
     }
 
     public getTradeInfo(): TradeInfo {
