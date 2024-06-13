@@ -47,6 +47,7 @@ import { QuickSwapProvider } from 'src/features/on-chain/calculation-manager/pro
 import { SushiSwapPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
 import { PulseXV1Provider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/pulsex-v1/pulsex-v1-provider';
 import { PulseXV2Provider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/pulsex-v2/pulsex-v2-provider';
+import { DragonSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/sei/dragonswap/dragonswap-provider';
 import { PegasysProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/syscoin/pegasys/pegasys-provider';
 import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
 import { OmnidexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/omnidex/omnidex-provider';
@@ -148,5 +149,7 @@ export const UniswapV2TradeProviders = [
     // ZetaChain
     EddyFinanceProvider,
     // Mode
-    EddyFinanceModeProvider
+    EddyFinanceModeProvider,
+    // Sei
+    DragonSwapProvider
 ] as const;
