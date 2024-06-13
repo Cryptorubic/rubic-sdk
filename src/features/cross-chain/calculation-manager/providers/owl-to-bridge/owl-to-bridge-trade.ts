@@ -47,13 +47,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
             providerAddress,
             routePath: []
         });
-
-        const gasData = await getCrossChainGasData(trade);
-        if (!gasData) {
-            throw new Error('gasData is null');
-        }
-
-        return gasData;
+        return getCrossChainGasData(trade);
     }
 
     /**ABSTRACT PROPS */
