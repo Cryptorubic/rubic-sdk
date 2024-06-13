@@ -3,7 +3,6 @@ import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -39,8 +38,6 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         const walletAddress = this.getWalletAddress(fromBlockchain);
 
         try {
-            checkUnsupportedReceiverAddress(options.receiverAddress);
-
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
@@ -62,7 +59,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
             const minAmountBN = new BigNumber(pairInfo.min_value.ui_value);
             const maxAmountBN = new BigNumber(pairInfo.max_value.ui_value);
             const swapParams = {
-                amount: fromWithoutFee.tokenAmount.toFixed(1),
+                amount: fromWithoutFee.tokenAmount.toFixed(),
                 dstChainName: pairInfo.to_chain_name,
                 srcChainName: pairInfo.from_chain_name,
                 receiverAddress: options.receiverAddress || walletAddress,
@@ -70,7 +67,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 walletAddress
             } as OwlTopSwapRequest;
 
-            const { receive_value, gas_fee, txs } = await OwlToApiService.getSwapInfo(swapParams);
+            const { receive_value, txs } = await OwlToApiService.getSwapInfo(swapParams);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -84,7 +81,6 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                           fromToken: fromWithoutFee,
                           toToken: to,
                           providerAddress: options.providerAddress,
-                          gasLimit: new BigNumber(gas_fee.raw_value),
                           swapParams,
                           approveAddress: txs.transfer_body.to
                       })

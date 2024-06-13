@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
@@ -12,7 +11,6 @@ export interface OwlToGetGasDataParams {
     toToken: PriceTokenAmount<EvmBlockchainName>;
     feeInfo: FeeInfo;
     providerAddress: string;
-    gasLimit: BigNumber;
     swapParams: OwlTopSwapRequest;
     approveAddress: string;
 }

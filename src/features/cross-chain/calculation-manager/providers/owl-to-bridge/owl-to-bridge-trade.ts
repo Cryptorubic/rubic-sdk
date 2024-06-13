@@ -3,12 +3,10 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Injector } from 'src/core/injector/injector';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { ContractParams } from 'src/features/common/models/contract-params';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -33,37 +31,29 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         fromToken,
         toToken,
         providerAddress,
-        gasLimit,
         swapParams,
         approveAddress
     }: OwlToGetGasDataParams): Promise<GasData | null> {
-        try {
-            const trade = new OwlToBridgeTrade({
-                crossChainTrade: {
-                    feeInfo,
-                    from: fromToken,
-                    to: toToken,
-                    priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                    gasData: null,
-                    swapParams,
-                    approveAddress
-                },
-                providerAddress,
-                routePath: []
-            });
+        const trade = new OwlToBridgeTrade({
+            crossChainTrade: {
+                feeInfo,
+                from: fromToken,
+                to: toToken,
+                priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
+                gasData: null,
+                swapParams,
+                approveAddress
+            },
+            providerAddress,
+            routePath: []
+        });
 
-            const gasData = await getCrossChainGasData(trade);
-            if (!gasData) {
-                throw new Error('gasData is null');
-            }
-
-            return gasData;
-        } catch (_err) {
-            const gasDetails = await Injector.gasPriceApi.getGasPrice(fromToken.blockchain);
-            const gasDetailsBN = convertGasDataToBN(gasDetails);
-
-            return { gasLimit, ...gasDetailsBN };
+        const gasData = await getCrossChainGasData(trade);
+        if (!gasData) {
+            throw new Error('gasData is null');
         }
+
+        return gasData;
     }
 
     /**ABSTRACT PROPS */
@@ -104,7 +94,7 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
     }
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaTransfer';
+        return 'startBridgeTokensViaGenericCrossChain';
     }
 
     constructor({ crossChainTrade, providerAddress, routePath }: OwlToTradeParams) {

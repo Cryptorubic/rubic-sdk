@@ -56,6 +56,9 @@ export class OwlToApiService {
                 value_include_gas_fee: true
             }
         );
+        if (!data.txs) {
+            throw new NotSupportedTokensError();
+        }
 
         return data;
     }
@@ -68,7 +71,7 @@ export class OwlToApiService {
             }
         );
 
-        if (data.to_chain_hash) {
+        if (data?.to_chain_hash) {
             return {
                 status: TX_STATUS.SUCCESS,
                 hash: data.to_chain_hash
