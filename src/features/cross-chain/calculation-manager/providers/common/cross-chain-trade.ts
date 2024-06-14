@@ -6,6 +6,7 @@ import {
     WrongReceiverAddressError
 } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
+import { NoLinkedAccountError } from 'src/common/errors/swap/no-linked-account-erros';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
@@ -216,12 +217,27 @@ export abstract class CrossChainTrade<T = unknown> {
 
     protected async checkTradeErrors(): Promise<void | never> {
         this.checkWalletConnected();
-        await Promise.all([this.checkBlockchainCorrect(), this.checkUserBalance()]);
+        await Promise.all([
+            this.checkBlockchainCorrect(),
+            this.checkUserBalance(),
+            this.checkBlockchainRequirements()
+        ]);
     }
 
     protected checkWalletConnected(): never | void {
         if (!this.walletAddress) {
             throw new WalletNotConnectedError();
+        }
+    }
+
+    protected async checkBlockchainRequirements(): Promise<void | never> {
+        if (this.to.blockchain === BLOCKCHAIN_NAME.SEI && !this.to.isNative) {
+            const web3 = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SEI);
+            const transactionCount = await web3.getTransactionCount(this.walletAddress);
+            const balance = await web3.getBalance(this.walletAddress, this.to.address);
+            if (new BigNumber(balance).eq(0) && transactionCount === 0) {
+                throw new NoLinkedAccountError();
+            }
         }
     }
 

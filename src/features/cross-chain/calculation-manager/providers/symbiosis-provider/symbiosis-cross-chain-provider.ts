@@ -88,11 +88,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         let disabledTrade = {} as SymbiosisCrossChainTrade;
 
         try {
-            const fakeAddress = '0xf78312D6aD7afc364422Dda14a24082104588542';
+            const FAKE_WALLET_ADDRESS  = '0xf78312D6aD7afc364422Dda14a24082104588542';
             const fromAddress =
                 options.fromAddress ||
                 this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
-                fakeAddress ||
+                FAKE_WALLET_ADDRESS ||
                 oneinchApiParams.nativeAddress;
 
             const feeInfo = await this.getFeeInfo(
