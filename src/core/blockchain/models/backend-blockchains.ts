@@ -142,7 +142,7 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.XLAYER]: 'xlayer',
     [BLOCKCHAIN_NAME.TAIKO]: 'taiko',
     [BLOCKCHAIN_NAME.SEI]: 'sei',
-    [BLOCKCHAIN_NAME.COREDAO]: 'sei'
+    [BLOCKCHAIN_NAME.CORE]: 'sei'
 } as const;
 
 export const TO_BACKEND_BLOCKCHAINS: Record<BlockchainName, BackendBlockchain> = {

@@ -468,8 +468,8 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'SEI',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.COREDAO]: new Token({
-        blockchain: BLOCKCHAIN_NAME.COREDAO,
+    [BLOCKCHAIN_NAME.CORE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.CORE,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'CORE',
         symbol: 'CORE',
