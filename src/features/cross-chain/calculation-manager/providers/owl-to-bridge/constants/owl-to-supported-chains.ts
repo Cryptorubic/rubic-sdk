@@ -22,7 +22,8 @@ export const owlToSupportedBlockchains = [
     BLOCKCHAIN_NAME.ZETACHAIN,
     BLOCKCHAIN_NAME.MERLIN,
     BLOCKCHAIN_NAME.MODE,
-    BLOCKCHAIN_NAME.ZK_LINK
+    BLOCKCHAIN_NAME.ZK_LINK,
+    BLOCKCHAIN_NAME.TAIKO
 ] as const;
 
 export type OwlToSupportedBlockchain = (typeof owlToSupportedBlockchains)[number];
