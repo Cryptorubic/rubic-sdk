@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { NoLinkedAccountError } from 'src/common/errors/swap/no-linked-account-erros';
 import { PriceToken, PriceTokenAmount, TokenAmount as RubicTokenAmount } from 'src/common/tokens';
 import { TokenStruct } from 'src/common/tokens/token';
 import {
@@ -10,6 +11,7 @@ import {
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -86,9 +88,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         let disabledTrade = {} as SymbiosisCrossChainTrade;
 
         try {
+            const fakeAddress = '0xf78312D6aD7afc364422Dda14a24082104588542';
             const fromAddress =
                 options.fromAddress ||
                 this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
+                fakeAddress ||
                 oneinchApiParams.nativeAddress;
 
             const feeInfo = await this.getFeeInfo(
@@ -153,7 +157,14 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
 
             disabledTrade = this.getEmptyTrade(from, mockTo, swapParams, feeInfo);
-
+            if (toToken.blockchain === BLOCKCHAIN_NAME.SEI && !toToken.isNative) {
+                const web3 = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SEI);
+                const transactionCount = await web3.getTransactionCount(fromAddress);
+                const balance = await web3.getBalance(fromAddress, toToken.address);
+                if (new BigNumber(balance).eq(0) && transactionCount === 0) {
+                    throw new NoLinkedAccountError();
+                }
+            }
             const { rewards, tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
                 await SymbiosisApiService.getCrossChainSwapTx(swapParams);
 
