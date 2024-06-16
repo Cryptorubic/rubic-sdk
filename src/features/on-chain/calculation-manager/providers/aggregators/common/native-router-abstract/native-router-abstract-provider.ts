@@ -8,7 +8,6 @@ import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/mod
 import { RequiredOnChainCalculationOptions } from '../../../common/models/on-chain-calculation-options';
 import { AggregatorOnChainProvider } from '../../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { OnChainTrade } from '../../../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../../common/utils/get-gas-price-info';
 import {
@@ -23,17 +22,17 @@ import {
 import { NativeRouterAbstractTrade } from './native-router-abstract-trade';
 import { NativeRouterApiService } from './services/native-router-api-service';
 
-export abstract class NativeRouterAbstractProvider extends AggregatorOnChainProvider {
+export abstract class NativeRouterAbstractProvider<
+    T extends NativeRouterAbstractTrade = NativeRouterAbstractTrade
+> extends AggregatorOnChainProvider {
     private readonly nativeTokenAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
-    protected abstract createNativeRouterTradeInstance(
-        tradeInstance: NativeRouterTradeInstance
-    ): OnChainTrade;
+    protected abstract createNativeRouterTradeInstance(tradeInstance: NativeRouterTradeInstance): T;
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
-    ): Promise<OnChainTrade | OnChainTradeError> {
+    ): Promise<T | OnChainTradeError> {
         const fromChainId = blockchainId[from.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
         if (fromChainId !== toChainId) {

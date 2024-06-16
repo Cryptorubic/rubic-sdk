@@ -5,12 +5,12 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
-import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { NativeRouterTradeInstance } from '../common/native-router-abstract/models/native-router-trade-struct';
 import { NativeRouterAbstractProvider } from '../common/native-router-abstract/native-router-abstract-provider';
 import { nativeRouterSupportedBlockchains } from './constants/native-router-supported-blockchains';
+import { NativeRouterTrade } from './native-router-trade';
 
-export class NativeRouterProvider extends NativeRouterAbstractProvider {
+export class NativeRouterProvider extends NativeRouterAbstractProvider<NativeRouterTrade> {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.NATIVE_ROUTER;
 
     protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
@@ -19,7 +19,7 @@ export class NativeRouterProvider extends NativeRouterAbstractProvider {
 
     protected createNativeRouterTradeInstance(
         tradeInstance: NativeRouterTradeInstance
-    ): OnChainTrade {
+    ): NativeRouterTrade {
         return new NativeRouterTrade(tradeInstance);
     }
 
@@ -27,7 +27,7 @@ export class NativeRouterProvider extends NativeRouterAbstractProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
-    ): Promise<OnChainTrade | OnChainTradeError> {
+    ): Promise<NativeRouterTrade | OnChainTradeError> {
         if (!this.isSupportedBlockchain(from.blockchain)) {
             throw new NotSupportedBlockchain();
         }
