@@ -177,7 +177,6 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
         let receiverAddress = options.receiverAddress;
         let toAddress = '';
-
         if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
             const tronHexReceiverAddress = await this.tronWeb3Public.convertTronAddressToHex(
                 options.receiverAddress!
