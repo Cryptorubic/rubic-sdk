@@ -65,14 +65,23 @@ export abstract class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrad
         this.providerGateway = tradeInstance.providerGateway;
         this.nativeRouterQuoteParams = tradeInstance.nativeRouterQuoteParams;
     }
+     public async encode(
+        options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+            await checkUnsupportedReceiverAddress(
+                options.receiverAddress,
+                this.walletAddress
+            )
+            await this.checkFromAddress(options.fromAddress, true);
+            await this.checkReceiverAddress(options.receiverAddress);
 
+            if (this.useProxy) {
+                return this.encodeProxy(options);
+            }
+            return this.encodeDirect(options);
+     }
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
-        checkUnsupportedReceiverAddress(
-            options?.receiverAddress,
-            options?.fromAddress || this.walletAddress
-        );
         const account = options.receiverAddress || options.fromAddress;
         try {
             const { amountOut, txRequest } = await NativeRouterApiService.getFirmQuote({
