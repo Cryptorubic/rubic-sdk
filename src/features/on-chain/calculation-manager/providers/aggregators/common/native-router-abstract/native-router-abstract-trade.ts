@@ -3,6 +3,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
 import { AggregatorEvmOnChainTrade } from '../../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -68,7 +69,11 @@ export abstract class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrad
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
-        const account = options.fromAddress;
+        checkUnsupportedReceiverAddress(
+            options?.receiverAddress,
+            options?.fromAddress || this.walletAddress
+        );
+        const account = options.receiverAddress || options.fromAddress;
         try {
             const { amountOut, txRequest } = await NativeRouterApiService.getFirmQuote({
                 ...this.nativeRouterQuoteParams,
