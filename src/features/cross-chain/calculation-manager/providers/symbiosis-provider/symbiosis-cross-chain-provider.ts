@@ -207,7 +207,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const symbiosisErr = err as SymbiosisError;
             const symbiosisSdkError = this.handleMinAmountError(symbiosisErr);
             if (
-                err.error.message.includes(
+                err?.error?.message.includes(
                     'estimateGas: execution reverted: TransferHelper::safeTransfer: transfer failed'
                 )
             ) {
