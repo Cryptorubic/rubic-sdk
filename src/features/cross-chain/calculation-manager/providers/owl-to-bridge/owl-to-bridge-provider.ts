@@ -3,6 +3,7 @@ import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -35,7 +36,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as OwlToSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-        const walletAddress = this.getWalletAddress(fromBlockchain);
+        const walletAddress = this.getWalletAddress(fromBlockchain) || FAKE_WALLET_ADDRESS;
 
         try {
             const feeInfo = await this.getFeeInfo(

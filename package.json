@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.24.0-alpha.owlto.11",
+    "version": "5.24.0-alpha.owlto.13",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
