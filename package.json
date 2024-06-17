@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.25.0",
+    "version": "5.25.1-alpha.meson-id.2",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
