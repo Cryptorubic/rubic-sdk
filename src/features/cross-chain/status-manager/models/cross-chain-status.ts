@@ -19,4 +19,9 @@ export interface CrossChainStatus {
      * Transaction hash on destination chain.
      */
     dstTxHash: string | null;
+
+    /* Contains additional info for specific providers */
+    extraInfo?: {
+        mesonSwapId: string;
+    };
 }
