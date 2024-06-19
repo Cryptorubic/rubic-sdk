@@ -58,6 +58,8 @@ import { WagyuSwapProvider } from 'src/features/on-chain/calculation-manager/pro
 import { EddyFinanceProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/eddy-finance/eddy-finance-provider';
 import { MuteSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/mute-swap/mute-swap-provider';
 
+import { SushiSwapZetachainProvider } from '../../providers/dexes/zetachain/sushi-swap-zetachain/sushi-swap-zetachain-provider';
+
 export const UniswapV2TradeProviders = [
     // ethereum
     UniSwapV2EthereumProvider,
@@ -148,6 +150,7 @@ export const UniswapV2TradeProviders = [
     UniSwapV2BlastProvider,
     // ZetaChain
     EddyFinanceProvider,
+    SushiSwapZetachainProvider,
     // Mode
     EddyFinanceModeProvider,
     // Sei

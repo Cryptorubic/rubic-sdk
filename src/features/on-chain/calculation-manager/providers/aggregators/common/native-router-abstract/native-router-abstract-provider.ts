@@ -1,0 +1,119 @@
+import { RubicSdkError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
+
+import { RequiredOnChainCalculationOptions } from '../../../common/models/on-chain-calculation-options';
+import { AggregatorOnChainProvider } from '../../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { GasFeeInfo } from '../../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { getGasFeeInfo } from '../../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../../common/utils/get-gas-price-info';
+import {
+    AllSupportedNetworks,
+    blockchainNameMapping
+} from './constants/native-router-abstract-supported-blockchains';
+import { NativeRouterQuoteRequestParams } from './models/native-router-quote';
+import {
+    NativeRouterTradeInstance,
+    NativeRouterTradeStruct
+} from './models/native-router-trade-struct';
+import { NativeRouterAbstractTrade } from './native-router-abstract-trade';
+import { NativeRouterApiService } from './services/native-router-api-service';
+
+export abstract class NativeRouterAbstractProvider<
+    T extends NativeRouterAbstractTrade = NativeRouterAbstractTrade
+> extends AggregatorOnChainProvider {
+    private readonly nativeTokenAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+
+    protected abstract createNativeRouterTradeInstance(tradeInstance: NativeRouterTradeInstance): T;
+    public async calculate(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
+        options: RequiredOnChainCalculationOptions
+    ): Promise<T | OnChainTradeError> {
+        const fromChainId = blockchainId[from.blockchain];
+        const toChainId = blockchainId[toToken.blockchain];
+        if (fromChainId !== toChainId) {
+            throw new RubicSdkError();
+        }
+        try {
+            const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
+            const fromAddress = this.getWalletAddress(from.blockchain) || fakeAddress;
+            const chain = this.getBlockchainById(from.blockchain);
+            const path = this.getRoutePath(from, toToken);
+            const fromTokenAddress = from.isNative ? this.nativeTokenAddress : from.address;
+            const toTokenAddress = toToken.isNative ? this.nativeTokenAddress : toToken.address;
+            const nativeRouterQuoteParams: NativeRouterQuoteRequestParams = {
+                chain: chain,
+                tokenIn: fromTokenAddress,
+                tokenOut: toTokenAddress,
+                amount: fromWithoutFee.tokenAmount.toString(),
+                fromAddress: fromAddress,
+                slippage: options.slippageTolerance
+            };
+            const { amountOut, txRequest } = await NativeRouterApiService.getFirmQuote(
+                nativeRouterQuoteParams
+            );
+            const providerGateway = txRequest.target;
+            const to = new PriceTokenAmount({
+                ...toToken.asStruct,
+                tokenAmount: Web3Pure.fromWei(amountOut, toToken.decimals)
+            });
+            const nativeRouterTradeStruct: NativeRouterTradeStruct = {
+                from,
+                to,
+                slippageTolerance: options.slippageTolerance,
+                path,
+                gasFeeInfo: null,
+                useProxy: options.useProxy,
+                proxyFeeInfo,
+                fromWithoutFee,
+                withDeflation: options.withDeflation,
+                usedForCrossChain: options.usedForCrossChain,
+                txRequest
+            };
+            const gasFeeInfo =
+                options.gasCalculation === 'calculate'
+                    ? await this.getGasFeeInfo(nativeRouterTradeStruct, providerGateway)
+                    : null;
+            const tradeInstance: NativeRouterTradeInstance = {
+                tradeStruct: {
+                    ...nativeRouterTradeStruct,
+                    gasFeeInfo
+                },
+                providerAddress: options.providerAddress,
+                nativeRouterQuoteParams,
+                providerGateway
+            };
+            return this.createNativeRouterTradeInstance(tradeInstance);
+        } catch (err) {
+            return {
+                type: this.tradeType,
+                error: err
+            };
+        }
+    }
+
+    protected async getGasFeeInfo(
+        tradeStruct: NativeRouterTradeStruct,
+        providerGateway: string
+    ): Promise<GasFeeInfo | null> {
+        try {
+            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
+            const gasLimit = await NativeRouterAbstractTrade.getGasLimit(
+                tradeStruct,
+                providerGateway
+            );
+            return getGasFeeInfo(gasLimit, gasPriceInfo);
+        } catch {
+            return null;
+        }
+    }
+
+    public getBlockchainById(blockchain: string): string {
+        return blockchainNameMapping[blockchain as AllSupportedNetworks];
+    }
+}

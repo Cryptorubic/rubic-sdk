@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { NoLinkedAccountError } from 'src/common/errors/swap/no-linked-account-erros';
 import { PriceToken, PriceTokenAmount, TokenAmount as RubicTokenAmount } from 'src/common/tokens';
 import { TokenStruct } from 'src/common/tokens/token';
 import {
@@ -86,9 +87,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         let disabledTrade = {} as SymbiosisCrossChainTrade;
 
         try {
+            const FAKE_WALLET_ADDRESS = '0xf78312D6aD7afc364422Dda14a24082104588542';
             const fromAddress =
                 options.fromAddress ||
                 this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
+                FAKE_WALLET_ADDRESS ||
                 oneinchApiParams.nativeAddress;
 
             const feeInfo = await this.getFeeInfo(
@@ -199,11 +202,17 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 ),
                 tradeType: this.type
             };
-        } catch (err: unknown) {
+        } catch (err) {
             let rubicSdkError = CrossChainProvider.parseError(err);
             const symbiosisErr = err as SymbiosisError;
             const symbiosisSdkError = this.handleMinAmountError(symbiosisErr);
-
+            if (
+                err?.error?.message.includes(
+                    'estimateGas: execution reverted: TransferHelper::safeTransfer: transfer failed'
+                )
+            ) {
+                rubicSdkError = new NoLinkedAccountError();
+            }
             return {
                 trade: symbiosisSdkError ? disabledTrade : null,
                 error: symbiosisSdkError || rubicSdkError,
