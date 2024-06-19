@@ -40,6 +40,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     DFYN: 'DFYN',
     DLN: 'DLN',
     DODO: 'DODO',
+    DRAGON_SWAP: 'DRAGON_SWAP',
     DYSTOPIA: 'DYSTOPIA',
 
     ECHO_DEX: 'ECHO_DEX',
