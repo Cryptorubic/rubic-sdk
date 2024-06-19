@@ -12,7 +12,7 @@ const defaultCoreRoutingProvidersAddresses = [
 
 const defaultCoreWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.CORE]!.address;
 
-export const defaultCoreProviderConfiguration: UniswapV2ProviderConfiguration = {
+const defaultCoreProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 2,
     routingProvidersAddresses: defaultCoreRoutingProvidersAddresses,
     wethAddress: defaultCoreWethAddress
