@@ -3,4 +3,7 @@ import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/mo
 export interface TxStatusData {
     status: TxStatus;
     hash: string | null;
+    extraInfo?: {
+        mesonSwapId: string;
+    };
 }

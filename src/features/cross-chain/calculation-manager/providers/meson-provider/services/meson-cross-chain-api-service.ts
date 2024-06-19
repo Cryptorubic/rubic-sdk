@@ -101,7 +101,10 @@ export class MesonCcrApiService {
             if (res.result.RELEASED) {
                 return {
                     hash: res.result.RELEASED,
-                    status: TX_STATUS.SUCCESS
+                    status: TX_STATUS.SUCCESS,
+                    extraInfo: {
+                        mesonSwapId: res.result.swap.id
+                    }
                 };
             }
 
