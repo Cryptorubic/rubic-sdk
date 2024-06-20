@@ -206,16 +206,22 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             let rubicSdkError = CrossChainProvider.parseError(err);
             const symbiosisErr = err as SymbiosisError;
             const symbiosisSdkError = this.handleMinAmountError(symbiosisErr);
-            if (
-                err?.error?.code === 400 &&
-                err?.error?.message !== 'not found' &&
-                (err?.error?.message.includes(`BaseSwapping: can't get the best implementation`) ||
-                    err?.error?.message.includes(
-                        'estimateGas: execution reverted: TransferHelper::safeTransfer: transfer failed'
-                    ))
-            ) {
-                rubicSdkError = new NoLinkedAccountError();
+            const walletAddress = this.getWalletAddress(fromBlockchain);
+            if (toBlockchain === 'SEI' && walletAddress && !toToken.isNative) {
+                if (
+                    err?.error?.code === 400 &&
+                    err?.error?.message !== 'not found' &&
+                    (err?.error?.message.includes(
+                        `BaseSwapping: can't get the best implementation`
+                    ) ||
+                        err?.error?.message.includes(
+                            'estimateGas: execution reverted: TransferHelper::safeTransfer: transfer failed'
+                        ))
+                ) {
+                    rubicSdkError = new NoLinkedAccountError();
+                }
             }
+
             return {
                 trade: symbiosisSdkError ? disabledTrade : null,
                 error: symbiosisSdkError || rubicSdkError,
