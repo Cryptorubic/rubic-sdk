@@ -450,5 +450,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Sei',
         symbol: 'WSEI',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.CORE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.CORE,
+        address: '0x191e94fa59739e188dce837f7f6978d84727ad01',
+        name: 'Wrapped CORE',
+        symbol: 'WCORE',
+        decimals: 18
     })
 };
