@@ -7,7 +7,7 @@ import { wrappedAddress } from 'src/common/tokens/constants/wrapped-addresses';
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { combineOptions } from 'src/common/utils/options';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -115,7 +115,8 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
             supportFeeContractNumbers: this.config.supportedFees,
             support001Pools: [],
             direction: SwapDirection.ExactIn,
-            amount: weiAmountWithoutFee
+            amount: weiAmountWithoutFee,
+            shortBatchSize: this.blockchain === BLOCKCHAIN_NAME.MERLIN ? 5 : 20
         } as SearchPathQueryParams;
 
         let pathQueryResult = null;

@@ -122,16 +122,18 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             const gasLimits = this.getDefaultGases(sortedRoutes);
 
             if (this.walletAddress) {
-                const gasRequests = await Promise.all(this.getGasRequests(sortedRoutes));
-                const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
-                    this.walletAddress,
-                    gasRequests
-                );
-                estimatedGasLimits.forEach((elem, index) => {
-                    if (elem?.isFinite()) {
-                        gasLimits[index] = elem;
-                    }
-                });
+                try {
+                    const gasRequests = await Promise.all(this.getGasRequests(sortedRoutes));
+                    const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
+                        this.walletAddress,
+                        gasRequests
+                    );
+                    estimatedGasLimits.forEach((elem, index) => {
+                        if (elem?.isFinite()) {
+                            gasLimits[index] = elem;
+                        }
+                    });
+                } catch {}
             }
 
             const routesWithProfit: UniswapCalculatedInfoWithProfit[] = sortedRoutes.map(
