@@ -207,9 +207,12 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const symbiosisErr = err as SymbiosisError;
             const symbiosisSdkError = this.handleMinAmountError(symbiosisErr);
             if (
-                err?.error?.message.includes(
-                    'estimateGas: execution reverted: TransferHelper::safeTransfer: transfer failed'
-                )
+                err?.error?.code === 400 &&
+                err?.error?.message !== 'not found' &&
+                (err?.error?.message.includes(`BaseSwapping: can't get the best implementation`) ||
+                    err?.error?.message.includes(
+                        'estimateGas: execution reverted: TransferHelper::safeTransfer: transfer failed'
+                    ))
             ) {
                 rubicSdkError = new NoLinkedAccountError();
             }
