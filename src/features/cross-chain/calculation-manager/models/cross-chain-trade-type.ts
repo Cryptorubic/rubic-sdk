@@ -17,7 +17,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     ORBITER_BRIDGE: 'orbiter_bridge',
     LAYERZERO: 'layerzero',
     ARCHON_BRIDGE: 'archon_bridge',
-    MESON: 'meson'
+    MESON: 'meson',
+    EDDY_FINANCE: 'eddy_bridge'
 } as const;
 
 export type CrossChainTradeType =
