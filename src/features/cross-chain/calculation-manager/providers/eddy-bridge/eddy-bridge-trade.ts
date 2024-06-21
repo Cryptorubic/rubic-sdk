@@ -1,8 +1,10 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { ContractParams } from 'src/features/common/models/contract-params';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
@@ -18,7 +20,14 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { EddySupportedChain } from './constants/eddy-bridge-supported-chains';
+import {
+    OMNI_BRIDGE_ADDRESS_IN_ZETACHAIN,
+    TSS_ADDRESSES_EDDY_BRIDGE
+} from './constants/eddy-bridge-contract-addresses';
+import {
+    EddyBridgeSupportedChain,
+    TssAvailableEddyBridgeChain
+} from './constants/eddy-bridge-supported-chains';
 import {
     EddyBridgeGetGasDataParams,
     EddyBridgeTradeConstructorParams
@@ -69,8 +78,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     public readonly priceImpact: number | null;
     /** */
 
-    private get fromBlockchain(): EddySupportedChain {
-        return this.from.blockchain as EddySupportedChain;
+    private get fromBlockchain(): EddyBridgeSupportedChain {
+        return this.from.blockchain as EddyBridgeSupportedChain;
     }
 
     // @TODO find eddy contract addresses
@@ -115,13 +124,12 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        const extraNativeFee = '0';
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data,
             this.from.blockchain,
             providerRouter,
-            extraNativeFee
+            '0'
         );
 
         const methodArguments = [bridgeData, providerData];
@@ -149,12 +157,28 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     protected async getTransactionConfigAndAmount(
         _receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        let config = {} as EvmEncodeConfig;
+        if (
+            this.to.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
+            this.to.isNative &&
+            this.from.isNative
+        ) {
+            const wrappedZetaAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN]!.address;
+            const walletAddress = this.walletAddress || FAKE_WALLET_ADDRESS;
+            let data = OMNI_BRIDGE_ADDRESS_IN_ZETACHAIN;
+            data += walletAddress.slice(2) + wrappedZetaAddress.slice(2);
+            config = {
+                data,
+                to: TSS_ADDRESSES_EDDY_BRIDGE[this.fromBlockchain as TssAvailableEddyBridgeChain],
+                value: this.from.stringWeiAmount
+            };
+        } else if (this.fromBlockchain === BLOCKCHAIN_NAME.ZETACHAIN && this.from.isNative) {
+        } else if (this.fromBlockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
+        } // @TODO handle case: AnyTokenAnyChain -> AnyTokenZetaChain
+        else {
+        }
         return {
-            config: {
-                data: '',
-                to: '',
-                value: ''
-            },
+            config,
             amount: this.to.stringWeiAmount
         };
     }
