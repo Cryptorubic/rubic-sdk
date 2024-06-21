@@ -134,7 +134,8 @@ export class CrossChainStatusManager {
         return {
             srcTxStatus,
             dstTxStatus: dstTxData.status,
-            dstTxHash: dstTxData.hash
+            dstTxHash: dstTxData.hash,
+            ...(dstTxData.extraInfo && { extraInfo: dstTxData.extraInfo })
         };
     }
 
