@@ -1,4 +1,4 @@
-import { NotSupportedBlockchain } from 'src/common/errors';
+import { NotSupportedBlockchain, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
@@ -13,12 +13,12 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { OMNI_BRIDGE_ADDRESS_IN_ZETACHAIN } from './constants/eddy-bridge-contract-addresses';
+import { EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN } from './constants/eddy-bridge-contract-addresses';
 import {
     EddyBridgeSupportedChain,
     eddyBridgeSupportedChains
 } from './constants/eddy-bridge-supported-chains';
-import { EDDY_BRIDGE_ABI } from './constants/omni-chain-abi';
+import { EDDY_BRIDGE_ABI } from './constants/edyy-bridge-abi';
 import { EddyBridgeTrade } from './eddy-bridge-trade';
 
 export class EddyBridgeProvider extends CrossChainProvider {
@@ -26,15 +26,6 @@ export class EddyBridgeProvider extends CrossChainProvider {
 
     public isSupportedBlockchain(fromBlockchain: EvmBlockchainName): boolean {
         return eddyBridgeSupportedChains.some(chain => chain === fromBlockchain);
-    }
-
-    private skipkNotZetaSwapBridges(
-        fromChain: EvmBlockchainName,
-        toChain: EvmBlockchainName
-    ): void {
-        if (fromChain !== BLOCKCHAIN_NAME.ZETACHAIN && toChain !== BLOCKCHAIN_NAME.ZETACHAIN) {
-            throw new NotSupportedBlockchain();
-        }
     }
 
     public async calculate(
@@ -50,7 +41,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 options?.receiverAddress,
                 options?.fromAddress || walletAddress
             );
-            this.skipkNotZetaSwapBridges(from.blockchain, toToken.blockchain);
+            this.skipkNotSupportedRoutes(from, toToken);
 
             const [eddyBridgeFee, feeInfo] = await Promise.all([
                 this.getEddyBridgeFee(fromBlockchain),
@@ -102,7 +93,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
     private async getEddyBridgeFee(fromBlockchain: EddyBridgeSupportedChain): Promise<number> {
         const web3Public = this.getFromWeb3Public(fromBlockchain) as EvmWeb3Public;
         const platformFee = await web3Public.callContractMethod<number>(
-            OMNI_BRIDGE_ADDRESS_IN_ZETACHAIN,
+            EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
             EDDY_BRIDGE_ABI,
             'platformFee',
             []
@@ -110,6 +101,32 @@ export class EddyBridgeProvider extends CrossChainProvider {
         // @TODO check output format
         console.log('EDDY_PLATFORM_FEE ======> ', platformFee);
         return platformFee;
+    }
+
+    private skipkNotSupportedRoutes(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>
+    ): void {
+        const supportedTokens = ['eth', 'bnb', 'zeta'];
+
+        // Prevents bridges BSC <-> Ethereum
+        if (
+            from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
+            toToken.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN
+        ) {
+            throw new NotSupportedBlockchain();
+        }
+        // Only gas-token can be bridged from supported chains in ZetaChain
+        if (from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN && !from.isNative) {
+            throw new NotSupportedTokensError();
+        }
+        // Bridge from ZetaChain available only for ETH.ETH, BNB.BNB, ZETA
+        if (
+            from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
+            !supportedTokens.includes(from.symbol)
+        ) {
+            throw new NotSupportedTokensError();
+        }
     }
 
     protected async getRoutePath(

@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -21,13 +22,15 @@ import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
-    OMNI_BRIDGE_ADDRESS_IN_ZETACHAIN,
+    EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
+    TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS,
     TSS_ADDRESSES_EDDY_BRIDGE
 } from './constants/eddy-bridge-contract-addresses';
 import {
     EddyBridgeSupportedChain,
     TssAvailableEddyBridgeChain
 } from './constants/eddy-bridge-supported-chains';
+import { EDDY_BRIDGE_ABI } from './constants/edyy-bridge-abi';
 import {
     EddyBridgeGetGasDataParams,
     EddyBridgeTradeConstructorParams
@@ -158,24 +161,55 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         _receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         let config = {} as EvmEncodeConfig;
-        if (
-            this.to.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
-            this.to.isNative &&
-            this.from.isNative
-        ) {
-            const wrappedZetaAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN]!.address;
+        const wrappedZetaAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN]!.address;
+        const isFromZetaChainNative =
+            this.fromBlockchain === BLOCKCHAIN_NAME.ZETACHAIN && this.from.isNative;
+        const isFromZetaChainToken =
+            this.fromBlockchain === BLOCKCHAIN_NAME.ZETACHAIN && !this.from.isNative;
+        const isFromSupportedChainNative =
+            this.fromBlockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
+            this.from.isNative &&
+            this.to.isNative;
+
+        if (isFromSupportedChainNative) {
             const walletAddress = this.walletAddress || FAKE_WALLET_ADDRESS;
-            let data = OMNI_BRIDGE_ADDRESS_IN_ZETACHAIN;
-            data += walletAddress.slice(2) + wrappedZetaAddress.slice(2);
+            let data =
+                EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN +
+                walletAddress.slice(2) +
+                wrappedZetaAddress.slice(2);
+
             config = {
                 data,
                 to: TSS_ADDRESSES_EDDY_BRIDGE[this.fromBlockchain as TssAvailableEddyBridgeChain],
                 value: this.from.stringWeiAmount
             };
-        } else if (this.fromBlockchain === BLOCKCHAIN_NAME.ZETACHAIN && this.from.isNative) {
-        } else if (this.fromBlockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
-        } // @TODO handle case: AnyTokenAnyChain -> AnyTokenZetaChain
-        else {
+        } else if (isFromZetaChainNative) {
+            const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.from.symbol];
+            config = EvmWeb3Pure.encodeMethodCall(
+                EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
+                EDDY_BRIDGE_ABI,
+                'transferZetaToConnectedChain',
+                ['', wrappedZetaAddress, destZrc20TokenAddress],
+                this.from.stringWeiAmount
+            );
+        } else if (isFromZetaChainToken) {
+            const srcZrc20TokenAddress = this.from.address;
+            const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.to.symbol];
+            const methodArgs = [
+                '',
+                this.from.stringWeiAmount,
+                srcZrc20TokenAddress,
+                destZrc20TokenAddress
+            ];
+            config = EvmWeb3Pure.encodeMethodCall(
+                EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
+                EDDY_BRIDGE_ABI,
+                'withdrawToNativeChain',
+                methodArgs,
+                '0'
+            );
+        } else {
+            throw new RubicSdkError('Unhandled not available token pair in EDDY_BRIDGE');
         }
         return {
             config,

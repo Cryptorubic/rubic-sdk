@@ -93,7 +93,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE]: this.getOrbiterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LAYERZERO]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ARCHON_BRIDGE]: this.getLayerZeroDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.MESON]: this.getMesonDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.MESON]: this.getMesonDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus
     };
 
     /**
@@ -707,5 +708,13 @@ export class CrossChainStatusManager {
 
     private async getMesonDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         return MesonCcrApiService.fetchTxStatus(data.srcTxHash);
+    }
+
+    // @TODO handle EddyBridge status
+    private async getEddyBridgeDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
+        return {
+            hash: null,
+            status: TX_STATUS.PENDING
+        };
     }
 }
