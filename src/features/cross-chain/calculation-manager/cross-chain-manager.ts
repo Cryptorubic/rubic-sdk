@@ -333,15 +333,12 @@ export class CrossChainManager {
         const isBlockchainSupportedByProxy = proxySupportedBlockchains.includes(
             fromBlockchain as ProxySupportedBlockchain
         );
-        return Object.fromEntries(
-            Object.values(CROSS_CHAIN_TRADE_TYPE).map(key => {
-                return [
-                    key,
-                    isBlockchainSupportedByProxy
-                        ? options?.useProxy?.[key as CrossChainTradeType] ?? true
-                        : false
-                ];
-            })
-        ) as Record<CrossChainTradeType, boolean>;
+        return Object.values(CROSS_CHAIN_TRADE_TYPE).reduce(
+            (acc, chain) => ({
+                ...acc,
+                [chain]: isBlockchainSupportedByProxy ? options?.useProxy?.[chain] ?? true : false
+            }),
+            {} as Record<CrossChainTradeType, boolean>
+        );
     }
 }
