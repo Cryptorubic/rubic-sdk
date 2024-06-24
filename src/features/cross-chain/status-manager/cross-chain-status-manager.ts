@@ -63,6 +63,7 @@ import {
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
+import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
 import { OwlToApiService } from '../calculation-manager/providers/owl-to-bridge/services/owl-to-api-service';
@@ -718,11 +719,9 @@ export class CrossChainStatusManager {
         return txStatusData;
     }
 
-    // @TODO handle EddyBridge status
-    private async getEddyBridgeDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
-        return {
-            hash: null,
-            status: TX_STATUS.PENDING
-        };
+    private async getEddyBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const txStatusData = await getEddyBridgeDstSwapStatus(data);
+
+        return txStatusData;
     }
 }

@@ -34,7 +34,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as EddyBridgeSupportedChain;
-        const useProxy = options?.useProxy?.[this.type] ?? true;
+        // const useProxy = options?.useProxy?.[this.type] ?? true;
+        const useProxy = false;
         const walletAddress = this.getWalletAddress(fromBlockchain) || FAKE_WALLET_ADDRESS;
         try {
             checkUnsupportedReceiverAddress(
@@ -43,8 +44,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
             );
             this.skipkNotSupportedRoutes(from, toToken);
 
-            const [eddyBridgeFee, feeInfo] = await Promise.all([
-                this.getEddyBridgeFee(fromBlockchain),
+            const [eddyPercentFee, feeInfo] = await Promise.all([
+                this.getEddyBridgePercentFee(),
                 this.getFeeInfo(fromBlockchain, options.providerAddress, from, useProxy)
             ]);
             const fromWithoutFee = getFromWithoutFee(
@@ -54,7 +55,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
 
             const to = await PriceTokenAmount.createToken({
                 ...toToken.asStruct,
-                tokenAmount: from.tokenAmount.minus(eddyBridgeFee)
+                tokenAmount: from.tokenAmount.minus(from.tokenAmount.multipliedBy(eddyPercentFee))
             });
 
             const gasData =
@@ -90,17 +91,15 @@ export class EddyBridgeProvider extends CrossChainProvider {
         }
     }
 
-    private async getEddyBridgeFee(fromBlockchain: EddyBridgeSupportedChain): Promise<number> {
-        const web3Public = this.getFromWeb3Public(fromBlockchain) as EvmWeb3Public;
+    private async getEddyBridgePercentFee(): Promise<number> {
+        const web3Public = this.getFromWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN) as EvmWeb3Public;
         const platformFee = await web3Public.callContractMethod<number>(
             EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
             EDDY_BRIDGE_ABI,
             'platformFee',
             []
         );
-        // @TODO check output format
-        console.log('EDDY_PLATFORM_FEE ======> ', platformFee);
-        return platformFee;
+        return platformFee / 1_000;
     }
 
     private skipkNotSupportedRoutes(
@@ -123,7 +122,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
         // Bridge from ZetaChain available only for ETH.ETH, BNB.BNB, ZETA
         if (
             from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
-            !supportedTokens.includes(from.symbol)
+            !supportedTokens.includes(from.symbol.toLowerCase())
         ) {
             throw new NotSupportedTokensError();
         }

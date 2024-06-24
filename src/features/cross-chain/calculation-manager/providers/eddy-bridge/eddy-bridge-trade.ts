@@ -60,7 +60,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     }
 
     /**ABSTRACT PROPS */
-    public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.MESON;
+    public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE;
 
     public readonly isAggregator: boolean = false;
 
@@ -85,9 +85,11 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         return this.from.blockchain as EddyBridgeSupportedChain;
     }
 
-    // @TODO find eddy contract addresses
+    // EddyFinance has deployed contract only in ZetaChain, other routes go directly via `transfer`
     protected get fromContractAddress(): string {
-        return this.isProxyTrade ? rubicProxyContractAddress[this.fromBlockchain].gateway : '';
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN;
     }
 
     // @TODO check method on rubic-contract
@@ -184,19 +186,19 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 value: this.from.stringWeiAmount
             };
         } else if (isFromZetaChainNative) {
-            const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.from.symbol];
+            const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.to.symbol];
             config = EvmWeb3Pure.encodeMethodCall(
                 EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
                 EDDY_BRIDGE_ABI,
                 'transferZetaToConnectedChain',
-                ['', wrappedZetaAddress, destZrc20TokenAddress],
+                ['0x', wrappedZetaAddress, destZrc20TokenAddress],
                 this.from.stringWeiAmount
             );
         } else if (isFromZetaChainToken) {
             const srcZrc20TokenAddress = this.from.address;
             const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.to.symbol];
             const methodArgs = [
-                '',
+                '0x',
                 this.from.stringWeiAmount,
                 srcZrc20TokenAddress,
                 destZrc20TokenAddress
