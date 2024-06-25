@@ -1,6 +1,7 @@
 import { BigNumber as EthersBigNumber } from 'ethers';
 
 export type Web3PrimitiveType =
+    | number
     | string
     | boolean
     | Web3PrimitiveType[]

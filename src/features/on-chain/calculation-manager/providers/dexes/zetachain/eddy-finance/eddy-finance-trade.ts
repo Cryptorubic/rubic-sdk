@@ -1,5 +1,4 @@
 import { NotWhitelistedProviderError, RubicSdkError } from 'src/common/errors';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -137,25 +136,5 @@ export class EddyFinanceTrade extends UniswapV2AbstractTrade {
                 true
             ]
         ];
-    }
-
-    protected getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
-        let amountIn = this.fromWithoutFee.stringWeiAmount;
-        let amountOut = this.toTokenAmountMin.stringWeiAmount;
-
-        if (
-            this.from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
-            this.type === ON_CHAIN_TRADE_TYPE.EDDY_FINANCE &&
-            !this.from.isNative
-        ) {
-            amountIn = this.fromWithoutFee.weiAmount.minus(1).toFixed();
-        }
-
-        if (this.exact === 'output') {
-            amountIn = this.fromWithoutFee.weiAmountPlusSlippage(this.slippageTolerance).toFixed(0);
-            amountOut = this.to.stringWeiAmount;
-        }
-
-        return { amountIn, amountOut };
     }
 }
