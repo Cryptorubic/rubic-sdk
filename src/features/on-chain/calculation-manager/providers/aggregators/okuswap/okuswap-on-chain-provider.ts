@@ -39,16 +39,21 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
+        const fullOptions = { ...options, useProxy: false };
+
         if (!this.isSupportedBlockchain(from.blockchain)) {
             throw new RubicSdkError(`OkuSwap doesn't support ${from.blockchain} chain!`);
         }
 
         const fromBlockchain = from.blockchain as OkuSwapSupportedBlockchain;
         const walletAddress =
-            options.fromAddress || this.getWalletAddress(fromBlockchain) || FAKE_WALLET_ADDRESS;
+            fullOptions.fromAddress || this.getWalletAddress(fromBlockchain) || FAKE_WALLET_ADDRESS;
 
         try {
-            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
+                from,
+                fullOptions
+            );
             const path = this.getRoutePath(from, toToken);
 
             const subProviders = await OkuSwapApiService.getOkuSubProvidersForChain(
@@ -60,7 +65,7 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 inTokenAddress: from.address,
                 outTokenAddress: toToken.address,
                 isExactIn: true,
-                slippage: options.slippageTolerance * 10_000,
+                slippage: fullOptions.slippageTolerance * 10_000,
                 inTokenAmount: from.tokenAmount.toString()
             } as OkuQuoteRequestBody;
 
@@ -69,7 +74,7 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 quoteReqBody
             );
 
-            const providerGateway = swapReqBody.coupon.universalRouter;
+            const providerGateway = swapReqBody.coupon.raw.universalRouter;
             const permit2Address = swapReqBody.signingRequest?.permit2Address;
 
             const to = new PriceTokenAmount({
@@ -85,9 +90,9 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 gasFeeInfo: {
                     gasLimit: new BigNumber(gas)
                 },
-                slippageTolerance: options.slippageTolerance,
-                useProxy: options.useProxy,
-                withDeflation: options.withDeflation,
+                slippageTolerance: fullOptions.slippageTolerance,
+                useProxy: fullOptions.useProxy,
+                withDeflation: fullOptions.withDeflation,
                 path,
                 quoteReqBody,
                 swapReqBody,
@@ -96,7 +101,7 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
             };
 
             const gasFeeInfo =
-                options.gasCalculation === 'calculate'
+                fullOptions.gasCalculation === 'calculate'
                     ? await this.getGasFeeInfo(tradeStruct, providerGateway)
                     : null;
 
@@ -105,7 +110,7 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                     ...tradeStruct,
                     gasFeeInfo
                 },
-                options.providerAddress,
+                fullOptions.providerAddress,
                 providerGateway
             );
         } catch (err) {
