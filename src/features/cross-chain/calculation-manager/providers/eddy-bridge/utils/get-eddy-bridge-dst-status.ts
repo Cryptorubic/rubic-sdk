@@ -16,25 +16,32 @@ interface CctxHashResponse {
 }
 
 export async function getEddyBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-    const srcRes = await Injector.httpClient.get<SrcHashResponse>(
-        `https://zetachain.blockpi.network/lcd/v1/public/zeta-chain/crosschain/inTxHashToCctx/${data.srcTxHash}`
-    );
-    const cctxHash = srcRes.inTxHashToCctx.cctx_index[0];
+    try {
+        const srcRes = await Injector.httpClient.get<SrcHashResponse>(
+            `https://zetachain.blockpi.network/lcd/v1/public/zeta-chain/crosschain/inTxHashToCctx/${data.srcTxHash}`
+        );
+        const cctxHash = srcRes.inTxHashToCctx.cctx_index[0];
 
-    const cctxRes = await Injector.httpClient.get<CctxHashResponse>(`
+        const cctxRes = await Injector.httpClient.get<CctxHashResponse>(`
         https://zetachain.blockpi.network/lcd/v1/public/zeta-chain/crosschain/cctx/${cctxHash}
     `);
-    const dstTxHash = cctxRes.CrossChainTx?.outbound_tx_params?.[0]?.outbound_tx_hash;
+        const dstTxHash = cctxRes.CrossChainTx?.outbound_tx_params?.[0]?.outbound_tx_hash;
 
-    if (dstTxHash) {
+        if (dstTxHash) {
+            return {
+                hash: dstTxHash,
+                status: TX_STATUS.SUCCESS
+            };
+        }
+
         return {
-            hash: dstTxHash,
-            status: TX_STATUS.SUCCESS
+            hash: null,
+            status: TX_STATUS.PENDING
+        };
+    } catch {
+        return {
+            hash: null,
+            status: TX_STATUS.PENDING
         };
     }
-
-    return {
-        hash: null,
-        status: TX_STATUS.PENDING
-    };
 }
