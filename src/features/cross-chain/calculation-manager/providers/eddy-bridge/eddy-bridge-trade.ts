@@ -1,12 +1,14 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
+import { RubicSdkError, UnnecessaryApproveError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { TransactionReceipt } from 'web3-eth';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
@@ -35,7 +37,6 @@ import {
     EddyBridgeGetGasDataParams,
     EddyBridgeTradeConstructorParams
 } from './models/eddy-trade-types';
-
 export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData({
@@ -227,5 +228,42 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             slippage: 0,
             routePath: this.routePath
         };
+    }
+
+    public override async needApprove(): Promise<boolean> {
+        this.checkWalletConnected();
+        if (this.from.isNative) return false;
+
+        const allowance = await this.fromWeb3Public.getAllowance(
+            this.from.address,
+            this.walletAddress,
+            this.fromContractAddress
+        );
+        // need allowance = amount + 1 wei at least
+        return this.from.weiAmount.gte(allowance);
+    }
+
+    public override async approve(
+        options: EvmBasicTransactionOptions,
+        checkNeedApprove = true,
+        amount: BigNumber = new BigNumber(0)
+    ): Promise<TransactionReceipt> {
+        if (checkNeedApprove) {
+            const needApprove = await this.needApprove();
+            if (!needApprove) {
+                throw new UnnecessaryApproveError();
+            }
+        }
+        this.checkWalletConnected();
+        await this.checkBlockchainCorrect();
+        // because of error on EddyBridge contract(they check on allowance > amount instead of allowance >= amount)
+        const approveAmount = amount.plus(1);
+
+        return this.web3Private.approveTokens(
+            this.from.address,
+            this.fromContractAddress,
+            approveAmount,
+            options
+        );
     }
 }
