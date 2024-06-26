@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedBlockchain, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
@@ -102,7 +101,6 @@ export class EddyBridgeProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<BigNumber> {
-        const zetaToken = nativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN];
         const web3Public = this.getFromWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN) as EvmWeb3Public;
         const platformFee = await web3Public.callContractMethod<number>(
             EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
@@ -139,15 +137,24 @@ export class EddyBridgeProvider extends CrossChainProvider {
             return calcData.to.tokenAmount;
             // BNB or ETH -> ZETA
         } else {
-            const toWithPrice = new PriceToken({
-                ...zetaToken,
-                price: new BigNumber(0)
-            }) as PriceToken<EvmBlockchainName>;
-            const calcData = await new EddyFinanceProvider().calculate(from, toWithPrice, {
-                ...options,
-                gasCalculation: 'disabled',
-                useProxy: false
+            const fromTokenInZetaChain = new PriceTokenAmount({
+                address: TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[from.symbol] as string,
+                blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
+                decimals: 18,
+                name: from.symbol,
+                price: new BigNumber(0),
+                symbol: from.symbol,
+                tokenAmount: from.tokenAmount
             });
+            const calcData = await new EddyFinanceProvider().calculate(
+                fromTokenInZetaChain,
+                toToken,
+                {
+                    ...options,
+                    gasCalculation: 'disabled',
+                    useProxy: false
+                }
+            );
             return calcData.to.tokenAmount.multipliedBy(ratioToAmount);
         }
     }
