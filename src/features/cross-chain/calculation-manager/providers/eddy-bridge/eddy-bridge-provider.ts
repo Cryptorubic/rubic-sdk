@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedBlockchain, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
@@ -102,7 +102,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<BigNumber> {
-        const wrappedZetaToken = wrappedNativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN]!;
+        const zetaToken = nativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN];
         const web3Public = this.getFromWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN) as EvmWeb3Public;
         const platformFee = await web3Public.callContractMethod<number>(
             EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
@@ -140,7 +140,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
             // BNB or ETH -> ZETA
         } else {
             const toWithPrice = new PriceToken({
-                ...wrappedZetaToken,
+                ...zetaToken,
                 price: new BigNumber(0)
             }) as PriceToken<EvmBlockchainName>;
             const calcData = await new EddyFinanceProvider().calculate(from, toWithPrice, {
