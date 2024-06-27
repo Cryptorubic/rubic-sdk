@@ -10,6 +10,7 @@ export interface EddyBridgeGetGasDataParams {
     toToken: PriceTokenAmount<EvmBlockchainName>;
     feeInfo: FeeInfo;
     providerAddress: string;
+    slippage: number;
 }
 
 export interface EddyBridgeTradeConstructorParams {
@@ -19,6 +20,7 @@ export interface EddyBridgeTradeConstructorParams {
         gasData: GasData | null;
         feeInfo: FeeInfo;
         priceImpact: number | null;
+        slippage: number;
     };
     providerAddress: string;
     routePath: RubicStep[];

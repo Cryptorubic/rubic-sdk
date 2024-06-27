@@ -43,7 +43,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         feeInfo,
         from,
         providerAddress,
-        toToken
+        toToken,
+        slippage
     }: EddyBridgeGetGasDataParams): Promise<GasData | null> {
         const trade = new EddyBridgeTrade({
             crossChainTrade: {
@@ -51,7 +52,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 to: toToken,
                 gasData: null,
                 priceImpact: 0,
-                feeInfo
+                feeInfo,
+                slippage
             },
             providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             routePath: []
@@ -80,6 +82,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     public readonly gasData: GasData;
 
     public readonly priceImpact: number | null;
+
+    private readonly slippage: number;
     /** */
 
     private get fromBlockchain(): EddyBridgeSupportedChain {
@@ -106,6 +110,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         this.gasData = params.crossChainTrade.gasData;
         this.priceImpact = params.crossChainTrade.priceImpact;
         this.toTokenAmountMin = this.to.tokenAmount;
+        this.slippage = params.crossChainTrade.slippage;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {

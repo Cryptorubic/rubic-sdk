@@ -49,14 +49,17 @@ export class EddyBridgeProvider extends CrossChainProvider {
             );
             this.skipkNotSupportedRoutes(from, toToken);
 
-            const [toAmount, feeInfo] = await Promise.all([
-                this.getToTokenAmount(from, toToken, options),
-                this.getFeeInfo(fromBlockchain, options.providerAddress, from, useProxy)
-            ]);
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                from,
+                useProxy
+            );
             const fromWithoutFee = getFromWithoutFee(
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
+            const toAmount = await this.getToTokenAmount(fromWithoutFee, toToken, options);
 
             const to = await PriceTokenAmount.createToken({
                 ...toToken.asStruct,
@@ -69,7 +72,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
                           feeInfo,
                           from: fromWithoutFee,
                           toToken: to,
-                          providerAddress: options.providerAddress
+                          providerAddress: options.providerAddress,
+                          slippage: options.slippageTolerance
                       })
                     : null;
 
@@ -79,7 +83,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
                     from: fromWithoutFee,
                     gasData,
                     to,
-                    priceImpact: from.calculatePriceImpactPercent(to)
+                    priceImpact: from.calculatePriceImpactPercent(to),
+                    slippage: options.slippageTolerance
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
