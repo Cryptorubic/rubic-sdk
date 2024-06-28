@@ -6,5 +6,7 @@ export const eddyBridgeSupportedChains = [
     BLOCKCHAIN_NAME.ETHEREUM
 ] as const;
 
+export type EddyBridgeSupportedTokens = 'ETH' | 'BNB' | 'ZETA';
+
 export type EddyBridgeSupportedChain = (typeof eddyBridgeSupportedChains)[number];
 export type TssAvailableEddyBridgeChain = Exclude<EddyBridgeSupportedChain, 'ZETACHAIN'>;

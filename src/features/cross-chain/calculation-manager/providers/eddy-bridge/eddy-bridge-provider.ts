@@ -1,5 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedBlockchain, NotSupportedTokensError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    NotSupportedBlockchain,
+    NotSupportedTokensError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
@@ -21,9 +26,11 @@ import {
 } from './constants/eddy-bridge-contract-addresses';
 import {
     EddyBridgeSupportedChain,
-    eddyBridgeSupportedChains
+    eddyBridgeSupportedChains,
+    EddyBridgeSupportedTokens
 } from './constants/eddy-bridge-supported-chains';
 import { EDDY_BRIDGE_ABI } from './constants/edyy-bridge-abi';
+import { EDDY_BRIDGE_LIMITS } from './constants/swap-limits';
 import { EddyBridgeTrade } from './eddy-bridge-trade';
 
 export class EddyBridgeProvider extends CrossChainProvider {
@@ -89,6 +96,23 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
             });
+
+            const limits = EDDY_BRIDGE_LIMITS[from.symbol as EddyBridgeSupportedTokens];
+
+            if (fromWithoutFee.tokenAmount.lt(limits.min)) {
+                return {
+                    trade,
+                    error: new MinAmountError(limits.min, from.symbol),
+                    tradeType: this.type
+                };
+            }
+            if (fromWithoutFee.tokenAmount.gt(limits.max)) {
+                return {
+                    trade,
+                    error: new MaxAmountError(limits.max, from.symbol),
+                    tradeType: this.type
+                };
+            }
 
             return { trade, tradeType: this.type };
         } catch (err) {
