@@ -92,3 +92,75 @@ export const stargateV2SendQuoteAbi = [
         type: 'function'
     }
 ] as AbiItem[];
+
+export const stargateV2SendTokenAbi = [
+    {
+        inputs: [
+            {
+                components: [
+                    { internalType: 'uint32', name: 'dstEid', type: 'uint32' },
+                    { internalType: 'bytes32', name: 'to', type: 'bytes32' },
+                    { internalType: 'uint256', name: 'amountLD', type: 'uint256' },
+                    { internalType: 'uint256', name: 'minAmountLD', type: 'uint256' },
+                    { internalType: 'bytes', name: 'extraOptions', type: 'bytes' },
+                    { internalType: 'bytes', name: 'composeMsg', type: 'bytes' },
+                    { internalType: 'bytes', name: 'oftCmd', type: 'bytes' }
+                ],
+                internalType: 'struct SendParam',
+                name: '_sendParam',
+                type: 'tuple'
+            },
+            {
+                components: [
+                    { internalType: 'uint256', name: 'nativeFee', type: 'uint256' },
+                    { internalType: 'uint256', name: 'lzTokenFee', type: 'uint256' }
+                ],
+                internalType: 'struct MessagingFee',
+                name: '_fee',
+                type: 'tuple'
+            },
+            { internalType: 'address', name: '_refundAddress', type: 'address' }
+        ],
+        name: 'sendToken',
+        outputs: [
+            {
+                components: [
+                    { internalType: 'bytes32', name: 'guid', type: 'bytes32' },
+                    { internalType: 'uint64', name: 'nonce', type: 'uint64' },
+                    {
+                        components: [
+                            { internalType: 'uint256', name: 'nativeFee', type: 'uint256' },
+                            { internalType: 'uint256', name: 'lzTokenFee', type: 'uint256' }
+                        ],
+                        internalType: 'struct MessagingFee',
+                        name: 'fee',
+                        type: 'tuple'
+                    }
+                ],
+                internalType: 'struct MessagingReceipt',
+                name: 'msgReceipt',
+                type: 'tuple'
+            },
+            {
+                components: [
+                    { internalType: 'uint256', name: 'amountSentLD', type: 'uint256' },
+                    { internalType: 'uint256', name: 'amountReceivedLD', type: 'uint256' }
+                ],
+                internalType: 'struct OFTReceipt',
+                name: 'oftReceipt',
+                type: 'tuple'
+            },
+            {
+                components: [
+                    { internalType: 'uint72', name: 'ticketId', type: 'uint72' },
+                    { internalType: 'bytes', name: 'passengerBytes', type: 'bytes' }
+                ],
+                internalType: 'struct Ticket',
+                name: 'ticket',
+                type: 'tuple'
+            }
+        ],
+        stateMutability: 'payable',
+        type: 'function'
+    }
+] as AbiItem[];

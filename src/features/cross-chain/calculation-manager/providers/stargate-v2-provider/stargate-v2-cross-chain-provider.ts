@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { NotSupportedBlockchain, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import {
@@ -10,7 +10,6 @@ import {
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -27,7 +26,10 @@ import {
     stargateV2SupportedBlockchains
 } from './constants/stargate-v2-cross-chain-supported-blockchains';
 import { stargateV2PoolAbi } from './constants/stargate-v2-pool-abi';
-import { StargateV2QuoteOFTResponse } from './modal/stargate-v2-quote-params-struct';
+import {
+    StargateV2QuoteOFTResponse,
+    StargateV2QuoteParamsStruct
+} from './modal/stargate-v2-quote-params-struct';
 import { StargateV2CrossChainTrade } from './stargate-v2-cross-chain-trade';
 
 export class StargateV2CrossChainProvider extends CrossChainProvider {
@@ -71,11 +73,23 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
+        if (!this.isSupportedBlockchain(from.blockchain)) {
+            throw new NotSupportedBlockchain();
+        }
         try {
             const fromBlockchain = from.blockchain as StargateV2SupportedBlockchains;
             const toBlockchain = toToken.blockchain as StargateV2SupportedBlockchains;
-            const useProxy = options?.useProxy?.[this.type] ?? true;
-            if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
+            const useProxy = false;
+
+            const fromSymbol = StargateV2CrossChainProvider.getSymbol(
+                from.symbol,
+                from.blockchain
+            ) as StargateV2BridgeToken;
+            const isSupported =
+                stargateV2ContractAddress?.[fromBlockchain as StargateV2SupportedBlockchains]?.[
+                    fromSymbol
+                ];
+            if (!isSupported) {
                 return {
                     trade: null,
                     error: new NotSupportedTokensError(),
@@ -92,40 +106,36 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             );
             const FAKE_ADDRESS = '0x17235BeeF7CC95a6cc65E98D7b3cA4F5B7f75283';
             const fromAddress = options?.fromAddress || FAKE_ADDRESS;
-            const fromSymbol = StargateV2CrossChainProvider.getSymbol(
-                from.symbol,
-                from.blockchain
-            ) as StargateV2BridgeToken;
+
             const fromWithoutFee = getFromWithoutFee(
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
             const amountLD = fromWithoutFee.stringWeiAmount;
-            const sendParams = [
-                dstChainId,
-                ethers.utils.hexZeroPad(fromAddress, 32),
-                amountLD,
-                amountLD,
-                '0x',
-                '0x',
-                0
-            ];
+            const sendParams: StargateV2QuoteParamsStruct = {
+                dstEid: dstChainId,
+                to: ethers.utils.hexZeroPad(fromAddress, 32),
+                amountLD: amountLD,
+                minAmountLD: amountLD,
+                extraOptions: '0x',
+                composeMsg: '0x',
+                oftCmd: 0
+            };
 
-            const { amountReceivedLD } = await this.getRecieveAmount(
+            const { amountReceivedLD } = await this.getReceiveAmount(
                 sendParams,
                 from.blockchain,
                 fromSymbol
             );
-            const amountReceived = amountReceivedLD?.[1] || fromWithoutFee.stringWeiAmount;
-            sendParams[3] = amountReceived;
+            const amountReceived = amountReceivedLD[1] as string;
+            sendParams.minAmountLD = amountReceived;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(amountReceived, toToken.decimals)
             });
 
-            const srcOnChainTrade: EvmOnChainTrade | null = null;
-            const routePath = await this.getRoutePath(from, to, srcOnChainTrade);
+            const routePath = await this.getRoutePath(from, to);
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await StargateV2CrossChainTrade.getGasData(
@@ -135,6 +145,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                           options.slippageTolerance,
                           options.providerAddress,
                           routePath,
+                          sendParams,
                           options.receiverAddress
                       )
                     : null;
@@ -147,7 +158,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                         slippageTolerance: options.slippageTolerance,
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
-                        cryptoFeeToken: null
+                        sendParams
                     },
                     options.providerAddress,
                     routePath
@@ -190,18 +201,14 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private async getRecieveAmount(
-        sendParam: (string | number)[],
+    private async getReceiveAmount(
+        sendParam: StargateV2QuoteParamsStruct,
         fromBlockchain: EvmBlockchainName,
         tokenSymbol: StargateV2BridgeToken
     ): Promise<StargateV2QuoteOFTResponse> {
-        const contractAddress =
-            stargateV2ContractAddress?.[fromBlockchain as StargateV2SupportedBlockchains]?.[
-                tokenSymbol
-            ];
-        if (!contractAddress) {
-            throw new RubicSdkError();
-        }
+        const contractAddress = stargateV2ContractAddress[
+            fromBlockchain as StargateV2SupportedBlockchains
+        ][tokenSymbol] as string;
         try {
             const { 2: amountReceivedLD } = await Injector.web3PublicService
                 .getWeb3Public(fromBlockchain)
@@ -222,23 +229,8 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
 
     protected async getRoutePath(
         from: PriceTokenAmount,
-        to: PriceTokenAmount,
-        srcOnChainTrade: EvmOnChainTrade | null
+        to: PriceTokenAmount
     ): Promise<RubicStep[]> {
-        if (srcOnChainTrade) {
-            return [
-                {
-                    type: 'on-chain',
-                    provider: srcOnChainTrade.type,
-                    path: [srcOnChainTrade.from, srcOnChainTrade.to]
-                },
-                {
-                    type: 'cross-chain',
-                    provider: CROSS_CHAIN_TRADE_TYPE.STARGATE_V2,
-                    path: [srcOnChainTrade.to, to]
-                }
-            ];
-        }
         return [
             {
                 type: 'cross-chain',
