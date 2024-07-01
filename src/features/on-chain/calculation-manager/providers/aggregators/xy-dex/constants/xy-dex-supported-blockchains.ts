@@ -16,7 +16,8 @@ export const xyDexSupportedBlockchains = [
     BLOCKCHAIN_NAME.SCROLL,
     BLOCKCHAIN_NAME.MANTLE,
     BLOCKCHAIN_NAME.BLAST,
-    BLOCKCHAIN_NAME.XLAYER
+    BLOCKCHAIN_NAME.XLAYER,
+    BLOCKCHAIN_NAME.TAIKO
 ] as const;
 
 export type XyDexSupportedBlockchains = (typeof xyDexSupportedBlockchains)[number];
