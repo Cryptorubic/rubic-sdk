@@ -201,8 +201,11 @@ export class EddyBridgeProvider extends CrossChainProvider {
         ) {
             throw new NotSupportedBlockchain();
         }
-        // Only gas-token can be bridged from supported chains in ZetaChain
-        if (from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN && !from.isNative) {
+        // Only gas-token(BNB, ETH) can be bridged from supported chains in ZetaChain(ZETA)
+        if (
+            from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
+            (!from.isNative || !toToken.isNative)
+        ) {
             throw new NotSupportedTokensError();
         }
         // Bridge from ZetaChain available only for ETH.ETH, BNB.BNB, ZETA
