@@ -164,3 +164,19 @@ export const stargateV2SendTokenAbi = [
         type: 'function'
     }
 ] as AbiItem[];
+
+export const stargateV2PoolBalanceAbi = [
+    {
+        inputs: [],
+        name: 'poolBalance',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256'
+            }
+        ],
+        stateMutability: 'view',
+        type: 'function'
+    }
+] as AbiItem[];

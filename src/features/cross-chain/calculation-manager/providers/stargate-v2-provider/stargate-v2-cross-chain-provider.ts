@@ -9,6 +9,7 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -18,6 +19,7 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { stargateV2BlockchainSupportedPools } from './constants/stargate-v2-blockchain-supported-pools';
 import { StargateV2BridgeToken } from './constants/stargate-v2-bridge-token';
 import { stargateV2ChainIds } from './constants/stargate-v2-chain-id';
 import { stargateV2ContractAddress } from './constants/stargate-v2-contract-address';
@@ -26,6 +28,7 @@ import {
     stargateV2SupportedBlockchains
 } from './constants/stargate-v2-cross-chain-supported-blockchains';
 import { stargateV2PoolAbi } from './constants/stargate-v2-pool-abi';
+import { stargateV2PoolId } from './constants/stargate-v2-pool-id';
 import {
     StargateV2QuoteOFTResponse,
     StargateV2QuoteParamsStruct
@@ -41,33 +44,6 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         );
     }
 
-    // private static hasDirectRoute(
-    //     from: PriceTokenAmount<EvmBlockchainName>,
-    //     to: PriceTokenAmount<EvmBlockchainName>
-    // ): boolean {
-    //     const fromBlockchain = from.blockchain as StargateV2SupportedBlockchains;
-    //     const toBlockchain = to.blockchain as StargateV2SupportedBlockchains;
-    //     const fromSymbol = StargateV2CrossChainProvider.getSymbol(from.symbol, from.blockchain);
-    //     const toSymbol = StargateV2CrossChainProvider.getSymbol(to.symbol, to.blockchain);
-    //     const srcPoolId = stargateV2PoolId[fromSymbol as StargateV2BridgeToken];
-    //     const srcSupportedPools = stargateV2BlockchainSupportedPools[fromBlockchain];
-    //     if (!srcPoolId || !srcSupportedPools?.includes(srcPoolId)) {
-    //         return false;
-    //     }
-    //     const dstPoolId = stargateV2PoolId[toSymbol as StargateV2BridgeToken];
-    //     if (srcPoolId === dstPoolId) {
-    //         return true;
-    //     }
-    //     const dstSupportedPools = stargateV2BlockchainSupportedPools[toBlockchain];
-    //     if (!dstSupportedPools?.includes(dstPoolId)) {
-    //         throw new RubicSdkError('Tokens are not supported.');
-    //     }
-    //     if (fromSymbol === toSymbol) {
-    //         return true;
-    //     }
-    //     return false;
-    // }
-
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
@@ -77,7 +53,6 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             throw new NotSupportedBlockchain();
         }
         try {
-            const fromBlockchain = from.blockchain as StargateV2SupportedBlockchains;
             const toBlockchain = toToken.blockchain as StargateV2SupportedBlockchains;
             const useProxy = false;
 
@@ -85,11 +60,9 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 from.symbol,
                 from.blockchain
             ) as StargateV2BridgeToken;
-            const isSupported =
-                stargateV2ContractAddress?.[fromBlockchain as StargateV2SupportedBlockchains]?.[
-                    fromSymbol
-                ];
-            if (!isSupported) {
+
+            const isSupportedPools = this.checkSupportedPools(from, toToken);
+            if (!isSupportedPools) {
                 return {
                     trade: null,
                     error: new NotSupportedTokensError(),
@@ -104,8 +77,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 from,
                 useProxy
             );
-            const FAKE_ADDRESS = '0x17235BeeF7CC95a6cc65E98D7b3cA4F5B7f75283';
-            const fromAddress = options?.fromAddress || FAKE_ADDRESS;
+            const fromAddress = options?.fromAddress || FAKE_WALLET_ADDRESS;
 
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -199,6 +171,35 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             percentFeeToken,
             useProxy
         );
+    }
+
+    private checkSupportedPools(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>
+    ): boolean {
+        const fromTokenSymbol = StargateV2CrossChainProvider.getSymbol(
+            from.symbol,
+            from.blockchain
+        ) as StargateV2BridgeToken;
+        const toTokenSymbol = StargateV2CrossChainProvider.getSymbol(
+            to.symbol,
+            to.blockchain
+        ) as StargateV2BridgeToken;
+        const srcTokenPool = stargateV2PoolId[fromTokenSymbol];
+        const dstTokenPool = stargateV2PoolId[toTokenSymbol];
+        const srcSupportedPools =
+            stargateV2BlockchainSupportedPools[from.blockchain as StargateV2SupportedBlockchains];
+        const dstSupportedPools =
+            stargateV2BlockchainSupportedPools[to.blockchain as StargateV2SupportedBlockchains];
+
+        if (
+            srcSupportedPools.includes(srcTokenPool) &&
+            dstSupportedPools.includes(dstTokenPool) &&
+            srcTokenPool === dstTokenPool
+        ) {
+            return true;
+        }
+        return false;
     }
 
     private async getReceiveAmount(

@@ -1,5 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    MaxAmountError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -28,7 +32,11 @@ import { StargateCrossChainProvider } from '../stargate-provider/stargate-cross-
 import { StargateV2BridgeToken } from './constants/stargate-v2-bridge-token';
 import { stargateV2ContractAddress } from './constants/stargate-v2-contract-address';
 import { StargateV2SupportedBlockchains } from './constants/stargate-v2-cross-chain-supported-blockchains';
-import { stargateV2SendQuoteAbi, stargateV2SendTokenAbi } from './constants/stargate-v2-pool-abi';
+import {
+    stargateV2PoolBalanceAbi,
+    stargateV2SendQuoteAbi,
+    stargateV2SendTokenAbi
+} from './constants/stargate-v2-pool-abi';
 import {
     StargateV2MessagingFee,
     StargateV2QuoteParamsStruct
@@ -93,8 +101,6 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
     public readonly bridgeType = BRIDGE_TYPE.STARGATE_V2;
-
-    private messagingFee: StargateV2MessagingFee = { nativeFee: '0', lzTokenFee: '0' };
 
     public get fromBlockchain(): StargateV2SupportedBlockchains {
         return this.from.blockchain as StargateV2SupportedBlockchains;
@@ -171,7 +177,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             //         to,
             //         extraNativeFee
             //     )
-            const methodArguments = [bridgeData, [to, to, this.messagingFee.nativeFee, data]];
+            const methodArguments = [bridgeData, [to, to, providerValue, data]];
             const value = this.getSwapValue(providerValue);
 
             const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
@@ -206,12 +212,14 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             this.from.blockchain
         ) as StargateV2BridgeToken;
         const refundAddress = receiverAddress || this.walletAddress;
+        await this.checkMaxAmount(this.from.blockchain, fromTokenSymbol);
+
         const messagingFee = await this.getNativeFee(
             this.stargateV2SendParams,
             this.from.blockchain,
             fromTokenSymbol
         );
-        this.messagingFee = messagingFee;
+
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];
         if (!contractAddress) {
             throw new RubicSdkError();
@@ -220,7 +228,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             contractAddress,
             stargateV2SendTokenAbi,
             'sendToken',
-            [this.stargateV2SendParams, messagingFee, refundAddress]
+            [this.stargateV2SendParams, messagingFee, refundAddress],
+            messagingFee.nativeFee
         );
         return {
             config: calldata,
@@ -278,6 +287,24 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             slippage: this.slippageTolerance * 100,
             routePath: this.routePath
         };
+    }
+
+    private async checkMaxAmount(
+        fromBlockchain: EvmBlockchainName,
+        tokenSymbol: StargateV2BridgeToken
+    ): Promise<void | never> {
+        const contractAddress = stargateV2ContractAddress[
+            fromBlockchain as StargateV2SupportedBlockchains
+        ][tokenSymbol] as string;
+        const sendAmount = new BigNumber(this.stargateV2SendParams.amountLD);
+        const maxAmount = await Injector.web3PublicService
+            .getWeb3Public(fromBlockchain)
+            .callContractMethod(contractAddress, stargateV2PoolBalanceAbi, 'poolBalance');
+        const maxAmounSend = new BigNumber(maxAmount);
+
+        if (sendAmount.gt(maxAmounSend)) {
+            throw new MaxAmountError(maxAmounSend, tokenSymbol as string);
+        }
     }
 
     private async getNativeFee(
