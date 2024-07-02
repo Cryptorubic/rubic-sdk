@@ -9,11 +9,11 @@ interface EddySupportedChainLimit {
 
 export const EDDY_BRIDGE_LIMITS: Record<EddyBridgeSupportedTokens, EddySupportedChainLimit> = {
     BNB: {
-        min: new BigNumber(0.001),
+        min: new BigNumber(0.002),
         max: new BigNumber(15)
     },
     ETH: {
-        min: new BigNumber(0.0001),
+        min: new BigNumber(0.0005),
         max: new BigNumber(5)
     },
     ZETA: {

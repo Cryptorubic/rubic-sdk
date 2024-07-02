@@ -32,6 +32,7 @@ import {
 import { EDDY_BRIDGE_ABI } from './constants/edyy-bridge-abi';
 import { EDDY_BRIDGE_LIMITS } from './constants/swap-limits';
 import { EddyBridgeTrade } from './eddy-bridge-trade';
+import { EddyBridgeApiService } from './services/eddy-bridge-api-service';
 
 export class EddyBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE;
@@ -123,6 +124,38 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         }
+    }
+
+    private async getCalculationResult(
+        fromWithoutFee: PriceTokenAmount<EvmBlockchainName>,
+        trade: EddyBridgeTrade
+    ): Promise<CalculationResult> {
+        const limits = EDDY_BRIDGE_LIMITS[fromWithoutFee.symbol as EddyBridgeSupportedTokens];
+        let hasEnoughCapacity: boolean = true;
+
+        if (fromWithoutFee.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN) {
+            const maxAmountWei = await EddyBridgeApiService.getWeiTokenLimitInForeignChain(
+                fromWithoutFee.symbol
+            );
+            hasEnoughCapacity = fromWithoutFee.weiAmount.lte(maxAmountWei);
+        }
+
+        if (fromWithoutFee.tokenAmount.lt(limits.min)) {
+            return {
+                trade,
+                error: new MinAmountError(limits.min, fromWithoutFee.symbol),
+                tradeType: this.type
+            };
+        }
+        if (fromWithoutFee.tokenAmount.gt(limits.max) && !hasEnoughCapacity) {
+            return {
+                trade,
+                error: new MaxAmountError(limits.max, fromWithoutFee.symbol),
+                tradeType: this.type
+            };
+        }
+
+        return { trade, tradeType: this.type };
     }
 
     private async getToTokenAmount(
