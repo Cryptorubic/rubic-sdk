@@ -98,24 +98,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 routePath: await this.getRoutePath(from, to)
             });
 
-            const limits = EDDY_BRIDGE_LIMITS[from.symbol as EddyBridgeSupportedTokens];
-
-            if (fromWithoutFee.tokenAmount.lt(limits.min)) {
-                return {
-                    trade,
-                    error: new MinAmountError(limits.min, from.symbol),
-                    tradeType: this.type
-                };
-            }
-            if (fromWithoutFee.tokenAmount.gt(limits.max)) {
-                return {
-                    trade,
-                    error: new MaxAmountError(limits.max, from.symbol),
-                    tradeType: this.type
-                };
-            }
-
-            return { trade, tradeType: this.type };
+            return this.getCalculationResult(fromWithoutFee, trade);
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
             return {
@@ -147,7 +130,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         }
-        if (fromWithoutFee.tokenAmount.gt(limits.max) && !hasEnoughCapacity) {
+        if (fromWithoutFee.tokenAmount.gt(limits.max) || !hasEnoughCapacity) {
             return {
                 trade,
                 error: new MaxAmountError(limits.max, fromWithoutFee.symbol),
