@@ -215,14 +215,14 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
     ): CalculationResult<EvmEncodeConfig | TronTransactionConfig> {
         if (from.tokenAmount.lt(transactionData.depositMin)) {
             return {
-                trade: null,
+                trade,
                 error: new MinAmountError(new BigNumber(transactionData.depositMin), from.symbol),
                 tradeType: this.type
             };
         }
         if (from.tokenAmount.gt(transactionData.depositMax)) {
             return {
-                trade: null,
+                trade,
                 error: new MaxAmountError(new BigNumber(transactionData.depositMax), from.symbol),
                 tradeType: this.type
             };
