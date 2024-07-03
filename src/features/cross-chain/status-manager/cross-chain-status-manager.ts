@@ -179,7 +179,7 @@ export class CrossChainStatusManager {
         const client = lzPackage.createClient('mainnet');
         const scanResponse = await client.getMessagesBySrcTxHash(data.srcTxHash);
         const targetTrade = scanResponse.messages.find(
-            item => item.srcTxHash.toLocaleLowerCase() === data.srcTxHash.toLocaleLowerCase()
+            item => item.srcTxHash?.toLocaleLowerCase() === data.srcTxHash.toLocaleLowerCase()
         );
         const txStatusData: TxStatusData = {
             status: TX_STATUS.PENDING,

@@ -1,5 +1,11 @@
+import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
-import { NotSupportedBlockchain, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    NotSupportedBlockchain,
+    NotSupportedTokensError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import {
@@ -27,7 +33,7 @@ import {
     StargateV2SupportedBlockchains,
     stargateV2SupportedBlockchains
 } from './constants/stargate-v2-cross-chain-supported-blockchains';
-import { stargateV2PoolAbi } from './constants/stargate-v2-pool-abi';
+import { stargateV2PoolAbi, stargateV2PoolBalanceAbi } from './constants/stargate-v2-pool-abi';
 import { stargateV2PoolId } from './constants/stargate-v2-pool-id';
 import {
     StargateV2QuoteOFTResponse,
@@ -54,7 +60,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         }
         try {
             const toBlockchain = toToken.blockchain as StargateV2SupportedBlockchains;
-            const useProxy = false;
+            const useProxy = options?.useProxy?.[this.type] ?? true;
 
             const fromSymbol = StargateV2CrossChainProvider.getSymbol(
                 from.symbol,
@@ -77,12 +83,27 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 from,
                 useProxy
             );
-            const fromAddress = options?.fromAddress || FAKE_WALLET_ADDRESS;
+            const fromAddress = this.getWalletAddress(from.blockchain) || FAKE_WALLET_ADDRESS;
 
             const fromWithoutFee = getFromWithoutFee(
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
+
+            const maxAmountError = await this.checkMaxAmount(
+                from.blockchain,
+                fromSymbol,
+                fromWithoutFee.weiAmount
+            );
+
+            if (maxAmountError) {
+                return {
+                    trade: null,
+                    error: maxAmountError,
+                    tradeType: this.type
+                };
+            }
+
             const amountLD = fromWithoutFee.stringWeiAmount;
             const sendParams: StargateV2QuoteParamsStruct = {
                 dstEid: dstChainId,
@@ -104,7 +125,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: Web3Pure.fromWei(amountReceived, toToken.decimals)
+                tokenAmount: Web3Pure.fromWei(amountReceived, fromWithoutFee.decimals)
             });
 
             const routePath = await this.getRoutePath(from, to);
@@ -156,7 +177,29 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         if (blockchain === BLOCKCHAIN_NAME.SCROLL && symbol.toLowerCase() === 'usdc') {
             return 'USDC.e';
         }
+        if (blockchain === BLOCKCHAIN_NAME.ETHEREUM && symbol.toLowerCase() === 'metis') {
+            return 'METIS';
+        }
         return symbol;
+    }
+
+    private async checkMaxAmount(
+        fromBlockchain: EvmBlockchainName,
+        tokenSymbol: StargateV2BridgeToken,
+        amountToSend: BigNumber
+    ): Promise<MaxAmountError | null> {
+        const contractAddress = stargateV2ContractAddress[
+            fromBlockchain as StargateV2SupportedBlockchains
+        ][tokenSymbol] as string;
+        const maxAmount = await Injector.web3PublicService
+            .getWeb3Public(fromBlockchain)
+            .callContractMethod(contractAddress, stargateV2PoolBalanceAbi, 'poolBalance');
+        const maxAmounSend = new BigNumber(maxAmount);
+
+        if (amountToSend.gt(maxAmounSend)) {
+            return new MaxAmountError(maxAmounSend, tokenSymbol as string);
+        }
+        return null;
     }
 
     protected async getFeeInfo(
@@ -192,14 +235,11 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         const dstSupportedPools =
             stargateV2BlockchainSupportedPools[to.blockchain as StargateV2SupportedBlockchains];
 
-        if (
+        return (
             srcSupportedPools.includes(srcTokenPool) &&
             dstSupportedPools.includes(dstTokenPool) &&
             srcTokenPool === dstTokenPool
-        ) {
-            return true;
-        }
-        return false;
+        );
     }
 
     private async getReceiveAmount(

@@ -1,9 +1,5 @@
 import BigNumber from 'bignumber.js';
-import {
-    FailedToCheckForTransactionReceiptError,
-    MaxAmountError,
-    RubicSdkError
-} from 'src/common/errors';
+import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -32,11 +28,7 @@ import { StargateCrossChainProvider } from '../stargate-provider/stargate-cross-
 import { StargateV2BridgeToken } from './constants/stargate-v2-bridge-token';
 import { stargateV2ContractAddress } from './constants/stargate-v2-contract-address';
 import { StargateV2SupportedBlockchains } from './constants/stargate-v2-cross-chain-supported-blockchains';
-import {
-    stargateV2PoolBalanceAbi,
-    stargateV2SendQuoteAbi,
-    stargateV2SendTokenAbi
-} from './constants/stargate-v2-pool-abi';
+import { stargateV2SendQuoteAbi, stargateV2SendTokenAbi } from './constants/stargate-v2-pool-abi';
 import {
     StargateV2MessagingFee,
     StargateV2QuoteParamsStruct
@@ -166,18 +158,17 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
                     fromAddress: this.walletAddress
                 }
             );
-            // const extraNativeFee = this.from.isNative
-            //     ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
-            //     : new BigNumber(providerValue).toFixed();
-            // const providerData =
-            //     await ProxyCrossChainEvmTrade.getGenericProviderData(
-            //         to,
-            //         data,
-            //         this.fromBlockchain as EvmBlockchainName,
-            //         to,
-            //         extraNativeFee
-            //     )
-            const methodArguments = [bridgeData, [to, to, providerValue, data]];
+            const extraNativeFee = this.from.isNative
+                ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+                : new BigNumber(providerValue).toFixed();
+            const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+                to,
+                data,
+                this.fromBlockchain as EvmBlockchainName,
+                to,
+                extraNativeFee
+            );
+            const methodArguments = [bridgeData, providerData];
             const value = this.getSwapValue(providerValue);
 
             const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
@@ -212,7 +203,6 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             this.from.blockchain
         ) as StargateV2BridgeToken;
         const refundAddress = receiverAddress || this.walletAddress;
-        await this.checkMaxAmount(this.from.blockchain, fromTokenSymbol);
 
         const messagingFee = await this.getNativeFee(
             this.stargateV2SendParams,
@@ -287,24 +277,6 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             slippage: this.slippageTolerance * 100,
             routePath: this.routePath
         };
-    }
-
-    private async checkMaxAmount(
-        fromBlockchain: EvmBlockchainName,
-        tokenSymbol: StargateV2BridgeToken
-    ): Promise<void | never> {
-        const contractAddress = stargateV2ContractAddress[
-            fromBlockchain as StargateV2SupportedBlockchains
-        ][tokenSymbol] as string;
-        const sendAmount = new BigNumber(this.stargateV2SendParams.amountLD);
-        const maxAmount = await Injector.web3PublicService
-            .getWeb3Public(fromBlockchain)
-            .callContractMethod(contractAddress, stargateV2PoolBalanceAbi, 'poolBalance');
-        const maxAmounSend = new BigNumber(maxAmount);
-
-        if (sendAmount.gt(maxAmounSend)) {
-            throw new MaxAmountError(maxAmounSend, tokenSymbol as string);
-        }
     }
 
     private async getNativeFee(
