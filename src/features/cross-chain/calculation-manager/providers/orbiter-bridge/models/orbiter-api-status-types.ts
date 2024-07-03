@@ -1,4 +1,5 @@
 import { OrbiterOpTxStatus, OrbiterResponse, OrbiterTxStatus } from './orbiter-api-common-types';
+import { OrbiterQuoteConfig } from './orbiter-api-quote-types';
 
 export type OrbiterStatusResponse = OrbiterResponse<{
     chainId: string;
@@ -16,3 +17,10 @@ export type OrbiterStatusResponse = OrbiterResponse<{
     targetSymbol: string;
     targetChain: string;
 }>;
+
+export interface OrbiterReceiveAmountResponse {
+    result: {
+        receiveAmount: string;
+        router: OrbiterQuoteConfig;
+    };
+}
