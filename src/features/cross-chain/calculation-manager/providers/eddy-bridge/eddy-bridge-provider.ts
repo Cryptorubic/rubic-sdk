@@ -191,7 +191,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 name: from.symbol,
                 price: new BigNumber(0),
                 symbol: from.symbol,
-                tokenAmount: from.tokenAmount
+                tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
             });
             const calcData = await new EddyFinanceProvider().calculate(
                 fromTokenInZetaChain,
@@ -202,7 +202,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                     useProxy: false
                 }
             );
-            return calcData.to.tokenAmount.multipliedBy(ratioToAmount);
+            return calcData.to.tokenAmount;
         }
     }
 
