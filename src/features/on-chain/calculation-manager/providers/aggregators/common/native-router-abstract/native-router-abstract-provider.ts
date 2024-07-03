@@ -52,7 +52,7 @@ export abstract class NativeRouterAbstractProvider<
                 tokenOut: toTokenAddress,
                 amount: fromWithoutFee.tokenAmount.toString(),
                 fromAddress: fromAddress,
-                slippage: options.slippageTolerance
+                slippage: options.slippageTolerance * 100
             };
             const { amountOut, txRequest } = await NativeRouterApiService.getFirmQuote(
                 nativeRouterQuoteParams
