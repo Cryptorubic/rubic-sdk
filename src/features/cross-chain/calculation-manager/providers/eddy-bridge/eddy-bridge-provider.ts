@@ -117,10 +117,12 @@ export class EddyBridgeProvider extends CrossChainProvider {
         let hasEnoughCapacity: boolean = true;
 
         if (fromWithoutFee.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN) {
-            const maxAmountWei = await EddyBridgeApiService.getWeiTokenLimitInForeignChain(
-                fromWithoutFee.symbol
-            );
-            hasEnoughCapacity = fromWithoutFee.weiAmount.lte(maxAmountWei);
+            try {
+                const maxAmountWei = await EddyBridgeApiService.getWeiTokenLimitInForeignChain(
+                    fromWithoutFee.symbol
+                );
+                hasEnoughCapacity = fromWithoutFee.weiAmount.lte(maxAmountWei);
+            } catch {}
         }
 
         if (fromWithoutFee.tokenAmount.lt(limits.min)) {

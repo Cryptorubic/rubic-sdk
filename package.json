@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.30.0-alpha.eddy-bridge.18",
+    "version": "5.30.0-alpha.eddy-bridge.19",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
