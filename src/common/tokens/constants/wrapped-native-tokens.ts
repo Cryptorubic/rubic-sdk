@@ -457,5 +457,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped CORE',
         symbol: 'WCORE',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BAHAMUT]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BAHAMUT,
+        address: '0x4084ab20f8ffca76c19aaf854fb5fe9de6217fbb',
+        name: 'Wrapped FTN',
+        symbol: 'WFTN',
+        decimals: 18
     })
 };
