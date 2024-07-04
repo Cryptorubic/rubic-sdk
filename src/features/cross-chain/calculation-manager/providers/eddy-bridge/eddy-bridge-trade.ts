@@ -260,9 +260,11 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
 
         if (!skipAmountChangeCheck) {
             await this.checkAmountChange(amount, this.amountToCheck);
-            const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
-            if (!newGasAmount.isEqualTo(this.prevGasAmountInNonZetaChain)) {
-                throw new UpdatedRatesError(amount, this.amountToCheck);
+            if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
+                const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
+                if (!newGasAmount.isEqualTo(this.prevGasAmountInNonZetaChain)) {
+                    throw new UpdatedRatesError(amount, this.amountToCheck);
+                }
             }
         }
         return config;
