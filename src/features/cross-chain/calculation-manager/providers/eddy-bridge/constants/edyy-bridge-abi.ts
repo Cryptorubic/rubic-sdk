@@ -3,6 +3,19 @@ import { AbiItem } from 'web3-utils';
 export const EDDY_BRIDGE_ABI = [
     {
         inputs: [],
+        name: 'slippage',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256'
+            }
+        ],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
         name: 'platformFee',
         outputs: [
             {
