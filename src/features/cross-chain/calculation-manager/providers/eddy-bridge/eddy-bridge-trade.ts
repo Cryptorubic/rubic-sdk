@@ -40,11 +40,7 @@ import {
     EddyBridgeTradeConstructorParams
 } from './models/eddy-trade-types';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import {
-    EddyRoutingDirection,
-    eddyRoutingDirection,
-    ERD
-} from './utils/eddy-bridge-routing-directions';
+import { EddyRoutingDirection, ERD } from './utils/eddy-bridge-routing-directions';
 export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData({
@@ -191,9 +187,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         let config = {} as EvmEncodeConfig;
         const wrappedZetaAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN]!.address;
-        const direction = eddyRoutingDirection(this.from, this.to);
 
-        if (direction === ERD.ANY_CHAIN_NATIVE_TO_ZETA_NATIVE) {
+        if (this.routingDirection === ERD.ANY_CHAIN_NATIVE_TO_ZETA_NATIVE) {
             const walletAddress = this.walletAddress || FAKE_WALLET_ADDRESS;
             let data =
                 EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN +
@@ -205,7 +200,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 to: TSS_ADDRESSES_EDDY_BRIDGE[this.fromBlockchain as TssAvailableEddyBridgeChain],
                 value: this.from.stringWeiAmount
             };
-        } else if (direction === ERD.ZETA_NATIVE_TO_ANY_CHAIN_NATIVE) {
+        } else if (this.routingDirection === ERD.ZETA_NATIVE_TO_ANY_CHAIN_NATIVE) {
             const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.to.symbol];
             config = EvmWeb3Pure.encodeMethodCall(
                 EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
@@ -214,7 +209,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 ['0x', wrappedZetaAddress, destZrc20TokenAddress],
                 this.from.stringWeiAmount
             );
-        } else if (direction === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
+        } else if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
             const srcZrc20TokenAddress = this.from.address;
             const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.to.symbol];
             const methodArgs = [
@@ -248,34 +243,29 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         };
     }
 
-    protected override async checkAmountChange(
-        newWeiAmount: string,
-        oldWeiAmount: string
-    ): Promise<void> {
-        const oldAmount = new BigNumber(oldWeiAmount);
-        const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.5;
-        const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
-
-        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
-        const amountMinusPercent = oldAmount.multipliedBy(
-            new BigNumber(1).minus(acceptablePercentPriceChange)
-        );
-
-        const newGasAmountInTargetChain = await EddyBridgeContractService.getGasInTargetChain(
-            this.from
-        );
-
-        const shouldThrowError =
-            this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE
-                ? newAmount.lt(amountMinusPercent) ||
-                  newAmount.gt(amountPlusPercent) ||
-                  !newGasAmountInTargetChain.isEqualTo(this.prevGasAmountInNonZetaChain)
-                : newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
-
-        if (shouldThrowError) {
-            throw new UpdatedRatesError(oldWeiAmount, newWeiAmount);
+    protected override async setTransactionConfig(
+        skipAmountChangeCheck: boolean,
+        useCacheData: boolean,
+        receiverAddress?: string
+    ): Promise<EvmEncodeConfig> {
+        if (this.lastTransactionConfig && useCacheData) {
+            return this.lastTransactionConfig;
         }
+
+        const { config, amount } = await this.getTransactionConfigAndAmount(receiverAddress);
+        this.lastTransactionConfig = config;
+        setTimeout(() => {
+            this.lastTransactionConfig = null;
+        }, 15_000);
+
+        if (!skipAmountChangeCheck) {
+            await this.checkAmountChange(amount, this.amountToCheck);
+            const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
+            if (!newGasAmount.isEqualTo(this.prevGasAmountInNonZetaChain)) {
+                throw new UpdatedRatesError(amount, this.amountToCheck);
+            }
+        }
+        return config;
     }
 
     public override async needApprove(): Promise<boolean> {

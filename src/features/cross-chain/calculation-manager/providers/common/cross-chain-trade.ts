@@ -346,7 +346,7 @@ export abstract class CrossChainTrade<T = unknown> {
         }, 15_000);
 
         if (!skipAmountChangeCheck) {
-            await this.checkAmountChange(amount, this.amountToCheck);
+            this.checkAmountChange(amount, this.amountToCheck);
         }
         return config;
     }
