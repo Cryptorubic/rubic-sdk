@@ -243,7 +243,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact || null,
-            slippage: this.slippage,
+            slippage: this.slippage * 100,
             routePath: this.routePath
         };
     }

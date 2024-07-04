@@ -78,7 +78,6 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 EddyBridgeContractService.getEddySlipage(),
                 this.getToTokenAmount(fromWithoutFee, toToken, options)
             ]);
-            console.log('EDDY_SLIPPAGE ----> ', eddySlippage);
 
             const to = await PriceTokenAmount.createToken({
                 ...toToken.asStruct,
@@ -162,9 +161,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<BigNumber> {
-        const platformFee = await EddyBridgeContractService.getPlatformFee();
-        // eddy currently takes 1% from bridged amount (platformFee = 10, ratioToAmount in than case = 0.99)
-        const ratioToAmount = 1 - platformFee / 1_000;
+        const eddyFee = await EddyBridgeContractService.getPlatformFee();
+        const ratioToAmount = 1 - eddyFee;
 
         if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
             const gasInTargetChainNonWei = await EddyBridgeContractService.getGasInTargetChain(
