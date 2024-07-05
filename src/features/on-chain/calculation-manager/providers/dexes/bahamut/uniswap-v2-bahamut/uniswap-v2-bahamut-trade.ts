@@ -4,7 +4,7 @@ import { UNISWAP_V2_BAHAMUT_CONTRACT_ADDRESS } from './constants';
 
 export class UniswapV2BahamutTrade extends UniswapV2AbstractTrade {
     public static get type(): OnChainTradeType {
-        return ON_CHAIN_TRADE_TYPE.UNISWAP_V2;
+        return ON_CHAIN_TRADE_TYPE.UNISWAP_BAHAMUT;
     }
 
     public readonly dexContractAddress = UNISWAP_V2_BAHAMUT_CONTRACT_ADDRESS;
