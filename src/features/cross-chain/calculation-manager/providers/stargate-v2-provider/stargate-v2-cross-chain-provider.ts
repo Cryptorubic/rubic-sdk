@@ -150,7 +150,6 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                         feeInfo,
                         slippageTolerance: options.slippageTolerance,
                         gasData,
-                        priceImpact: from.calculatePriceImpactPercent(to),
                         sendParams
                     },
                     options.providerAddress,

@@ -55,7 +55,6 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
                     from,
                     to: toToken,
                     slippageTolerance,
-                    priceImpact: null,
                     gasData: null,
                     feeInfo,
                     sendParams
@@ -84,11 +83,13 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData;
 
+    public readonly toTokenAmountMin: BigNumber;
+
     public readonly isAggregator = false;
 
     public readonly slippageTolerance: number;
 
-    public readonly priceImpact = null;
+    public readonly priceImpact: number | null;
 
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
@@ -110,14 +111,11 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     private readonly stargateV2SendParams: StargateV2QuoteParamsStruct;
 
-    public readonly toTokenAmountMin = new BigNumber(0);
-
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount<EvmBlockchainName>;
             slippageTolerance: number;
-            priceImpact: number | null;
             gasData: GasData | null;
             feeInfo: FeeInfo;
             sendParams: StargateV2QuoteParamsStruct;
@@ -132,6 +130,10 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.slippageTolerance = crossChainTrade.slippageTolerance;
         this.stargateV2SendParams = crossChainTrade.sendParams;
+        this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
+        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(
+            1 - crossChainTrade.slippageTolerance
+        );
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
