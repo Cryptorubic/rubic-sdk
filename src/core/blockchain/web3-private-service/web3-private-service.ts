@@ -42,7 +42,9 @@ export class Web3PrivateService {
     private readonly createWeb3Private: CreateWeb3Private = {
         [CHAIN_TYPE.EVM]: this.createEvmWeb3Private.bind(this),
         [CHAIN_TYPE.TRON]: this.createTronWeb3Private.bind(this),
-        [CHAIN_TYPE.SOLANA]: this.createSolanaWeb3Private.bind(this)
+        [CHAIN_TYPE.SOLANA]: this.createSolanaWeb3Private.bind(this),
+        // @TODO add TonWeb3Private / TonWeb3Public
+        [CHAIN_TYPE.TON]: ''
     };
 
     constructor(walletProvider: WalletProvider) {
