@@ -84,7 +84,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
-    public readonly bridgeType: BridgeType = BRIDGE_TYPE.MESON;
+    public readonly bridgeType: BridgeType = BRIDGE_TYPE.EDDY_BRIDGE;
 
     public readonly gasData: GasData;
 
