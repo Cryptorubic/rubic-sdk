@@ -109,9 +109,12 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             : EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN;
     }
 
-    // @TODO check method on rubic-contract
     protected get methodName(): string {
         return 'startBridgeTokensViaGenericCrossChain';
+    }
+
+    protected override get gasLimitRatio(): number {
+        return 1.5;
     }
 
     constructor(params: EddyBridgeTradeConstructorParams) {
