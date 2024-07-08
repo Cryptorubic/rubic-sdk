@@ -81,6 +81,8 @@
         "@pancakeswap/tokens": "0.1.6",
         "@solana/web3.js": "^1.89.1",
         "@solflare-wallet/utl-sdk": "^1.4.0",
+        "@ton/core": "^0.56.3",
+        "@ton/ton": "^13.11.2",
         "@tonconnect/ui": "^2.0.5",
         "@viaprotocol/router-sdk": "^1.0.7",
         "assert": "^2.0.0",
