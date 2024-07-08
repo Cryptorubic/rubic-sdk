@@ -9,6 +9,7 @@ import {
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName,
     SolanaBlockchainName,
+    TonBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { rpcErrors } from 'src/core/blockchain/web3-public-service/constants/rpc-errors';
@@ -24,6 +25,8 @@ import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-pub
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 import Web3 from 'web3';
+
+import { TonWeb3Public } from './web3-public/ton-web3-public/ton-web3-public';
 
 export class Web3PublicService {
     public static isSupportedBlockchain(
@@ -49,6 +52,7 @@ export class Web3PublicService {
     public getWeb3Public(blockchainName: EvmBlockchainName): EvmWeb3Public;
     public getWeb3Public(blockchainName: TronBlockchainName): TronWeb3Public;
     public getWeb3Public(blockchainName: SolanaBlockchainName): SolanaWeb3Public;
+    public getWeb3Public(blockchainName: TonBlockchainName): TonWeb3Public;
     public getWeb3Public(blockchainName: Web3PublicSupportedBlockchain): Web3Public;
     public getWeb3Public(blockchainName: BlockchainName): never;
     public getWeb3Public(blockchainName: BlockchainName) {
