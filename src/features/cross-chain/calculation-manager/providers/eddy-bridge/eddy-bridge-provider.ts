@@ -227,12 +227,12 @@ export class EddyBridgeProvider extends CrossChainProvider {
             throw new NotSupportedTokensError();
         }
         // Bridge from ZetaChain available only for ETH.ETH, BNB.BNB, ZETA
+        const isSupportedZrc20 = Object.values(TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS).some(
+            zrc20Address => compareAddresses(zrc20Address, from.address)
+        );
         if (
             from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
-            !from.isNative &&
-            !Object.values(TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS).some(zrc20Address =>
-                compareAddresses(zrc20Address, from.address)
-            )
+            ((!isSupportedZrc20 && !from.isNative) || !toToken.isNative)
         ) {
             throw new NotSupportedTokensError();
         }
