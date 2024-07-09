@@ -216,12 +216,17 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         if (!contractAddress) {
             throw new RubicSdkError();
         }
+        const nativeFee = new BigNumber(this.messagingFee.nativeFee);
+
+        const value = this.from.isNative ?
+        new BigNumber(this.from.stringWeiAmount).plus(nativeFee).toFixed()
+        : this.messagingFee.nativeFee
         const calldata = await EvmWeb3Pure.encodeMethodCall(
             contractAddress,
             stargateV2SendTokenAbi,
             'sendToken',
             [this.stargateV2SendParams, this.messagingFee, refundAddress],
-            this.messagingFee.nativeFee
+            value
         );
         return {
             config: calldata,
