@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import { UnnecessaryApproveError } from 'src/common/errors';
-import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -49,7 +48,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         providerAddress,
         toToken,
         slippage,
-        routingDirection
+        routingDirection,
+        eddyFee
     }: EddyBridgeGetGasDataParams): Promise<GasData | null> {
         const trade = new EddyBridgeTrade({
             crossChainTrade: {
@@ -60,7 +60,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 feeInfo,
                 slippage,
                 prevGasAmountInNonZetaChain: new BigNumber(0),
-                routingDirection
+                routingDirection,
+                eddyFee
             },
             providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             routePath: []
@@ -93,10 +94,12 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     private readonly slippage: number;
     /** */
 
-    // used for checkAmountChange in pairs ZetaChain.ETH->Ethreum.ETH & ZetaChain.BNB->Binance.BNB
+    // used for checkAmountChange in pairs ZetaChain.ETH->Ethreum.ETH & ZetaChain.BNB->Binance.BNB (non wei)
     private readonly prevGasAmountInNonZetaChain: BigNumber;
 
     private readonly routingDirection: EddyRoutingDirection;
+
+    private readonly eddyFee: number;
 
     private get fromBlockchain(): EddyBridgeSupportedChain {
         return this.from.blockchain as EddyBridgeSupportedChain;
@@ -113,10 +116,6 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
-    protected override get gasLimitRatio(): number {
-        return 1.5;
-    }
-
     constructor(params: EddyBridgeTradeConstructorParams) {
         super(params.providerAddress, params.routePath);
         this.to = params.crossChainTrade.to;
@@ -131,6 +130,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         );
         this.prevGasAmountInNonZetaChain = params.crossChainTrade.prevGasAmountInNonZetaChain;
         this.routingDirection = params.crossChainTrade.routingDirection;
+        this.eddyFee = params.crossChainTrade.eddyFee;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -262,14 +262,15 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         }, 15_000);
 
         if (!skipAmountChangeCheck) {
-            await this.checkAmountChange(amount, this.amountToCheck);
             if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
                 const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
-                const prevAmountPlusOnePercent =
-                    this.prevGasAmountInNonZetaChain.multipliedBy(1.01);
-                if (newGasAmount.gt(prevAmountPlusOnePercent)) {
-                    throw new UpdatedRatesError(amount, this.amountToCheck);
-                }
+                const newWeiAmount = Web3Pure.fromWei(amount, this.to.decimals)
+                    .plus(this.prevGasAmountInNonZetaChain)
+                    .minus(newGasAmount)
+                    .toFixed(0);
+                await this.checkAmountChange(newWeiAmount, this.amountToCheck);
+            } else {
+                await this.checkAmountChange(amount, this.amountToCheck);
             }
         }
         return config;

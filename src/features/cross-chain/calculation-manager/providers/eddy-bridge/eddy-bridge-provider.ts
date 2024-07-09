@@ -6,6 +6,7 @@ import {
     NotSupportedTokensError
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
@@ -38,8 +39,6 @@ import {
 export class EddyBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE;
 
-    private routingDirection!: EddyRoutingDirection;
-
     private prevGasAmountInNonZetaChain!: BigNumber;
 
     public isSupportedBlockchain(fromBlockchain: EvmBlockchainName): boolean {
@@ -61,7 +60,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 options?.fromAddress || walletAddress
             );
             this.skipkNotSupportedRoutes(from, toToken);
-            this.routingDirection = eddyRoutingDirection(from, toToken);
+            const routingDirection = eddyRoutingDirection(from, toToken);
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -69,15 +68,26 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 from,
                 useProxy
             );
+
             const fromWithoutFee = getFromWithoutFee(
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const [eddySlippage, toAmount] = await Promise.all([
+            const [eddySlippage, eddyFee, gasInTargetChainNonWei] = await Promise.all([
                 EddyBridgeContractService.getEddySlipage(),
-                this.getToTokenAmount(fromWithoutFee, toToken, options)
+                EddyBridgeContractService.getPlatformFee(),
+                EddyBridgeContractService.getGasInTargetChain(fromWithoutFee)
             ]);
+
+            const toAmount = await this.getToTokenAmount(
+                fromWithoutFee,
+                toToken,
+                options,
+                routingDirection,
+                gasInTargetChainNonWei,
+                eddyFee
+            );
 
             const to = await PriceTokenAmount.createToken({
                 ...toToken.asStruct,
@@ -92,7 +102,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
                           toToken: to,
                           providerAddress: options.providerAddress,
                           slippage: options.slippageTolerance,
-                          routingDirection: this.routingDirection
+                          routingDirection: routingDirection,
+                          eddyFee
                       })
                     : null;
 
@@ -105,7 +116,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: eddySlippage,
                     prevGasAmountInNonZetaChain: this.prevGasAmountInNonZetaChain,
-                    routingDirection: this.routingDirection
+                    routingDirection: routingDirection,
+                    eddyFee
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
@@ -159,27 +171,23 @@ export class EddyBridgeProvider extends CrossChainProvider {
     private async getToTokenAmount(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        options: RequiredCrossChainOptions
+        options: RequiredCrossChainOptions,
+        routingDirection: EddyRoutingDirection,
+        gasInTargetChainNonWei: BigNumber,
+        eddyFee: number
     ): Promise<BigNumber> {
-        const eddyFee = await EddyBridgeContractService.getPlatformFee();
         const ratioToAmount = 1 - eddyFee;
 
-        if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
-            const gasInTargetChainNonWei = await EddyBridgeContractService.getGasInTargetChain(
-                from
-            );
-            this.prevGasAmountInNonZetaChain = gasInTargetChainNonWei;
-
+        if (routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
             return from.tokenAmount.multipliedBy(ratioToAmount).minus(gasInTargetChainNonWei);
-        } else if (this.routingDirection === ERD.ZETA_NATIVE_TO_ANY_CHAIN_NATIVE) {
-            const to = new PriceToken({
-                address: TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[toToken.symbol] as string,
-                blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
-                decimals: 18,
-                name: toToken.symbol,
-                price: new BigNumber(0),
-                symbol: toToken.symbol
+        }
+
+        if (routingDirection === ERD.ZETA_NATIVE_TO_ANY_CHAIN_NATIVE) {
+            const to = await PriceToken.createToken({
+                address: TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[toToken.symbol]!,
+                blockchain: BLOCKCHAIN_NAME.ZETACHAIN
             });
+
             const fromWithEddyBridgeFee = new PriceTokenAmount({
                 ...from.asStruct,
                 tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
@@ -191,36 +199,27 @@ export class EddyBridgeProvider extends CrossChainProvider {
             });
 
             return calcData.to.tokenAmount;
-            // BNB or ETH -> ZETA
-        } else {
-            const fromTokenInZetaChain = new PriceTokenAmount({
-                address: TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[from.symbol] as string,
-                blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
-                decimals: 18,
-                name: from.symbol,
-                price: new BigNumber(0),
-                symbol: from.symbol,
-                tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
-            });
-            const calcData = await new EddyFinanceProvider().calculate(
-                fromTokenInZetaChain,
-                toToken,
-                {
-                    ...options,
-                    gasCalculation: 'disabled',
-                    useProxy: false
-                }
-            );
-            return calcData.to.tokenAmount;
         }
+        // BNB or ETH -> ZETA
+        const fromTokenInZetaChain = await PriceTokenAmount.createToken({
+            address: TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[from.symbol]!,
+            blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
+            tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
+        });
+
+        const calcData = await new EddyFinanceProvider().calculate(fromTokenInZetaChain, toToken, {
+            ...options,
+            gasCalculation: 'disabled',
+            useProxy: false
+        });
+
+        return calcData.to.tokenAmount;
     }
 
     private skipkNotSupportedRoutes(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
     ): void {
-        const supportedTokens = ['eth', 'bnb', 'zeta'];
-
         // Prevents bridges BSC <-> Ethereum
         if (
             from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
@@ -238,7 +237,10 @@ export class EddyBridgeProvider extends CrossChainProvider {
         // Bridge from ZetaChain available only for ETH.ETH, BNB.BNB, ZETA
         if (
             from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
-            !supportedTokens.includes(from.symbol.toLowerCase())
+            !from.isNative &&
+            !Object.values(TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS).some(zrc20Address =>
+                compareAddresses(zrc20Address, from.address)
+            )
         ) {
             throw new NotSupportedTokensError();
         }

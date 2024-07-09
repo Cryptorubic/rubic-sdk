@@ -33,16 +33,22 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
      */
     public abstract readonly gasData: GasData;
 
-    protected get gasLimitRatio(): number {
-        return 1.05;
-    }
-
     protected get fromWeb3Public(): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
 
     protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
+    }
+
+    protected get gasLimitRatio(): number {
+        if (
+            this.to.blockchain === BLOCKCHAIN_NAME.ZETACHAIN ||
+            this.from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN
+        ) {
+            return 1.5;
+        }
+        return 1.05;
     }
 
     /**

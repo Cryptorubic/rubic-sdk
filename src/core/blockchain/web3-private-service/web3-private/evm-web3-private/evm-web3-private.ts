@@ -146,7 +146,7 @@ export class EvmWeb3Private extends Web3Private {
      */
     public async trySendTransaction(
         toAddress: string,
-        options: EvmTransactionOptions = { gasLimitRatio: 1.05 }
+        options: EvmTransactionOptions
     ): Promise<TransactionReceipt> {
         try {
             const gaslessParams = {
@@ -162,7 +162,7 @@ export class EvmWeb3Private extends Web3Private {
             const gasfulParams = {
                 ...gaslessParams,
                 ...getGasOptions(options),
-                gas: Web3Private.stringifyAmount(gas, options.gasLimitRatio)
+                gas: Web3Private.stringifyAmount(gas, options?.gasLimitRatio || 1.05)
             };
 
             try {
