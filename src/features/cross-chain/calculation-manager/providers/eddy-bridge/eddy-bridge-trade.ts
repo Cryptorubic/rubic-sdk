@@ -48,8 +48,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         providerAddress,
         toToken,
         slippage,
-        routingDirection,
-        eddyFee
+        routingDirection
     }: EddyBridgeGetGasDataParams): Promise<GasData | null> {
         const trade = new EddyBridgeTrade({
             crossChainTrade: {
@@ -60,8 +59,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 feeInfo,
                 slippage,
                 prevGasAmountInNonZetaChain: new BigNumber(0),
-                routingDirection,
-                eddyFee
+                routingDirection
             },
             providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             routePath: []
@@ -95,11 +93,9 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** */
 
     // used for checkAmountChange in pairs ZetaChain.ETH->Ethreum.ETH & ZetaChain.BNB->Binance.BNB (non wei)
-    private readonly prevGasAmountInNonZetaChain: BigNumber;
+    private readonly prevGasAmountInNonZetaChain: BigNumber | undefined;
 
     private readonly routingDirection: EddyRoutingDirection;
-
-    private readonly eddyFee: number;
 
     private get fromBlockchain(): EddyBridgeSupportedChain {
         return this.from.blockchain as EddyBridgeSupportedChain;
@@ -130,7 +126,6 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         );
         this.prevGasAmountInNonZetaChain = params.crossChainTrade.prevGasAmountInNonZetaChain;
         this.routingDirection = params.crossChainTrade.routingDirection;
-        this.eddyFee = params.crossChainTrade.eddyFee;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -265,7 +260,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
                 const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
                 const newWeiAmount = Web3Pure.fromWei(amount, this.to.decimals)
-                    .plus(this.prevGasAmountInNonZetaChain)
+                    .plus(this.prevGasAmountInNonZetaChain!)
                     .minus(newGasAmount)
                     .toFixed(0);
                 await this.checkAmountChange(newWeiAmount, this.amountToCheck);

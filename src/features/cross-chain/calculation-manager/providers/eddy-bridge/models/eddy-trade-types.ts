@@ -14,7 +14,6 @@ export interface EddyBridgeGetGasDataParams {
     providerAddress: string;
     slippage: number;
     routingDirection: EddyRoutingDirection;
-    eddyFee: number;
 }
 
 export interface EddyBridgeTradeConstructorParams {
@@ -25,9 +24,8 @@ export interface EddyBridgeTradeConstructorParams {
         feeInfo: FeeInfo;
         priceImpact: number | null;
         slippage: number;
-        prevGasAmountInNonZetaChain: BigNumber;
+        prevGasAmountInNonZetaChain: BigNumber | undefined;
         routingDirection: EddyRoutingDirection;
-        eddyFee: number;
     };
     providerAddress: string;
     routePath: RubicStep[];
