@@ -79,7 +79,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE_V2;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE;
 
     public readonly gasData: GasData;
 
@@ -93,7 +93,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
-    public readonly bridgeType = BRIDGE_TYPE.STARGATE_V2;
+    public readonly bridgeType = BRIDGE_TYPE.STARGATE;
 
     public get fromBlockchain(): StargateV2SupportedBlockchains {
         return this.from.blockchain as StargateV2SupportedBlockchains;

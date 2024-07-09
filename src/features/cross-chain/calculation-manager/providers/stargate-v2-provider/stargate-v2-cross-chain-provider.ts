@@ -42,7 +42,7 @@ import {
 import { StargateV2CrossChainTrade } from './stargate-v2-cross-chain-trade';
 
 export class StargateV2CrossChainProvider extends CrossChainProvider {
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE_V2;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE;
 
     public isSupportedBlockchain(fromBlockchain: BlockchainName): boolean {
         return stargateV2SupportedBlockchains.some(
@@ -274,7 +274,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         return [
             {
                 type: 'cross-chain',
-                provider: CROSS_CHAIN_TRADE_TYPE.STARGATE_V2,
+                provider: CROSS_CHAIN_TRADE_TYPE.STARGATE,
                 path: [from, to]
             }
         ];
