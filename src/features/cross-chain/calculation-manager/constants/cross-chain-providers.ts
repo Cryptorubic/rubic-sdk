@@ -14,6 +14,7 @@ import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manag
 import { LayerZeroBridgeProvider } from '../providers/layerzero-bridge/layerzero-bridge-provider';
 import { MesonCrossChainProvider } from '../providers/meson-provider/meson-cross-chain-provider';
 import { OrbiterBridgeProvider } from '../providers/orbiter-bridge/orbiter-bridge-provider';
+import { OwlToBridgeProvider } from '../providers/owl-to-bridge/owl-to-bridge-provider';
 import { RangoCrossChainProvider } from '../providers/rango-provider/rango-cross-chain-provider';
 // import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
 import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-provider';
@@ -29,7 +30,8 @@ const proxyProviders = [
     PulseChainCrossChainProvider,
     OrbiterBridgeProvider,
     ArchonBridgeProvider,
-    MesonCrossChainProvider
+    MesonCrossChainProvider,
+    OwlToBridgeProvider
 ] as const;
 
 const nonProxyProviders = [

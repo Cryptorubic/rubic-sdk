@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -59,13 +59,14 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 to: toToken,
                 configs: this.orbiterQuoteConfigs
             });
+            const minAmountBN = new BigNumber(quoteConfig.minAmt);
+            const maxAmountBN = new BigNumber(quoteConfig.maxAmt);
 
-            if (!OrbiterUtils.isAmountCorrect(from.tokenAmount, quoteConfig)) {
-                throw new RubicSdkError(`
-                    [ORBITER] Amount is out of range. 
-                    Min amount - ${quoteConfig.minAmt} ${from.symbol}.
-                    Max amount - ${quoteConfig.maxAmt} ${from.symbol}.
-                `);
+            if (from.tokenAmount.gt(maxAmountBN)) {
+                throw new MaxAmountError(maxAmountBN, from.symbol);
+            }
+            if (from.tokenAmount.lt(minAmountBN)) {
+                throw new MinAmountError(minAmountBN, from.symbol);
             }
 
             const toAmount = await OrbiterApiService.calculateAmount(fromWithoutFee, quoteConfig);

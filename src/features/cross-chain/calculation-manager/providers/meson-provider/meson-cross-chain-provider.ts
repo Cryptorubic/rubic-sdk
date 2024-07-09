@@ -101,14 +101,14 @@ export class MesonCrossChainProvider extends CrossChainProvider {
                 routePath: await this.getRoutePath(from, to)
             });
 
-            if (from.tokenAmount.lt(min)) {
+            if (fromWithoutFee.tokenAmount.lt(min)) {
                 return {
                     trade,
                     error: new MinAmountError(min, from.symbol),
                     tradeType: this.type
                 };
             }
-            if (from.tokenAmount.gt(max)) {
+            if (fromWithoutFee.tokenAmount.gt(max)) {
                 return {
                     trade,
                     error: new MaxAmountError(max, from.symbol),
