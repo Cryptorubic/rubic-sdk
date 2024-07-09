@@ -7,6 +7,7 @@ import {
     RubicSdkError
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
 import {
     BLOCKCHAIN_NAME,
@@ -33,9 +34,14 @@ import {
     StargateV2SupportedBlockchains,
     stargateV2SupportedBlockchains
 } from './constants/stargate-v2-cross-chain-supported-blockchains';
-import { stargateV2PoolAbi, stargateV2PoolBalanceAbi } from './constants/stargate-v2-pool-abi';
+import {
+    stargateV2PoolAbi,
+    stargateV2PoolBalanceAbi,
+    stargateV2SendQuoteAbi
+} from './constants/stargate-v2-pool-abi';
 import { stargateV2PoolId } from './constants/stargate-v2-pool-id';
 import {
+    StargateV2MessagingFee,
     StargateV2QuoteOFTResponse,
     StargateV2QuoteParamsStruct
 } from './modal/stargate-v2-quote-params-struct';
@@ -122,6 +128,13 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             );
             const amountReceived = amountReceivedLD[1] as string;
             sendParams.minAmountLD = amountReceived;
+            const messagingFee = await this.getNativeFee(sendParams, from.blockchain, fromSymbol);
+            const nativeToken = nativeTokensList[from.blockchain];
+
+            const cryptoFeeToken = await PriceTokenAmount.createFromToken({
+                ...nativeToken,
+                weiAmount: new BigNumber(messagingFee.nativeFee)
+            });
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -139,6 +152,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                           options.providerAddress,
                           routePath,
                           sendParams,
+                          messagingFee,
                           options.receiverAddress
                       )
                     : null;
@@ -147,10 +161,22 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        feeInfo,
+                        feeInfo: {
+                            ...feeInfo,
+                            provider: {
+                                cryptoFee: {
+                                    amount: Web3Pure.fromWei(
+                                        messagingFee.nativeFee,
+                                        nativeToken.decimals
+                                    ),
+                                    token: cryptoFeeToken
+                                }
+                            }
+                        },
                         slippageTolerance: options.slippageTolerance,
                         gasData,
-                        sendParams
+                        sendParams,
+                        messagingFee
                     },
                     options.providerAddress,
                     routePath
@@ -278,5 +304,35 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 path: [from, to]
             }
         ];
+    }
+
+    private async getNativeFee(
+        sendParam: StargateV2QuoteParamsStruct,
+        fromBlockchain: EvmBlockchainName,
+        tokenSymbol: StargateV2BridgeToken
+    ): Promise<StargateV2MessagingFee> {
+        const contractAddress =
+            stargateV2ContractAddress?.[fromBlockchain as StargateV2SupportedBlockchains]?.[
+                tokenSymbol
+            ];
+        if (!contractAddress) {
+            throw new RubicSdkError();
+        }
+        try {
+            const { 0: nativeFee, 1: lzTokenFee } = await Injector.web3PublicService
+                .getWeb3Public(fromBlockchain)
+                .callContractMethod<{ 0: string; 1: string }>(
+                    contractAddress,
+                    stargateV2SendQuoteAbi,
+                    'quoteSend',
+                    [sendParam, false]
+                );
+            return {
+                nativeFee,
+                lzTokenFee
+            };
+        } catch (err) {
+            throw new RubicSdkError(err?.message);
+        }
     }
 }
