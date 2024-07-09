@@ -225,6 +225,16 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             );
         }
 
+        if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
+            const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
+            const newNonWeiAmount = Web3Pure.fromWei(this.to.stringWeiAmount, this.to.decimals)
+                .plus(this.prevGasAmountInNonZetaChain!)
+                .minus(newGasAmount);
+            const newWeiAmount = Web3Pure.toWei(newNonWeiAmount, this.to.decimals);
+
+            return { config, amount: newWeiAmount };
+        }
+
         return {
             config,
             amount: this.to.stringWeiAmount
@@ -239,36 +249,6 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
-    }
-
-    protected override async setTransactionConfig(
-        skipAmountChangeCheck: boolean,
-        useCacheData: boolean,
-        receiverAddress?: string
-    ): Promise<EvmEncodeConfig> {
-        if (this.lastTransactionConfig && useCacheData) {
-            return this.lastTransactionConfig;
-        }
-
-        const { config, amount } = await this.getTransactionConfigAndAmount(receiverAddress);
-        this.lastTransactionConfig = config;
-        setTimeout(() => {
-            this.lastTransactionConfig = null;
-        }, 15_000);
-
-        if (!skipAmountChangeCheck) {
-            if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
-                const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
-                const newWeiAmount = Web3Pure.fromWei(amount, this.to.decimals)
-                    .plus(this.prevGasAmountInNonZetaChain!)
-                    .minus(newGasAmount)
-                    .toFixed(0);
-                await this.checkAmountChange(newWeiAmount, this.amountToCheck);
-            } else {
-                await this.checkAmountChange(amount, this.amountToCheck);
-            }
-        }
-        return config;
     }
 
     public override async needApprove(): Promise<boolean> {
