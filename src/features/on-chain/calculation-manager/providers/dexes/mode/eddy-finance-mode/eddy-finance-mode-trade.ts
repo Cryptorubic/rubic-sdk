@@ -56,7 +56,7 @@ export class EddyFinanceModeTrade extends UniswapV2AbstractTrade {
                 await this.checkBalance();
             } catch (_err) {
                 throw new RubicSdkError(
-                    'To use `encode` function, wallet must have enough balance or you must provider `supportFee` parameter in options.'
+                    'To use `encode` function, wallet must have enough balance or you must provide `supportFee` parameter in options.'
                 );
             }
         }

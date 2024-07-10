@@ -16,4 +16,9 @@ export interface EvmTransactionOptions extends EvmBasicTransactionOptions {
      * Use in case of eip-155
      */
     chainId?: string;
+
+    /**
+     * gasLimit multiplier (to change ratio for specific chain)
+     */
+    gasLimitRatio?: number;
 }
