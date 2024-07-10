@@ -23,8 +23,7 @@ import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/
 import { TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS } from './constants/eddy-bridge-contract-addresses';
 import {
     EddyBridgeSupportedChain,
-    eddyBridgeSupportedChains,
-    EddyBridgeSupportedTokens
+    eddyBridgeSupportedChains
 } from './constants/eddy-bridge-supported-chains';
 import { EDDY_BRIDGE_LIMITS } from './constants/swap-limits';
 import { EddyBridgeTrade } from './eddy-bridge-trade';
@@ -124,7 +123,14 @@ export class EddyBridgeProvider extends CrossChainProvider {
         fromWithoutFee: PriceTokenAmount<EvmBlockchainName>,
         trade: EddyBridgeTrade
     ): Promise<CalculationResult> {
-        const limits = EDDY_BRIDGE_LIMITS[fromWithoutFee.symbol as EddyBridgeSupportedTokens];
+        const limits = EDDY_BRIDGE_LIMITS.find(
+            info =>
+                info.blockchain === fromWithoutFee.blockchain &&
+                compareAddresses(info.address, fromWithoutFee.address)
+        );
+        if (!limits) {
+            throw new NotSupportedTokensError();
+        }
         let hasEnoughCapacity: boolean = true;
 
         if (fromWithoutFee.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN) {
