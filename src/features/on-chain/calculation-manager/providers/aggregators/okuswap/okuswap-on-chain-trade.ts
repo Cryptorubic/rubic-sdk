@@ -107,6 +107,9 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     public async needApprove(fromAddress?: string): Promise<boolean> {
+        if(this.from.isNative){
+            return false;
+        }
         if (!fromAddress) {
             this.checkWalletConnected();
         }
