@@ -1,10 +1,5 @@
 import BigNumber from 'bignumber.js';
-import {
-    MaxAmountError,
-    MinAmountError,
-    NotSupportedBlockchain,
-    NotSupportedTokensError
-} from 'src/common/errors';
+import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -56,16 +51,18 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 options?.receiverAddress,
                 options?.fromAddress || walletAddress
             );
-            this.skipkNotSupportedRoutes(from, toToken);
-            const routingDirection = eddyRoutingDirection(from, toToken);
+            const isSupportedRoute = this.checkIsSupportedRoute(from, toToken);
+            if (!isSupportedRoute) {
+                throw new NotSupportedTokensError();
+            }
 
+            const routingDirection = eddyRoutingDirection(from, toToken);
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
                 from,
                 useProxy
             );
-
             const fromWithoutFee = getFromWithoutFee(
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
@@ -210,34 +207,40 @@ export class EddyBridgeProvider extends CrossChainProvider {
         return { toAmount: calcData.to.tokenAmount, gasInTargetChain: undefined };
     }
 
-    private skipkNotSupportedRoutes(
+    private checkIsSupportedRoute(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
-    ): void {
+    ): boolean {
         // Prevents bridges BSC <-> Ethereum
         if (
             from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
             toToken.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN
         ) {
-            throw new NotSupportedBlockchain();
+            return false;
         }
         // Only gas-token(BNB, ETH) can be bridged from supported chains in ZetaChain(ZETA)
-        if (
-            from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
-            (!from.isNative || !toToken.isNative)
-        ) {
-            throw new NotSupportedTokensError();
+        if (from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN && from.isNative && toToken.isNative) {
+            return true;
         }
-        // Bridge from ZetaChain available only for ETH.ETH, BNB.BNB, ZETA
         const isSupportedZrc20 = Object.values(TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS).some(
             zrc20Address => compareAddresses(zrc20Address, from.address)
         );
+        // Zetachain(BNB) -> BSC(BNB) and Zetachain(ETH) -> ETH(ETH)
         if (
             from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
-            ((!isSupportedZrc20 && !from.isNative) || !toToken.isNative)
+            isSupportedZrc20 &&
+            toToken.isNative &&
+            new RegExp(toToken.symbol, 'i').test(from.symbol)
         ) {
-            throw new NotSupportedTokensError();
+            return true;
         }
+
+        // ZetaChain(ZETA) -> BSC(BNB) or ETH(ETH)
+        if (from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN && from.isNative && toToken.isNative) {
+            return true;
+        }
+
+        return false;
     }
 
     protected async getRoutePath(

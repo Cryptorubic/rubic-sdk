@@ -31,7 +31,7 @@ export class EddyBridgeContractService {
             'withdrawGasFee',
             []
         );
-        const gasFeeNonWei = Web3Pure.fromWei(res?.[1], from.decimals);
+        const gasFeeNonWei = Web3Pure.fromWei(res?.[1] || 0, from.decimals);
 
         return gasFeeNonWei;
     }
