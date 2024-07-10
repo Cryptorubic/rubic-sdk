@@ -300,9 +300,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const lifiSteps = (route.steps[0] as LifiStep).includedSteps;
         const crossChainStep = lifiSteps.find(el => el.type === 'cross')!;
 
-        const fromTransit =
-            crossChainStep.action?.fromAddress || crossChainStep.action.fromToken.address;
-        const toTransit = crossChainStep.action?.toAddress || crossChainStep.action.toToken.address;
+        const fromTransit = crossChainStep.action.fromToken.address;
+        const toTransit = crossChainStep.action.toToken.address;
 
         const fromTokenAmount = await TokenAmount.createToken({
             address: fromTransit,
