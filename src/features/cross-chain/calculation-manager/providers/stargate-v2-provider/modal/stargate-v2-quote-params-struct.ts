@@ -5,7 +5,7 @@ export interface StargateV2QuoteParamsStruct {
     minAmountLD: string;
     extraOptions: string;
     composeMsg: string;
-    oftCmd: 1 | 0;
+    oftCmd: string;
 }
 
 export interface StargateV2QuoteOFTResponse {

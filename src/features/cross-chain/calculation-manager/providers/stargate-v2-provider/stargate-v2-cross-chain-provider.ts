@@ -118,7 +118,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 minAmountLD: amountLD,
                 extraOptions: '0x',
                 composeMsg: '0x',
-                oftCmd: 0
+                oftCmd: '0x'
             };
 
             const { amountReceivedLD } = await this.getReceiveAmount(
