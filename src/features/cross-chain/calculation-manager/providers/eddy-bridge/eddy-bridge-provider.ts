@@ -123,11 +123,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
         fromWithoutFee: PriceTokenAmount<EvmBlockchainName>,
         trade: EddyBridgeTrade
     ): Promise<CalculationResult> {
-        const limits = EDDY_BRIDGE_LIMITS.find(
-            info =>
-                info.blockchain === fromWithoutFee.blockchain &&
-                compareAddresses(info.address, fromWithoutFee.address)
-        );
+        const limits = EDDY_BRIDGE_LIMITS.find(info => fromWithoutFee.isEqualTo(info));
         if (!limits) {
             throw new NotSupportedTokensError();
         }
