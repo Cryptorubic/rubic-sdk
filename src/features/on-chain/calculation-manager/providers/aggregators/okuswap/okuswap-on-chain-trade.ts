@@ -109,7 +109,7 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     public async needApprove(fromAddress?: string): Promise<boolean> {
-        if(this.from.isNative){
+        if (this.from.isNative) {
             return false;
         }
         if (!fromAddress) {
@@ -146,8 +146,8 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        if(this.from.blockchain === 'ROOTSTOCK'){
-           await checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
+        if (this.from.blockchain === 'ROOTSTOCK') {
+            await checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
         }
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
