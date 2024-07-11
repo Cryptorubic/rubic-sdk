@@ -2,8 +2,10 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError, UnnecessaryApproveError } from 'src/common/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 import { TransactionReceipt } from 'web3-eth';
@@ -107,6 +109,9 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     public async needApprove(fromAddress?: string): Promise<boolean> {
+        if (this.from.isNative) {
+            return false;
+        }
         if (!fromAddress) {
             this.checkWalletConnected();
         }
@@ -138,6 +143,19 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         );
 
         return this.from.weiAmount.gt(allowance) || new BigNumber(Date.now()).gt(expiration);
+    }
+
+    public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+        if (this.from.blockchain === 'ROOTSTOCK') {
+            await checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
+        }
+        await this.checkFromAddress(options.fromAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress);
+
+        if (this.useProxy) {
+            return this.encodeProxy(options);
+        }
+        return this.encodeDirect(options);
     }
 
     protected async getTransactionConfigAndAmount(

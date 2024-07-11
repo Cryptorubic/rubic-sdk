@@ -41,6 +41,16 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
+    protected get gasLimitRatio(): number {
+        if (
+            this.to.blockchain === BLOCKCHAIN_NAME.ZETACHAIN ||
+            this.from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN
+        ) {
+            return 1.5;
+        }
+        return 1.05;
+    }
+
     /**
      * Gets gas fee in source blockchain.
      */
@@ -139,7 +149,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
                     value,
                     onTransactionHash,
                     gas: gasLimit,
-                    gasPriceOptions
+                    gasPriceOptions,
+                    gasLimitRatio: this.gasLimitRatio
                 });
                 return transactionHash!;
             }
@@ -184,6 +195,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
                 onTransactionHash,
                 gas: gasLimit,
                 gasPriceOptions,
+                gasLimitRatio: this.gasLimitRatio,
                 ...(options?.useEip155 && {
                     chainId: `0x${blockchainId[this.from.blockchain].toString(16)}`
                 })
