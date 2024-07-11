@@ -146,7 +146,9 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
+        if(this.from.blockchain === 'ROOTSTOCK'){
+           await checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
+        }
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
 
