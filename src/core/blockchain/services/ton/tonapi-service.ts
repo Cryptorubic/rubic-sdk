@@ -6,7 +6,6 @@ import {
     TonCenterBlocksResp,
     TonCenterResp
 } from '../../models/ton/ton-center-types';
-import { TONAPI_TX_STATUS, TonApiTxStatus } from '../../models/ton/tonapi-statuses';
 import {
     TonApiAccountInfoResp,
     TonApiAllNonNullableTokenInfoForWalletResp,
@@ -14,6 +13,7 @@ import {
     TonApiHealthcheckResp,
     TonApiResp,
     TonApiSeqnoResp,
+    TonApiStatusByBocResp,
     TonApiTokenInfoForWalletResp,
     TonApiTokenInfoResp,
     TonApiTxDataByBocResp
@@ -52,19 +52,17 @@ export class TonApiService {
         return res;
     }
 
-    public async getTxStatus(boc: string): Promise<TonApiTxStatus> {
-        const txInfo = await this.fetchTxInfo(boc);
-        if (txInfo.aborted) {
-            return TONAPI_TX_STATUS.ABORTED;
-        }
-        if (txInfo.destroyed) {
-            return TONAPI_TX_STATUS.DESTROYED;
-        }
-        if (txInfo.success) {
-            return TONAPI_TX_STATUS.SUCCESS;
+    public async checkIsTxCompleted(boc: string): Promise<boolean> {
+        const msgHash = TonUtils.fromBocToBase64Hash(boc);
+        const res = await Injector.httpClient.get<TonApiResp<TonApiStatusByBocResp>>(
+            `${TONAPI_API_URL}/events/${msgHash}`,
+            { headers: { Authorization: TONAPI_API_KEY } }
+        );
+        if ('error' in res) {
+            throw new RubicSdkError(`[TonApiService] Error in checkIsTxCompleted - ${res.error}`);
         }
 
-        return TONAPI_TX_STATUS.PENDING;
+        return Object.hasOwn(res, 'in_progress') && !res.in_progress;
     }
 
     public async healthcheck(): Promise<boolean> {

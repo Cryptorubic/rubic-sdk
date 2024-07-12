@@ -1,11 +1,7 @@
 import { TonConnectUI } from '@tonconnect/ui';
+import { RubicSdkError } from 'src/common/errors';
 import { waitFor } from 'src/common/utils/waitFor';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import {
-    TONAPI_STATUS_ERROR_MAP,
-    TONAPI_TX_STATUS,
-    TonApiTxStatus
-} from 'src/core/blockchain/models/ton/tonapi-statuses';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TonWalletProviderCore } from 'src/core/sdk/models/wallet-provider';
@@ -33,9 +29,9 @@ export class TonWeb3Private extends Web3Private {
                 messages: options.messages
             });
             options.onTransactionHash?.(boc);
-            const txStatus = await this.waitForTransactionReceipt(boc);
-            if (txStatus !== TONAPI_TX_STATUS.SUCCESS) {
-                throw TONAPI_STATUS_ERROR_MAP[txStatus];
+            const isCompleted = await this.waitForTransactionReceipt(boc);
+            if (!isCompleted) {
+                throw new RubicSdkError('[TonWeb3Private] TON transaction timeout expired!');
             }
             return boc;
         } catch (err) {
@@ -44,24 +40,22 @@ export class TonWeb3Private extends Web3Private {
         }
     }
 
-    private async waitForTransactionReceipt(
-        boc: string
-    ): Promise<Exclude<TonApiTxStatus, 'PENDING'>> {
-        let status: TonApiTxStatus = TONAPI_TX_STATUS.PENDING;
+    private async waitForTransactionReceipt(boc: string): Promise<boolean> {
+        let isCompleted = false;
         let durationInSecs = 0;
         const durationLimit = 180;
-        const intervalId = setInterval(() => durationInSecs++, 3_000);
+        const intervalId = setInterval(() => durationInSecs++, 1_000);
         while (true) {
             if (durationInSecs > durationLimit) {
                 clearInterval(intervalId);
-                return TONAPI_TX_STATUS.TIMEOUT;
+                return false;
             }
-            if (status !== TONAPI_TX_STATUS.PENDING) {
+            if (isCompleted) {
                 clearInterval(intervalId);
-                return status;
+                return true;
             }
-            await waitFor(5_000);
-            status = await this.tonApi.getTxStatus(boc);
+            await waitFor(3_000);
+            isCompleted = await this.tonApi.checkIsTxCompleted(boc);
         }
     }
 

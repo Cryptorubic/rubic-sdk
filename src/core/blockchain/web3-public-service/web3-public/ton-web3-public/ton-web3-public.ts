@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import pTimeout from 'src/common/utils/p-timeout';
-import { TONAPI_TX_STATUS, TonApiTxStatus } from 'src/core/blockchain/models/ton/tonapi-statuses';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { TonUtils } from 'src/core/blockchain/services/ton/ton-utils';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
@@ -15,15 +14,10 @@ export class TonWeb3Public extends Web3Public {
     private readonly tonApi: TonApiService = new TonApiService();
 
     public async getTransactionStatus(boc: string): Promise<TxStatus> {
-        const status: TonApiTxStatus = await this.tonApi.getTxStatus(boc);
-        if (status === TONAPI_TX_STATUS.SUCCESS) {
+        const isCompleted = await this.tonApi.checkIsTxCompleted(boc);
+        if (isCompleted) {
             return TX_STATUS.SUCCESS;
         }
-
-        if (status === TONAPI_TX_STATUS.ABORTED || status === TONAPI_TX_STATUS.DESTROYED) {
-            return TX_STATUS.FAIL;
-        }
-
         return TX_STATUS.PENDING;
     }
 
@@ -58,8 +52,8 @@ export class TonWeb3Public extends Web3Public {
             return [];
         }
         const rawTokensAddresses = await Promise.all(
-            tokensAddresses.map(async addr => {
-                const res = await TonUtils.getAllAddressesFormatsOfAccount(addr);
+            tokensAddresses.map(async address => {
+                const res = await TonUtils.getAllFormatsOfAddress(address);
                 return res.raw_form.toLowerCase();
             })
         );

@@ -21,7 +21,7 @@ export class TonUtils {
     /**
      * @param walletAddress in any format: raw or friendly
      */
-    public static async getAllAddressesFormatsOfAccount(
+    public static async getAllFormatsOfAddress(
         walletAddress: string
     ): Promise<TonApiParseAddressResp> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiParseAddressResp>>(
@@ -33,9 +33,7 @@ export class TonUtils {
             }
         );
         if ('error' in res) {
-            throw new RubicSdkError(
-                `[TonUtils] Error in getAllAddressesFormatsOfAccount - ${res.error}`
-            );
+            throw new RubicSdkError(`[TonUtils] Error in getAllFormatsOfAddress - ${res.error}`);
         }
 
         return res;

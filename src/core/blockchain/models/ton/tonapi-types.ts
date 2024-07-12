@@ -19,6 +19,11 @@ export interface TonApiTxDataByBocResp {
     out_msgs: object[];
 }
 
+export interface TonApiStatusByBocResp {
+    in_progress: boolean;
+    lt: number;
+}
+
 export interface TonApiHealthcheckResp {
     rest_online: boolean;
     indexing_latency: number;
