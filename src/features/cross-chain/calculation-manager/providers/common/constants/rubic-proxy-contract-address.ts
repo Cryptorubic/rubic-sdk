@@ -18,7 +18,8 @@ const ALTERNATIVE_ROUTER1_NETWORKS = [
     BLOCKCHAIN_NAME.XLAYER,
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.SEI,
-    BLOCKCHAIN_NAME.CORE
+    BLOCKCHAIN_NAME.CORE,
+    BLOCKCHAIN_NAME.BAHAMUT
 ] as const;
 
 function isAlternativeRouter1Network(blockchain: BlockchainName): boolean {

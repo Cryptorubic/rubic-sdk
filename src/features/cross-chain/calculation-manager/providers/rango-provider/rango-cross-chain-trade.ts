@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -127,6 +128,15 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             value: providerValue,
             to: providerRouter
         } = await this.setTransactionConfig(false, options?.useCacheData || false, receiverAddress);
+        if (
+            !compareAddresses(
+                providerRouter,
+                rangoContractAddresses[this.from.blockchain as RangoSupportedBlockchain]!
+                    .providerRouter
+            )
+        ) {
+            throw new RubicSdkError('Rubic proxy does not support non proxy Rango routers');
+        }
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,

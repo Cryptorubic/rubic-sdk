@@ -95,7 +95,10 @@ export interface GetBestRouteReturnType {
 
 interface OkuCoupon {
     chainId: number;
-    swapConfig: object;
-    trade: object;
-    universalRouter: string;
+    account: string;
+    raw: {
+        swapConfig: object;
+        trade: object;
+        universalRouter: string;
+    };
 }
