@@ -381,7 +381,10 @@ export class OnChainManager {
         const availableAggregators = Object.values(this.AGGREGATORS)
             .map(AggregatorClass => new AggregatorClass())
             .filter(aggregator => {
-                return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
+                return (
+                    !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType) &&
+                    aggregator.isSupportedBlockchain(from.blockchain)
+                );
             });
 
         return availableAggregators.map(aggregator => {

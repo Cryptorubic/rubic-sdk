@@ -30,7 +30,7 @@ import { OkuSwapApiService } from './services/okuswap-api-service';
 export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OKU_SWAP;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return OKUSWAP_ON_CHAIN_SUPPORTED_BLOCKCHAINS.some(chain => chain === blockchain);
     }
 
@@ -39,10 +39,6 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError(`OkuSwap doesn't support ${from.blockchain} chain!`);
-        }
-
         const fromBlockchain = from.blockchain as OkuSwapSupportedBlockchain;
         const walletAddress =
             options.fromAddress || this.getWalletAddress(fromBlockchain) || FAKE_WALLET_ADDRESS;

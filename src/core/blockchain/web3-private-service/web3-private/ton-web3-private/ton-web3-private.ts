@@ -50,7 +50,7 @@ export class TonWeb3Private extends Web3Private {
         let status: TonApiTxStatus = TONAPI_TX_STATUS.PENDING;
         let durationInSecs = 0;
         const durationLimit = 180;
-        const intervalId = setInterval(() => durationInSecs++, 1_000);
+        const intervalId = setInterval(() => durationInSecs++, 3_000);
         while (true) {
             if (durationInSecs > durationLimit) {
                 clearInterval(intervalId);

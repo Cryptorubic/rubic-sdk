@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
@@ -22,7 +21,7 @@ import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 export class RangoOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.RANGO;
 
-    protected isSupportedBlockchain(blockchainName: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchainName: BlockchainName): boolean {
         return rangoSupportedBlockchains.some(chain => chain === blockchainName);
     }
 
@@ -31,10 +30,6 @@ export class RangoOnChainProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError(`Rango doesn't support ${from.blockchain} chain!`);
-        }
-
         try {
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
 
