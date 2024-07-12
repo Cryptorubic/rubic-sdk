@@ -1,0 +1,30 @@
+import { BLOCKCHAIN_NAME } from "src/core/blockchain/models/blockchain-name";
+import { RouterCrossChainSupportedBlockchains } from "./router-cross-chain-supported-chains";
+
+export const routerChainId: Record<RouterCrossChainSupportedBlockchains, number> = {
+    [BLOCKCHAIN_NAME.ETHEREUM]: 1,
+    [BLOCKCHAIN_NAME.OPTIMISM]: 10,
+    [BLOCKCHAIN_NAME.ROOTSTOCK]: 30,
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 56,
+    [BLOCKCHAIN_NAME.POLYGON]: 137,
+    [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 169,
+    [BLOCKCHAIN_NAME.XLAYER]: 196,
+    [BLOCKCHAIN_NAME.FANTOM]: 250,
+    [BLOCKCHAIN_NAME.BOBA]: 288,
+    [BLOCKCHAIN_NAME.ZK_SYNC]: 324,
+    [BLOCKCHAIN_NAME.METIS]: 1088,
+    // [BLOCKCHAIN_NAME.POLYGON_ZKEVM],
+    // [BLOCKCHAIN_NAME.DOGECOIN],
+    // [BLOCKCHAIN_NAME.MANTLE],
+    // [BLOCKCHAIN_NAME.BASE],
+    // [BLOCKCHAIN_NAME.OASIS],
+    // [BLOCKCHAIN_NAME.MODE],
+    // [BLOCKCHAIN_NAME.ARBITRUM],
+    // [BLOCKCHAIN_NAME.AVALANCHE],
+    // [BLOCKCHAIN_NAME.LINEA],
+    // [BLOCKCHAIN_NAME.BLAST],
+    // [BLOCKCHAIN_NAME.TAIKO],
+    // [BLOCKCHAIN_NAME.SCROLL],
+    // [BLOCKCHAIN_NAME.TRON],
+    // [BLOCKCHAIN_NAME.AURORA],
+}
