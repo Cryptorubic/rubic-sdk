@@ -33,7 +33,9 @@ export class TonkeeperApiService {
             );
             return req;
         });
-        const routes = (await Promise.all(promises)).filter(route => typeof route !== 'string');
+        const routes = (await Promise.all(promises)).filter(
+            route => typeof route !== 'string'
+        ) as TonkeeperQuoteResp[];
         if (!routes.length) {
             throw new NotSupportedTokensError();
         }
