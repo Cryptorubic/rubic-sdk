@@ -476,6 +476,13 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'CORE',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.BAHAMUT]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BAHAMUT,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'FTN',
+        symbol: 'FTN',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.TON]: new Token({
         blockchain: BLOCKCHAIN_NAME.TON,
         address: TonWeb3Pure.nativeTokenAddress,
