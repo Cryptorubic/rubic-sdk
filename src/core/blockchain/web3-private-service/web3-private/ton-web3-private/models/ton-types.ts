@@ -1,10 +1,10 @@
 import { BasicTransactionOptions } from '../../models/basic-transaction-options';
 
 export interface TonTransactionOptions extends BasicTransactionOptions {
-    messages: TonTxMessage[];
+    messages: TonEncodedConfig[];
 }
 
-export interface TonTxMessage {
+export interface TonEncodedConfig {
     /**
      * In default transfer - it's a receiverWalletAddress to send funds in  format "0:41241077...."
      * In tx using contracts - it's a jettonWalletAddress (like ERC-20, but in TON)

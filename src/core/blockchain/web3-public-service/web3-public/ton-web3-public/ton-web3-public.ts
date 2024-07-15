@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import pTimeout from 'src/common/utils/p-timeout';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { TonUtils } from 'src/core/blockchain/services/ton/ton-utils';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
@@ -11,6 +12,10 @@ import { TX_STATUS, TxStatus } from '../models/tx-status';
 import { Web3Public } from '../web3-public';
 
 export class TonWeb3Public extends Web3Public {
+    constructor() {
+        super(BLOCKCHAIN_NAME.TON);
+    }
+
     private readonly tonApi: TonApiService = new TonApiService();
 
     public async getTransactionStatus(boc: string): Promise<TxStatus> {

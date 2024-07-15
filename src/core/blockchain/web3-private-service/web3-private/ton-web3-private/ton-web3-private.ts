@@ -54,12 +54,12 @@ export class TonWeb3Private extends Web3Private {
                 clearInterval(intervalId);
                 return true;
             }
-            await waitFor(3_000);
+            await waitFor(5_000);
             isCompleted = await this.tonApi.checkIsTxCompleted(boc);
         }
     }
 
-    constructor(private readonly tonProviderCore: TonWalletProviderCore) {
+    constructor(tonProviderCore: TonWalletProviderCore) {
         super(tonProviderCore.address);
         this.tonConnectUI = tonProviderCore.core;
     }

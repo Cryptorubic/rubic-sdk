@@ -7,7 +7,6 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import {
     DlnEvmOnChainSupportedBlockchain,
     DlnOnChainSupportedBlockchain
@@ -32,12 +31,6 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
     public readonly type: OnChainTradeType;
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
-
-    protected get spenderAddress(): string {
-        return this.useProxy
-            ? rubicProxyContractAddress[this.from.blockchain].gateway
-            : this.providerGateway;
-    }
 
     public get dexContractAddress(): string {
         throw new RubicSdkError('Dex address is unknown before swap is started');

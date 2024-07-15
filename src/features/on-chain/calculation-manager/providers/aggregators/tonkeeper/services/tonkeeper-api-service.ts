@@ -45,6 +45,9 @@ export class TonkeeperApiService {
         return bestRoute;
     }
 
+    /**
+     * @param slippage number from 0 to 1
+     */
     public static async encodeParamsForSwap(
         bestRoute: TonkeeperQuoteResp,
         walletAddress: string,
@@ -62,7 +65,7 @@ export class TonkeeperApiService {
                 },
                 options: {
                     senderAddress: walletAddress,
-                    slippage: Number(slippage * 100).toString()
+                    slippage: slippage.toString()
                 }
             }
         );
