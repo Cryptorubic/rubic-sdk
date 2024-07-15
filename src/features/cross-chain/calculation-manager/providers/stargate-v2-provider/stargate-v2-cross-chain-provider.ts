@@ -39,7 +39,8 @@ import {
     stargateV2PoolBalanceAbi,
     stargateV2SendQuoteAbi
 } from './constants/stargate-v2-pool-abi';
-import { stargateV2PoolId } from './constants/stargate-v2-pool-id';
+import { getTokenPoolByAddress } from './constants/stargate-v2-pool-id';
+import { stargateV2TokenAddress } from './constants/stargate-v2-token-address';
 import {
     StargateV2MessagingFee,
     StargateV2QuoteOFTResponse,
@@ -48,7 +49,7 @@ import {
 import { StargateV2CrossChainTrade } from './stargate-v2-cross-chain-trade';
 
 export class StargateV2CrossChainProvider extends CrossChainProvider {
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE_V2;
 
     public isSupportedBlockchain(fromBlockchain: BlockchainName): boolean {
         return stargateV2SupportedBlockchains.some(
@@ -67,13 +68,8 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         try {
             const toBlockchain = toToken.blockchain as StargateV2SupportedBlockchains;
             const useProxy = options?.useProxy?.[this.type] ?? true;
-
-            const fromSymbol = StargateV2CrossChainProvider.getSymbol(
-                from.symbol,
-                from.blockchain
-            ) as StargateV2BridgeToken;
-
             const isSupportedPools = this.checkSupportedPools(from, toToken);
+
             if (!isSupportedPools) {
                 return {
                     trade: null,
@@ -89,7 +85,10 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 from,
                 useProxy
             );
-            const fromAddress = this.getWalletAddress(from.blockchain) || FAKE_WALLET_ADDRESS;
+            const receiverAddress =
+                options?.receiverAddress ||
+                this.getWalletAddress(from.blockchain) ||
+                FAKE_WALLET_ADDRESS;
 
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -98,7 +97,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
 
             const maxAmountError = await this.checkMaxAmount(
                 from.blockchain,
-                fromSymbol,
+                from.address,
                 fromWithoutFee.weiAmount
             );
 
@@ -111,9 +110,10 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             }
 
             const amountLD = fromWithoutFee.stringWeiAmount;
+
             const sendParams: StargateV2QuoteParamsStruct = {
                 dstEid: dstChainId,
-                to: ethers.utils.hexZeroPad(fromAddress, 32),
+                to: ethers.utils.hexZeroPad(receiverAddress, 32),
                 amountLD: amountLD,
                 minAmountLD: amountLD,
                 extraOptions: '0x',
@@ -124,11 +124,11 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             const { amountReceivedLD } = await this.getReceiveAmount(
                 sendParams,
                 from.blockchain,
-                fromSymbol
+                from.address
             );
             const amountReceived = amountReceivedLD[1] as string;
             sendParams.minAmountLD = amountReceived;
-            const messagingFee = await this.getNativeFee(sendParams, from.blockchain, fromSymbol);
+            const messagingFee = await this.getNativeFee(sendParams, from.blockchain, from.address);
             const nativeToken = nativeTokensList[from.blockchain];
 
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
@@ -205,17 +205,24 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         if (blockchain === BLOCKCHAIN_NAME.ETHEREUM && symbol.toLowerCase() === 'metis') {
             return 'METIS';
         }
+        if (blockchain === BLOCKCHAIN_NAME.AVALANCHE && symbol.toLowerCase() === 'usdt') {
+            return 'USDT';
+        }
         return symbol;
     }
 
     private async checkMaxAmount(
         fromBlockchain: EvmBlockchainName,
-        tokenSymbol: StargateV2BridgeToken,
+        tokenAddress: string,
         amountToSend: BigNumber
     ): Promise<MaxAmountError | null> {
+        const tokenSymbol = stargateV2TokenAddress[
+            fromBlockchain as StargateV2SupportedBlockchains
+        ][tokenAddress] as StargateV2BridgeToken;
         const contractAddress = stargateV2ContractAddress[
             fromBlockchain as StargateV2SupportedBlockchains
         ][tokenSymbol] as string;
+
         const maxAmount = await Injector.web3PublicService
             .getWeb3Public(fromBlockchain)
             .callContractMethod(contractAddress, stargateV2PoolBalanceAbi, 'poolBalance');
@@ -245,16 +252,21 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken<EvmBlockchainName>
     ): boolean {
-        const fromTokenSymbol = StargateV2CrossChainProvider.getSymbol(
-            from.symbol,
-            from.blockchain
-        ) as StargateV2BridgeToken;
-        const toTokenSymbol = StargateV2CrossChainProvider.getSymbol(
-            to.symbol,
-            to.blockchain
-        ) as StargateV2BridgeToken;
-        const srcTokenPool = stargateV2PoolId[fromTokenSymbol];
-        const dstTokenPool = stargateV2PoolId[toTokenSymbol];
+        // const fromTokenSymbol = StargateV2CrossChainProvider.getSymbol(
+        //     from.symbol,
+        //     from.blockchain
+        // ) as StargateV2BridgeToken;
+        // const toTokenSymbol = StargateV2CrossChainProvider.getSymbol(
+        //     to.symbol,
+        //     to.blockchain
+        // ) as StargateV2BridgeToken;
+        const fromBlockchain = from.blockchain as StargateV2SupportedBlockchains;
+        const toBlockchain = to.blockchain as StargateV2SupportedBlockchains;
+        const srcTokenPool = getTokenPoolByAddress(fromBlockchain, from.address);
+        const dstTokenPool = getTokenPoolByAddress(toBlockchain, to.address);
+        if (!srcTokenPool || !dstTokenPool) {
+            return false;
+        }
         const srcSupportedPools =
             stargateV2BlockchainSupportedPools[from.blockchain as StargateV2SupportedBlockchains];
         const dstSupportedPools =
@@ -270,11 +282,20 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
     private async getReceiveAmount(
         sendParam: StargateV2QuoteParamsStruct,
         fromBlockchain: EvmBlockchainName,
-        tokenSymbol: StargateV2BridgeToken
+        tokenAddress: string
     ): Promise<StargateV2QuoteOFTResponse> {
+        const tokenSymbol = stargateV2TokenAddress[
+            fromBlockchain as StargateV2SupportedBlockchains
+        ][tokenAddress] as StargateV2BridgeToken;
+
         const contractAddress = stargateV2ContractAddress[
             fromBlockchain as StargateV2SupportedBlockchains
         ][tokenSymbol] as string;
+
+        if (!contractAddress) {
+            throw new RubicSdkError();
+        }
+
         try {
             const { 2: amountReceivedLD } = await Injector.web3PublicService
                 .getWeb3Public(fromBlockchain)
@@ -300,7 +321,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         return [
             {
                 type: 'cross-chain',
-                provider: CROSS_CHAIN_TRADE_TYPE.STARGATE,
+                provider: CROSS_CHAIN_TRADE_TYPE.STARGATE_V2,
                 path: [from, to]
             }
         ];
@@ -309,8 +330,11 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
     private async getNativeFee(
         sendParam: StargateV2QuoteParamsStruct,
         fromBlockchain: EvmBlockchainName,
-        tokenSymbol: StargateV2BridgeToken
+        tokenAddress: string
     ): Promise<StargateV2MessagingFee> {
+        const tokenSymbol = stargateV2TokenAddress[
+            fromBlockchain as StargateV2SupportedBlockchains
+        ][tokenAddress] as StargateV2BridgeToken;
         const contractAddress =
             stargateV2ContractAddress?.[fromBlockchain as StargateV2SupportedBlockchains]?.[
                 tokenSymbol

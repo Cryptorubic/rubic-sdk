@@ -13,11 +13,11 @@ export const stargateV2SupportedBlockchains = [
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.KAVA,
     BLOCKCHAIN_NAME.SCROLL,
-    BLOCKCHAIN_NAME.AURORA,
-    BLOCKCHAIN_NAME.KLAYTN,
-    BLOCKCHAIN_NAME.IOTA,
-    BLOCKCHAIN_NAME.TAIKO,
-    BLOCKCHAIN_NAME.SEI
+    BLOCKCHAIN_NAME.AURORA
+    // BLOCKCHAIN_NAME.KLAYTN,
+    // BLOCKCHAIN_NAME.IOTA,
+    // BLOCKCHAIN_NAME.TAIKO,
+    // BLOCKCHAIN_NAME.SEI
 ];
 
 export type StargateV2SupportedBlockchains = (typeof stargateV2SupportedBlockchains)[number];

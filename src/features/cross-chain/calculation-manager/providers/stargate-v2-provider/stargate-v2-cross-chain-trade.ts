@@ -8,7 +8,6 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
@@ -29,6 +28,7 @@ import { StargateV2BridgeToken } from './constants/stargate-v2-bridge-token';
 import { stargateV2ContractAddress } from './constants/stargate-v2-contract-address';
 import { StargateV2SupportedBlockchains } from './constants/stargate-v2-cross-chain-supported-blockchains';
 import { stargateV2SendTokenAbi } from './constants/stargate-v2-pool-abi';
+import { stargateV2TokenAddress } from './constants/stargate-v2-token-address';
 import {
     StargateV2MessagingFee,
     StargateV2QuoteParamsStruct
@@ -81,7 +81,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE_V2;
 
     public readonly gasData: GasData;
 
@@ -95,7 +95,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
-    public readonly bridgeType = BRIDGE_TYPE.STARGATE;
+    public readonly bridgeType = BRIDGE_TYPE.STARGATE_V2;
 
     public readonly messagingFee: StargateV2MessagingFee;
 
@@ -104,10 +104,9 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        const fromTokenSymbol = StargateCrossChainProvider.getSymbol(
-            this.from.symbol,
-            this.from.blockchain
-        ) as StargateV2BridgeToken;
+        const fromTokenSymbol = stargateV2TokenAddress[
+            this.from.blockchain as StargateV2SupportedBlockchains
+        ][this.from.address] as StargateV2BridgeToken;
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
             : (stargateV2ContractAddress?.[this.fromBlockchain]?.[fromTokenSymbol] as string);
@@ -218,9 +217,9 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         }
         const nativeFee = new BigNumber(this.messagingFee.nativeFee);
 
-        const value = this.from.isNative ?
-        new BigNumber(this.from.stringWeiAmount).plus(nativeFee).toFixed()
-        : this.messagingFee.nativeFee
+        const value = this.from.isNative
+            ? new BigNumber(this.from.stringWeiAmount).plus(nativeFee).toFixed()
+            : this.messagingFee.nativeFee;
         const calldata = await EvmWeb3Pure.encodeMethodCall(
             contractAddress,
             stargateV2SendTokenAbi,
@@ -236,7 +235,6 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string> {
         this.checkWalletConnected();
-        checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
         const { onConfirm, gasLimit, gasPriceOptions } = options;

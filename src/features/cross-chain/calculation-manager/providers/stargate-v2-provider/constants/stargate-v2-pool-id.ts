@@ -1,4 +1,6 @@
 import { StargateV2BridgeToken, stargateV2BridgeToken } from './stargate-v2-bridge-token';
+import { StargateV2SupportedBlockchains } from './stargate-v2-cross-chain-supported-blockchains';
+import { stargateV2TokenAddress } from './stargate-v2-token-address';
 
 const pools = {
     [stargateV2BridgeToken.USDC]: 1,
@@ -13,3 +15,14 @@ const pools = {
 
 export const stargateV2PoolId: Record<StargateV2BridgeToken, number> = pools;
 export type StargateV2PoolId = (typeof pools)[keyof typeof pools];
+
+export function getTokenPoolByAddress(
+    blockchain: StargateV2SupportedBlockchains,
+    contractAddress: string
+): number | null {
+    const tokenSymbol = stargateV2TokenAddress?.[blockchain]?.[contractAddress];
+    if (tokenSymbol) {
+        return stargateV2PoolId[tokenSymbol];
+    }
+    return null;
+}
