@@ -26,7 +26,6 @@ export class OrbiterApiService {
     public static async getReceiveAmount(request: {
         line: string;
         value: string;
-        dealerId: string;
     }): Promise<BigNumber> {
         const nonce = Math.round(Math.random() * 10 ** 4).toString();
         const response = await Injector.httpClient.get<OrbiterReceiveAmountResponse>(
@@ -34,6 +33,7 @@ export class OrbiterApiService {
             {
                 params: {
                     ...request,
+                    ...(this.dealerId && { dealerId: this.dealerId }),
                     nonce
                 }
             }

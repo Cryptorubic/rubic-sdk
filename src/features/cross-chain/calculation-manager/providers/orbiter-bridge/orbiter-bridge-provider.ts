@@ -69,11 +69,10 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
             if (from.tokenAmount.lt(minAmountBN)) {
                 throw new MinAmountError(minAmountBN, from.symbol);
             }
-            const walletAddress = this.getWalletAddress(from.blockchain);
+
             const toAmount = await OrbiterApiService.getReceiveAmount({
                 line: quoteConfig.line,
-                value: fromWithoutFee.stringWeiAmount,
-                dealerId: walletAddress
+                value: fromWithoutFee.stringWeiAmount
             });
 
             const to = new PriceTokenAmount({
