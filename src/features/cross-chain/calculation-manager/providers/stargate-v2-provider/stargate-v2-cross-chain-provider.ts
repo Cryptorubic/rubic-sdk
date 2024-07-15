@@ -145,16 +145,16 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await StargateV2CrossChainTrade.getGasData(
-                          from,
-                          to,
-                          feeInfo,
-                          options.slippageTolerance,
-                          options.providerAddress,
-                          routePath,
-                          sendParams,
-                          messagingFee,
-                          options.receiverAddress
-                      )
+                        from,
+                        to,
+                        feeInfo,
+                        options.slippageTolerance,
+                        options.providerAddress,
+                        routePath,
+                        sendParams,
+                        messagingFee,
+                        options.receiverAddress
+                    )
                     : null;
             return {
                 trade: new StargateV2CrossChainTrade(
@@ -190,25 +190,6 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         }
-    }
-
-    public static getSymbol(symbol: string, blockchain: BlockchainName): string {
-        if (blockchain === BLOCKCHAIN_NAME.METIS && symbol.toLowerCase() === 'usdt') {
-            return 'm.USDT';
-        }
-        if (blockchain === BLOCKCHAIN_NAME.METIS && symbol.toLowerCase() === 'eth') {
-            return 'WETH';
-        }
-        if (blockchain === BLOCKCHAIN_NAME.SCROLL && symbol.toLowerCase() === 'usdc') {
-            return 'USDC.e';
-        }
-        if (blockchain === BLOCKCHAIN_NAME.ETHEREUM && symbol.toLowerCase() === 'metis') {
-            return 'METIS';
-        }
-        if (blockchain === BLOCKCHAIN_NAME.AVALANCHE && symbol.toLowerCase() === 'usdt') {
-            return 'USDT';
-        }
-        return symbol;
     }
 
     private async checkMaxAmount(
@@ -252,14 +233,6 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken<EvmBlockchainName>
     ): boolean {
-        // const fromTokenSymbol = StargateV2CrossChainProvider.getSymbol(
-        //     from.symbol,
-        //     from.blockchain
-        // ) as StargateV2BridgeToken;
-        // const toTokenSymbol = StargateV2CrossChainProvider.getSymbol(
-        //     to.symbol,
-        //     to.blockchain
-        // ) as StargateV2BridgeToken;
         const fromBlockchain = from.blockchain as StargateV2SupportedBlockchains;
         const toBlockchain = to.blockchain as StargateV2SupportedBlockchains;
         const srcTokenPool = getTokenPoolByAddress(fromBlockchain, from.address);
@@ -337,7 +310,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         ][tokenAddress] as StargateV2BridgeToken;
         const contractAddress =
             stargateV2ContractAddress?.[fromBlockchain as StargateV2SupportedBlockchains]?.[
-                tokenSymbol
+            tokenSymbol
             ];
         if (!contractAddress) {
             throw new RubicSdkError();
