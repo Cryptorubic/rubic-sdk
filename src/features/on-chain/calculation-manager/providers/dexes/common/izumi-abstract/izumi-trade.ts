@@ -13,7 +13,7 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { IzumiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/models/izumi-trade-struct';
@@ -70,7 +70,7 @@ export class IzumiTrade extends EvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const tokenChain = blockchainId[this.from.blockchain];
         const swapParams = {
             feeChain: this.swapConfig.feeChain,

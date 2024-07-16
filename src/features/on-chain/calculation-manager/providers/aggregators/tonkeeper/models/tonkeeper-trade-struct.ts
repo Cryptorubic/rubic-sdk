@@ -5,4 +5,9 @@ import { TonkeeperQuoteResp } from './tonkeeper-api-types';
 
 export interface TonkeeperOnChainTradeStruct extends OnChainTradeStruct<TonBlockchainName> {
     bestRoute: TonkeeperQuoteResp;
+    rawAddresses: TxTokensRawAddresses;
+}
+export interface TxTokensRawAddresses {
+    fromRawAddress: string;
+    toRawAddress: string;
 }

@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
@@ -39,10 +40,13 @@ export class TonWeb3Public extends Web3Public {
         const isNative = !tokenAddress || TonWeb3Pure.isNativeAddress(tokenAddress);
         const balance = isNative
             ? (await this.tonApi.fetchAccountInfo(userAddress)).balance
-            : await this.getTokenBalance(userAddress, tokenAddress);
-        return new BigNumber(balance);
+            : (await this.tonApi.fetchTokenInfoForWallet(userAddress, tokenAddress)).balance;
+        return new BigNumber(balance || 0);
     }
 
+    /**
+     * @deprecated Use getBalance instead for all tokens and native currency
+     */
     public async getTokenBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
         const info = await this.tonApi.fetchTokenInfoForWallet(userAddress, tokenAddress);
         return new BigNumber(info.balance || 0);
@@ -74,7 +78,13 @@ export class TonWeb3Public extends Web3Public {
         tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
     ): Promise<Partial<Record<SupportedTokenField, string>>[]> {
         const info = await Promise.all(
-            tokensAddresses.map(address => this.tonApi.fetchTokenInfo(address))
+            tokensAddresses.map(address => {
+                if (TonWeb3Pure.isNativeAddress(address)) {
+                    const nativeToken = nativeTokensList[BLOCKCHAIN_NAME.TON];
+                    return nativeToken;
+                }
+                return this.tonApi.fetchTokenInfo(address);
+            })
         );
         if (!info.length) {
             return [];

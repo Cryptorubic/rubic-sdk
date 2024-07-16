@@ -32,10 +32,9 @@ export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            const [fromRawAddress, toRawAddress, { fromWithoutFee, proxyFeeInfo }] =
+            const [[fromRawAddress, toRawAddress], { fromWithoutFee, proxyFeeInfo }] =
                 await Promise.all([
-                    (await TonUtils.getAllFormatsOfAddress(from.address)).raw_form,
-                    (await TonUtils.getAllFormatsOfAddress(toToken.address)).raw_form,
+                    this.fetchRawTokensAddresses(from, toToken),
                     this.handleProxyContract(from, options)
                 ]);
 
@@ -59,7 +58,11 @@ export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
                 path: this.getRoutePath(from, toToken),
                 proxyFeeInfo,
                 fromWithoutFee,
-                bestRoute
+                bestRoute,
+                rawAddresses: {
+                    fromRawAddress,
+                    toRawAddress
+                }
             } as TonkeeperOnChainTradeStruct;
             tradeStruct.gasFeeInfo = await this.getGasFeeInfo(tradeStruct);
 
@@ -70,6 +73,23 @@ export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
                 error: err
             };
         }
+    }
+
+    private async fetchRawTokensAddresses(
+        from: PriceTokenAmount,
+        toToken: PriceToken
+    ): Promise<[string, string]> {
+        const promises = [from, toToken].map(async token => {
+            if (token.address.startsWith('0:') || token.address.startsWith('-1:')) {
+                return token.address;
+            }
+            if (token.isNative) {
+                return 'ton';
+            }
+            return (await TonUtils.getAllFormatsOfAddress(token.address)).raw_form;
+        });
+        const rawAddresses = (await Promise.all(promises)) as [string, string];
+        return rawAddresses;
     }
 
     protected async getGasFeeInfo(

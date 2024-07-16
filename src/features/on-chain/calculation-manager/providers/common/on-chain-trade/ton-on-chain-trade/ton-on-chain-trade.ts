@@ -14,6 +14,7 @@ import { TransactionConfig } from 'web3-core';
 import { OnChainTradeStruct } from '../evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from '../evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../on-chain-trade';
+import { TonEncodedConfigAndToAmount } from './models/ton--on-chian-trade-types';
 
 export abstract class TonOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount;
@@ -27,6 +28,8 @@ export abstract class TonOnChainTrade extends OnChainTrade {
     public readonly feeInfo: FeeInfo = {};
 
     public readonly gasFeeInfo: GasFeeInfo | null;
+
+    protected readonly fromWithoutFee: PriceTokenAmount<TonBlockchainName>;
 
     protected get spenderAddress(): string {
         throw new RubicSdkError('No spender address!');
@@ -47,6 +50,7 @@ export abstract class TonOnChainTrade extends OnChainTrade {
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.path = tradeStruct.path;
+        this.fromWithoutFee = tradeStruct.fromWithoutFee;
     }
 
     public override async needApprove(): Promise<boolean> {
@@ -79,6 +83,7 @@ export abstract class TonOnChainTrade extends OnChainTrade {
         const tonEncodedConfig = await this.encode({
             fromAddress,
             receiverAddress,
+            skipAmountCheck: false,
             ...(options?.referrer && { referrer: options?.referrer })
         });
 
@@ -96,9 +101,22 @@ export abstract class TonOnChainTrade extends OnChainTrade {
     public async encode(options: EncodeTransactionOptions): Promise<TonEncodedConfig> {
         await this.checkFromAddress(options.fromAddress);
         await this.checkReceiverAddress(options.receiverAddress);
+        if (!options.skipAmountCheck) {
+            await this.handleAmountCheckBeforeSwap(options);
+        }
 
         return this.encodeDirect(options);
     }
 
     public abstract encodeDirect(options: EncodeTransactionOptions): Promise<TonEncodedConfig>;
+
+    private async handleAmountCheckBeforeSwap(options: EncodeTransactionOptions): Promise<void> {
+        const { toAmount } = await this.getTransactionConfigAndAmount(options);
+
+        this.checkAmountChange(toAmount, this.to.stringWeiAmount);
+    }
+
+    protected abstract getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
+    ): Promise<TonEncodedConfigAndToAmount>;
 }

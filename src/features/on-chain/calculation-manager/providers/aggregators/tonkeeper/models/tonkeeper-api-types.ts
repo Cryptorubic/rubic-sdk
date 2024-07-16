@@ -18,7 +18,9 @@ export interface TonkeeperStonfiQuoteInfo extends TonkeeperCommonQuoteInfo {
 interface TonkeeperCommonQuoteInfo {
     fromAsset: string;
     toAsset: string;
+    /** wei amount */
     fromAmount: string;
+    /** wei amount */
     toAmount: string;
     blockchainFee: string;
     path: string[];

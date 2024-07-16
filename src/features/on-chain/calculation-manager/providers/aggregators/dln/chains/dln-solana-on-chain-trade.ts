@@ -15,7 +15,7 @@ import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager
 import { DlnTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorSolanaOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-solana-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
     private readonly transactionRequest: DlnOnChainSwapRequest;
@@ -88,7 +88,7 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
     protected async getToAmountAndTxData(
         receiverAddress?: string,
         _fromAddress?: string
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const params: DlnOnChainSwapRequest = {
             ...this.transactionRequest,
             tokenOutRecipient: receiverAddress || this.web3Private.address
