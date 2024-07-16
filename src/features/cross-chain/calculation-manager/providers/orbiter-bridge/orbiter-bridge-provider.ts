@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -69,11 +70,14 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 throw new MinAmountError(minAmountBN, from.symbol);
             }
 
-            const toAmount = await OrbiterApiService.calculateAmount(fromWithoutFee, quoteConfig);
+            const toAmount = await OrbiterApiService.getReceiveAmount({
+                line: quoteConfig.line,
+                value: fromWithoutFee.stringWeiAmount
+            });
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: toAmount
+                tokenAmount: Web3Pure.fromWei(toAmount, toToken.decimals)
             });
 
             const fromWithoutFeeWithCode = new PriceTokenAmount({
