@@ -34,14 +34,15 @@ export class TonkeeperApiService {
             return req;
         });
         const routes = (await Promise.all(promises)).filter(
-            route => typeof route !== 'string'
+            route => typeof route !== 'string' && route.trades.length
         ) as TonkeeperQuoteResp[];
+
         if (!routes.length) {
             throw new NotSupportedTokensError();
         }
 
         const bestRoute = routes.sort((routeA, routeB) =>
-            new BigNumber(routeB.trades[0].toAmount).comparedTo(routeA.trades[0].toAmount)
+            new BigNumber(routeB.trades[0]?.toAmount).comparedTo(routeA.trades[0]?.toAmount)
         )[0]!;
 
         return bestRoute;
