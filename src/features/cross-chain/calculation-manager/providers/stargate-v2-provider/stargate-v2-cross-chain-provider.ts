@@ -176,7 +176,8 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                         slippageTolerance: options.slippageTolerance,
                         gasData,
                         sendParams,
-                        messagingFee
+                        messagingFee,
+                        priceImpact: from.calculatePriceImpactPercent(to)
                     },
                     options.providerAddress,
                     routePath
@@ -237,6 +238,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         const toBlockchain = to.blockchain as StargateV2SupportedBlockchains;
         const srcTokenPool = getTokenPoolByAddress(fromBlockchain, from.address);
         const dstTokenPool = getTokenPoolByAddress(toBlockchain, to.address);
+
         if (!srcTokenPool || !dstTokenPool) {
             return false;
         }
@@ -263,7 +265,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
 
         const contractAddress = stargateV2ContractAddress[
             fromBlockchain as StargateV2SupportedBlockchains
-        ][tokenSymbol] as string;
+        ][tokenSymbol];
 
         if (!contractAddress) {
             throw new RubicSdkError();

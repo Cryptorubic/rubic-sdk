@@ -24,12 +24,12 @@ export const stargateV2TokenAddress: StargateV2TokenAddress = {
         '0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7': stargateV2BridgeToken.USDT
     },
     [BLOCKCHAIN_NAME.POLYGON]: {
-        '0x2791bca1f2de4661ed88a30c99a7a9449aa84174': stargateV2BridgeToken.USDC,
+        '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359': stargateV2BridgeToken.USDC,
         '0xc2132d05d31c914a87c6611c10748aeb04b58e8f': stargateV2BridgeToken.USDT
     },
     [BLOCKCHAIN_NAME.ARBITRUM]: {
         '0x0000000000000000000000000000000000000000': stargateV2BridgeToken.ETH,
-        '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8': stargateV2BridgeToken.USDC,
+        '0xaf88d065e77c8cc2239327c5edb3a432268e5831': stargateV2BridgeToken.USDC,
         '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9': stargateV2BridgeToken.USDT
     },
     [BLOCKCHAIN_NAME.OPTIMISM]: {
@@ -63,6 +63,7 @@ export const stargateV2TokenAddress: StargateV2TokenAddress = {
         '0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4': stargateV2BridgeToken.USDCe
     },
     [BLOCKCHAIN_NAME.AURORA]: {
-        '0x368ebb46aca6b8d0787c96b2b20bd3cc3f2c45f7': stargateV2BridgeToken.USDC
+        '0xb12bfca5a55806aaf64e99521918a4bf0fc40802': stargateV2BridgeToken.USDC
     }
 };
+

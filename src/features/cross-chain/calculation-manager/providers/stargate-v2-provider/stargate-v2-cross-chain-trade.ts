@@ -59,7 +59,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
                     gasData: null,
                     feeInfo,
                     sendParams,
-                    messagingFee
+                    messagingFee,
+                    priceImpact: 0
                 },
                 providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                 routePath
@@ -123,6 +124,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             feeInfo: FeeInfo;
             sendParams: StargateV2QuoteParamsStruct;
             messagingFee: StargateV2MessagingFee;
+            priceImpact: number | null;
         },
         providerAddress: string,
         routePath: RubicStep[]
@@ -135,7 +137,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         this.slippageTolerance = crossChainTrade.slippageTolerance;
         this.stargateV2SendParams = crossChainTrade.sendParams;
         this.messagingFee = crossChainTrade.messagingFee;
-        this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
+        this.priceImpact = crossChainTrade.priceImpact;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(
             1 - crossChainTrade.slippageTolerance
         );
@@ -277,7 +279,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || null,
+            priceImpact: this.priceImpact,
             slippage: this.slippageTolerance * 100,
             routePath: this.routePath
         };
