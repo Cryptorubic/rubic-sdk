@@ -208,7 +208,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         const fromTokenSymbol = stargateV2TokenAddress[
             fromBlockchain
         ][this.from.address] as StargateV2BridgeToken;
-        const refundAddress = receiverAddress || this.walletAddress;
+        console.log(receiverAddress);
 
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];
         if (!contractAddress) {
@@ -223,7 +223,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             contractAddress,
             stargateV2SendTokenAbi,
             'sendToken',
-            [this.stargateV2SendParams, this.messagingFee, refundAddress],
+            [this.stargateV2SendParams, this.messagingFee, this.walletAddress],
             value
         );
         return {

@@ -24,12 +24,12 @@ export const stargateV2TokenAddress: StargateV2TokenAddress = {
         '0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7': stargateV2BridgeToken.USDT
     },
     [BLOCKCHAIN_NAME.POLYGON]: {
-        '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359': stargateV2BridgeToken.USDC,
+        '0x2791bca1f2de4661ed88a30c99a7a9449aa84174': stargateV2BridgeToken.USDC,
         '0xc2132d05d31c914a87c6611c10748aeb04b58e8f': stargateV2BridgeToken.USDT
     },
     [BLOCKCHAIN_NAME.ARBITRUM]: {
         '0x0000000000000000000000000000000000000000': stargateV2BridgeToken.ETH,
-        '0xaf88d065e77c8cc2239327c5edb3a432268e5831': stargateV2BridgeToken.USDC,
+        '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8': stargateV2BridgeToken.USDC,
         '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9': stargateV2BridgeToken.USDT
     },
     [BLOCKCHAIN_NAME.OPTIMISM]: {
@@ -40,7 +40,7 @@ export const stargateV2TokenAddress: StargateV2TokenAddress = {
     [BLOCKCHAIN_NAME.METIS]: {
         '0xbb06dca3ae6887fabf931640f67cab3e3a16f4dc': stargateV2BridgeToken.mUSD,
         '0x420000000000000000000000000000000000000a': stargateV2BridgeToken.WETH,
-        '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000': stargateV2BridgeToken.METIS
+        '0x0000000000000000000000000000000000000000': stargateV2BridgeToken.METIS
     },
     [BLOCKCHAIN_NAME.LINEA]: {
         '0x0000000000000000000000000000000000000000': stargateV2BridgeToken.ETH
