@@ -20,7 +20,8 @@ export function getTokenPoolByAddress(
     blockchain: StargateV2SupportedBlockchains,
     contractAddress: string
 ): number | null {
-    const tokenSymbol = stargateV2TokenAddress?.[blockchain]?.[contractAddress];
+    const tokenAddress = contractAddress.toLowerCase();
+    const tokenSymbol = stargateV2TokenAddress?.[blockchain]?.[tokenAddress];
     if (tokenSymbol) {
         return stargateV2PoolId[tokenSymbol];
     }
