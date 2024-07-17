@@ -69,7 +69,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             const toBlockchain = toToken.blockchain as StargateV2SupportedBlockchains;
             const useProxy = options?.useProxy?.[this.type] ?? true;
             const isSupportedPools = this.checkSupportedPools(from, toToken);
-
+            const fromTokenAddress = from.address.toLowerCase()
             if (!isSupportedPools) {
                 return {
                     trade: null,
@@ -97,7 +97,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
 
             const maxAmountError = await this.checkMaxAmount(
                 from.blockchain,
-                from.address,
+                fromTokenAddress,
                 fromWithoutFee.weiAmount
             );
 
@@ -124,11 +124,11 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             const { amountReceivedLD } = await this.getReceiveAmount(
                 sendParams,
                 from.blockchain,
-                from.address
+                fromTokenAddress
             );
             const amountReceived = amountReceivedLD[1] as string;
             sendParams.minAmountLD = amountReceived;
-            const messagingFee = await this.getNativeFee(sendParams, from.blockchain, from.address);
+            const messagingFee = await this.getNativeFee(sendParams, from.blockchain, fromTokenAddress);
             const nativeToken = nativeTokensList[from.blockchain];
 
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({

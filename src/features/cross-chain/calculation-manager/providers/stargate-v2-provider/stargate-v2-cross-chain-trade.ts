@@ -100,6 +100,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     public readonly messagingFee: StargateV2MessagingFee;
 
+    private readonly fromTokenAddress: string;
+
     public get fromBlockchain(): StargateV2SupportedBlockchains {
         return this.from.blockchain as StargateV2SupportedBlockchains;
     }
@@ -107,7 +109,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
     protected get fromContractAddress(): string {
         const fromTokenSymbol = stargateV2TokenAddress[
             this.from.blockchain as StargateV2SupportedBlockchains
-        ][this.from.address] as StargateV2BridgeToken;
+        ][this.fromTokenAddress] as StargateV2BridgeToken;
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
             : (stargateV2ContractAddress?.[this.fromBlockchain]?.[fromTokenSymbol] as string);
@@ -138,6 +140,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         this.stargateV2SendParams = crossChainTrade.sendParams;
         this.messagingFee = crossChainTrade.messagingFee;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.fromTokenAddress = this.from.address.toLowerCase();
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(
             1 - crossChainTrade.slippageTolerance
         );
@@ -209,7 +212,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         const fromBlockchain = this.from.blockchain as StargateV2SupportedBlockchains;
         const fromTokenSymbol = stargateV2TokenAddress[
             fromBlockchain
-        ][this.from.address] as StargateV2BridgeToken;
+        ][this.fromTokenAddress] as StargateV2BridgeToken;
         console.log(receiverAddress);
 
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];
@@ -284,34 +287,4 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             routePath: this.routePath
         };
     }
-
-    // private async getNativeFee(
-    //     sendParam: StargateV2QuoteParamsStruct,
-    //     fromBlockchain: EvmBlockchainName,
-    //     tokenSymbol: StargateV2BridgeToken
-    // ): Promise<StargateV2MessagingFee> {
-    //     const contractAddress =
-    //         stargateV2ContractAddress?.[fromBlockchain as StargateV2SupportedBlockchains]?.[
-    //             tokenSymbol
-    //         ];
-    //     if (!contractAddress) {
-    //         throw new RubicSdkError();
-    //     }
-    //     try {
-    //         const { 0: nativeFee, 1: lzTokenFee } = await Injector.web3PublicService
-    //             .getWeb3Public(fromBlockchain)
-    //             .callContractMethod<{ 0: string; 1: string }>(
-    //                 contractAddress,
-    //                 stargateV2SendQuoteAbi,
-    //                 'quoteSend',
-    //                 [sendParam, false]
-    //             );
-    //         return {
-    //             nativeFee,
-    //             lzTokenFee
-    //         };
-    //     } catch (err) {
-    //         throw new RubicSdkError(err?.message);
-    //     }
-    // }
 }
