@@ -2,6 +2,7 @@ import { TonConnectUI } from '@tonconnect/ui';
 import { RubicSdkError } from 'src/common/errors';
 import { waitFor } from 'src/common/utils/waitFor';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { TonUtils } from 'src/core/blockchain/services/ton/ton-utils';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TonWalletProviderCore } from 'src/core/sdk/models/wallet-provider';
@@ -28,7 +29,8 @@ export class TonWeb3Private extends Web3Private {
                 validUntil: Math.floor(Date.now() / 1000) + 360,
                 messages: options.messages
             });
-            options.onTransactionHash?.(boc);
+            const txHash = TonUtils.fromBocToBase64Hash(boc);
+            options.onTransactionHash?.(txHash);
             const isCompleted = await this.waitForTransactionReceipt(boc);
             if (!isCompleted) {
                 throw new RubicSdkError('[TonWeb3Private] TON transaction timeout expired!');
@@ -43,10 +45,11 @@ export class TonWeb3Private extends Web3Private {
     private async waitForTransactionReceipt(boc: string): Promise<boolean> {
         let isCompleted = false;
         let durationInSecs = 0;
-        const durationLimit = 180;
+        const durationLimitInSecs = 600;
         const intervalId = setInterval(() => durationInSecs++, 1_000);
+
         while (true) {
-            if (durationInSecs > durationLimit) {
+            if (durationInSecs > durationLimitInSecs) {
                 clearInterval(intervalId);
                 return false;
             }
@@ -54,8 +57,8 @@ export class TonWeb3Private extends Web3Private {
                 clearInterval(intervalId);
                 return true;
             }
-            await waitFor(5_000);
-            isCompleted = await this.tonApi.checkIsTxCompleted(boc);
+            await waitFor(30_000);
+            isCompleted = await this.tonApi.checkIsTxCompleted(boc, 'boc');
         }
     }
 

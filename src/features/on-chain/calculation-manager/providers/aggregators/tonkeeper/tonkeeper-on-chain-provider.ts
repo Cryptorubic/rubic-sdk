@@ -1,3 +1,4 @@
+import { Address } from '@ton/core';
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
@@ -6,7 +7,6 @@ import {
     BlockchainName,
     TonBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { TonUtils } from 'src/core/blockchain/services/ton/ton-utils';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
@@ -32,11 +32,8 @@ export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            const [[fromRawAddress, toRawAddress], { fromWithoutFee, proxyFeeInfo }] =
-                await Promise.all([
-                    this.fetchRawTokensAddresses(from, toToken),
-                    this.handleProxyContract(from, options)
-                ]);
+            const [fromRawAddress, toRawAddress] = this.getRawAddresses(from, toToken);
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
 
             const bestRoute = await TonkeeperApiService.makeQuoteReq(
                 fromRawAddress,
@@ -75,20 +72,16 @@ export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
         }
     }
 
-    private async fetchRawTokensAddresses(
-        from: PriceTokenAmount,
-        toToken: PriceToken
-    ): Promise<[string, string]> {
-        const promises = [from, toToken].map(async token => {
+    private getRawAddresses(from: PriceTokenAmount, toToken: PriceToken): [string, string] {
+        const rawAddresses = [from, toToken].map(token => {
             if (token.address.startsWith('0:') || token.address.startsWith('-1:')) {
                 return token.address;
             }
             if (token.isNative) {
                 return 'ton';
             }
-            return (await TonUtils.getAllFormatsOfAddress(token.address)).raw_form;
-        });
-        const rawAddresses = (await Promise.all(promises)) as [string, string];
+            return Address.parse(token.address).toRawString();
+        }) as [string, string];
         return rawAddresses;
     }
 

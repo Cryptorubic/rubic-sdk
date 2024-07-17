@@ -52,17 +52,28 @@ export class TonApiService {
         return res;
     }
 
-    public async checkIsTxCompleted(boc: string): Promise<boolean> {
-        const msgHash = TonUtils.fromBocToBase64Hash(boc);
-        const res = await Injector.httpClient.get<TonApiResp<TonApiStatusByBocResp>>(
-            `${TONAPI_API_URL}/events/${msgHash}`,
-            { headers: { Authorization: TONAPI_API_KEY } }
-        );
-        if ('error' in res) {
-            throw new RubicSdkError(`[TonApiService] Error in checkIsTxCompleted - ${res.error}`);
-        }
+    /**
+     *
+     * @param type base64 is base64 hash string, boc - string converted from cells returned in tonConnectUI.sendTransactioon
+     * @returns
+     */
+    public async checkIsTxCompleted(hashOrBoc: string, type: 'boc' | 'base64'): Promise<boolean> {
+        try {
+            const msgHash = type === 'boc' ? TonUtils.fromBocToBase64Hash(hashOrBoc) : hashOrBoc;
+            const res = await Injector.httpClient.get<TonApiResp<TonApiStatusByBocResp>>(
+                `${TONAPI_API_URL}/events/${msgHash}`,
+                { headers: { Authorization: TONAPI_API_KEY } }
+            );
+            if ('error' in res) {
+                throw new RubicSdkError(
+                    `[TonApiService] Error in checkIsTxCompleted - ${res.error}`
+                );
+            }
 
-        return Object.hasOwn(res, 'in_progress') && !res.in_progress;
+            return Object.hasOwn(res, 'in_progress') && !res.in_progress;
+        } catch {
+            return false;
+        }
     }
 
     public async healthcheck(): Promise<boolean> {
@@ -134,6 +145,7 @@ export class TonApiService {
 
     /**
      *
+     * @param tokenAddress in any form: raw or friendly
      * @returns balance, decimals, name, symbol, walletJettonAddress, jettonAddress
      */
     public async fetchTokenInfoForWallet(

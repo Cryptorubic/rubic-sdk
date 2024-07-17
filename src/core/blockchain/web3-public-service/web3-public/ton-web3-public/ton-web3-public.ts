@@ -1,9 +1,9 @@
+import { Address } from '@ton/core';
 import BigNumber from 'bignumber.js';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
-import { TonUtils } from 'src/core/blockchain/services/ton/ton-utils';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 
@@ -19,8 +19,8 @@ export class TonWeb3Public extends Web3Public {
 
     private readonly tonApi: TonApiService = new TonApiService();
 
-    public async getTransactionStatus(boc: string): Promise<TxStatus> {
-        const isCompleted = await this.tonApi.checkIsTxCompleted(boc);
+    public async getTransactionStatus(txHash: string): Promise<TxStatus> {
+        const isCompleted = await this.tonApi.checkIsTxCompleted(txHash, 'base64');
         if (isCompleted) {
             return TX_STATUS.SUCCESS;
         }
@@ -56,19 +56,34 @@ export class TonWeb3Public extends Web3Public {
         userAddress: string,
         tokensAddresses: string[]
     ): Promise<BigNumber[]> {
-        const tokens = await this.tonApi.fetchAllNonNullableTokensInfoForWallet(userAddress);
-        if (!tokens.length || !tokensAddresses.length) {
+        const tokensWithBalance = await this.tonApi.fetchAllNonNullableTokensInfoForWallet(
+            userAddress
+        );
+        const nativeIndex = tokensAddresses.findIndex(TonWeb3Pure.isNativeAddress);
+
+        if (!tokensWithBalance.length && nativeIndex === -1) {
             return [];
         }
-        const rawTokensAddresses = await Promise.all(
-            tokensAddresses.map(async address => {
-                const res = await TonUtils.getAllFormatsOfAddress(address);
-                return res.raw_form.toLowerCase();
-            })
-        );
-        const balances = tokens
-            .filter(token => rawTokensAddresses.includes(token.jetton.address.toLowerCase()))
-            .map(token => new BigNumber(token.balance));
+
+        const balances = tokensAddresses
+            .filter(address => !TonWeb3Pure.isNativeAddress(address))
+            .map(address => {
+                const tokenWithBalance = tokensWithBalance.find(
+                    token =>
+                        token.jetton.address.toLowerCase() ===
+                        Address.parse(address).toRawString().toLowerCase()
+                );
+                if (tokenWithBalance) {
+                    return new BigNumber(tokenWithBalance.balance);
+                }
+                return new BigNumber(0);
+            });
+
+        if (nativeIndex !== -1) {
+            const acountInfo = await this.tonApi.fetchAccountInfo(userAddress);
+            const nativeBalance = new BigNumber(acountInfo.balance);
+            balances.splice(nativeIndex, 0, nativeBalance);
+        }
 
         return balances;
     }

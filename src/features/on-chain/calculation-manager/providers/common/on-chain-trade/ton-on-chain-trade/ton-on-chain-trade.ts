@@ -31,6 +31,8 @@ export abstract class TonOnChainTrade extends OnChainTrade {
 
     protected readonly fromWithoutFee: PriceTokenAmount<TonBlockchainName>;
 
+    private skipAmountCheck: boolean = false;
+
     protected get spenderAddress(): string {
         throw new RubicSdkError('No spender address!');
     }
@@ -83,7 +85,7 @@ export abstract class TonOnChainTrade extends OnChainTrade {
         const tonEncodedConfig = await this.encode({
             fromAddress,
             receiverAddress,
-            skipAmountCheck: false,
+            skipAmountCheck: this.skipAmountCheck,
             ...(options?.referrer && { referrer: options?.referrer })
         });
 
@@ -102,6 +104,7 @@ export abstract class TonOnChainTrade extends OnChainTrade {
         await this.checkFromAddress(options.fromAddress);
         await this.checkReceiverAddress(options.receiverAddress);
         if (!options.skipAmountCheck) {
+            this.skipAmountCheck = true;
             await this.handleAmountCheckBeforeSwap(options);
         }
 
