@@ -115,6 +115,19 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
         return Promise.reject(new RubicSdkError('method not implemented'));
     }
 
+    protected getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{
+        config: {
+            value: string,
+            to: string,
+            data: string
+        }; amount: string
+    }> {
+        console.log(receiverAddress)
+        return Promise.reject(new RubicSdkError('method not implemented'));
+    };
+
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,
