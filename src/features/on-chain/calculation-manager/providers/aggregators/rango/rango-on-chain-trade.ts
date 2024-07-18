@@ -78,7 +78,10 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
             fromAddress: this.walletAddress
         });
 
-        const { tx: transaction, route } = await RangoOnChainApiService.getSwapTransaction(params);
+        const { tx: transaction, route } = await RangoOnChainApiService.getSwapTransaction(
+            params,
+            true
+        );
 
         const { outputAmount: toAmount } = route as RangoBestRouteSimulationResult;
 

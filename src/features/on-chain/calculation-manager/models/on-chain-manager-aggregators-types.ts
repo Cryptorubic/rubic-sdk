@@ -4,7 +4,6 @@ import { PiteasProvider } from 'src/features/on-chain/calculation-manager/provid
 import { XyDexProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-provider';
 import { ZrxProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/zrx-provider';
 
-import { LifiProvider } from '../providers/aggregators/lifi/lifi-provider';
 import { NativeRouterProvider } from '../providers/aggregators/native-router/native-router-provider';
 import { OdosOnChainProvider } from '../providers/aggregators/odos/odos-on-chain-provider';
 import { OkuSwapOnChainProvider } from '../providers/aggregators/okuswap/okuswap-on-chain-provider';
@@ -14,7 +13,8 @@ import { TonkeeperOnChainProvider } from '../providers/aggregators/tonkeeper/ton
 import { ZetaSwapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
-    LIFI: LifiProvider,
+    // Possibly Compromised
+    // LIFI: LifiProvider,
     OPEN_OCEAN: OpenOceanProvider,
     RANGO: RangoOnChainProvider,
     ODOS: OdosOnChainProvider,

@@ -1,8 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { rangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
-import { rangoSupportedBlockchains } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
+import {
+    RangoSupportedBlockchain,
+    rangoSupportedBlockchains
+} from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
@@ -40,10 +44,15 @@ export class RangoOnChainProvider extends AggregatorOnChainProvider {
                 swapperGroups: RANGO_ON_CHAIN_DISABLED_PROVIDERS
             });
 
-            const { route, tx } = await RangoOnChainApiService.getSwapTransaction(swapParams);
+            const { route, tx } = await RangoOnChainApiService.getSwapTransaction(
+                swapParams,
+                false
+            );
             const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
 
-            const providerGateway = tx!.txTo;
+            const providerGateway =
+                tx?.txTo ||
+                rangoContractAddresses[from.blockchain as RangoSupportedBlockchain].providerGateway;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
