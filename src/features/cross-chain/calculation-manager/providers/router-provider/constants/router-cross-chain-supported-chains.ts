@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from "src/core/blockchain/models/blockchain-name";
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const routerCrossChainSupportedChains = [
     BLOCKCHAIN_NAME.ETHEREUM,
@@ -25,7 +25,7 @@ export const routerCrossChainSupportedChains = [
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.SCROLL,
     BLOCKCHAIN_NAME.TRON,
-    BLOCKCHAIN_NAME.AURORA,
-]
+    BLOCKCHAIN_NAME.AURORA
+];
 
 export type RouterCrossChainSupportedBlockchains = (typeof routerCrossChainSupportedChains)[number];

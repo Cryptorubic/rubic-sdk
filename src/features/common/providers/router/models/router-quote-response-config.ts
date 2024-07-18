@@ -1,5 +1,3 @@
-
-
 type RouterFlowType = 'trustless' | 'mint-burn' | 'circle' | 'gateway' | 'none';
 
 interface RouterAsset {
@@ -19,11 +17,11 @@ interface RouterSwapTokenInfo {
     stableReserveAsset: RouterAsset;
     tokenAmount: string;
     stableReserveAmount: string;
-    path: unknown[];
-    flags: unknown[];
+    path: string[];
+    flags: string[];
     priceImpact: string;
     tokenPath: string;
-    dataTx: unknown[]
+    dataTx: string[];
 }
 
 export interface RouterQuoteResponseConfig {
@@ -34,7 +32,7 @@ export interface RouterQuoteResponseConfig {
     fromTokenAddress: string;
     toTokenAddress: string;
     source: RouterSwapTokenInfo & {
-        bridgeFeeAmount: string
+        bridgeFeeAmount: string;
     };
     destination: RouterSwapTokenInfo;
     partnerId: number;

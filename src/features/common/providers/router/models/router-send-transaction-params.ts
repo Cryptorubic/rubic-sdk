@@ -8,8 +8,11 @@ export interface RouterSendTransactionParams extends RouterQuoteResponseConfig {
 
 export interface RouterSendTransactionResponse extends RouterSendTransactionParams {
     txn: {
+        from: string;
         value: string;
         to: string;
         data: string;
-    }
+        gasPrice: string;
+        gasLimit: string;
+    };
 }
