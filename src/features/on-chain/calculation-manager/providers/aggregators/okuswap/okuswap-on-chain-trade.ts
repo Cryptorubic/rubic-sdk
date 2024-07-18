@@ -12,7 +12,7 @@ import { TransactionReceipt } from 'web3-eth';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { OkuQuoteRequestBody, OkuSwapRequestBody } from './models/okuswap-api-types';
 import { OkuSwapSupportedBlockchain } from './models/okuswap-on-chain-supported-chains';
 import { OkuSwapOnChainTradeStruct } from './models/okuswap-trade-types';
@@ -160,7 +160,7 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         _options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const [{ outAmount, estimatedGas }, evmConfig] = await Promise.all([
             OkuSwapApiService.makeQuoteRequest(this.okuSubProvider, this.quoteReqBody),
             OkuSwapApiService.makeSwapRequest(this.okuSubProvider, this.swapReqBody)

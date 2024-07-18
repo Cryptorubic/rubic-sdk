@@ -1,7 +1,5 @@
-import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
 
@@ -28,16 +26,12 @@ export abstract class NativeRouterAbstractProvider<
     private readonly nativeTokenAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
     protected abstract createNativeRouterTradeInstance(tradeInstance: NativeRouterTradeInstance): T;
+
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<T | OnChainTradeError> {
-        const fromChainId = blockchainId[from.blockchain];
-        const toChainId = blockchainId[toToken.blockchain];
-        if (fromChainId !== toChainId) {
-            throw new RubicSdkError();
-        }
         try {
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);

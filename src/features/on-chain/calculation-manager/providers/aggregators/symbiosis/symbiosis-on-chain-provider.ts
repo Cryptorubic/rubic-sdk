@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
@@ -20,7 +19,7 @@ import { SymbiosisOnChainTrade } from './symbiosis-on-chain-trade';
 export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return symbiosisOnChainSupportedBlockchains.some(chain => chain === blockchain);
     }
 
@@ -29,10 +28,6 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<BlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError(`Symbiosis doesn't support ${from.blockchain} chain!`);
-        }
-
         try {
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
             const path = this.getRoutePath(from, toToken);

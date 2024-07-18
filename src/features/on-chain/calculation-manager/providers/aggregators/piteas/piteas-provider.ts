@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -32,7 +31,7 @@ export class PiteasProvider extends AggregatorOnChainProvider {
 
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.PITEAS;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return piteasOnChainSupportedBlockchains.some(
             supportedNetwork => supportedNetwork === blockchain
         );
@@ -43,10 +42,6 @@ export class PiteasProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options?: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError(`Piteas doesn't support ${from.blockchain} chain!`);
-        }
-
         try {
             const fromAddress =
                 options?.useProxy || this.defaultOptions.useProxy

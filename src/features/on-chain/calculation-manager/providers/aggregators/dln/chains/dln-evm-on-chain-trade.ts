@@ -19,7 +19,7 @@ import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager
 import { DlnTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
     private readonly transactionRequest: DlnOnChainSwapRequest;
@@ -94,7 +94,7 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const params: DlnOnChainSwapRequest = {
             ...this.transactionRequest,
             tokenOutRecipient: options.receiverAddress || this.web3Private.address

@@ -23,8 +23,8 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
     };
 
     usedForCrossChain?: boolean;
-
-    permit2ApproveAddress?: string;
 }
 
-export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainName> {}
+export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainName> {
+    permit2ApproveAddress?: string;
+}

@@ -7,9 +7,12 @@ import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-priva
 import {
     EvmWalletProviderCore,
     SolanaWalletProviderCore,
+    TonWalletProviderCore,
     TronWalletProviderCore,
     WalletProviderCore
 } from 'src/core/sdk/models/wallet-provider';
+
+import { TonWeb3Private } from '../web3-private/ton-web3-private/ton-web3-private';
 
 export type CreateWeb3Private = Record<
     Web3PrivateSupportedChainType,
@@ -18,4 +21,5 @@ export type CreateWeb3Private = Record<
     [CHAIN_TYPE.EVM]: (walletProviderCore: EvmWalletProviderCore) => EvmWeb3Private;
     [CHAIN_TYPE.TRON]: (walletProviderCore: TronWalletProviderCore) => TronWeb3Private;
     [CHAIN_TYPE.SOLANA]: (walletProviderCore: SolanaWalletProviderCore) => SolanaWeb3Private;
+    [CHAIN_TYPE.TON]: (walletProviderCore: TonWalletProviderCore) => TonWeb3Private;
 };

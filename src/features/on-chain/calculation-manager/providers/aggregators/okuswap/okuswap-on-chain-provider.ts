@@ -30,7 +30,7 @@ import { OkuSwapApiService } from './services/okuswap-api-service';
 export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OKU_SWAP;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return OKUSWAP_ON_CHAIN_SUPPORTED_BLOCKCHAINS.some(chain => chain === blockchain);
     }
 

@@ -28,7 +28,7 @@ import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-man
 export class ZrxProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions: RequiredOnChainCalculationOptions = evmProviderDefaultOptions;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return zeroXSupportedBlockchains.some(item => item === blockchain);
     }
 

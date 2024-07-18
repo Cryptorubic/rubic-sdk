@@ -3,7 +3,7 @@ import { TokenUtils } from 'src/common/utils/token-utils';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { SolanaOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/solana-on-chain-trade/solana-on-chain-trade';
 
-import { GetToAmountAndTxDataResponse } from './models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from './models/aggregator-on-chain-types';
 
 export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
     protected async getTxConfigAndCheckAmount(
@@ -39,5 +39,5 @@ export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
     protected abstract getToAmountAndTxData(
         receiverAddress?: string,
         fromAddress?: string
-    ): Promise<GetToAmountAndTxDataResponse>;
+    ): Promise<EvmEncodedConfigAndToAmount>;
 }

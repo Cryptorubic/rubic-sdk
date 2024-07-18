@@ -22,11 +22,14 @@ import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-priva
 import {
     EvmWalletProviderCore,
     SolanaWalletProviderCore,
+    TonWalletProviderCore,
     TronWalletProviderCore,
     WalletProvider,
     WalletProviderCore
 } from 'src/core/sdk/models/wallet-provider';
 import Web3 from 'web3';
+
+import { TonWeb3Private } from './web3-private/ton-web3-private/ton-web3-private';
 
 export class Web3PrivateService {
     public static isSupportedChainType(
@@ -42,7 +45,8 @@ export class Web3PrivateService {
     private readonly createWeb3Private: CreateWeb3Private = {
         [CHAIN_TYPE.EVM]: this.createEvmWeb3Private.bind(this),
         [CHAIN_TYPE.TRON]: this.createTronWeb3Private.bind(this),
-        [CHAIN_TYPE.SOLANA]: this.createSolanaWeb3Private.bind(this)
+        [CHAIN_TYPE.SOLANA]: this.createSolanaWeb3Private.bind(this),
+        [CHAIN_TYPE.TON]: this.createTonWeb3Private.bind(this)
     };
 
     constructor(walletProvider: WalletProvider) {
@@ -118,6 +122,10 @@ export class Web3PrivateService {
     private createSolanaWeb3Private(solanaWallet: SolanaWalletProviderCore): SolanaWeb3Private {
         let { core } = solanaWallet;
         return new SolanaWeb3Private(core);
+    }
+
+    private createTonWeb3Private(tonProviderCore: TonWalletProviderCore): TonWeb3Private {
+        return new TonWeb3Private(tonProviderCore);
     }
 
     public updateWeb3PrivateStorage(walletProvider: WalletProvider) {
