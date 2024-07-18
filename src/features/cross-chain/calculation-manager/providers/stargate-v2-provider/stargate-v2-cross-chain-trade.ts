@@ -60,7 +60,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
                     feeInfo,
                     sendParams,
                     messagingFee,
-                    priceImpact: 0
+                    priceImpact: 0,
+                    toTokenAmountMin: new BigNumber(0)
                 },
                 providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                 routePath
@@ -127,6 +128,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             sendParams: StargateV2QuoteParamsStruct;
             messagingFee: StargateV2MessagingFee;
             priceImpact: number | null;
+            toTokenAmountMin: BigNumber;
         },
         providerAddress: string,
         routePath: RubicStep[]
@@ -140,10 +142,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         this.stargateV2SendParams = crossChainTrade.sendParams;
         this.messagingFee = crossChainTrade.messagingFee;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.fromTokenAddress = this.from.address.toLowerCase();
-        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(
-            1 - crossChainTrade.slippageTolerance
-        );
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {

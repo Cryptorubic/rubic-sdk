@@ -127,7 +127,11 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 fromTokenAddress
             );
             const amountReceived = amountReceivedLD[1] as string;
-            sendParams.minAmountLD = amountReceived;
+            const slippageAmount = new BigNumber(amountReceived)
+                .multipliedBy(options.slippageTolerance);
+            const minReceivedAmount = new BigNumber(amountReceived).minus(slippageAmount);
+            sendParams.amountLD = amountReceived;
+            sendParams.minAmountLD = minReceivedAmount.toFixed(0);
             const messagingFee = await this.getNativeFee(sendParams, from.blockchain, fromTokenAddress);
             const nativeToken = nativeTokensList[from.blockchain];
 
@@ -177,7 +181,8 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                         gasData,
                         sendParams,
                         messagingFee,
-                        priceImpact: from.calculatePriceImpactPercent(to)
+                        priceImpact: from.calculatePriceImpactPercent(to),
+                        toTokenAmountMin: Web3Pure.fromWei(minReceivedAmount, fromWithoutFee.decimals)
                     },
                     options.providerAddress,
                     routePath
