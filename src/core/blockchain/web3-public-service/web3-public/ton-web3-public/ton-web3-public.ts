@@ -20,7 +20,7 @@ export class TonWeb3Public extends Web3Public {
     private readonly tonApi: TonApiService = new TonApiService();
 
     public async getTransactionStatus(txHash: string): Promise<TxStatus> {
-        const isCompleted = await this.tonApi.checkIsTxCompleted(txHash, 'base64');
+        const isCompleted = await this.tonApi.checkIsTxCompleted(txHash);
         if (isCompleted) {
             return TX_STATUS.SUCCESS;
         }

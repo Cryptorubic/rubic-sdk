@@ -15,7 +15,9 @@ export class TonUtils {
         const inMsgCell = Cell.fromBase64(boc);
         const inMsgHash = inMsgCell.hash();
         const inMsgHashBase64 = inMsgHash.toString('base64');
-        return inMsgHashBase64;
+        const inMsgHashBase64Url = inMsgHashBase64.replace(/\+/g, '-').replace(/\//g, '_');
+
+        return inMsgHashBase64Url;
     }
 
     /**

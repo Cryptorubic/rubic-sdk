@@ -58,7 +58,7 @@ export class TonWeb3Private extends Web3Private {
                 return true;
             }
             await waitFor(30_000);
-            isCompleted = await this.tonApi.checkIsTxCompleted(boc, 'boc');
+            isCompleted = await this.tonApi.checkIsTxCompleted(boc);
         }
     }
 

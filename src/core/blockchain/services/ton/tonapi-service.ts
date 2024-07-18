@@ -20,7 +20,6 @@ import {
 } from '../../models/ton/tonapi-types';
 import { Web3PrimitiveType } from '../../models/web3-primitive-type';
 import { TONAPI_API_KEY, TONAPI_API_URL, TONCENTER_API_V3_URL } from '../constants/ton-constants';
-import { TonUtils } from './ton-utils';
 
 export class TonApiService {
     /**
@@ -39,10 +38,9 @@ export class TonApiService {
         return res.seqno;
     }
 
-    public async fetchTxInfo(boc: string): Promise<TonApiTxDataByBocResp> {
-        const msgHash = TonUtils.fromBocToBase64Hash(boc);
+    public async fetchTxInfo(txHash: string): Promise<TonApiTxDataByBocResp> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiTxDataByBocResp>>(
-            `${TONAPI_API_URL}/blockchain/messages/${msgHash}/transaction`,
+            `${TONAPI_API_URL}/blockchain/messages/${txHash}/transaction`,
             { headers: { Authorization: TONAPI_API_KEY } }
         );
         if ('error' in res) {
@@ -52,16 +50,10 @@ export class TonApiService {
         return res;
     }
 
-    /**
-     *
-     * @param type base64 is base64 hash string, boc - string converted from cells returned in tonConnectUI.sendTransactioon
-     * @returns
-     */
-    public async checkIsTxCompleted(hashOrBoc: string, type: 'boc' | 'base64'): Promise<boolean> {
+    public async checkIsTxCompleted(txHash: string): Promise<boolean> {
         try {
-            const msgHash = type === 'boc' ? TonUtils.fromBocToBase64Hash(hashOrBoc) : hashOrBoc;
             const res = await Injector.httpClient.get<TonApiResp<TonApiStatusByBocResp>>(
-                `${TONAPI_API_URL}/events/${msgHash}`,
+                `${TONAPI_API_URL}/events/${txHash}`,
                 { headers: { Authorization: TONAPI_API_KEY } }
             );
             if ('error' in res) {
