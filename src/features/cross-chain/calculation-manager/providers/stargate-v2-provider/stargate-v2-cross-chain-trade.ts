@@ -23,7 +23,6 @@ import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { RubicStep } from '../common/models/rubicStep';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { StargateCrossChainProvider } from '../stargate-provider/stargate-cross-chain-provider';
 import { StargateV2BridgeToken } from './constants/stargate-v2-bridge-token';
 import { stargateV2ContractAddress } from './constants/stargate-v2-contract-address';
 import { StargateV2SupportedBlockchains } from './constants/stargate-v2-cross-chain-supported-blockchains';
@@ -210,9 +209,9 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         receiverAddress?: string | undefined
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const fromBlockchain = this.from.blockchain as StargateV2SupportedBlockchains;
-        const fromTokenSymbol = stargateV2TokenAddress[
-            fromBlockchain
-        ][this.fromTokenAddress] as StargateV2BridgeToken;
+        const fromTokenSymbol = stargateV2TokenAddress[fromBlockchain][
+            this.fromTokenAddress
+        ] as StargateV2BridgeToken;
         console.log(receiverAddress);
 
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];

@@ -63,7 +63,6 @@ export const stargateV2TokenAddress: StargateV2TokenAddress = {
         '0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4': stargateV2BridgeToken.USDCe
     },
     [BLOCKCHAIN_NAME.AURORA]: {
-        '0xb12bfca5a55806aaf64e99521918a4bf0fc40802': stargateV2BridgeToken.USDC
+        '0x368ebb46aca6b8d0787c96b2b20bd3cc3f2c45f7': stargateV2BridgeToken.USDC
     }
 };
-

@@ -9,11 +9,7 @@ import {
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
@@ -69,7 +65,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             const toBlockchain = toToken.blockchain as StargateV2SupportedBlockchains;
             const useProxy = options?.useProxy?.[this.type] ?? true;
             const isSupportedPools = this.checkSupportedPools(from, toToken);
-            const fromTokenAddress = from.address.toLowerCase()
+            const fromTokenAddress = from.address.toLowerCase();
             if (!isSupportedPools) {
                 return {
                     trade: null,
@@ -127,12 +123,17 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 fromTokenAddress
             );
             const amountReceived = amountReceivedLD[1] as string;
-            const slippageAmount = new BigNumber(amountReceived)
-                .multipliedBy(options.slippageTolerance);
+            const slippageAmount = new BigNumber(amountReceived).multipliedBy(
+                options.slippageTolerance
+            );
             const minReceivedAmount = new BigNumber(amountReceived).minus(slippageAmount);
             sendParams.amountLD = amountReceived;
             sendParams.minAmountLD = minReceivedAmount.toFixed(0);
-            const messagingFee = await this.getNativeFee(sendParams, from.blockchain, fromTokenAddress);
+            const messagingFee = await this.getNativeFee(
+                sendParams,
+                from.blockchain,
+                fromTokenAddress
+            );
             const nativeToken = nativeTokensList[from.blockchain];
 
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
@@ -149,16 +150,16 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await StargateV2CrossChainTrade.getGasData(
-                        from,
-                        to,
-                        feeInfo,
-                        options.slippageTolerance,
-                        options.providerAddress,
-                        routePath,
-                        sendParams,
-                        messagingFee,
-                        options.receiverAddress
-                    )
+                          from,
+                          to,
+                          feeInfo,
+                          options.slippageTolerance,
+                          options.providerAddress,
+                          routePath,
+                          sendParams,
+                          messagingFee,
+                          options.receiverAddress
+                      )
                     : null;
             return {
                 trade: new StargateV2CrossChainTrade(
@@ -182,7 +183,10 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                         sendParams,
                         messagingFee,
                         priceImpact: from.calculatePriceImpactPercent(to),
-                        toTokenAmountMin: Web3Pure.fromWei(minReceivedAmount, fromWithoutFee.decimals)
+                        toTokenAmountMin: Web3Pure.fromWei(
+                            minReceivedAmount,
+                            fromWithoutFee.decimals
+                        )
                     },
                     options.providerAddress,
                     routePath
@@ -268,9 +272,10 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             fromBlockchain as StargateV2SupportedBlockchains
         ][tokenAddress] as StargateV2BridgeToken;
 
-        const contractAddress = stargateV2ContractAddress[
-            fromBlockchain as StargateV2SupportedBlockchains
-        ][tokenSymbol];
+        const contractAddress =
+            stargateV2ContractAddress[fromBlockchain as StargateV2SupportedBlockchains][
+                tokenSymbol
+            ];
 
         if (!contractAddress) {
             throw new RubicSdkError();
@@ -317,7 +322,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         ][tokenAddress] as StargateV2BridgeToken;
         const contractAddress =
             stargateV2ContractAddress?.[fromBlockchain as StargateV2SupportedBlockchains]?.[
-            tokenSymbol
+                tokenSymbol
             ];
         if (!contractAddress) {
             throw new RubicSdkError();

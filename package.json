@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.30.0-alpha-stargate-v2.17",
+    "version": "5.30.0-alpha-stargate-v2.18",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
