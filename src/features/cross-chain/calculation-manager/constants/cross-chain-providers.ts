@@ -22,7 +22,8 @@ import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-prov
 
 const proxyProviders = [
     SymbiosisCrossChainProvider,
-    // StargateCrossChainProvider,
+    StargateV2CrossChainProvider,
+    //StargateCrossChainProvider,
     XyCrossChainProvider,
     CbridgeCrossChainProvider,
     // Possibly Compromised
