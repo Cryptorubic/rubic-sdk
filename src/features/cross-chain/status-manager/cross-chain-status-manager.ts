@@ -88,6 +88,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus,
@@ -97,6 +98,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.MESON]: this.getMesonDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE]: this.getOwlToDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getLayerZeroDstSwapStatus
     };
 
@@ -445,8 +447,7 @@ export class CrossChainStatusManager {
     private async getXyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
             const { success, tx } = await this.httpClient.get<XyApiResponse>(
-                `${XY_API_ENDPOINT}/crossChainStatus?srcChainId=${
-                    blockchainId[data.fromBlockchain]
+                `${XY_API_ENDPOINT}/crossChainStatus?srcChainId=${blockchainId[data.fromBlockchain]
                 }&srcTxHash=${data.srcTxHash}`
             );
 
@@ -495,13 +496,13 @@ export class CrossChainStatusManager {
                 case TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED:
                     return XFER_STATUS_CODE[swapData.refund_reason] === XFER_STATUS.OK_TO_RELAY
                         ? {
-                              status: TX_STATUS.PENDING,
-                              hash: null
-                          }
+                            status: TX_STATUS.PENDING,
+                            hash: null
+                        }
                         : {
-                              status: TX_STATUS.REVERT,
-                              hash: null
-                          };
+                            status: TX_STATUS.REVERT,
+                            hash: null
+                        };
             }
         } catch {
             return { status: TX_STATUS.PENDING, hash: null };
