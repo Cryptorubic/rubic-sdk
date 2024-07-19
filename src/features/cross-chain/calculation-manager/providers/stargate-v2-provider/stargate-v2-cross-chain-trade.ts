@@ -213,10 +213,10 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         const fromTokenSymbol = stargateV2TokenAddress[fromBlockchain][
             this.fromTokenAddress
         ] as StargateV2BridgeToken;
-        const receiverAddress = receiverAddress || this.walletAddress;
+        const toAddress = receiverAddress || this.walletAddress
         const sendParams = {
             ...this.stargateV2SendParams,
-            to: ethers.utils.hexZeroPad(receiverAddress, 32)
+            to: ethers.utils.hexZeroPad(toAddress, 32)
         };
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];
         if (!contractAddress) {
