@@ -150,16 +150,16 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await StargateV2CrossChainTrade.getGasData(
-                        from,
-                        to,
-                        feeInfo,
-                        options.slippageTolerance,
-                        options.providerAddress,
-                        routePath,
-                        sendParams,
-                        messagingFee,
-                        options.receiverAddress
-                    )
+                          from,
+                          to,
+                          feeInfo,
+                          options.slippageTolerance,
+                          options.providerAddress,
+                          routePath,
+                          sendParams,
+                          messagingFee,
+                          options.receiverAddress
+                      )
                     : null;
             return {
                 trade: new StargateV2CrossChainTrade(
@@ -272,10 +272,9 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             fromBlockchain as StargateV2SupportedBlockchains
         ][tokenAddress] as StargateV2BridgeToken;
 
-        const contractAddress =
-            stargateV2ContractAddress[fromBlockchain as StargateV2SupportedBlockchains][
-            tokenSymbol
-            ] as string;
+        const contractAddress = stargateV2ContractAddress[
+            fromBlockchain as StargateV2SupportedBlockchains
+        ][tokenSymbol] as string;
 
         try {
             const { 2: amountReceivedLD } = await Injector.web3PublicService
@@ -316,10 +315,9 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         const tokenSymbol = stargateV2TokenAddress[
             fromBlockchain as StargateV2SupportedBlockchains
         ][tokenAddress] as StargateV2BridgeToken;
-        const contractAddress =
-            stargateV2ContractAddress[fromBlockchain as StargateV2SupportedBlockchains][
-            tokenSymbol
-            ] as string;
+        const contractAddress = stargateV2ContractAddress[
+            fromBlockchain as StargateV2SupportedBlockchains
+        ][tokenSymbol] as string;
         try {
             const { 0: nativeFee, 1: lzTokenFee } = await Injector.web3PublicService
                 .getWeb3Public(fromBlockchain)
