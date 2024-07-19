@@ -205,15 +205,17 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    protected async getTransactionConfigAndAmount(): Promise<{
-        config: EvmEncodeConfig;
-        amount: string;
-    }> {
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string | undefined
+    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const fromBlockchain = this.from.blockchain as StargateV2SupportedBlockchains;
         const fromTokenSymbol = stargateV2TokenAddress[fromBlockchain][
             this.fromTokenAddress
         ] as StargateV2BridgeToken;
-
+        const sendParams = {
+            ...this.stargateV2SendParams,
+            to: receiverAddress || this.walletAddress
+        };
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];
         if (!contractAddress) {
             throw new RubicSdkError();
@@ -227,7 +229,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             contractAddress,
             stargateV2SendTokenAbi,
             'sendToken',
-            [this.stargateV2SendParams, this.messagingFee, this.walletAddress],
+            [sendParams, this.messagingFee, this.walletAddress],
             value
         );
         return {
