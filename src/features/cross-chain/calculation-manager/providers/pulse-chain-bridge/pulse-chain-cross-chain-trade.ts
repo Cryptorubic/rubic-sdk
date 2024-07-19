@@ -173,7 +173,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
             await this.checkAllowanceAndApprove(options);
         }
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -194,7 +194,6 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
                 data,
                 value,
                 onTransactionHash,
-                gas: gasLimit,
                 gasPriceOptions
             });
 

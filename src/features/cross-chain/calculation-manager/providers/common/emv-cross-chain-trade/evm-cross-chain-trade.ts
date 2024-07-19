@@ -127,7 +127,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -148,7 +148,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
                     data,
                     value,
                     onTransactionHash,
-                    gas: gasLimit,
                     gasPriceOptions,
                     gasLimitRatio: this.gasLimitRatio
                 });
@@ -179,7 +178,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
 
         const { data, value, to } = await this.encode({ ...options, fromAddress });
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -193,7 +192,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
                 data,
                 value,
                 onTransactionHash,
-                gas: gasLimit,
                 gasPriceOptions,
                 gasLimitRatio: this.gasLimitRatio,
                 ...(options?.useEip155 && {
@@ -219,7 +217,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -241,7 +239,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
                     methodName,
                     methodName,
                     value,
-                    gasLimit,
                     gasPriceOptions
                 );
                 method = 'executeContractMethod';
@@ -255,7 +252,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
                 {
                     value,
                     onTransactionHash,
-                    gas: gasLimit,
                     gasPriceOptions
                 }
             );

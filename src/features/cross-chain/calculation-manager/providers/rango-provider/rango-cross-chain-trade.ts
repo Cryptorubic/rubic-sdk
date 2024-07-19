@@ -187,7 +187,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
 
         const onTransactionHash = (hash: string) => {
@@ -210,7 +210,6 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                 data,
                 value,
                 onTransactionHash,
-                gas: gasLimit,
                 gasPriceOptions
             });
 
