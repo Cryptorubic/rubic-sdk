@@ -11,6 +11,8 @@ import { RouterApiService } from 'src/features/common/providers/router/services/
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from '../common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from '../common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
@@ -19,6 +21,7 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { RubicStep } from '../common/models/rubicStep';
 import { TradeInfo } from '../common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RouterCrossChainSupportedBlockchains } from './constants/router-cross-chain-supported-chains';
 
 export class RouterCrossChainTrade extends EvmCrossChainTrade {
@@ -75,7 +78,9 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade ? rubicProxyContractAddress[this.fromBlockchain].gateway : ' ';
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : this.routerQuoteConfig.allowanceTo;
     }
 
     protected get methodName(): string {
@@ -105,12 +110,72 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
         this.slippage = crossChainTrade.slippage;
     }
 
-    protected getContractParams(
+    protected async getContractParams(
         options: GetContractParamsOptions,
         skipAmountChangeCheck?: boolean | undefined
     ): Promise<ContractParams> {
-        console.log(options, skipAmountChangeCheck);
-        return Promise.reject(new RubicSdkError('method not implemented'));
+        const {
+            data,
+            value: providerValue,
+            to,
+            gasPrice
+        } = await this.setTransactionConfig(
+            skipAmountChangeCheck || false,
+            options?.useCacheData || false,
+            options?.receiverAddress
+        );
+        try {
+            const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+                walletAddress: this.walletAddress,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.to,
+                srcChainTrade: null,
+                providerAddress: this.providerAddress,
+                type: `native:${this.type}`,
+                fromAddress: this.walletAddress
+            });
+            const extraNativeFee = this.from.isNative
+                ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+                : new BigNumber(providerValue).toFixed();
+            // const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+            //     to!,
+            //     data! as string,
+            //     this.fromBlockchain as EvmBlockchainName,
+            //     to,
+            //     extraNativeFee
+            // );
+
+            const methodArguments = [
+                bridgeData,
+                [to, this.routerQuoteConfig.allowanceTo, extraNativeFee, data]
+            ];
+
+            const value = this.getSwapValue(providerValue);
+
+            const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+                rubicProxyContractAddress[this.from.blockchain].router,
+                evmCommonCrossChainAbi,
+                this.methodName,
+                methodArguments,
+                value,
+                {
+                    gasPrice: gasPrice
+                }
+            );
+            const sendingToken = this.from.isNative ? [] : [this.from.address];
+            const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+            return {
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+                contractAbi: gatewayRubicCrossChainAbi,
+                methodName: 'startViaRubic',
+                methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
+                value
+            };
+        } catch (err) {
+            console.log(err?.message);
+            throw new RubicSdkError(err?.message);
+        }
     }
 
     protected async getTransactionConfigAndAmount(

@@ -39,7 +39,7 @@ export class RouterCrossChainProvider extends CrossChainProvider {
             };
         }
 
-        const useProxy = options?.useProxy?.[this.type] ?? true;
+        const useProxy = false;
 
         try {
             const srcChainId = blockchainId[from.blockchain];
