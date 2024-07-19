@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { ethers } from 'ethers';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -207,17 +206,12 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected async getTransactionConfigAndAmount(
-        receiverAddress?: string | undefined
+        _receiverAddress?: string | undefined
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const fromBlockchain = this.from.blockchain as StargateV2SupportedBlockchains;
         const fromTokenSymbol = stargateV2TokenAddress[fromBlockchain][
             this.fromTokenAddress
         ] as StargateV2BridgeToken;
-        const toAddress = receiverAddress || this.walletAddress
-        const sendParams = {
-            ...this.stargateV2SendParams,
-            to: ethers.utils.hexZeroPad(toAddress, 32)
-        };
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];
         if (!contractAddress) {
             throw new RubicSdkError();
@@ -231,7 +225,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             contractAddress,
             stargateV2SendTokenAbi,
             'sendToken',
-            [sendParams, this.messagingFee, this.walletAddress],
+            [this.stargateV2SendParams, this.messagingFee, this.walletAddress],
             value
         );
         return {
