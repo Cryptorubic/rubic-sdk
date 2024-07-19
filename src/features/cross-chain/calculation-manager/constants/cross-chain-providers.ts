@@ -16,12 +16,14 @@ import { MesonCrossChainProvider } from '../providers/meson-provider/meson-cross
 import { OrbiterBridgeProvider } from '../providers/orbiter-bridge/orbiter-bridge-provider';
 import { OwlToBridgeProvider } from '../providers/owl-to-bridge/owl-to-bridge-provider';
 import { RangoCrossChainProvider } from '../providers/rango-provider/rango-cross-chain-provider';
-// import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
+import { StargateV2CrossChainProvider } from '../providers/stargate-v2-provider/stargate-v2-cross-chain-provider';
+//import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
 import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-provider';
 
 const proxyProviders = [
     SymbiosisCrossChainProvider,
-    // StargateCrossChainProvider,
+    StargateV2CrossChainProvider,
+    //StargateCrossChainProvider,
     XyCrossChainProvider,
     CbridgeCrossChainProvider,
     // Possibly Compromised
