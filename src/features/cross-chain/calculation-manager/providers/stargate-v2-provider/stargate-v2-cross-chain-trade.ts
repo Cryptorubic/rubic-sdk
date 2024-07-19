@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { ethers } from 'ethers';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -212,9 +213,10 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         const fromTokenSymbol = stargateV2TokenAddress[fromBlockchain][
             this.fromTokenAddress
         ] as StargateV2BridgeToken;
+        const receiverAddress = receiverAddress || this.walletAddress;
         const sendParams = {
             ...this.stargateV2SendParams,
-            to: receiverAddress || this.walletAddress
+            to: ethers.utils.hexZeroPad(receiverAddress, 32)
         };
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];
         if (!contractAddress) {
