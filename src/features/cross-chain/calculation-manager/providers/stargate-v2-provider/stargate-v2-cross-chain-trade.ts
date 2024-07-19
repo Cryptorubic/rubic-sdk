@@ -205,14 +205,14 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    protected async getTransactionConfigAndAmount(
-        receiverAddress?: string | undefined
-    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+    protected async getTransactionConfigAndAmount(): Promise<{
+        config: EvmEncodeConfig;
+        amount: string;
+    }> {
         const fromBlockchain = this.from.blockchain as StargateV2SupportedBlockchains;
         const fromTokenSymbol = stargateV2TokenAddress[fromBlockchain][
             this.fromTokenAddress
         ] as StargateV2BridgeToken;
-        console.log(receiverAddress);
 
         const contractAddress = stargateV2ContractAddress?.[fromBlockchain]?.[fromTokenSymbol];
         if (!contractAddress) {

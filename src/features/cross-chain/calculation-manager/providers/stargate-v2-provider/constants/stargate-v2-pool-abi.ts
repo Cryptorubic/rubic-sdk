@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const stargateV2PoolAbi = [
+export const stargateV2PoolAbi: AbiItem[] = [
     {
         inputs: [
             {
@@ -51,9 +51,9 @@ export const stargateV2PoolAbi = [
         stateMutability: 'view',
         type: 'function'
     }
-] as AbiItem[];
+];
 
-export const stargateV2SendQuoteAbi = [
+export const stargateV2SendQuoteAbi: AbiItem[] = [
     {
         inputs: [
             {
@@ -91,9 +91,9 @@ export const stargateV2SendQuoteAbi = [
         stateMutability: 'view',
         type: 'function'
     }
-] as AbiItem[];
+];
 
-export const stargateV2SendTokenAbi = [
+export const stargateV2SendTokenAbi: AbiItem[] = [
     {
         inputs: [
             {
@@ -163,9 +163,9 @@ export const stargateV2SendTokenAbi = [
         stateMutability: 'payable',
         type: 'function'
     }
-] as AbiItem[];
+];
 
-export const stargateV2PoolBalanceAbi = [
+export const stargateV2PoolBalanceAbi: AbiItem[] = [
     {
         inputs: [],
         name: 'poolBalance',
@@ -179,4 +179,4 @@ export const stargateV2PoolBalanceAbi = [
         stateMutability: 'view',
         type: 'function'
     }
-] as AbiItem[];
+];

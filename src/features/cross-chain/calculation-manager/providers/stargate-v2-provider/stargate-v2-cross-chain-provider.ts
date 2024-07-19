@@ -62,10 +62,7 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             throw new NotSupportedBlockchain();
         }
         try {
-            const toBlockchain = toToken.blockchain as StargateV2SupportedBlockchains;
-            const useProxy = options?.useProxy?.[this.type] ?? true;
             const isSupportedPools = this.checkSupportedPools(from, toToken);
-            const fromTokenAddress = from.address.toLowerCase();
             if (!isSupportedPools) {
                 return {
                     trade: null,
@@ -73,6 +70,11 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                     tradeType: this.type
                 };
             }
+
+            const toBlockchain = toToken.blockchain as StargateV2SupportedBlockchains;
+            const useProxy = options?.useProxy?.[this.type] ?? true;
+            const fromTokenAddress = from.address.toLowerCase();
+
             const dstChainId = stargateV2ChainIds[toBlockchain];
 
             const feeInfo = await this.getFeeInfo(
