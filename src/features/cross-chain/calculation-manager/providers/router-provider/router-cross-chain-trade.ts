@@ -1,9 +1,11 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { RouterQuoteResponseConfig } from 'src/features/common/providers/router/models/router-quote-response-config';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
@@ -41,12 +43,17 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
                 gasData: null,
                 priceImpact: 0,
                 routerQuoteConfig,
-                slippage: 0
+                slippage: 0,
+                toTokenAmountMin: new BigNumber(0)
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             []
         );
         return getCrossChainGasData(trade, receiverAddress);
+    }
+
+    private get tronWeb3Public(): TronWeb3Public {
+        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
     }
 
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.ROUTER;
@@ -55,7 +62,7 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly toTokenAmountMin: BigNumber = new BigNumber(0);
+    public readonly toTokenAmountMin: BigNumber;
 
     public readonly feeInfo: FeeInfo;
 
@@ -96,6 +103,7 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: number | null;
             routerQuoteConfig: RouterQuoteResponseConfig;
             slippage: number;
+            toTokenAmountMin: BigNumber;
         },
         providerAddress: string,
         routePath: RubicStep[]
@@ -108,6 +116,7 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.routerQuoteConfig = crossChainTrade.routerQuoteConfig;
         this.slippage = crossChainTrade.slippage;
+        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
     }
 
     protected async getContractParams(
@@ -137,18 +146,15 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             const extraNativeFee = this.from.isNative
                 ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
                 : new BigNumber(providerValue).toFixed();
-            // const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
-            //     to!,
-            //     data! as string,
-            //     this.fromBlockchain as EvmBlockchainName,
-            //     to,
-            //     extraNativeFee
-            // );
+            const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+                to!,
+                data! as string,
+                this.fromBlockchain as EvmBlockchainName,
+                to,
+                extraNativeFee
+            );
 
-            const methodArguments = [
-                bridgeData,
-                [to, this.routerQuoteConfig.allowanceTo, extraNativeFee, data]
-            ];
+            const methodArguments = [bridgeData, providerData];
 
             const value = this.getSwapValue(providerValue);
 
@@ -181,11 +187,28 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
     protected async getTransactionConfigAndAmount(
         receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        let toAddress = receiverAddress;
+        let senderAddress = this.walletAddress;
+
+        const toBlockchain = this.to.blockchain as RouterCrossChainSupportedBlockchains;
+
+        if (toBlockchain === BLOCKCHAIN_NAME.TRON && receiverAddress) {
+            const toTronHexAddress = await this.tronWeb3Public.convertTronAddressToHex(
+                receiverAddress
+            );
+            toAddress = `0x${toTronHexAddress.slice(2)}`;
+        }
+        if (this.fromBlockchain === BLOCKCHAIN_NAME.TRON) {
+            const senderTronHexAddress = await this.tronWeb3Public.convertTronAddressToHex(
+                this.walletAddress
+            );
+            senderAddress = `0x${senderTronHexAddress.slice(2)}`;
+        }
         const { txn, destination } = await RouterApiService.getSwapTx({
             ...this.routerQuoteConfig,
-            senderAddress: this.walletAddress,
-            receiverAddress: receiverAddress || this.walletAddress,
-            refundAddress: this.walletAddress
+            senderAddress,
+            receiverAddress: toAddress || this.walletAddress,
+            refundAddress: senderAddress
         });
 
         if (!txn) {

@@ -16,3 +16,8 @@ export interface RouterSendTransactionResponse extends RouterSendTransactionPara
         gasLimit: string;
     };
 }
+
+export interface RouterTxStatusResponse {
+    status: 'completed' | 'pending';
+    dest_tx_hash: string;
+}

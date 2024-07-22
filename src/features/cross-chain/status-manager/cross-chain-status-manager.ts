@@ -21,6 +21,7 @@ import { Injector } from 'src/core/injector/injector';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
+import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
@@ -99,7 +100,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE]: this.getOwlToDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getLayerZeroDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus
     };
 
     /**
@@ -447,7 +448,8 @@ export class CrossChainStatusManager {
     private async getXyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
             const { success, tx } = await this.httpClient.get<XyApiResponse>(
-                `${XY_API_ENDPOINT}/crossChainStatus?srcChainId=${blockchainId[data.fromBlockchain]
+                `${XY_API_ENDPOINT}/crossChainStatus?srcChainId=${
+                    blockchainId[data.fromBlockchain]
                 }&srcTxHash=${data.srcTxHash}`
             );
 
@@ -496,13 +498,13 @@ export class CrossChainStatusManager {
                 case TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED:
                     return XFER_STATUS_CODE[swapData.refund_reason] === XFER_STATUS.OK_TO_RELAY
                         ? {
-                            status: TX_STATUS.PENDING,
-                            hash: null
-                        }
+                              status: TX_STATUS.PENDING,
+                              hash: null
+                          }
                         : {
-                            status: TX_STATUS.REVERT,
-                            hash: null
-                        };
+                              status: TX_STATUS.REVERT,
+                              hash: null
+                          };
             }
         } catch {
             return { status: TX_STATUS.PENDING, hash: null };
@@ -722,6 +724,12 @@ export class CrossChainStatusManager {
 
     private async getEddyBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const txStatusData = await getEddyBridgeDstSwapStatus(data);
+
+        return txStatusData;
+    }
+
+    private async getRouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const txStatusData = await RouterApiService.getTxStatus(data);
 
         return txStatusData;
     }

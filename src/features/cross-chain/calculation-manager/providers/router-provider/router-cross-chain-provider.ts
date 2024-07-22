@@ -1,9 +1,15 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { RouterQuoteResponseConfig } from 'src/features/common/providers/router/models/router-quote-response-config';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -16,11 +22,18 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { routerCrossChainSupportedChains } from './constants/router-cross-chain-supported-chains';
+import {
+    RouterCrossChainSupportedBlockchains,
+    routerCrossChainSupportedChains
+} from './constants/router-cross-chain-supported-chains';
 import { RouterCrossChainTrade } from './router-cross-chain-trade';
 
 export class RouterCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ROUTER;
+
+    private get tronWeb3Public(): TronWeb3Public {
+        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
+    }
 
     public isSupportedBlockchain(fromBlockchain: BlockchainName): boolean {
         return routerCrossChainSupportedChains.some(chain => chain === fromBlockchain);
@@ -44,9 +57,29 @@ export class RouterCrossChainProvider extends CrossChainProvider {
         try {
             const srcChainId = blockchainId[from.blockchain];
             const dstChainId = blockchainId[toToken.blockchain];
+            const fromBlockchain = from.blockchain as RouterCrossChainSupportedBlockchains;
+            const toBlockchain = toToken.blockchain as RouterCrossChainSupportedBlockchains;
+
             const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-            const srcTokenAddress = from.isNative ? NATIVE_TOKEN_ADDRESS : from.address;
-            const dstTokenAddress = toToken.isNative ? NATIVE_TOKEN_ADDRESS : toToken.address;
+            let srcTronAddress = '';
+            let dstTronAddress = '';
+
+            if (fromBlockchain === BLOCKCHAIN_NAME.TRON) {
+                const srcTronHexAddress = await this.tronWeb3Public.convertTronAddressToHex(
+                    from.address
+                );
+                srcTronAddress = `0x${srcTronHexAddress.slice(2)}`;
+            } else if (toBlockchain === BLOCKCHAIN_NAME.TRON) {
+                const dstTronHexAddress = await this.tronWeb3Public.convertTronAddressToHex(
+                    toToken.address
+                );
+                dstTronAddress = `0x${dstTronHexAddress.slice(2)}`;
+            }
+            const srcTokenAddress =
+                fromBlockchain === BLOCKCHAIN_NAME.TRON ? srcTronAddress : from.address;
+            const dstTokenAddress =
+                toBlockchain === BLOCKCHAIN_NAME.TRON ? dstTronAddress : toToken.address;
+
             const feeInfo = await this.getFeeInfo(
                 from.blockchain,
                 options.providerAddress,
@@ -61,13 +94,14 @@ export class RouterCrossChainProvider extends CrossChainProvider {
 
             const routerQuoteConfig = await RouterApiService.getQuote({
                 amount: fromWithoutFee.stringWeiAmount,
-                fromTokenAddress: srcTokenAddress,
+                fromTokenAddress: from.isNative ? NATIVE_TOKEN_ADDRESS : srcTokenAddress,
                 fromTokenChainId: srcChainId.toString(),
-                toTokenAddress: dstTokenAddress,
+                toTokenAddress: toToken.isNative ? NATIVE_TOKEN_ADDRESS : dstTokenAddress,
                 toTokenChainId: dstChainId.toString(),
                 slippageTolerance: options.slippageTolerance * 100
             });
-            const dstTokenAmount = routerQuoteConfig.destination.tokenAmount;
+            const dstTokenAmount = new BigNumber(routerQuoteConfig.destination.tokenAmount);
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(
@@ -77,6 +111,10 @@ export class RouterCrossChainProvider extends CrossChainProvider {
             });
 
             const routePath = await this.getRoutePath(from, to, routerQuoteConfig);
+
+            const slippageAmount = dstTokenAmount.multipliedBy(options.slippageTolerance);
+
+            const toTokenAmountMin = dstTokenAmount.minus(slippageAmount);
 
             const gasData =
                 options.gasCalculation === 'enabled'
@@ -98,7 +136,11 @@ export class RouterCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         routerQuoteConfig,
-                        slippage: options.slippageTolerance
+                        slippage: options.slippageTolerance,
+                        toTokenAmountMin: Web3Pure.fromWei(
+                            toTokenAmountMin,
+                            routerQuoteConfig.destination.asset.decimals
+                        )
                     },
                     options.providerAddress,
                     routePath
