@@ -4,6 +4,7 @@ import { BridgersCrossChainProvider } from 'src/features/cross-chain/calculation
 import { CbridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-provider';
 import { ChangenowCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/changenow-cross-chain-provider';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
+import { LifiCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-provider';
 import { PulseChainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/pulse-chain-cross-chain-provider';
 // import { ScrollBridgeProvider } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/scroll-bridge-provider';
 import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
@@ -26,8 +27,7 @@ const proxyProviders = [
     //StargateCrossChainProvider,
     XyCrossChainProvider,
     CbridgeCrossChainProvider,
-    // Possibly Compromised
-    // LifiCrossChainProvider,
+    LifiCrossChainProvider,
     SquidrouterCrossChainProvider,
     RangoCrossChainProvider,
     PulseChainCrossChainProvider,
