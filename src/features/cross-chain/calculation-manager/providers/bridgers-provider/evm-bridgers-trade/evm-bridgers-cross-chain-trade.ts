@@ -104,7 +104,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         this.slippage = crossChainTrade.slippage;
     }
 
-    protected async swapDirect(
+    protected override async swapDirect(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();
