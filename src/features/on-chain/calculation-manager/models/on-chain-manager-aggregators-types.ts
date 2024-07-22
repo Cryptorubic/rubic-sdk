@@ -1,5 +1,6 @@
 import { OneInchProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/one-inch-provider';
 import { DlnOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/dln-on-chain-provider';
+import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-provider';
 import { PiteasProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-provider';
 import { XyDexProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-provider';
 import { ZrxProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/zrx-provider';
@@ -12,8 +13,7 @@ import { RangoOnChainProvider } from '../providers/aggregators/rango/rango-on-ch
 import { ZetaSwapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
-    // Possibly Compromised
-    // LIFI: LifiProvider,
+    LIFI: LifiProvider,
     OPEN_OCEAN: OpenOceanProvider,
     RANGO: RangoOnChainProvider,
     ODOS: OdosOnChainProvider,
