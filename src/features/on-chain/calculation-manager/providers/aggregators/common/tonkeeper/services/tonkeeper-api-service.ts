@@ -10,9 +10,7 @@ import {
 } from '../models/tonkeeper-api-types';
 
 export class TonkeeperApiService {
-    private static apiUrl: string = 'https://swap.tonkeeper.com/v2';
-
-    // private static tonkeeperDexes: TonkeeperDexType[] = ['dedust', 'stonfi'];
+    private static apiUrl: string = 'https://rubic-swap.tonkeeper.com/v2';
 
     public static async makeQuoteReq<T extends TonkeeperCommonQuoteInfo>(
         fromRawAddress: string,

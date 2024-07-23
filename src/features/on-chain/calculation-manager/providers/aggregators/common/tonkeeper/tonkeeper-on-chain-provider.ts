@@ -58,6 +58,7 @@ export abstract class TonkeeperOnChainProvider<
                 path: this.getRoutePath(from, toToken),
                 proxyFeeInfo,
                 fromWithoutFee,
+                tradeType: this.tradeType,
                 tonkeeperDexType: this.tonkeeperDexType,
                 bestRoute,
                 rawAddresses: {
