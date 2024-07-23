@@ -1,8 +1,8 @@
 export type TonkeeperResp<T> = T | string;
 
-export interface TonkeeperQuoteResp {
+export interface TonkeeperQuoteResp<T extends TonkeeperCommonQuoteInfo> {
     provider: TonkeeperDexType;
-    trades: [TonkeeperDedustQuoteInfo | TonkeeperStonfiQuoteInfo];
+    trades: [T];
 }
 
 export type TonkeeperDexType = 'stonfi' | 'dedust';
@@ -15,7 +15,7 @@ export interface TonkeeperStonfiQuoteInfo extends TonkeeperCommonQuoteInfo {
     stonfiRawTrade: TonkeeperRawTradeStep | TonkeeperRawTradeStep[];
 }
 
-interface TonkeeperCommonQuoteInfo {
+export interface TonkeeperCommonQuoteInfo {
     fromAsset: string;
     toAsset: string;
     /** wei amount */

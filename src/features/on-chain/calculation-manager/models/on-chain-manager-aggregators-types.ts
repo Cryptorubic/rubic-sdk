@@ -4,12 +4,13 @@ import { PiteasProvider } from 'src/features/on-chain/calculation-manager/provid
 import { XyDexProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-provider';
 import { ZrxProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/zrx-provider';
 
+import { DedustOnChainProvider } from '../providers/aggregators/dedust/dedust-on-chain-provider';
 import { NativeRouterProvider } from '../providers/aggregators/native-router/native-router-provider';
 import { OdosOnChainProvider } from '../providers/aggregators/odos/odos-on-chain-provider';
 import { OkuSwapOnChainProvider } from '../providers/aggregators/okuswap/okuswap-on-chain-provider';
 import { OpenOceanProvider } from '../providers/aggregators/open-ocean/open-ocean-provider';
 import { RangoOnChainProvider } from '../providers/aggregators/rango/rango-on-chain-provider';
-import { TonkeeperOnChainProvider } from '../providers/aggregators/tonkeeper/tonkeeper-on-chain-provider';
+import { StonfiOnChainProvider } from '../providers/aggregators/stonfi/stonfi-on-chain-provider';
 import { ZetaSwapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
@@ -26,6 +27,7 @@ export const AGGREGATORS_ON_CHAIN = {
     ONE_INCH: OneInchProvider,
     ZETA_SWAP: ZetaSwapProvider,
     NATIVE_ROUTER: NativeRouterProvider,
-    TONKEEPER: TonkeeperOnChainProvider
+    DEDUST: DedustOnChainProvider,
+    STONFI: StonfiOnChainProvider
     // SYMBIOSIS: SymbiosisOnChainProvider
 } as const;

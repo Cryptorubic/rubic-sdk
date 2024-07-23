@@ -9,18 +9,20 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
-import { OnChainTradeError } from '../../../models/on-chain-trade-error';
-import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
-import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
-import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
+import { OnChainTradeError } from '../../../../models/on-chain-trade-error';
+import { RequiredOnChainCalculationOptions } from '../../../common/models/on-chain-calculation-options';
+import { AggregatorOnChainProvider } from '../../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { GasFeeInfo } from '../../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { OnChainTrade } from '../../../common/on-chain-trade/on-chain-trade';
+import { TonkeeperCommonQuoteInfo, TonkeeperDexType } from './models/tonkeeper-api-types';
 import { TonkeeperOnChainTradeStruct } from './models/tonkeeper-trade-struct';
 import { TonkeeperApiService } from './services/tonkeeper-api-service';
 import { TonkeeperOnChainTrade } from './tonkeeper-on-chain-trade';
 
-export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
-    public readonly tradeType = ON_CHAIN_TRADE_TYPE.TONKEEPER;
+export abstract class TonkeeperOnChainProvider<
+    T extends TonkeeperCommonQuoteInfo
+> extends AggregatorOnChainProvider {
+    protected abstract tonkeeperDexType: TonkeeperDexType;
 
     public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
         return blockchain === BLOCKCHAIN_NAME.TON;
@@ -38,7 +40,8 @@ export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
             const bestRoute = await TonkeeperApiService.makeQuoteReq(
                 fromRawAddress,
                 toRawAddress,
-                fromWithoutFee.stringWeiAmount
+                fromWithoutFee.stringWeiAmount,
+                this.tonkeeperDexType
             );
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -55,18 +58,19 @@ export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
                 path: this.getRoutePath(from, toToken),
                 proxyFeeInfo,
                 fromWithoutFee,
+                tonkeeperDexType: this.tonkeeperDexType,
                 bestRoute,
                 rawAddresses: {
                     fromRawAddress,
                     toRawAddress
                 }
-            } as TonkeeperOnChainTradeStruct;
+            } as TonkeeperOnChainTradeStruct<T>;
             tradeStruct.gasFeeInfo = await this.getGasFeeInfo(tradeStruct);
 
             return new TonkeeperOnChainTrade(tradeStruct, options.providerAddress);
         } catch (err) {
             return {
-                type: ON_CHAIN_TRADE_TYPE.TONKEEPER,
+                type: this.tradeType,
                 error: err
             };
         }
@@ -86,7 +90,7 @@ export class TonkeeperOnChainProvider extends AggregatorOnChainProvider {
     }
 
     protected async getGasFeeInfo(
-        tradeStruct: TonkeeperOnChainTradeStruct
+        tradeStruct: TonkeeperOnChainTradeStruct<T>
     ): Promise<GasFeeInfo | null> {
         const nativeTonCoin = nativeTokensList[BLOCKCHAIN_NAME.TON];
         const gasLimitWei = tradeStruct.bestRoute.trades[0].blockchainFee;

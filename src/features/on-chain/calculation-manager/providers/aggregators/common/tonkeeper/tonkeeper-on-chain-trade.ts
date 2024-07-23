@@ -3,24 +3,33 @@ import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
-import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
-import { TonEncodedConfigAndToAmount } from '../../common/on-chain-trade/ton-on-chain-trade/models/ton--on-chian-trade-types';
-import { TonOnChainTrade } from '../../common/on-chain-trade/ton-on-chain-trade/ton-on-chain-trade';
-import { TonkeeperQuoteResp } from './models/tonkeeper-api-types';
+import { OnChainTradeType } from '../../../common/models/on-chain-trade-type';
+import { TonEncodedConfigAndToAmount } from '../../../common/on-chain-trade/ton-on-chain-trade/models/ton--on-chian-trade-types';
+import { TonOnChainTrade } from '../../../common/on-chain-trade/ton-on-chain-trade/ton-on-chain-trade';
+import {
+    TonkeeperCommonQuoteInfo,
+    TonkeeperDexType,
+    TonkeeperQuoteResp
+} from './models/tonkeeper-api-types';
 import { TonkeeperOnChainTradeStruct, TxTokensRawAddresses } from './models/tonkeeper-trade-struct';
 import { TonkeeperApiService } from './services/tonkeeper-api-service';
 
-export class TonkeeperOnChainTrade extends TonOnChainTrade {
-    public type = ON_CHAIN_TRADE_TYPE.TONKEEPER;
+export class TonkeeperOnChainTrade<T extends TonkeeperCommonQuoteInfo> extends TonOnChainTrade {
+    public type: OnChainTradeType;
 
-    private readonly bestRoute: TonkeeperQuoteResp;
+    private readonly bestRoute: TonkeeperQuoteResp<T>;
 
     private readonly rawAddresses: TxTokensRawAddresses;
 
-    constructor(tradeStruct: TonkeeperOnChainTradeStruct, providerAddress: string) {
+    private readonly tonkeeperDexType: TonkeeperDexType;
+
+    constructor(tradeStruct: TonkeeperOnChainTradeStruct<T>, providerAddress: string) {
         super(tradeStruct, providerAddress);
+
         this.bestRoute = tradeStruct.bestRoute;
         this.rawAddresses = tradeStruct.rawAddresses;
+        this.type = tradeStruct.tradeType;
+        this.tonkeeperDexType = tradeStruct.tonkeeperDexType;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<TonEncodedConfig> {
@@ -37,7 +46,8 @@ export class TonkeeperOnChainTrade extends TonOnChainTrade {
             TonkeeperApiService.makeQuoteReq(
                 this.rawAddresses.fromRawAddress,
                 this.rawAddresses.toRawAddress,
-                this.fromWithoutFee.stringWeiAmount
+                this.fromWithoutFee.stringWeiAmount,
+                this.tonkeeperDexType
             ),
             TonkeeperApiService.encodeParamsForSwap(
                 this.bestRoute,
