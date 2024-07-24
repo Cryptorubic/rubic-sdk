@@ -128,6 +128,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     SUSHI_SWAP: 'SUSHI_SWAP',
     SYNAPSE: 'SYNAPSE',
     SYNC_SWAP: 'SYNC_SWAP',
+    SILK_SWAP: 'SILK_SWAP',
 
     SYMBIOSIS_SWAP: 'SYMBIOSIS_SWAP', // Fake to show swap via unknown symbiosis dex
 
@@ -139,7 +140,6 @@ export const ON_CHAIN_TRADE_TYPE = {
     UBE_SWAP: 'UBE_SWAP',
     UNISWAP_V2: 'UNISWAP_V2',
     UNI_SWAP_V3: 'UNI_SWAP_V3',
-    UNISWAP_BAHAMUT: 'UNISWAP_BAHAMUT',
 
     VERSE: 'VERSE',
     VIPER_SWAP: 'VIPER_SWAP',
