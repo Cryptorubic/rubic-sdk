@@ -5,7 +5,7 @@ import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
  */
 export class NotSupportedRegionError extends RubicSdkError {
     constructor() {
-        super();
+        super('Bridgers does not provide services for your current country/region.');
         Object.setPrototypeOf(this, NotSupportedRegionError.prototype);
     }
 }
