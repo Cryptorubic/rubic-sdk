@@ -37,40 +37,6 @@ export class TonkeeperApiService {
         return res;
     }
 
-    // public static async makeQuoteReq(
-    //     fromRawAddress: string,
-    //     toRawAddress: string,
-    //     fromAmount: string
-    // ): Promise<TonkeeperQuoteResp> {
-    //     const promises = this.tonkeeperDexes.map(dexName => {
-    //         const req = Injector.httpClient.get<TonkeeperResp<TonkeeperQuoteResp>>(
-    //             `${this.apiUrl}/swap/calculate`,
-    //             {
-    //                 params: {
-    //                     fromAsset: fromRawAddress,
-    //                     toAsset: toRawAddress,
-    //                     provider: dexName,
-    //                     fromAmount
-    //                 }
-    //             }
-    //         );
-    //         return req;
-    //     });
-    //     const routes = (await Promise.all(promises)).filter(
-    //         route => typeof route !== 'string' && route.trades.length
-    //     ) as TonkeeperQuoteResp[];
-
-    //     if (!routes.length) {
-    //         throw new NotSupportedTokensError();
-    //     }
-
-    //     const bestRoute = routes.sort((routeA, routeB) =>
-    //         new BigNumber(routeB.trades[0]?.toAmount).comparedTo(routeA.trades[0]?.toAmount)
-    //     )[0]!;
-
-    //     return bestRoute;
-    // }
-
     /**
      * @param slippage number from 0 to 1
      */

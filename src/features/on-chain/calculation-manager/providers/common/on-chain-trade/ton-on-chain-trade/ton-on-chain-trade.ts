@@ -11,10 +11,12 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { TransactionConfig } from 'web3-core';
 
-import { OnChainTradeStruct } from '../evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from '../evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../on-chain-trade';
-import { TonEncodedConfigAndToAmount } from './models/ton--on-chian-trade-types';
+import {
+    TonEncodedConfigAndToAmount,
+    TonOnChainTradeStruct
+} from './models/ton-on-chian-trade-types';
 
 export abstract class TonOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount;
@@ -45,7 +47,7 @@ export abstract class TonOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.TON);
     }
 
-    constructor(tradeStruct: OnChainTradeStruct<TonBlockchainName>, providerAddress: string) {
+    constructor(tradeStruct: TonOnChainTradeStruct, providerAddress: string) {
         super(providerAddress);
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;

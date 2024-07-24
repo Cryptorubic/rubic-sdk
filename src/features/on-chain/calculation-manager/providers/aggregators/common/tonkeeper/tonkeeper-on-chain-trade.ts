@@ -4,7 +4,7 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
 import { OnChainTradeType } from '../../../common/models/on-chain-trade-type';
-import { TonEncodedConfigAndToAmount } from '../../../common/on-chain-trade/ton-on-chain-trade/models/ton--on-chian-trade-types';
+import { TonEncodedConfigAndToAmount } from '../../../common/on-chain-trade/ton-on-chain-trade/models/ton-on-chian-trade-types';
 import { TonOnChainTrade } from '../../../common/on-chain-trade/ton-on-chain-trade/ton-on-chain-trade';
 import {
     TonkeeperCommonQuoteInfo,

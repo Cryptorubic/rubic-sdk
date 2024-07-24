@@ -1,7 +1,5 @@
-import { TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-
 import { OnChainTradeType } from '../../../../common/models/on-chain-trade-type';
-import { OnChainTradeStruct } from '../../../../common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
+import { TonOnChainTradeStruct } from '../../../../common/on-chain-trade/ton-on-chain-trade/models/ton-on-chian-trade-types';
 import {
     TonkeeperCommonQuoteInfo,
     TonkeeperDedustQuoteInfo,
@@ -14,7 +12,7 @@ export type DedustOnChainTradeStruct = TonkeeperOnChainTradeStruct<TonkeeperDedu
 export type StonfiOnChainTradeStruct = TonkeeperOnChainTradeStruct<TonkeeperStonfiQuoteInfo>;
 
 export interface TonkeeperOnChainTradeStruct<T extends TonkeeperCommonQuoteInfo>
-    extends OnChainTradeStruct<TonBlockchainName> {
+    extends TonOnChainTradeStruct {
     bestRoute: TonkeeperQuoteResp<T>;
     rawAddresses: TxTokensRawAddresses;
     tradeType: Extract<OnChainTradeType, 'DEDUST' | 'STONFI'>;
