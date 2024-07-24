@@ -6,6 +6,7 @@ import {
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -27,7 +28,6 @@ import {
 } from './constants/router-cross-chain-supported-chains';
 import { RouterCrossChainTrade } from './router-cross-chain-trade';
 import { RouterCrossChainUtilService } from './utils/router-cross-chain-util-service.ts';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type'
 export class RouterCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ROUTER;
 
@@ -53,11 +53,14 @@ export class RouterCrossChainProvider extends CrossChainProvider {
             };
         }
 
-        const useProxy = false;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
             const srcChainId = blockchainId[from.blockchain];
-            const dstChainId = blockchainId[toToken.blockchain];
+            const dstChainId =
+                toBlockchain === BLOCKCHAIN_NAME.SOLANA
+                    ? 'solana'
+                    : blockchainId[toToken.blockchain];
 
             const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
@@ -102,13 +105,13 @@ export class RouterCrossChainProvider extends CrossChainProvider {
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await RouterCrossChainTrade.getGasData(
-                        from,
-                        to,
-                        feeInfo,
-                        options.providerAddress,
-                        routerQuoteConfig,
-                        options?.receiverAddress
-                    )
+                          from,
+                          to,
+                          feeInfo,
+                          options.providerAddress,
+                          routerQuoteConfig,
+                          options?.receiverAddress
+                      )
                     : null;
             return {
                 trade: new RouterCrossChainTrade(
@@ -154,29 +157,29 @@ export class RouterCrossChainProvider extends CrossChainProvider {
         }
         const transitFromAddress =
             fromToken.address.toLowerCase() !==
-                routerSrcAsset.stableReserveAsset.address.toLowerCase()
+            routerSrcAsset.stableReserveAsset.address.toLowerCase()
                 ? routerSrcAsset.stableReserveAsset.address
                 : null;
 
         const transitToAddress =
             toToken.address.toLowerCase() !==
-                routerDstAsset.stableReserveAsset.address.toLowerCase()
+            routerDstAsset.stableReserveAsset.address.toLowerCase()
                 ? routerDstAsset.stableReserveAsset.address
                 : null;
         const fromTransitToken = transitFromAddress
             ? await TokenAmount.createToken({
-                blockchain: fromToken.blockchain,
-                address: transitFromAddress,
-                weiAmount: new BigNumber(routerSrcAsset.stableReserveAmount)
-            })
+                  blockchain: fromToken.blockchain,
+                  address: transitFromAddress,
+                  weiAmount: new BigNumber(routerSrcAsset.stableReserveAmount)
+              })
             : fromToken;
 
         const toTransitToken = transitToAddress
             ? await TokenAmount.createToken({
-                blockchain: toToken.blockchain,
-                address: transitToAddress,
-                weiAmount: new BigNumber(routerDstAsset.stableReserveAmount)
-            })
+                  blockchain: toToken.blockchain,
+                  address: transitToAddress,
+                  weiAmount: new BigNumber(routerDstAsset.stableReserveAmount)
+              })
             : toToken;
         const routePath: RubicStep[] = [];
 
