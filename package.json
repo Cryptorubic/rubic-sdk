@@ -73,7 +73,7 @@
         "@1inch/limit-order-protocol-utils": "3.0.1",
         "@arbitrum/sdk": "^3.1.3",
         "@debridge-finance/debridge-external-call": "^1.0.7",
-        "@layerzerolabs/scan-client": "^0.0.0-beta.6",
+        "@layerzerolabs/scan-client": "0.0.8",
         "@noble/secp256k1": "^1.7.1",
         "@pancakeswap/sdk": "^5.1.0",
         "@pancakeswap/smart-router": "4.2.1",

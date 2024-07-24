@@ -85,7 +85,6 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
@@ -97,7 +96,9 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ARCHON_BRIDGE]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.MESON]: this.getMesonDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE]: this.getOwlToDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getLayerZeroDstSwapStatus
     };
 
     /**

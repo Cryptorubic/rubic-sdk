@@ -1671,12 +1671,10 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@layerzerolabs/scan-client@^0.0.0-beta.6":
-  version "0.0.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@layerzerolabs/scan-client/-/scan-client-0.0.0-beta.6.tgz#079275514e2a386677fc8129ced52a3c3f0a1b9a"
-  integrity sha512-TjhEfMcmN5Q8Gtog45lj6in+y8OzGPoLzUzSF45cJO703Lrlwf5tAA85TQnnRWPGBiChw70KG2S6nzgmMRQWJg==
-  dependencies:
-    axios "^0.27.2"
+"@layerzerolabs/scan-client@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/scan-client/-/scan-client-0.0.8.tgz#38316cde50c06556bb81b74f18d10a36b637eefb"
+  integrity sha512-V9vvt9GW0+AHoWXfOSNmZ9WUa28fVBmC93J/f9RLeDMEy5VR8srW2Du5pf1mMAg6ncEL0kQ1xkVCu+X6ARFBtQ==
 
 "@metamask/eth-sig-util@^4.0.1":
   version "4.0.1"
