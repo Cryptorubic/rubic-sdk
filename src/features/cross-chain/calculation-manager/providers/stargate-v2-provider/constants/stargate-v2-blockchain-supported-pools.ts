@@ -53,20 +53,25 @@ export const stargateV2BlockchainSupportedPools: Record<StargateV2SupportedBlock
             stargateV2PoolId[stargateV2BridgeToken.USDCe],
             stargateV2PoolId[stargateV2BridgeToken.ETH]
         ],
-        [BLOCKCHAIN_NAME.AURORA]: [stargateV2PoolId[stargateV2BridgeToken.USDC]]
-        // [BLOCKCHAIN_NAME.KLAYTN]: [
-        //     stargateV2PoolId[stargateV2BridgeToken.USDC],
-        //     stargateV2PoolId[stargateV2BridgeToken.USDT],
-        //     stargateV2PoolId[stargateV2BridgeToken.WETH]
-        // ],
+        [BLOCKCHAIN_NAME.AURORA]: [stargateV2PoolId[stargateV2BridgeToken.USDC]],
+        [BLOCKCHAIN_NAME.KLAYTN]: [
+            stargateV2PoolId[stargateV2BridgeToken.USDC],
+            stargateV2PoolId[stargateV2BridgeToken.USDT],
+            stargateV2PoolId[stargateV2BridgeToken.WETH]
+        ],
         // [BLOCKCHAIN_NAME.IOTA]: [
         //     stargateV2PoolId[stargateV2BridgeToken.USDC],
         //     stargateV2PoolId[stargateV2BridgeToken.USDT],
         //     stargateV2PoolId[stargateV2BridgeToken.WETH]
         // ],
-        // [BLOCKCHAIN_NAME.TAIKO]: [
-        //     stargateV2PoolId[stargateV2BridgeToken.USDC],
-        //     stargateV2PoolId[stargateV2BridgeToken.USDT]
-        // ],
-        // [BLOCKCHAIN_NAME.SEI]: [stargateV2PoolId[stargateV2BridgeToken.WETH]]
+        [BLOCKCHAIN_NAME.TAIKO]: [
+            stargateV2PoolId[stargateV2BridgeToken.USDC],
+            stargateV2PoolId[stargateV2BridgeToken.USDT]
+        ],
+        [BLOCKCHAIN_NAME.SEI]: [stargateV2PoolId[stargateV2BridgeToken.WETH]],
+        [BLOCKCHAIN_NAME.FLARE]: [
+            stargateV2PoolId[stargateV2BridgeToken.USDC],
+            stargateV2PoolId[stargateV2BridgeToken.USDT],
+            stargateV2PoolId[stargateV2BridgeToken.WETH]
+        ]
     };

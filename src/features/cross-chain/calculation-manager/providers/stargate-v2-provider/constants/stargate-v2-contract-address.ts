@@ -64,22 +64,27 @@ export const stargateV2ContractAddress: StargateV2ContractAddress = {
     },
     [BLOCKCHAIN_NAME.AURORA]: {
         [stargateV2BridgeToken.USDC]: '0x81F6138153d473E8c5EcebD3DC8Cd4903506B075'
-    }
-    // [BLOCKCHAIN_NAME.KLAYTN]: {
-    //     [stargateV2BridgeToken.ETH]: '0xBB4957E44401a31ED81Cab33539d9e8993FA13Ce',
-    //     [stargateV2BridgeToken.USDC]: '0x01A7c805cc47AbDB254CD8AaD29dE5e447F59224',
-    //     [stargateV2BridgeToken.USDT]: '0x8619bA1B324e099CB2227060c4BC5bDEe14456c6'
-    // },
+    },
+    [BLOCKCHAIN_NAME.KLAYTN]: {
+        [stargateV2BridgeToken.WETH]: '0x55acee547df909cf844e32dd66ee55a6f81dc71b',
+        [stargateV2BridgeToken.USDC]: '0xe2053bcf56d2030d2470fb454574237cf9ee3d4b',
+        [stargateV2BridgeToken.USDT]: '0x9025095263d1e548dc890a7589a4c78038ac40ab'
+    },
+    [BLOCKCHAIN_NAME.TAIKO]: {
+        [stargateV2BridgeToken.USDC]: '0x19e26B0638bf63aa9fa4d14c6baF8D52eBE86C5C',
+        [stargateV2BridgeToken.USDT]: '0x9c2dc7377717603eB92b2655c5f2E7997a4945BD'
+    },
     // [BLOCKCHAIN_NAME.IOTA]: {
     //     [stargateV2BridgeToken.ETH]: '0x9c2dc7377717603eB92b2655c5f2E7997a4945BD',
     //     [stargateV2BridgeToken.USDC]: '0x8e8539e4CcD69123c623a106773F2b0cbbc58746',
     //     [stargateV2BridgeToken.USDT]: '0x77C71633C34C3784ede189d74223122422492a0f'
     // },
-    // [BLOCKCHAIN_NAME.TAIKO]: {
-    //     [stargateV2BridgeToken.USDC]: '0x77C71633C34C3784ede189d74223122422492a0f',
-    //     [stargateV2BridgeToken.USDT]: '0x1C10CC06DC6D35970d1D53B2A23c76ef370d4135'
-    // },
-    // [BLOCKCHAIN_NAME.SEI]: {
-    //     [stargateV2BridgeToken.WETH]: '0x5c386D85b1B82FD9Db681b9176C8a4248bb6345B'
-    // }
+    [BLOCKCHAIN_NAME.SEI]: {
+        [stargateV2BridgeToken.WETH]: '0x160345fC359604fC6e70E3c5fAcbdE5F7A9342d8'
+    },
+    [BLOCKCHAIN_NAME.FLARE]: {
+        [stargateV2BridgeToken.USDC]: '0xFbDa5F676cB37624f28265A144A48B0d6e87d3b6',
+        [stargateV2BridgeToken.USDT]: '0x0B38e83B86d491735fEaa0a791F65c2B99535396',
+        [stargateV2BridgeToken.WETH]: '0x1502FA4be69d526124D453619276FacCab275d3D'
+    }
 };
