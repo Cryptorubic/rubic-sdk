@@ -184,7 +184,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                 onTransactionHash,
                 data,
                 value,
-                gas: options.gasLimit,
                 gasPriceOptions: options.gasPriceOptions
             });
 

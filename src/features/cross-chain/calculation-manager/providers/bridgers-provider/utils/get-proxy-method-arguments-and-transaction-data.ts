@@ -1,4 +1,6 @@
 import BigNumber from 'bignumber.js';
+import { NotSupportedTokensError } from 'src/common/errors';
+import { NotSupportedRegionError } from 'src/common/errors/swap/not-supported-region';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -69,6 +71,13 @@ export async function getProxyMethodArgumentsAndTransactionData<
         'https://sswap.swft.pro/api/sswap/swap',
         swapRequest
     );
+    if (swapData.resCode === 1146) {
+        throw new NotSupportedRegionError();
+    }
+    if (!swapData.data?.txData) {
+        throw new NotSupportedTokensError();
+    }
+
     const transactionData = swapData.data?.txData;
 
     const quoteRequest: BridgersQuoteRequest = {

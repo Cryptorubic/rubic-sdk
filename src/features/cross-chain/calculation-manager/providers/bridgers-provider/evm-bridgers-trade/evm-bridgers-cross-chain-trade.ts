@@ -104,7 +104,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         this.slippage = crossChainTrade.slippage;
     }
 
-    protected async swapDirect(
+    protected override async swapDirect(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();
@@ -112,7 +112,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -144,7 +144,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 data: transactionData.data,
                 value: transactionData.value,
                 onTransactionHash,
-                gas: gasLimit,
                 gasPriceOptions
             });
 

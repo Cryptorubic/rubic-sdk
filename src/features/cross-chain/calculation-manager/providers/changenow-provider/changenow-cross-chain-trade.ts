@@ -198,7 +198,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -231,7 +231,6 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                     [this.paymentInfo.payinAddress, this.from.stringWeiAmount],
                     {
                         onTransactionHash,
-                        gas: gasLimit,
                         gasPriceOptions
                     }
                 );
