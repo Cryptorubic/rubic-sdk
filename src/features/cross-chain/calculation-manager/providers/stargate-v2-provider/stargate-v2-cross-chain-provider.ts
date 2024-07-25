@@ -247,8 +247,8 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
     ): boolean {
         const fromBlockchain = from.blockchain as StargateV2SupportedBlockchains;
         const toBlockchain = to.blockchain as StargateV2SupportedBlockchains;
-        const srcTokenPool = getTokenPoolByAddress(fromBlockchain, from.address);
-        const dstTokenPool = getTokenPoolByAddress(toBlockchain, to.address);
+        const srcTokenPool = getTokenPoolByAddress(fromBlockchain, from.address.toLowerCase());
+        const dstTokenPool = getTokenPoolByAddress(toBlockchain, to.address.toLowerCase());
 
         if (!srcTokenPool || !dstTokenPool) {
             return false;

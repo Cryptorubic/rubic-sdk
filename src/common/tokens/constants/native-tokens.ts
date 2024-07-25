@@ -481,5 +481,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'FTN',
         symbol: 'FTN',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FLARE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FLARE,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'FLR',
+        symbol: 'FLR',
+        decimals: 18
     })
 };
