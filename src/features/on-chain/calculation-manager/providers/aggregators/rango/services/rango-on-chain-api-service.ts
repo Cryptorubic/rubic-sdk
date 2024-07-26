@@ -34,14 +34,15 @@ export class RangoOnChainApiService {
         maxAge: 15_000
     })
     public static async getSwapTransaction(
-        params: RangoSwapQueryParams
+        params: RangoSwapQueryParams,
+        isSwap: boolean
     ): Promise<RangoSwapTransactionResponse> {
         const res = await Injector.httpClient.get<RangoSwapTransactionResponse>(
             `${RANGO_API_ENDPOINT}/swap`,
             { params: params as unknown as HttpClientParams }
         );
 
-        if (!res.route || res.error || !res.tx) {
+        if (!res.route || (isSwap && (res.error || !res.tx))) {
             throw new RubicSdkError(res.error ?? 'No available routes in rango.');
         }
 

@@ -284,6 +284,7 @@ export class OnChainManager {
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
+            // throw Error('Lifi has been compromised');
             const disabledProviders = [
                 ...this.LIFI_DISABLED_PROVIDERS,
                 ...options.disabledProviders
