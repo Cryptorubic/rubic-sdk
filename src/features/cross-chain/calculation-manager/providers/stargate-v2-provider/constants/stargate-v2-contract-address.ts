@@ -65,11 +65,11 @@ export const stargateV2ContractAddress: StargateV2ContractAddress = {
     [BLOCKCHAIN_NAME.AURORA]: {
         [stargateV2BridgeToken.USDC]: '0x81F6138153d473E8c5EcebD3DC8Cd4903506B075'
     },
-    [BLOCKCHAIN_NAME.KLAYTN]: {
-        [stargateV2BridgeToken.WETH]: '0x55acee547df909cf844e32dd66ee55a6f81dc71b',
-        [stargateV2BridgeToken.USDC]: '0xe2053bcf56d2030d2470fb454574237cf9ee3d4b',
-        [stargateV2BridgeToken.USDT]: '0x9025095263d1e548dc890a7589a4c78038ac40ab'
-    },
+    // [BLOCKCHAIN_NAME.KLAYTN]: {
+    //     [stargateV2BridgeToken.WETH]: '0x55acee547df909cf844e32dd66ee55a6f81dc71b',
+    //     [stargateV2BridgeToken.USDC]: '0xe2053bcf56d2030d2470fb454574237cf9ee3d4b',
+    //     [stargateV2BridgeToken.USDT]: '0x9025095263d1e548dc890a7589a4c78038ac40ab'
+    // },
     [BLOCKCHAIN_NAME.TAIKO]: {
         [stargateV2BridgeToken.USDC]: '0x19e26B0638bf63aa9fa4d14c6baF8D52eBE86C5C',
         [stargateV2BridgeToken.USDT]: '0x9c2dc7377717603eB92b2655c5f2E7997a4945BD'
