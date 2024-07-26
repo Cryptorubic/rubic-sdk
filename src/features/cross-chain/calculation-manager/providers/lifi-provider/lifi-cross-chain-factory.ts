@@ -4,7 +4,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 
 import { CrossChainTrade } from '../common/cross-chain-trade';
 import { RubicStep } from '../common/models/rubicStep';
-import { LifiCrossChainTrade } from './chains/lifi-cross-chain-trade';
+import { LifiEvmCrossChainTrade } from './chains/lifi-evm-cross-chain-trade';
 import { LifiSolanaCrossChainTrade } from './chains/lifi-solana-cross-chain-trade';
 import {
     LifiCrossChainTradeConstructor,
@@ -27,7 +27,7 @@ export class LifiCrossChainFactory {
         }
 
         if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
-            return new LifiCrossChainTrade(
+            return new LifiEvmCrossChainTrade(
                 constructorParams as LifiEvmCrossChainTradeConstructor,
                 providerAddress,
                 routePath

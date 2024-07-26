@@ -9,7 +9,6 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -29,7 +28,6 @@ import {
     LifiCrossChainSupportedBlockchain,
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
-import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
 import {
     LIFI_API_CROSS_CHAIN_PROVIDERS,
     LifiSubProvider
@@ -43,16 +41,15 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
+import { LifiUtilsService } from '../../../../common/providers/lifi/lifi-utils-service';
 import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
+import { LifiEvmCrossChainTrade } from './chains/lifi-evm-cross-chain-trade';
 import { LifiCrossChainFactory } from './lifi-cross-chain-factory';
 import { FeeCost, LifiStep } from './models/lifi-fee-cost';
 import { Route, RouteOptions, RoutesRequest } from './models/lifi-route';
 import { LifiApiService } from './services/lifi-api-service';
-import { LifiUtilsService } from './services/lifi-utils-service';
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
-
-    private readonly MIN_AMOUNT_USD = new BigNumber(2);
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -88,14 +85,18 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             exchanges: { deny: disabledDexes },
             integrator: 'rubic'
         };
-        const SOLANA_CHAIN_ID = 'SOL';
-
-        const fromChainId =
-            fromBlockchain === BLOCKCHAIN_NAME.SOLANA
-                ? SOLANA_CHAIN_ID
-                : blockchainId[fromBlockchain];
-        const toChainId =
-            toBlockchain === BLOCKCHAIN_NAME.SOLANA ? SOLANA_CHAIN_ID : blockchainId[toBlockchain];
+        const fromTokenAddress = LifiUtilsService.getLifiTokenAddress(
+            from.blockchain,
+            from.isNative,
+            from.address
+        );
+        const toTokenAddress = LifiUtilsService.getLifiTokenAddress(
+            toToken.blockchain,
+            toToken.isNative,
+            toToken.address
+        );
+        const fromChainId = LifiUtilsService.getLifiChainId(fromBlockchain);
+        const toChainId = LifiUtilsService.getLifiChainId(toBlockchain);
 
         const feeInfo = await this.getFeeInfo(
             fromBlockchain,
@@ -115,9 +116,9 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const routesRequest: RoutesRequest = {
             fromChainId,
             fromAmount: fromWithoutFee.stringWeiAmount,
-            fromTokenAddress: from.address,
+            fromTokenAddress,
             toChainId,
-            toTokenAddress: toToken.address,
+            toTokenAddress,
             options: routeOptions,
             ...(fromAddress && { fromAddress }),
             ...(toAddress && { toAddress })
@@ -185,7 +186,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         );
 
         try {
-            this.checkMinError(from);
+            const minAmountUSD = this.setMinAmountUSD(fromBlockchain, toBlockchain);
+            this.checkMinError(from, minAmountUSD);
         } catch (err) {
             return {
                 trade,
@@ -200,16 +202,16 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         };
     }
 
-    private checkMinError(from: PriceTokenAmount): void | never {
+    private checkMinError(from: PriceTokenAmount, minAmountUsd: BigNumber): void | never {
         const fromUsdAmount = from.price.multipliedBy(from.tokenAmount);
-        if (fromUsdAmount.lt(this.MIN_AMOUNT_USD)) {
+        if (fromUsdAmount.lt(minAmountUsd)) {
             if (from.price.gt(0)) {
-                const minTokenAmount = this.MIN_AMOUNT_USD.multipliedBy(from.tokenAmount).dividedBy(
-                    fromUsdAmount
-                );
+                const minTokenAmount = minAmountUsd
+                    .multipliedBy(from.tokenAmount)
+                    .dividedBy(fromUsdAmount);
                 throw new MinAmountError(minTokenAmount, from.symbol);
             }
-            throw new MinAmountError(this.MIN_AMOUNT_USD, 'USDC');
+            throw new MinAmountError(minAmountUsd, 'USDC');
         }
     }
 
@@ -353,6 +355,19 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         return routePath;
     }
 
+    private setMinAmountUSD(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): BigNumber {
+        if (
+            fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM ||
+            toBlockchain === BLOCKCHAIN_NAME.ETHEREUM
+        ) {
+            return new BigNumber(20);
+        }
+        return new BigNumber(10);
+    }
+
     private async getGasData(
         options: RequiredCrossChainOptions,
         from: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
@@ -368,7 +383,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const chainType = BlockchainsInfo.getChainType(blockchain);
 
         if (chainType === CHAIN_TYPE.EVM) {
-            return LifiCrossChainTrade.getGasData(
+            return LifiEvmCrossChainTrade.getGasData(
                 from as PriceTokenAmount<EvmBlockchainName>,
                 to as PriceTokenAmount<EvmBlockchainName>,
                 bestRoute,

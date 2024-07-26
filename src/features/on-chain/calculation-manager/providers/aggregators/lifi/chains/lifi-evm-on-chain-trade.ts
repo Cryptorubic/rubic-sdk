@@ -21,12 +21,12 @@ import { GetToAmountAndTxDataResponse } from '../../../common/on-chain-aggregato
 import { LifiOnChainTransactionRequest } from '../models/lifi-on-chain-transaction-request';
 import { LifiOnChainApiService } from '../services/lifi-on-chain-api-service';
 
-export class LifiTrade extends AggregatorEvmOnChainTrade {
+export class LifiEvmOnChainTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(
         lifiTradeStruct: LifiTradeStruct<EvmBlockchainName>
     ): Promise<BigNumber | null> {
-        const lifiTrade = new LifiTrade(lifiTradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
+        const lifiTrade = new LifiEvmOnChainTrade(lifiTradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
         return getOnChainGasData(lifiTrade);
     }
 

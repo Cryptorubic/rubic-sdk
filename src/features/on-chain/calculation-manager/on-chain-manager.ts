@@ -36,7 +36,6 @@ import { OnChainTrade } from 'src/features/on-chain/calculation-manager/provider
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 
 import { AGGREGATORS_ON_CHAIN } from './models/on-chain-manager-aggregators-types';
-import { LifiCalculationOptions } from './providers/aggregators/lifi/models/lifi-calculation-options';
 import { AggregatorOnChainProvider } from './providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 
 /**

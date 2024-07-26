@@ -37,7 +37,7 @@ import { LifiApiService } from '../services/lifi-api-service';
 /**
  * Calculated Celer cross-chain trade.
  */
-export class LifiCrossChainTrade extends EvmCrossChainTrade {
+export class LifiEvmCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -48,7 +48,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
-        const trade = new LifiCrossChainTrade(
+        const trade = new LifiEvmCrossChainTrade(
             {
                 from,
                 to: toToken,

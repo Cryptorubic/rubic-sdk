@@ -6,8 +6,8 @@ import {
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
+import { LifiEvmOnChainTrade } from './chains/lifi-evm-on-chain-trade';
 import { LifiSolanaOnChainTrade } from './chains/lifi-solana-on-chain-trade';
-import { LifiTrade } from './chains/lifi-trade';
 import { LifiTradeStruct } from './models/lifi-trade-struct';
 
 export class LifiOnChainFactory {
@@ -24,7 +24,7 @@ export class LifiOnChainFactory {
         }
 
         if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
-            return new LifiTrade(
+            return new LifiEvmOnChainTrade(
                 tradeStruct as LifiTradeStruct<EvmBlockchainName>,
                 providerAddress
             );
