@@ -23,6 +23,7 @@ import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
+
 import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
 
 export class ZrxProvider extends AggregatorOnChainProvider {
