@@ -3,7 +3,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
-import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
+import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/chains/lifi-trade';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { zrxApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/constants';
 import {
@@ -94,7 +94,9 @@ export class ZrxProvider extends AggregatorOnChainProvider {
      * Fetches zrx data from api.
      */
 
-    protected async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
+    protected async getGasFeeInfo(
+        lifiTradeStruct: LifiTradeStruct<EvmBlockchainName>
+    ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
             const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);

@@ -4,8 +4,8 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 
 import { CrossChainTrade } from '../common/cross-chain-trade';
 import { RubicStep } from '../common/models/rubicStep';
+import { LifiCrossChainTrade } from './chains/lifi-cross-chain-trade';
 import { LifiSolanaCrossChainTrade } from './chains/lifi-solana-cross-chain-trade';
-import { LifiCrossChainTrade } from './lifi-cross-chain-trade';
 import {
     LifiCrossChainTradeConstructor,
     LifiEvmCrossChainTradeConstructor

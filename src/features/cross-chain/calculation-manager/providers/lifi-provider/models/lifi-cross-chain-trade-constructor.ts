@@ -24,6 +24,3 @@ export interface LifiCrossChainTradeConstructor<T extends BlockchainName> {
 export type LifiEvmCrossChainTradeConstructor = Required<
     LifiCrossChainTradeConstructor<EvmBlockchainName>
 >;
-
-// export interface LifiSolanaCrossChainTradeConstructor
-//     extends LifiCrossChainTradeConstructor<SolanaBlockchainName>

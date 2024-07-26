@@ -29,10 +29,10 @@ import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calc
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
-import { LifiEvmCrossChainTradeConstructor } from './models/lifi-cross-chain-trade-constructor';
-import { Estimate } from './models/lifi-fee-cost';
-import { Route } from './models/lifi-route';
-import { LifiApiService } from './services/lifi-api-service';
+import { LifiEvmCrossChainTradeConstructor } from '../models/lifi-cross-chain-trade-constructor';
+import { Estimate } from '../models/lifi-fee-cost';
+import { Route } from '../models/lifi-route';
+import { LifiApiService } from '../services/lifi-api-service';
 
 /**
  * Calculated Celer cross-chain trade.

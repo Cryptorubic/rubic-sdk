@@ -3,18 +3,21 @@ import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import {
     RouteOptions,
     RoutesRequest
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-route';
+import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/chains/lifi-trade';
 import {
     LIFI_API_ON_CHAIN_PROVIDERS,
     LIFI_DISABLED_ON_CHAIN_PROVIDERS
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
-import { lifiOnChainSupportedBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-supported-blockchains';
-import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
+import {
+    LifiOnChainSupportedBlockchain,
+    lifiOnChainSupportedBlockchains
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-supported-blockchains';
 import {
     LifiCalculationOptions,
     RequiredLifiCalculationOptions
@@ -43,8 +46,8 @@ export class LifiProvider extends AggregatorOnChainProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>,
+        from: PriceTokenAmount<BlockchainName>,
+        toToken: PriceToken<BlockchainName>,
         options: LifiCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         if (!this.isSupportedBlockchain(from.blockchain)) {
@@ -54,16 +57,26 @@ export class LifiProvider extends AggregatorOnChainProvider {
         if (options.withDeflation.from.isDeflation) {
             throw new RubicSdkError('[RUBIC_SDK] Lifi does not work if source token is deflation.');
         }
-
+        const fromBlockchain = from.blockchain as LifiOnChainSupportedBlockchain;
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,
             disabledProviders: [...options.disabledProviders, ON_CHAIN_TRADE_TYPE.DODO]
         });
 
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
+        const SOLANA_CHAIN_ID = 'SOL';
+        const SOLANA_NATIVE_TOKEN_ADDRESS = '11111111111111111111111111111111';
+        const isSolanaBlockchain = fromBlockchain === BLOCKCHAIN_NAME.SOLANA;
 
-        const fromChainId = blockchainId[from.blockchain];
-        const toChainId = blockchainId[toToken.blockchain];
+        const fromChainId = isSolanaBlockchain ? SOLANA_CHAIN_ID : blockchainId[from.blockchain];
+        const toChainId = isSolanaBlockchain ? SOLANA_CHAIN_ID : blockchainId[toToken.blockchain];
+
+        const fromTokenAddress =
+            isSolanaBlockchain && from.isNative ? SOLANA_NATIVE_TOKEN_ADDRESS : from.address;
+        const toTokenAddress =
+            isSolanaBlockchain && toToken.isNative
+                ? SOLANA_NATIVE_TOKEN_ADDRESS
+                : toToken.blockchain;
 
         const { disabledProviders } = fullOptions;
         const lifiDisabledProviders = Object.entries(LIFI_API_ON_CHAIN_PROVIDERS)
@@ -86,9 +99,9 @@ export class LifiProvider extends AggregatorOnChainProvider {
         const routesRequest: RoutesRequest = {
             fromChainId,
             fromAmount: fromWithoutFee.stringWeiAmount,
-            fromTokenAddress: fromWithoutFee.address,
+            fromTokenAddress,
             toChainId,
-            toTokenAddress: toToken.address,
+            toTokenAddress,
             options: routeOptions
         };
 
