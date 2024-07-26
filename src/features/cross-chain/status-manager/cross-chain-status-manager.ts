@@ -286,10 +286,19 @@ export class CrossChainStatusManager {
      */
     private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
+            const SOLANA_CHAIN_ID = 'SOL';
+            const fromChain =
+                data.fromBlockchain === BLOCKCHAIN_NAME.SOLANA
+                    ? SOLANA_CHAIN_ID
+                    : blockchainId[data.fromBlockchain];
+            const toChain =
+                data.toBlockchain === BLOCKCHAIN_NAME.SOLANA
+                    ? SOLANA_CHAIN_ID
+                    : blockchainId[data.toBlockchain];
             const params = {
                 ...(data.lifiBridgeType && { bridge: data.lifiBridgeType }),
-                fromChain: blockchainId[data.fromBlockchain],
-                toChain: blockchainId[data.toBlockchain],
+                fromChain,
+                toChain,
                 txHash: data.srcTxHash
             };
             const { status, receiving } = await Injector.httpClient.get<{

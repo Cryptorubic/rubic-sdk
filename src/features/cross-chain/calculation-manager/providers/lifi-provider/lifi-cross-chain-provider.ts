@@ -2,8 +2,15 @@ import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -36,13 +43,16 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
+import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
+import { LifiCrossChainFactory } from './lifi-cross-chain-factory';
 import { FeeCost, LifiStep } from './models/lifi-fee-cost';
 import { Route, RouteOptions, RoutesRequest } from './models/lifi-route';
 import { LifiApiService } from './services/lifi-api-service';
+import { LifiUtilsService } from './services/lifi-utils-service';
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-    private readonly MIN_AMOUNT_USD = new BigNumber(30);
+    private readonly MIN_AMOUNT_USD = new BigNumber(2);
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -53,10 +63,10 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>,
+        from: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
+        toToken: PriceToken<LifiCrossChainSupportedBlockchain>,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult> {
+    ): Promise<CalculationResult<EvmEncodeConfig | { data: string }>> {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -78,9 +88,14 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             exchanges: { deny: disabledDexes },
             integrator: 'rubic'
         };
+        const SOLANA_CHAIN_ID = 'SOL';
 
-        const fromChainId = blockchainId[fromBlockchain];
-        const toChainId = blockchainId[toBlockchain];
+        const fromChainId =
+            fromBlockchain === BLOCKCHAIN_NAME.SOLANA
+                ? SOLANA_CHAIN_ID
+                : blockchainId[fromBlockchain];
+        const toChainId =
+            toBlockchain === BLOCKCHAIN_NAME.SOLANA ? SOLANA_CHAIN_ID : blockchainId[toBlockchain];
 
         const feeInfo = await this.getFeeInfo(
             fromBlockchain,
@@ -91,7 +106,12 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
 
         const fromAddress = this.getWalletAddress(fromBlockchain);
-        const toAddress = options.receiverAddress || fromAddress;
+        const toAddress = LifiUtilsService.getLifiReceiverAddress(
+            fromBlockchain,
+            toBlockchain,
+            fromAddress,
+            options?.receiverAddress
+        );
         const routesRequest: RoutesRequest = {
             fromChainId,
             fromAmount: fromWithoutFee.stringWeiAmount,
@@ -142,22 +162,12 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         const priceImpact = from.calculatePriceImpactPercent(to);
 
-        const gasData =
-            options.gasCalculation === 'enabled'
-                ? await LifiCrossChainTrade.getGasData(
-                      from,
-                      to,
-                      bestRoute,
-                      feeInfo,
-                      options.slippageTolerance,
-                      options.providerAddress,
-                      options.receiverAddress
-                  )
-                : null;
+        const gasData = await this.getGasData(options, from, to, bestRoute, feeInfo);
 
         const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute.steps);
 
-        const trade = new LifiCrossChainTrade(
+        const trade = LifiCrossChainFactory.createTrade(
+            fromBlockchain,
             {
                 from,
                 to,
@@ -341,5 +351,33 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         }
 
         return routePath;
+    }
+
+    private async getGasData(
+        options: RequiredCrossChainOptions,
+        from: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
+        to: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
+        bestRoute: Route,
+        feeInfo: FeeInfo
+    ): Promise<GasData | null> {
+        if (options.gasCalculation !== 'enabled') {
+            return null;
+        }
+
+        const blockchain = from.blockchain;
+        const chainType = BlockchainsInfo.getChainType(blockchain);
+
+        if (chainType === CHAIN_TYPE.EVM) {
+            return LifiCrossChainTrade.getGasData(
+                from as PriceTokenAmount<EvmBlockchainName>,
+                to as PriceTokenAmount<EvmBlockchainName>,
+                bestRoute,
+                feeInfo,
+                options.slippageTolerance,
+                options.providerAddress,
+                options?.receiverAddress
+            );
+        }
+        return null;
     }
 }

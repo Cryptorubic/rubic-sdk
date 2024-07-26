@@ -17,6 +17,7 @@ export class LifiApiService {
         toToken: string,
         fromAmount: string,
         fromAddress: string,
+        toAddress: string,
         slippage: number
     ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {
         const result = await Injector.httpClient.get<{
@@ -30,6 +31,7 @@ export class LifiApiService {
                 toToken,
                 fromAmount,
                 fromAddress,
+                toAddress,
                 slippage,
                 integrator: 'rubic'
             },
