@@ -16,7 +16,7 @@ export const rangoApiBlockchainNames: Record<RangoSupportedBlockchain, string> =
     [BLOCKCHAIN_NAME.METIS]: 'METIS',
     [BLOCKCHAIN_NAME.ZK_SYNC]: 'ZKSYNC',
     [BLOCKCHAIN_NAME.LINEA]: 'LINEA',
-    [BLOCKCHAIN_NAME.FANTOM]: 'FANTOM',
+    // [BLOCKCHAIN_NAME.FANTOM]: 'FANTOM',
     [BLOCKCHAIN_NAME.BLAST]: 'BLAST',
     [BLOCKCHAIN_NAME.SCROLL]: 'SCROLL'
 };
