@@ -26,7 +26,7 @@ import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/p
 import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-trade-struct';
 import { OneInchApiService } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/one-inch-api-service';
 import { OneInchTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/one-inch-trade';
-import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/chains/lifi-trade';
+
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
@@ -37,6 +37,7 @@ import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/provi
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
 
 export class OneInchProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
@@ -221,7 +222,7 @@ export class OneInchProvider extends AggregatorOnChainProvider {
     ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-            const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
+            const gasLimit = await LifiEvmOnChainTrade.getGasLimit(lifiTradeStruct);
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;

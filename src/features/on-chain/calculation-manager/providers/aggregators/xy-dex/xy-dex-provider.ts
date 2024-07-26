@@ -15,7 +15,6 @@ import { XyQuoteResponse } from 'src/features/common/providers/xy/models/xy-quot
 import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { xySupportedBlockchains } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/chains/lifi-trade';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/models/xy-dex-trade-struct';
 import { XyDexTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-trade';
@@ -31,6 +30,7 @@ import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/provi
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
+import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
 
 export class XyDexProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions = evmProviderDefaultOptions;
@@ -136,7 +136,7 @@ export class XyDexProvider extends AggregatorOnChainProvider {
     ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-            const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
+            const gasLimit = await LifiEvmOnChainTrade.getGasLimit(lifiTradeStruct);
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;
