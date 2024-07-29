@@ -7,10 +7,8 @@ import {
     TONAPI_API_KEY,
     TONAPI_API_URL
 } from 'src/core/blockchain/services/constants/ton-constants';
-import { isChangenowReceiverAddressCorrect } from 'src/core/blockchain/utils/changenow-receiver-address-validator';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { changenowApiBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 
 @staticImplements<TypedWeb3Pure>()
 export class TonWeb3Pure {
@@ -29,11 +27,7 @@ export class TonWeb3Pure {
     }
 
     public static async isAddressCorrect(address: string): Promise<boolean> {
-        return isChangenowReceiverAddressCorrect(
-            address,
-            changenowApiBlockchain.TON,
-            /^(EQ|UQ)[0-9a-zA-Z-_!]{46}$/
-        );
+        return /^(EQ|UQ)[0-9a-zA-Z-_!]{46}$/.test(address);
     }
 
     /**
