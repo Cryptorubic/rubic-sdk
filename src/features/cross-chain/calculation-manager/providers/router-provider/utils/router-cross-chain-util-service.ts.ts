@@ -1,4 +1,5 @@
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { Injector } from 'src/core/injector/injector';
 
@@ -19,5 +20,16 @@ export class RouterCrossChainUtilService {
         }
 
         return address;
+    }
+
+    public static getBlockchainId(blockchain: BlockchainName): string {
+        if (blockchain === BLOCKCHAIN_NAME.TRON) {
+            return '728126428';
+        }
+        if (blockchain === BLOCKCHAIN_NAME.SOLANA) {
+            return 'solana';
+        }
+
+        return blockchainId[blockchain].toString();
     }
 }

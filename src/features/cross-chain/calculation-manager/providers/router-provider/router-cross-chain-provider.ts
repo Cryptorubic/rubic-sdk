@@ -1,14 +1,9 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { RouterQuoteResponseConfig } from 'src/features/common/providers/router/models/router-quote-response-config';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
@@ -56,11 +51,8 @@ export class RouterCrossChainProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
-            const srcChainId = blockchainId[from.blockchain];
-            const dstChainId =
-                toBlockchain === BLOCKCHAIN_NAME.SOLANA
-                    ? 'solana'
-                    : blockchainId[toToken.blockchain];
+            const srcChainId = RouterCrossChainUtilService.getBlockchainId(fromBlockchain);
+            const dstChainId = RouterCrossChainUtilService.getBlockchainId(toBlockchain);
 
             const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
@@ -85,9 +77,9 @@ export class RouterCrossChainProvider extends CrossChainProvider {
             const routerQuoteConfig = await RouterApiService.getQuote({
                 amount: fromWithoutFee.stringWeiAmount,
                 fromTokenAddress: from.isNative ? NATIVE_TOKEN_ADDRESS : srcTokenAddress,
-                fromTokenChainId: srcChainId.toString(),
+                fromTokenChainId: srcChainId,
                 toTokenAddress: toToken.isNative ? NATIVE_TOKEN_ADDRESS : dstTokenAddress,
-                toTokenChainId: dstChainId.toString(),
+                toTokenChainId: dstChainId,
                 slippageTolerance: options.slippageTolerance * 100
             });
             const dstTokenAmount = new BigNumber(routerQuoteConfig.destination.tokenAmount);
