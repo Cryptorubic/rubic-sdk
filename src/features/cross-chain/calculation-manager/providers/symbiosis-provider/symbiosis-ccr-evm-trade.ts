@@ -329,9 +329,6 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
         if (this.from.blockchain === 'BAHAMUT' || this.to.blockchain === 'BAHAMUT') {
             checkUnsupportedReceiverAddress(receiverAddress, this.walletAddress);
         }
-        if (!BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)) {
-            await this.checkReceiverAddress(receiverAddress, true);
-        }
 
         const params: SymbiosisSwappingParams = {
             ...this.swappingParams,
