@@ -42,7 +42,7 @@ import { SymbiosisCrossChainSupportedBlockchain } from './models/symbiosis-cross
 /**
  * Calculated Symbiosis cross-chain trade.
  */
-export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
+export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
     private readonly swappingParams: SymbiosisSwappingParams;
 
     /** @internal */
@@ -55,7 +55,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
-        const trade = new SymbiosisCrossChainTrade(
+        const trade = new SymbiosisEvmCcrTrade(
             {
                 from,
                 to: toToken,
@@ -157,7 +157,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
-        this.onChainSubtype = SymbiosisCrossChainTrade.getSubtype(
+        this.onChainSubtype = SymbiosisEvmCcrTrade.getSubtype(
             crossChainTrade.tradeType,
             crossChainTrade.to.blockchain
         );
@@ -327,8 +327,12 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const walletAddress = this.walletAddress;
         if (this.from.blockchain === 'BAHAMUT' || this.to.blockchain === 'BAHAMUT') {
-            await checkUnsupportedReceiverAddress(receiverAddress, this.walletAddress);
+            checkUnsupportedReceiverAddress(receiverAddress, this.walletAddress);
         }
+        if (!BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)) {
+            await this.checkReceiverAddress(receiverAddress, true);
+        }
+
         const params: SymbiosisSwappingParams = {
             ...this.swappingParams,
             from: walletAddress,
