@@ -27,7 +27,6 @@ import {
     SymbiosisToken,
     SymbiosisTokenAmount
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/constants';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import {
@@ -83,8 +82,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const fromAddress =
                 options.fromAddress ||
                 this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
-                FAKE_WALLET_ADDRESS ||
-                oneinchApiParams.nativeAddress;
+                FAKE_WALLET_ADDRESS;
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -299,6 +297,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     ): string {
         if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN && !receiverAddress) {
             return 'bc1qvyf8ufqpeyfe6vshfxdrr970rkqfphgz28ulhr';
+        }
+        // @TODO add rubic-mock address
+        if (toBlockchain === BLOCKCHAIN_NAME.TON && !receiverAddress) {
+            return 'UQATSC4TXAqjgLswuSEDVTIGmPG_kNnUTDhrTiIILVmymoQA';
         }
 
         return receiverAddress || fromAddress;
