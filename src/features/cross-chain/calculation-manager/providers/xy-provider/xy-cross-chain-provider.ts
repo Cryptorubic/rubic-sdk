@@ -221,8 +221,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
         if (transitFromAddress) {
             routePath.push({
                 type: 'on-chain',
-                // @TODO provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
-                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
                 path: [fromToken, fromTokenAmount]
             });
         }
@@ -234,8 +233,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
         if (transitToAddress) {
             routePath.push({
                 type: 'on-chain',
-                // @TODO provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
-                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
                 path: [toTokenAmount, toToken]
             });
         }
