@@ -3,6 +3,7 @@ import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/comm
 import { PriceTokenAmount } from 'src/common/tokens';
 import { getGasOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -197,7 +198,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -230,7 +231,6 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                     [this.paymentInfo.payinAddress, this.from.stringWeiAmount],
                     {
                         onTransactionHash,
-                        gas: gasLimit,
                         gasPriceOptions
                     }
                 );
@@ -288,16 +288,24 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             config.data = '0x';
             config.to = this.paymentInfo.payinAddress;
         } else {
-            const encodedConfig = EvmWeb3Pure.encodeMethodCall(
-                this.from.address,
-                ERC20_TOKEN_ABI,
-                'transfer',
-                [this.paymentInfo.payinAddress, this.from.stringWeiAmount],
-                '0'
-            );
-            config.value = '0';
-            config.to = this.from.address;
-            config.data = encodedConfig.data;
+            const blockchainType = BlockchainsInfo.getChainType(this.from.blockchain);
+
+            if (blockchainType === CHAIN_TYPE.EVM) {
+                const encodedConfig = EvmWeb3Pure.encodeMethodCall(
+                    this.from.address,
+                    ERC20_TOKEN_ABI,
+                    'transfer',
+                    [this.paymentInfo.payinAddress, this.from.stringWeiAmount],
+                    '0'
+                );
+                config.value = '0';
+                config.to = this.from.address;
+                config.data = encodedConfig.data;
+            } else {
+                config.value = '0';
+                config.data = '0x';
+                config.to = this.paymentInfo.payinAddress;
+            }
         }
 
         return { config, amount: toAmountWei };

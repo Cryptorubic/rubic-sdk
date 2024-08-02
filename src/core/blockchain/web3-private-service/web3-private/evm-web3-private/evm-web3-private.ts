@@ -11,7 +11,7 @@ import {
 } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
 import { getGasOptions } from 'src/common/utils/options';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
@@ -146,7 +146,7 @@ export class EvmWeb3Private extends Web3Private {
      */
     public async trySendTransaction(
         toAddress: string,
-        options: EvmTransactionOptions = {}
+        options: EvmTransactionOptions
     ): Promise<TransactionReceipt> {
         try {
             const gaslessParams = {
@@ -162,7 +162,7 @@ export class EvmWeb3Private extends Web3Private {
             const gasfulParams = {
                 ...gaslessParams,
                 ...getGasOptions(options),
-                gas: Web3Private.stringifyAmount(gas, 1.05)
+                gas: Web3Private.stringifyAmount(gas, options?.gasLimitRatio || 1.05)
             };
 
             try {
@@ -179,7 +179,7 @@ export class EvmWeb3Private extends Web3Private {
             return this.sendTransaction(toAddress, sendParams);
         } catch (err) {
             console.debug('Call tokens transfer error', err);
-            const shouldIgnore = this.shouldIgnoreError(err);
+            const shouldIgnore = await this.shouldIgnoreError(err);
             if (shouldIgnore) {
                 return this.sendTransaction(toAddress, options);
             }
@@ -282,7 +282,10 @@ export class EvmWeb3Private extends Web3Private {
                 sendParams
             );
         } catch (err) {
-            if ((allowError && allowError(err as Web3Error)) || this.shouldIgnoreError(err)) {
+            if (
+                (allowError && allowError(err as Web3Error)) ||
+                (await this.shouldIgnoreError(err))
+            ) {
                 return this.executeContractMethod(
                     contractAddress,
                     contractAbi,
@@ -296,7 +299,14 @@ export class EvmWeb3Private extends Web3Private {
         }
     }
 
-    private shouldIgnoreError(error: Web3Error): boolean {
+    private async shouldIgnoreError(error: Web3Error): Promise<boolean> {
+        if (
+            error.message === 'Low native value' &&
+            (await this.getBlockchainName()) === BLOCKCHAIN_NAME.MANTLE
+        ) {
+            return true;
+        }
+
         const ignoreCallErrors = [
             'STF',
             'execution reverted: ERC20: transfer amount exceeds allowance',

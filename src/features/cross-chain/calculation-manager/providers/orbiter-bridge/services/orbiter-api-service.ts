@@ -1,6 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
@@ -8,8 +6,10 @@ import { TxStatusData } from 'src/features/common/status-manager/models/tx-statu
 import { ORBITER_API_ENDPOINT } from '../constants/orbiter-api';
 import { ORBITER_OP_STATUS, ORBITER_STATUS } from '../models/orbiter-api-common-types';
 import { OrbiterQuoteConfig, OrbiterQuoteConfigsResponse } from '../models/orbiter-api-quote-types';
-import { OrbiterStatusResponse } from '../models/orbiter-api-status-types';
-import { OrbiterUtils } from './orbiter-utils';
+import {
+    OrbiterReceiveAmountResponse,
+    OrbiterStatusResponse
+} from '../models/orbiter-api-status-types';
 
 export class OrbiterApiService {
     private static dealerId: string | null = null;
@@ -23,13 +23,22 @@ export class OrbiterApiService {
         return result;
     }
 
-    public static calculateAmount(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        config: OrbiterQuoteConfig
-    ): BigNumber {
-        const tradingFee = OrbiterUtils.getTradingFee(from, config);
-
-        return from.tokenAmount.minus(tradingFee).minus(config.withholdingFee);
+    public static async getReceiveAmount(request: {
+        line: string;
+        value: string;
+    }): Promise<BigNumber> {
+        const nonce = Math.round(Math.random() * 10 ** 4).toString();
+        const response = await Injector.httpClient.get<OrbiterReceiveAmountResponse>(
+            `${ORBITER_API_ENDPOINT}/routers/simulation/receiveAmount`,
+            {
+                params: {
+                    ...request,
+                    ...(this.dealerId && { dealerId: this.dealerId }),
+                    nonce
+                }
+            }
+        );
+        return new BigNumber(response.result.receiveAmount);
     }
 
     public static async getTxStatus(txHash: string): Promise<TxStatusData> {

@@ -194,8 +194,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                             providerRouter: tx.to!,
                             providerGateway: approveTo
                         },
-                        ...(toBlockchain === BLOCKCHAIN_NAME.MANTLE &&
-                            rewards.length && { promotions: this.getPromotions(rewards) })
+                        ...(rewards?.length && { promotions: this.getPromotions(rewards) })
                     },
                     options.providerAddress,
                     await this.getRoutePath(from, to, route)

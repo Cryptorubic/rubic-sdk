@@ -15,6 +15,7 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -250,7 +251,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -270,7 +271,6 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 data,
                 value,
                 onTransactionHash,
-                gas: gasLimit,
                 gasPriceOptions
             });
 
@@ -325,6 +325,9 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const walletAddress = this.walletAddress;
+        if (this.from.blockchain === 'BAHAMUT' || this.to.blockchain === 'BAHAMUT') {
+            await checkUnsupportedReceiverAddress(receiverAddress, this.walletAddress);
+        }
         const params: SymbiosisSwappingParams = {
             ...this.swappingParams,
             from: walletAddress,
