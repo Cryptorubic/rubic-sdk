@@ -3,10 +3,10 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { evmProviderDefaultOptions } from '../../common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { UniswapV2CalculationOptions } from '../../common/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
 import { UniswapV2AbstractProvider } from '../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
-import { UNISWAP_V2_BAHAMUT_PROVIDER_CONFIGURATION } from './constants';
-import { UniswapV2BahamutTrade } from './uniswap-v2-bahamut-trade';
+import { SILK_SWAP_BAHAMUT_PROVIDER_CONFIGURATION } from './constants';
+import { SilkSwapBahamutTrade } from './silk-swap-bahamut-trade';
 
-export class UniswapV2BahamutProvider extends UniswapV2AbstractProvider<UniswapV2BahamutTrade> {
+export class SilkSwapBahamutProvider extends UniswapV2AbstractProvider<SilkSwapBahamutTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.BAHAMUT;
 
     protected readonly defaultOptions: UniswapV2CalculationOptions = {
@@ -15,7 +15,7 @@ export class UniswapV2BahamutProvider extends UniswapV2AbstractProvider<UniswapV
         disableMultihops: false
     };
 
-    public readonly UniswapV2TradeClass = UniswapV2BahamutTrade;
+    public readonly UniswapV2TradeClass = SilkSwapBahamutTrade;
 
-    public readonly providerSettings = UNISWAP_V2_BAHAMUT_PROVIDER_CONFIGURATION;
+    public readonly providerSettings = SILK_SWAP_BAHAMUT_PROVIDER_CONFIGURATION;
 }
