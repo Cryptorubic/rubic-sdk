@@ -7,7 +7,7 @@ import { LifiTransactionRequest } from '../models/lifi-transaction-request';
 export class LifiApiService {
     private static LIFI_API_ENDPOINT = 'https://li.quest/v1';
 
-    public static LIFI_API_KEY =
+    private static LIFI_API_KEY =
         '0a1eec2c-b1bd-4dc1-81cf-c988f099c929.f5950d26-5955-4e21-9db2-77ad984ea575';
 
     public static async getQuote(
@@ -17,6 +17,7 @@ export class LifiApiService {
         toToken: string,
         fromAmount: string,
         fromAddress: string,
+        toAddress: string,
         slippage: number
     ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {
         const result = await Injector.httpClient.get<{
@@ -30,6 +31,7 @@ export class LifiApiService {
                 toToken,
                 fromAmount,
                 fromAddress,
+                toAddress,
                 slippage,
                 integrator: 'rubic'
             },

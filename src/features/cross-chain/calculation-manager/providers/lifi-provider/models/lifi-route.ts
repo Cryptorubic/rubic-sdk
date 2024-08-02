@@ -13,11 +13,11 @@ export interface Insurance {
 export declare const Orders: readonly ['RECOMMENDED', 'FASTEST', 'CHEAPEST', 'SAFEST'];
 export type Order = (typeof Orders)[number];
 export interface RoutesRequest {
-    fromChainId: number;
+    fromChainId: number | string;
     fromAmount: string;
     fromTokenAddress: string;
     fromAddress?: string;
-    toChainId: number;
+    toChainId: number | string;
     toTokenAddress: string;
     toAddress?: string;
     options?: RouteOptions;

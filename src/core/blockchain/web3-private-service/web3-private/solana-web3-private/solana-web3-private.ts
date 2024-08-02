@@ -1,4 +1,5 @@
 import { VersionedTransaction } from '@solana/web3.js';
+import { base64 } from 'ethers/lib/utils';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
@@ -18,8 +19,11 @@ export class SolanaWeb3Private extends Web3Private {
     public async sendTransaction(options: SolanaTransactionOptions = {}): Promise<string> {
         try {
             const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SOLANA);
+            const decodedData = options.data!.startsWith('0x')
+                ? Buffer.from(options.data!.slice(2), 'hex')
+                : base64.decode(options.data!);
 
-            const tx = VersionedTransaction.deserialize(Buffer.from(options.data!.slice(2), 'hex'));
+            const tx = VersionedTransaction.deserialize(decodedData);
             const { blockhash } = await web3Public.getRecentBlockhash();
             tx.message.recentBlockhash = blockhash;
 
