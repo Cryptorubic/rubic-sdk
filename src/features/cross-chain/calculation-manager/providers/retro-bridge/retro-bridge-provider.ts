@@ -15,6 +15,7 @@ import {
     RetroBridgeSupportedBlockchain,
     retroBridgeSupportedBlockchain
 } from './constants/retro-bridge-supported-blockchain';
+import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
 import { RetroBridgeTrade } from './retro-bridge-trade';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
 
@@ -46,8 +47,7 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
-
-            const retroBridgeQuoteConfig = await RetroBridgeApiService.getQuote({
+            const quoteSendParams: RetroBridgeQuoteSendParams = {
                 source_chain: fromWithoutFee.blockchain,
                 destination_chain: toToken.blockchain,
                 asset_from: from.symbol,
@@ -56,7 +56,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
                     fromWithoutFee.stringWeiAmount,
                     fromWithoutFee.decimals
                 ).toFixed()
-            });
+            };
+            const retroBridgeQuoteConfig = await RetroBridgeApiService.getQuote(quoteSendParams);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -65,12 +66,13 @@ export class RetroBridgeProvider extends CrossChainProvider {
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await RetroBridgeTrade.getGasData(
-                        from,
-                        to,
-                        feeInfo,
-                        options.slippageTolerance,
-                        options.providerAddress
-                    )
+                          from,
+                          to,
+                          feeInfo,
+                          options.slippageTolerance,
+                          options.providerAddress,
+                          quoteSendParams
+                      )
                     : null;
             const routePath = await this.getRoutePath(from, to);
             const trade = new RetroBridgeTrade(
@@ -80,7 +82,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
                     feeInfo,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: options.slippageTolerance,
-                    gasData
+                    gasData,
+                    quoteSendParams
                 },
                 options.providerAddress,
                 routePath

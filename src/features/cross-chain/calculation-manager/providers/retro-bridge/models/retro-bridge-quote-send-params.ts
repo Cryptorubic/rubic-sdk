@@ -4,7 +4,6 @@ export interface RetroBridgeQuoteSendParams {
     asset_from: string;
     asset_to: string;
     amount: string;
-    wallet_sender?: string;
 }
 
 export interface RetroBridgeQuoteResponse {
@@ -17,4 +16,13 @@ export interface RetroBridgeQuoteResponse {
     swap_fee_in_usd: number;
     full_fee: number;
     fee_asset: string;
+}
+
+export interface RetroBridgeTxSendParams extends RetroBridgeQuoteSendParams {
+    receiver_wallet: string;
+}
+
+export interface RetroBridgeTxResponse {
+    transaction_id: string;
+    hot_wallet_address: string;
 }
