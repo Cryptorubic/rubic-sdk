@@ -15,7 +15,7 @@ export class RouterApiService {
     private static readonly ROUTER_ENDPOINT =
         'https://api-beta.pathfinder.routerprotocol.com/api/v2';
 
-    private static readonly partnerId = 0;
+    private static readonly partnerId = 1;
 
     public static async getQuote(
         params: RouterQuoteSendParams

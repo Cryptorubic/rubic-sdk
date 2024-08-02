@@ -24,6 +24,7 @@ import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RouterCrossChainSupportedBlockchains } from './constants/router-cross-chain-supported-chains';
 import { RouterCrossChainUtilService } from './utils/router-cross-chain-util-service.ts';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 
 export class RouterCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
@@ -127,14 +128,29 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             options?.receiverAddress
         );
         try {
-            const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+
+            const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
+            const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
+            const toBlockchain = this.to.blockchain as RouterCrossChainSupportedBlockchains;
+            const receiverAddress =
+                await RouterCrossChainUtilService.checkAndConvertAddress(
+                    toBlockchain,
+                    options.receiverAddress || this.walletAddress
+                );
+            const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
+                {
+                    ...options,
+                    receiverAddress
+                },
+                {
                 walletAddress: this.walletAddress,
                 fromTokenAmount: this.from,
                 toTokenAmount: this.to,
                 srcChainTrade: null,
                 providerAddress: this.providerAddress,
                 type: `native:${this.type}`,
-                fromAddress: this.walletAddress
+                    fromAddress: this.walletAddress,
+                    toAddress: receivingAsset
             });
             const extraNativeFee = this.from.isNative
                 ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
