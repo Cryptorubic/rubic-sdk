@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.32.6",
+    "version": "5.32.9",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -83,7 +83,7 @@
         "@solflare-wallet/utl-sdk": "^1.4.0",
         "@viaprotocol/router-sdk": "^1.0.7",
         "assert": "^2.0.0",
-        "axios": "^0.26.1",
+        "axios": "^1.7.2",
         "bignumber.js": "9.1.0",
         "bitcoin-address-validation": "2.2.1",
         "browserify-zlib": "^0.2.0",
