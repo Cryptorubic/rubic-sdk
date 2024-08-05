@@ -14,7 +14,7 @@ export const rangoSupportedBlockchains = [
     BLOCKCHAIN_NAME.ZK_SYNC,
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.LINEA
-    // BLOCKCHAIN_NAME.BLAST
+    // BLOCKCHAIN_NAME.BLAST,
     // BLOCKCHAIN_NAME.SCROLL
 ] as const;
 
