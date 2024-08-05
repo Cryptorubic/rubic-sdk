@@ -1,6 +1,4 @@
-import { Web3Provider } from '@ethersproject/providers';
 import BigNumber from 'bignumber.js';
-import { ethers } from 'ethers';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -28,7 +26,6 @@ import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/
 import { RetroBridgeSupportedBlockchain } from './constants/retro-bridge-supported-blockchain';
 import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
-
 export class RetroBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
@@ -179,6 +176,10 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
     protected async getTransactionConfigAndAmount(
         receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        const needAuthWallet = await this.needAuthWallet();
+        if (needAuthWallet) {
+            throw new RubicSdkError('Need to authorize the wallet via authWallet method');
+        }
         const retroBridgeOrder = await RetroBridgeApiService.createTransaction(
             {
                 ...this.quoteSendParams,
@@ -189,15 +190,25 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         this.retroBridgeId = retroBridgeOrder.transaction_id;
         const transferAmount = this.from.stringWeiAmount;
 
-        const value = this.from.isNative ? transferAmount : '0';
+        const config: EvmEncodeConfig = { to: '', data: '', value: '' };
 
-        const config = EvmWeb3Pure.encodeMethodCall(
-            this.from.address,
-            ERC20_TOKEN_ABI,
-            'transfer',
-            [retroBridgeOrder.hot_wallet_address, transferAmount],
-            value
-        );
+        if (this.from.isNative) {
+            config.value = transferAmount;
+            config.data = '0x';
+            config.to = retroBridgeOrder.hot_wallet_address;
+        } else {
+            const value = this.from.isNative ? transferAmount : '0';
+            const encodedConfig = EvmWeb3Pure.encodeMethodCall(
+                this.from.address,
+                ERC20_TOKEN_ABI,
+                'transfer',
+                [retroBridgeOrder.hot_wallet_address, transferAmount],
+                value
+            );
+            config.value = encodedConfig.value;
+            config.to = encodedConfig.to;
+            config.data = encodedConfig.data;
+        }
 
         return { config, amount: this.to.stringWeiAmount };
     }
@@ -216,29 +227,18 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         try {
             const msg = await RetroBridgeApiService.checkWallet(this.walletAddress, this.chainType);
 
-            if (msg.toLowerCase() === 'success') {
-                return false;
-            }
-
-            return true;
+            return msg.toLowerCase() !== 'success';
         } catch {
             return true;
         }
     }
 
-    public async authWallet(
-        walletProvider: ethers.providers.ExternalProvider
-    ): Promise<never | void> {
-        const provider = new Web3Provider(walletProvider);
-
-        const signer = provider.getSigner();
-
+    public async authWallet(): Promise<never | void> {
         const signData = await RetroBridgeApiService.getMessageToAuthWallet();
 
         const signMessage = `${signData}\n${this.walletAddress}`;
 
-        const signature = await signer.signMessage(signMessage);
-
+        const signature = await this.web3Private.signMessage(signMessage);
         await RetroBridgeApiService.sendSignedMessage(
             this.walletAddress,
             signature,

@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
@@ -21,6 +20,8 @@ interface SignMessage {
 }
 export class RetroBridgeApiService {
     private static readonly RETRO_BRIDGE_API_ENDPOINT = 'https://backend.retrobridge.io/api';
+
+    private static API_KEY = 'rubic';
 
     public static async getTokenLimits(
         fromBlockchain: string,
@@ -71,7 +72,7 @@ export class RetroBridgeApiService {
         networkType: string
     ): Promise<never | void> {
         try {
-            await axios.post(
+            await Injector.httpClient.post(
                 `${this.RETRO_BRIDGE_API_ENDPOINT}/wallet_auth/message`,
                 {
                     wallet_address: walletAddress,
@@ -88,33 +89,34 @@ export class RetroBridgeApiService {
     }
 
     public static async checkWallet(walletAddress: string, networkType: string): Promise<string> {
-        const { data } = await axios.get<{ message: string }>(
+        const { message } = await Injector.httpClient.get<{ message: string }>(
             `${this.RETRO_BRIDGE_API_ENDPOINT}/wallet_auth/wallet/${walletAddress}`,
             {
                 headers: {
-                    ['network-type']: networkType
+                    'network-type': networkType
                 },
                 withCredentials: true
             }
         );
-        return data.message;
+        return message;
     }
 
     public static async createTransaction(
         params: RetroBridgeTxSendParams,
         networkType: string
     ): Promise<RetroBridgeTxResponse> {
-        const { data } = await axios.post<{ data: RetroBridgeTxResponse }>(
+        const { data } = await Injector.httpClient.post<{ data: RetroBridgeTxResponse }>(
             `${this.RETRO_BRIDGE_API_ENDPOINT}/bridge/execute`,
             params,
             {
                 headers: {
-                    ['network-type']: networkType
+                    'network-type': networkType,
+                    'api-key': this.API_KEY
                 },
                 withCredentials: true
             }
         );
-        return data.data;
+        return data;
     }
 
     public static async getTxStatus(transactionId: string): Promise<TxStatusData> {
