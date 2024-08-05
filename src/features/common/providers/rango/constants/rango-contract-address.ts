@@ -60,11 +60,11 @@ export const rangoContractAddresses: Record<RangoSupportedBlockchain, UniversalC
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
     },
-    // [BLOCKCHAIN_NAME.ZK_SYNC]: {
-    //     providerGateway: '0x13598FD0986D0E33c402f6907F05Acf720224527',
-    //     providerRouter: '0x13598FD0986D0E33c402f6907F05Acf720224527',
-    //     rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
-    // },
+    [BLOCKCHAIN_NAME.ZK_SYNC]: {
+        providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
+        providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
+    },
     [BLOCKCHAIN_NAME.BASE]: {
         providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',

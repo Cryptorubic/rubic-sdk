@@ -13,7 +13,7 @@ export const rangoApiSymbols: Record<RangoSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: 'ETH',
     [BLOCKCHAIN_NAME.AURORA]: 'ETH',
     [BLOCKCHAIN_NAME.BASE]: 'ETH',
-    // [BLOCKCHAIN_NAME.ZK_SYNC]: 'ETH',
+    [BLOCKCHAIN_NAME.ZK_SYNC]: 'ETH',
     [BLOCKCHAIN_NAME.LINEA]: 'ETH',
     [BLOCKCHAIN_NAME.METIS]: 'METIS'
     // [BLOCKCHAIN_NAME.FANTOM]: 'FTM',
