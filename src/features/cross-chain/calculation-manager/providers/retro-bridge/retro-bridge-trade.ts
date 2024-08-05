@@ -197,13 +197,12 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
             config.data = '0x';
             config.to = retroBridgeOrder.hot_wallet_address;
         } else {
-            const value = this.from.isNative ? transferAmount : '0';
             const encodedConfig = EvmWeb3Pure.encodeMethodCall(
                 this.from.address,
                 ERC20_TOKEN_ABI,
                 'transfer',
                 [retroBridgeOrder.hot_wallet_address, transferAmount],
-                value
+                '0'
             );
             config.value = encodedConfig.value;
             config.to = encodedConfig.to;
