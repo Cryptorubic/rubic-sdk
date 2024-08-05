@@ -40,6 +40,8 @@ import { RubicStep } from 'src/features/cross-chain/calculation-manager/provider
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
 import { AbiItem } from 'web3-utils';
 
+import { CrossChainTrade } from '../common/cross-chain-trade';
+
 export class BridgersCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
 
@@ -167,37 +169,36 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                           )
                         : null;
 
-                return {
-                    trade: new EvmBridgersCrossChainTrade(
-                        {
-                            from: from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
-                            to: to as PriceTokenAmount<TronBlockchainName>,
-                            toTokenAmountMin,
-                            feeInfo,
-                            gasData,
-                            slippage: options.slippageTolerance
-                        },
-                        options.providerAddress,
-                        await this.getRoutePath(from, to)
-                    ),
-                    tradeType: this.type
-                };
-            }
-            return {
-                trade: new TronBridgersCrossChainTrade(
+                const evmTrade = new EvmBridgersCrossChainTrade(
                     {
-                        from: from as PriceTokenAmount<TronBlockchainName>,
-                        to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
+                        from: from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
+                        to: to as PriceTokenAmount<TronBlockchainName>,
                         toTokenAmountMin,
                         feeInfo,
-                        slippage: options.slippageTolerance,
-                        contractAddress: transactionData.contractAddress
+                        gasData,
+                        slippage: options.slippageTolerance
                     },
                     options.providerAddress,
                     await this.getRoutePath(from, to)
-                ),
-                tradeType: this.type
-            };
+                );
+
+                return this.getCalculationResponse(from, transactionData, evmTrade);
+            }
+
+            const tronTrade = new TronBridgersCrossChainTrade(
+                {
+                    from: from as PriceTokenAmount<TronBlockchainName>,
+                    to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
+                    toTokenAmountMin,
+                    feeInfo,
+                    slippage: options.slippageTolerance,
+                    contractAddress: transactionData.contractAddress
+                },
+                options.providerAddress,
+                await this.getRoutePath(from, to)
+            );
+
+            return this.getCalculationResponse(from, transactionData, tronTrade);
         } catch (err: unknown) {
             return {
                 trade: null,
@@ -205,6 +206,32 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         }
+    }
+
+    private getCalculationResponse(
+        from: PriceTokenAmount,
+        transactionData: BridgersQuoteResponse['data']['txData'],
+        trade: CrossChainTrade<EvmEncodeConfig | TronTransactionConfig>
+    ): CalculationResult<EvmEncodeConfig | TronTransactionConfig> {
+        if (from.tokenAmount.lt(transactionData.depositMin)) {
+            return {
+                trade,
+                error: new MinAmountError(new BigNumber(transactionData.depositMin), from.symbol),
+                tradeType: this.type
+            };
+        }
+        if (from.tokenAmount.gt(transactionData.depositMax)) {
+            return {
+                trade,
+                error: new MaxAmountError(new BigNumber(transactionData.depositMax), from.symbol),
+                tradeType: this.type
+            };
+        }
+
+        return {
+            trade,
+            tradeType: this.type
+        };
     }
 
     protected override async getFeeInfo(

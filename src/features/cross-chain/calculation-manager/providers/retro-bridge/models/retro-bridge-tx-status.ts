@@ -15,5 +15,7 @@ export type RetroBridgeTxStatus =
 export interface RetroBridgeStatusResponse {
     data: {
         status: RetroBridgeTxStatus;
+        destination_tx_hash: string;
+        source_tx_hash: string;
     };
 }

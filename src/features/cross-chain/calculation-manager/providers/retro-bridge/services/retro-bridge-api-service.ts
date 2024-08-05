@@ -1,4 +1,7 @@
+import axios from 'axios';
+import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
+import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 
 import {
     RetroBridgeQuoteResponse,
@@ -6,6 +9,10 @@ import {
     RetroBridgeTxResponse,
     RetroBridgeTxSendParams
 } from '../models/retro-bridge-quote-send-params';
+import {
+    RETRO_BRIDGE_TX_STATUS,
+    RetroBridgeStatusResponse
+} from '../models/retro-bridge-tx-status';
 
 interface SignMessage {
     message: {
@@ -14,8 +21,6 @@ interface SignMessage {
 }
 export class RetroBridgeApiService {
     private static readonly RETRO_BRIDGE_API_ENDPOINT = 'https://backend.retrobridge.io/api';
-
-    private static readonly API_KEY = ' ';
 
     public static async getTokenLimits(
         fromBlockchain: string,
@@ -64,54 +69,77 @@ export class RetroBridgeApiService {
         walletAddress: string,
         signature: string,
         networkType: string
-    ): Promise<string> {
-        const { data } = await Injector.httpClient.post<{
-            data: {
-                network_type: string;
-                token: string;
-            };
-        }>(`${this.RETRO_BRIDGE_API_ENDPOINT}/wallet_auth/message`, {
-            wallet_address: walletAddress,
-            network_type: networkType,
-            signature
-        });
-
-        return `${data.network_type}=${data.token}`;
+    ): Promise<never | void> {
+        try {
+            await axios.post(
+                `${this.RETRO_BRIDGE_API_ENDPOINT}/wallet_auth/message`,
+                {
+                    wallet_address: walletAddress,
+                    network_type: networkType,
+                    signature
+                },
+                {
+                    withCredentials: true
+                }
+            );
+        } catch (err) {
+            console.error(err);
+        }
     }
 
-    public static async checkWallet(
-        walletAddress: string,
-        networkType: string,
-        walletCookie: string
-    ): Promise<string> {
-        const { message } = await Injector.httpClient.get<{ message: string }>(
+    public static async checkWallet(walletAddress: string, networkType: string): Promise<string> {
+        const { data } = await axios.get<{ message: string }>(
             `${this.RETRO_BRIDGE_API_ENDPOINT}/wallet_auth/wallet/${walletAddress}`,
             {
                 headers: {
-                    'network-type': networkType,
-                    Сookie: walletCookie
-                }
+                    ['network-type']: networkType
+                },
+                withCredentials: true
             }
         );
-        return message;
+        return data.message;
     }
 
     public static async createTransaction(
         params: RetroBridgeTxSendParams,
-        networkType: string,
-        walletCookie: string
+        networkType: string
     ): Promise<RetroBridgeTxResponse> {
-        const { data } = await Injector.httpClient.post<{ data: RetroBridgeTxResponse }>(
+        const { data } = await axios.post<{ data: RetroBridgeTxResponse }>(
             `${this.RETRO_BRIDGE_API_ENDPOINT}/bridge/execute`,
             params,
             {
                 headers: {
-                    'api-key': this.API_KEY,
-                    'network-type': networkType,
-                    Сookie: walletCookie
-                }
+                    ['network-type']: networkType
+                },
+                withCredentials: true
             }
         );
-        return data;
+        return data.data;
+    }
+
+    public static async getTxStatus(transactionId: string): Promise<TxStatusData> {
+        const { data } = await Injector.httpClient.get<RetroBridgeStatusResponse>(
+            `${this.RETRO_BRIDGE_API_ENDPOINT}/bridge/${transactionId}/info`
+        );
+
+        if (data.status === RETRO_BRIDGE_TX_STATUS.COMPLETED) {
+            return {
+                hash: data.destination_tx_hash,
+                status: TX_STATUS.PENDING
+            };
+        }
+        if (
+            data.status === RETRO_BRIDGE_TX_STATUS.SEND_FAILED ||
+            data.status === RETRO_BRIDGE_TX_STATUS.REJECTED
+        ) {
+            return {
+                hash: data.source_tx_hash,
+                status: TX_STATUS.FAIL
+            };
+        }
+        return {
+            hash: null,
+            status: TX_STATUS.PENDING
+        };
     }
 }

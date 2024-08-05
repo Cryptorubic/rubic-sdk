@@ -68,6 +68,7 @@ import { MesonCcrApiService } from '../calculation-manager/providers/meson-provi
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
 import { OwlToApiService } from '../calculation-manager/providers/owl-to-bridge/services/owl-to-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
+import { RetroBridgeApiService } from '../calculation-manager/providers/retro-bridge/services/retro-bridge-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
 /**
@@ -99,7 +100,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getLayerZeroDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getLayerZeroDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus
     };
 
     /**
@@ -725,5 +726,12 @@ export class CrossChainStatusManager {
         const txStatusData = await getEddyBridgeDstSwapStatus(data);
 
         return txStatusData;
+    }
+
+    private async getRetroBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.retroBridgeId) {
+            throw new RubicSdkError('Must provide Retro bridge transaction ID');
+        }
+        return await RetroBridgeApiService.getTxStatus(data.retroBridgeId);
     }
 }

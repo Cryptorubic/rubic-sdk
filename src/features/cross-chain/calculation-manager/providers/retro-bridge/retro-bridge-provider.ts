@@ -31,7 +31,7 @@ export class RetroBridgeProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const useProxy = options?.useProxy?.[this.type] ?? true;
+        const useProxy = false;
         const fromBlockchain = from.blockchain as RetroBridgeSupportedBlockchain;
         try {
             await this.checkMinMaxAmount(from, toToken);
