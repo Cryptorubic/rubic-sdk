@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -24,7 +25,6 @@ import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RouterCrossChainSupportedBlockchains } from './constants/router-cross-chain-supported-chains';
 import { RouterCrossChainUtilService } from './utils/router-cross-chain-util-service.ts';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 
 export class RouterCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
@@ -128,30 +128,29 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             options?.receiverAddress
         );
         try {
-
             const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
             const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
             const toBlockchain = this.to.blockchain as RouterCrossChainSupportedBlockchains;
-            const receiverAddress =
-                await RouterCrossChainUtilService.checkAndConvertAddress(
-                    toBlockchain,
-                    options.receiverAddress || this.walletAddress
-                );
+            const receiverAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
+                toBlockchain,
+                options.receiverAddress || this.walletAddress
+            );
             const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
                 {
                     ...options,
                     receiverAddress
                 },
                 {
-                walletAddress: this.walletAddress,
-                fromTokenAmount: this.from,
-                toTokenAmount: this.to,
-                srcChainTrade: null,
-                providerAddress: this.providerAddress,
-                type: `native:${this.type}`,
+                    walletAddress: this.walletAddress,
+                    fromTokenAmount: this.from,
+                    toTokenAmount: this.to,
+                    srcChainTrade: null,
+                    providerAddress: this.providerAddress,
+                    type: `native:${this.type}`,
                     fromAddress: this.walletAddress,
                     toAddress: receivingAsset
-            });
+                }
+            );
             const extraNativeFee = this.from.isNative
                 ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
                 : new BigNumber(providerValue).toFixed();
@@ -200,7 +199,8 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
 
         const toAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
             toBlockchain,
-            receiverAddress || this.walletAddress
+            receiverAddress || this.walletAddress,
+            this.to.address
         );
         const { txn, destination } = await RouterApiService.getSwapTx({
             ...this.routerQuoteConfig,
