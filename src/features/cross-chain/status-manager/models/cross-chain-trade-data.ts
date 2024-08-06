@@ -59,4 +59,9 @@ export interface CrossChainTradeData {
      * Taiko bridge transaction ID.
      */
     taikoTransactionId?: string;
+
+    /**
+     * Retro bridge transaction id.
+     */
+    retroBridgeId?: string;
 }
