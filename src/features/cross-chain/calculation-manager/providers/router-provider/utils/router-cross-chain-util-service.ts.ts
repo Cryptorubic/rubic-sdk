@@ -1,12 +1,10 @@
 import { RubicSdkError } from 'src/common/errors';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/solana-web3-public/solana-web3-public';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { Injector } from 'src/core/injector/injector';
 
-import { routerCrossChainContractAddress } from '../constants/router-cross-chain-contract-address';
 import { RouterCrossChainSupportedBlockchains } from '../constants/router-cross-chain-supported-chains';
 
 export class RouterCrossChainUtilService {
@@ -56,22 +54,5 @@ export class RouterCrossChainUtilService {
         }
 
         return blockchainId[blockchain].toString();
-    }
-
-    public static checkSupportedContractAddress(
-        fromBlockchain: RouterCrossChainSupportedBlockchains,
-        allowanceAddress: string
-    ): boolean {
-        if (
-            fromBlockchain === BLOCKCHAIN_NAME.TRON ||
-            fromBlockchain === BLOCKCHAIN_NAME.SOLANA ||
-            fromBlockchain === BLOCKCHAIN_NAME.BOBA
-        ) {
-            return true;
-        }
-
-        return routerCrossChainContractAddress[fromBlockchain]!.some(contractAddress =>
-            compareAddresses(contractAddress, allowanceAddress)
-        );
     }
 }
