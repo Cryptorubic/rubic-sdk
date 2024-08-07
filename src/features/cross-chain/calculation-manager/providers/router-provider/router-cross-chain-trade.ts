@@ -128,17 +128,24 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             options?.receiverAddress
         );
         try {
+            const isValidContractAddress =
+                RouterCrossChainUtilService.checkSupportedContractAddress(
+                    this.from.blockchain as RouterCrossChainSupportedBlockchains,
+                    to
+                );
+            if (!isValidContractAddress) {
+                throw new RubicSdkError('Invalid Router contract address');
+            }
             const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
             const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
             const toBlockchain = this.to.blockchain as RouterCrossChainSupportedBlockchains;
             let receiverAddress = '';
             if (!isEvmDestination && options.receiverAddress) {
                 receiverAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
-                toBlockchain,
+                    toBlockchain,
                     options?.receiverAddress
-            );
-            }
-            else {
+                );
+            } else {
                 receiverAddress = options?.receiverAddress || this.walletAddress;
             }
 
