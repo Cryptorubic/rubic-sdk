@@ -131,10 +131,17 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
             const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
             const toBlockchain = this.to.blockchain as RouterCrossChainSupportedBlockchains;
-            const receiverAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
+            let receiverAddress = '';
+            if (!isEvmDestination && options.receiverAddress) {
+                receiverAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
                 toBlockchain,
-                options.receiverAddress || this.walletAddress
+                    options?.receiverAddress
             );
+            }
+            else {
+                receiverAddress = options?.receiverAddress || this.walletAddress;
+            }
+
             const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
                 {
                     ...options,
