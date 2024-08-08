@@ -1,11 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -55,12 +51,12 @@ export class RouterCrossChainProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
-            if (toBlockchain === BLOCKCHAIN_NAME.SOLANA && options.receiverAddress) {
-                await RouterCrossChainUtilService.checkAtaAddress(
-                    options.receiverAddress,
-                    toToken.address
-                );
-            }
+            // if (toBlockchain === BLOCKCHAIN_NAME.SOLANA && options.receiverAddress) {
+            //     await RouterCrossChainUtilService.checkAtaAddress(
+            //         options.receiverAddress,
+            //         toToken.address
+            //     );
+            // }
 
             const srcChainId = RouterCrossChainUtilService.getBlockchainId(fromBlockchain);
             const dstChainId = RouterCrossChainUtilService.getBlockchainId(toBlockchain);

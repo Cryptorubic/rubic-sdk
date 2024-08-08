@@ -19,17 +19,17 @@ export class RouterCrossChainUtilService {
     public static async checkAndConvertAddress(
         blockchain: RouterCrossChainSupportedBlockchains,
         address: string,
-        tokenAddress?: string
+        _tokenAddress?: string
     ): Promise<string> {
         if (blockchain === BLOCKCHAIN_NAME.TRON) {
             const tronHexAddress = await this.tronWeb3Public.convertTronAddressToHex(address);
             return `0x${tronHexAddress.slice(2)}`;
         }
 
-        if (blockchain === BLOCKCHAIN_NAME.SOLANA && tokenAddress) {
-            const ataAddress = await this.solanaWeb3Public.getAtaAddress(address, tokenAddress);
-            return ataAddress!;
-        }
+        // if (blockchain === BLOCKCHAIN_NAME.SOLANA && tokenAddress) {
+        //     const ataAddress = await this.solanaWeb3Public.getAtaAddress(address, tokenAddress);
+        //     return ataAddress!;
+        // }
 
         return address;
     }
@@ -49,9 +49,9 @@ export class RouterCrossChainUtilService {
         if (blockchain === BLOCKCHAIN_NAME.TRON) {
             return '728126428';
         }
-        if (blockchain === BLOCKCHAIN_NAME.SOLANA) {
-            return 'solana';
-        }
+        // if (blockchain === BLOCKCHAIN_NAME.SOLANA) {
+        //     return 'solana';
+        // }
 
         return blockchainId[blockchain].toString();
     }

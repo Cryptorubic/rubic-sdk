@@ -23,8 +23,8 @@ export const routerCrossChainSupportedChains = [
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.SCROLL,
     BLOCKCHAIN_NAME.TRON,
-    BLOCKCHAIN_NAME.AURORA,
-    BLOCKCHAIN_NAME.SOLANA
+    BLOCKCHAIN_NAME.AURORA
+    // BLOCKCHAIN_NAME.SOLANA
 ];
 
 export type RouterCrossChainSupportedBlockchains = (typeof routerCrossChainSupportedChains)[number];

@@ -134,11 +134,10 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             let receiverAddress = '';
             if (!isEvmDestination && options.receiverAddress) {
                 receiverAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
-                toBlockchain,
+                    toBlockchain,
                     options?.receiverAddress
-            );
-            }
-            else {
+                );
+            } else {
                 receiverAddress = options?.receiverAddress || this.walletAddress;
             }
 
