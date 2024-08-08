@@ -19,6 +19,10 @@ export const lifiCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.MODE,
     BLOCKCHAIN_NAME.SCROLL,
     BLOCKCHAIN_NAME.MANTLE
+    // BLOCKCHAIN_NAME.ROOTSTOCK,
+    // BLOCKCHAIN_NAME.CELO,
+    // BLOCKCHAIN_NAME.BLAST
+    // BLOCKCHAIN_NAME.AURORA
 ] as const;
 
 export type LifiCrossChainSupportedBlockchain = (typeof lifiCrossChainSupportedBlockchains)[number];
