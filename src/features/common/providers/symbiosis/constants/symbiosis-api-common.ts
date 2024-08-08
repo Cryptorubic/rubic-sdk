@@ -1,1 +1,1 @@
-export const SYMBIOSIS_API_ENDPOINT = 'https://api-v2.symbiosis.finance/crosschain';
+export const SYMBIOSIS_API_ENDPOINT = 'https://api.symbiosis.finance/crosschain';
