@@ -100,6 +100,18 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 DlnEvmTransactionResponse | DlnSolanaTransactionResponse
             >(requestParams);
 
+            const toAmount = new BigNumber(
+                debridgeResponse.estimation.dstChainTokenOut.maxTheoreticalAmount
+            );
+
+            if (toAmount.lt(0) || toAmount.eq(0)) {
+                return {
+                    error: new RubicSdkError('Received toAmount is less than 0'),
+                    trade: null,
+                    tradeType: this.type
+                };
+            }
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(
