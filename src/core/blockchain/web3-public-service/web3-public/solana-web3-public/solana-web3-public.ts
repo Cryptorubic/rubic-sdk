@@ -1,3 +1,8 @@
+import {
+    ASSOCIATED_TOKEN_PROGRAM_ID,
+    getAssociatedTokenAddress,
+    TOKEN_PROGRAM_ID
+} from '@solana/spl-token';
 import { BlockhashWithExpiryBlockHeight, Connection, PublicKey } from '@solana/web3.js';
 import { Client as TokenSdk } from '@solflare-wallet/utl-sdk';
 import BigNumber from 'bignumber.js';
@@ -198,5 +203,24 @@ export class SolanaWeb3Public extends Web3Public {
 
     public async getRecentBlockhash(): Promise<BlockhashWithExpiryBlockHeight> {
         return this.connection.getLatestBlockhash();
+    }
+
+    public async getAtaAddress(
+        walletAddress: string,
+        tokenAddress: string
+    ): Promise<string | null> {
+        const tokenKey = new PublicKey(tokenAddress);
+        const walletKey = new PublicKey(walletAddress);
+        const ataAddress = await getAssociatedTokenAddress(
+            tokenKey,
+            walletKey,
+            false,
+            TOKEN_PROGRAM_ID,
+            ASSOCIATED_TOKEN_PROGRAM_ID
+        );
+
+        const accountInfo = await this.connection.getAccountInfo(ataAddress);
+
+        return accountInfo ? ataAddress.toString() : null;
     }
 }
