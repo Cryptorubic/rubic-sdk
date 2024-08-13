@@ -147,7 +147,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         const type = rangoPath.swapperType === 'DEX' ? 'on-chain' : 'cross-chain';
 
         const provider = RangoUtils.getTradeTypeForRubic(
-            rangoPath.swapper.swapperGroup as RangoTradeType
+            rangoPath.swapper.swapperGroup as RangoTradeType,
+            type
         );
 
         const fromBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(

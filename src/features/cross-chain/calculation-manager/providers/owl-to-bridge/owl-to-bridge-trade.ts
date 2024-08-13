@@ -81,7 +81,6 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        // @TODO Add owl-to contract addresses
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
             : this.providerGateway;

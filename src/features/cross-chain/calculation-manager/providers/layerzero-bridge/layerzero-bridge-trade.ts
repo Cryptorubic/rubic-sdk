@@ -100,7 +100,7 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        const { onConfirm, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -120,7 +120,6 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
             const tx = await this.web3Private.trySendTransaction(to, {
                 data,
                 value,
-                gas: gasLimit,
                 gasPriceOptions
             });
 

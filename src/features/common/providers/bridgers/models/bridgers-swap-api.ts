@@ -21,4 +21,5 @@ export interface BridgersSwapResponse<
     data: {
         txData: T;
     };
+    resCode: number;
 }
