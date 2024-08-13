@@ -1,11 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
-import {
-    MaxAmountError,
-    NotSupportedBlockchain,
-    NotSupportedTokensError,
-    RubicSdkError
-} from 'src/common/errors';
+import { MaxAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
@@ -58,9 +53,6 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new NotSupportedBlockchain();
-        }
         try {
             const isSupportedPools = this.checkSupportedPools(from, toToken);
             if (!isSupportedPools) {
