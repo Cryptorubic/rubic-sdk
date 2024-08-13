@@ -20,7 +20,10 @@ import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/
 import { stargateV2BlockchainSupportedPools } from './constants/stargate-v2-blockchain-supported-pools';
 import { StargateV2BridgeToken } from './constants/stargate-v2-bridge-token';
 import { stargateV2ChainIds } from './constants/stargate-v2-chain-id';
-import { stargateV2ContractAddress } from './constants/stargate-v2-contract-address';
+import {
+    chainsWithoutPoolBalanceMethodOnContract,
+    stargateV2ContractAddress
+} from './constants/stargate-v2-contract-address';
 import {
     StargateV2SupportedBlockchains,
     stargateV2SupportedBlockchains
@@ -201,6 +204,10 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
         tokenAddress: string,
         amountToSend: BigNumber
     ): Promise<MaxAmountError | null> {
+        if (chainsWithoutPoolBalanceMethodOnContract.some(chain => chain === fromBlockchain)) {
+            return null;
+        }
+
         const tokenSymbol = stargateV2TokenAddress[
             fromBlockchain as StargateV2SupportedBlockchains
         ][tokenAddress] as StargateV2BridgeToken;
@@ -210,7 +217,8 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
 
         const maxAmount = await Injector.web3PublicService
             .getWeb3Public(fromBlockchain)
-            .callContractMethod(contractAddress, stargateV2PoolBalanceAbi, 'poolBalance');
+            .callContractMethod(contractAddress, stargateV2PoolBalanceAbi, 'poolBalance')
+            .catch(() => '0');
         const maxAmounSend = new BigNumber(maxAmount);
 
         if (amountToSend.gt(maxAmounSend)) {
