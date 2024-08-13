@@ -100,10 +100,14 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 DlnEvmTransactionResponse | DlnSolanaTransactionResponse
             >(requestParams);
 
+            const toAmount = new BigNumber(
+                debridgeResponse.estimation.dstChainTokenOut.maxTheoreticalAmount
+            );
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(
-                    debridgeResponse.estimation.dstChainTokenOut.maxTheoreticalAmount,
+                    toAmount.gt(0) ? toAmount : new BigNumber(0),
                     debridgeResponse.estimation.dstChainTokenOut.decimals
                 )
             });
