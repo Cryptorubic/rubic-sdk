@@ -22,6 +22,7 @@ import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service
 import { LifiUtilsService } from 'src/features/common/providers/lifi/lifi-utils-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
+import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
@@ -89,6 +90,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus,
@@ -97,9 +99,9 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ARCHON_BRIDGE]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.MESON]: this.getMesonDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE]: this.getOwlToDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getLayerZeroDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus
     };
 
     /**
@@ -725,6 +727,12 @@ export class CrossChainStatusManager {
 
     private async getEddyBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const txStatusData = await getEddyBridgeDstSwapStatus(data);
+
+        return txStatusData;
+    }
+
+    private async getRouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const txStatusData = await RouterApiService.getTxStatus(data);
 
         return txStatusData;
     }

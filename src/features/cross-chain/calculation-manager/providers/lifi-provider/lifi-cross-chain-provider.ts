@@ -363,9 +363,9 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM ||
             toBlockchain === BLOCKCHAIN_NAME.ETHEREUM
         ) {
-            return new BigNumber(20);
+            return new BigNumber(2);
         }
-        return new BigNumber(10);
+        return new BigNumber(1);
     }
 
     private async getGasData(
