@@ -16,14 +16,7 @@ export class NativeRouterApiService {
         const result = await Injector.httpClient.get<NativeRouterQuoteResponse>(
             `${this.NATIVE_ROUTER_ENDPOINT}/firm-quote`,
             {
-                params: {
-                    chain: request.chain,
-                    token_in: request.tokenIn,
-                    token_out: request.tokenOut,
-                    from_address: request.fromAddress,
-                    amount: request.amount,
-                    slippage: request.slippage as number
-                },
+                params: { ...request },
                 headers: {
                     apiKey: this.NATIVE_ROUTER_API_KEY
                 }
