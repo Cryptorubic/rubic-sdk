@@ -25,7 +25,7 @@ import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
-    EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
+    EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
     TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS,
     TSS_ADDRESSES_EDDY_BRIDGE
 } from './constants/eddy-bridge-contract-addresses';
@@ -105,7 +105,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     protected get fromContractAddress(): string {
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN;
+            : EDDY_OMNI_CONTRACT_IN_ZETACHAIN;
     }
 
     protected get methodName(): string {
@@ -189,7 +189,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         if (this.routingDirection === ERD.ANY_CHAIN_NATIVE_TO_ZETA_NATIVE) {
             const walletAddress = this.walletAddress || FAKE_WALLET_ADDRESS;
             let data =
-                EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN +
+                EDDY_OMNI_CONTRACT_IN_ZETACHAIN +
                 walletAddress.slice(2) +
                 wrappedZetaAddress.slice(2);
 
@@ -198,10 +198,10 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 to: TSS_ADDRESSES_EDDY_BRIDGE[this.fromBlockchain as TssAvailableEddyBridgeChain],
                 value: this.from.stringWeiAmount
             };
-        } else if (this.routingDirection === ERD.ZETA_NATIVE_TO_ANY_CHAIN_NATIVE) {
+        } else if (this.routingDirection === ERD.ZETA_NATIVE_TO_ANY_CHAIN_ALL) {
             const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.to.symbol];
             config = EvmWeb3Pure.encodeMethodCall(
-                EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
+                EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
                 EDDY_BRIDGE_ABI,
                 'transferZetaToConnectedChain',
                 ['0x', wrappedZetaAddress, destZrc20TokenAddress],
@@ -217,7 +217,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 destZrc20TokenAddress
             ];
             config = EvmWeb3Pure.encodeMethodCall(
-                EDDY_CONTRACT_ADDRESS_IN_ZETACHAIN,
+                EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
                 EDDY_BRIDGE_ABI,
                 'withdrawToNativeChain',
                 methodArgs,

@@ -15,7 +15,7 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS } from './constants/eddy-bridge-contract-addresses';
+import { ZETA_CHAIN_SUPPORTED_TOKENS } from './constants/eddy-bridge-contract-addresses';
 import {
     EddyBridgeSupportedChain,
     eddyBridgeSupportedChains
@@ -24,11 +24,8 @@ import { EDDY_BRIDGE_LIMITS } from './constants/swap-limits';
 import { EddyBridgeTrade } from './eddy-bridge-trade';
 import { EddyBridgeApiService } from './services/eddy-bridge-api-service';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import {
-    EddyRoutingDirection,
-    eddyRoutingDirection,
-    ERD
-} from './utils/eddy-bridge-routing-directions';
+import { EddyRoutingDirection, eddyRoutingDirection } from './utils/eddy-bridge-routing-directions';
+import { findCompatibleZrc20TokenAddress } from './utils/find-transit-token-address';
 
 export class EddyBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE;
@@ -129,7 +126,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
         if (fromWithoutFee.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN) {
             try {
                 const maxAmountWei = await EddyBridgeApiService.getWeiTokenLimitInForeignChain(
-                    fromWithoutFee.symbol
+                    fromWithoutFee
                 );
                 hasEnoughCapacity = fromWithoutFee.weiAmount.lte(maxAmountWei);
             } catch {}
@@ -157,12 +154,15 @@ export class EddyBridgeProvider extends CrossChainProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions,
-        routingDirection: EddyRoutingDirection
+        _routingDirection: EddyRoutingDirection
     ): Promise<{ toAmount: BigNumber; gasInTargetChain: BigNumber | undefined }> {
         const eddyFee = await EddyBridgeContractService.getPlatformFee();
         const ratioToAmount = 1 - eddyFee;
 
-        if (routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
+        const isSwapFromZetachain = from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
+        const isSwapToZetachain = toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
+
+        if (this.isDirectBridge(from, toToken)) {
             const gasInTargetChainNonWei = await EddyBridgeContractService.getGasInTargetChain(
                 from
             );
@@ -173,74 +173,99 @@ export class EddyBridgeProvider extends CrossChainProvider {
             return { toAmount, gasInTargetChain: gasInTargetChainNonWei };
         }
 
-        if (routingDirection === ERD.ZETA_NATIVE_TO_ANY_CHAIN_NATIVE) {
-            const to = await PriceToken.createToken({
-                address: TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[toToken.symbol]!,
-                blockchain: BLOCKCHAIN_NAME.ZETACHAIN
-            });
-
-            const fromWithEddyBridgeFee = new PriceTokenAmount({
+        // Zetachain(ZETA) -> Ethereum(ETH), Zetachain(BNB) -> Bsc(USDT)
+        if (isSwapFromZetachain) {
+            const fromZrc20Token = new PriceTokenAmount({
                 ...from.asStruct,
                 tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
             });
-            const calcData = await new EddyFinanceProvider().calculate(fromWithEddyBridgeFee, to, {
-                ...options,
-                gasCalculation: 'disabled',
-                useProxy: false
+            const toZrc20Token = await PriceToken.createToken({
+                address: findCompatibleZrc20TokenAddress(toToken),
+                blockchain: BLOCKCHAIN_NAME.ZETACHAIN
             });
+            const toAmount = await this.calculateOnChainToAmount(
+                fromZrc20Token,
+                toZrc20Token,
+                options
+            );
 
-            return { toAmount: calcData.to.tokenAmount, gasInTargetChain: undefined };
+            return { toAmount, gasInTargetChain: undefined };
         }
-        // BNB or ETH -> ZETA
-        const fromTokenInZetaChain = await PriceTokenAmount.createToken({
-            address: TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[from.symbol]!,
+
+        // Ethereum(ETH) -> Zetachain(ZETA), Bsc(USDT) -> Zetachain(BNB)
+        if (isSwapToZetachain) {
+            const fromZrc20Token = await PriceTokenAmount.createToken({
+                address: findCompatibleZrc20TokenAddress(from),
+                blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
+                tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
+            });
+            const toAmount = await this.calculateOnChainToAmount(fromZrc20Token, toToken, options);
+
+            return { toAmount, gasInTargetChain: undefined };
+        }
+
+        const fromZrc20Token = await PriceTokenAmount.createToken({
+            address: findCompatibleZrc20TokenAddress(from),
             blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
             tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
         });
+        const toZrc20Token = await PriceToken.createToken({
+            address: findCompatibleZrc20TokenAddress(toToken),
+            blockchain: BLOCKCHAIN_NAME.ZETACHAIN
+        });
+        const toAmount = await this.calculateOnChainToAmount(fromZrc20Token, toZrc20Token, options);
 
-        const calcData = await new EddyFinanceProvider().calculate(fromTokenInZetaChain, toToken, {
+        return { toAmount, gasInTargetChain: undefined };
+    }
+
+    private async calculateOnChainToAmount(
+        fromZrc20Token: PriceTokenAmount<EvmBlockchainName>,
+        toZrc20Token: PriceToken<EvmBlockchainName>,
+        options: RequiredCrossChainOptions
+    ): Promise<BigNumber> {
+        const calcData = await new EddyFinanceProvider().calculate(fromZrc20Token, toZrc20Token, {
             ...options,
             gasCalculation: 'disabled',
             useProxy: false
         });
 
-        return { toAmount: calcData.to.tokenAmount, gasInTargetChain: undefined };
+        return calcData.to.tokenAmount;
+    }
+
+    /**
+     * Check if route is Bsc(ETH) <-> Ethereum(ETH), Ethereum(USDT) <-> Zetachain(USDT.ETH) etc.
+     */
+    private isDirectBridge(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>
+    ): boolean {
+        return (
+            compareAddresses(from.symbol, toToken.symbol) ||
+            ZETA_CHAIN_SUPPORTED_TOKENS.some(zrcToken => {
+                return (
+                    (compareAddresses(from.symbol, zrcToken.zetaSymbol) &&
+                        compareAddresses(toToken.symbol, zrcToken.commonSymbol)) ||
+                    (compareAddresses(toToken.symbol, zrcToken.zetaSymbol) &&
+                        compareAddresses(from.symbol, zrcToken.commonSymbol))
+                );
+            })
+        );
     }
 
     private checkIsSupportedRoute(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
     ): boolean {
-        // Prevents bridges BSC <-> Ethereum
         if (
             from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
-            toToken.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN
+            toToken.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
+            !from.isNative &&
+            toToken.isNative
         ) {
             return false;
         }
-        // Only gas-token(BNB, ETH) can be bridged from supported chains in ZetaChain(ZETA)
-        if (from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN && from.isNative && toToken.isNative) {
-            return true;
-        }
-        const isSupportedZrc20 = Object.values(TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS).some(
-            zrc20Address => compareAddresses(zrc20Address, from.address)
-        );
-        // Zetachain(BNB) -> BSC(BNB) and Zetachain(ETH) -> ETH(ETH)
-        if (
-            from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN &&
-            isSupportedZrc20 &&
-            toToken.isNative &&
-            new RegExp(toToken.symbol, 'i').test(from.symbol)
-        ) {
-            return true;
-        }
 
-        // ZetaChain(ZETA) -> BSC(BNB) or ETH(ETH)
-        if (from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN && from.isNative && toToken.isNative) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     protected async getRoutePath(
