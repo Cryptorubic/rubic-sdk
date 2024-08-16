@@ -11,9 +11,9 @@ export const ERD = {
     ANY_CHAIN_NATIVE_TO_ZETA_TOKEN: 'ANY_CHAIN_NATIVE_TO_ZETA_TOKEN',
     ZETA_NATIVE_TO_ANY_CHAIN_ALL: 'ZETA_NATIVE_TO_ANY_CHAIN_ALL',
     ZETA_TOKEN_TO_ANY_CHAIN_ALL: 'ZETA_TOKEN_TO_ANY_CHAIN_ALL',
-    ANY_CHAIN_ALL_TO_ANY_CHAIN_ALL: 'ANY_CHAIN_ALL_TO_ANY_CHAIN_ALL',
     ANY_CHAIN_NATIVE_TO_ANY_CHAIN_TOKEN: 'ANY_CHAIN_NATIVE_TO_ANY_CHAIN_TOKEN',
-    ANY_CHAIN_TOKEN_TO_ANY_CHAIN_TOKEN: 'ANY_CHAIN_TOKEN_TO_ANY_CHAIN_TOKEN'
+    ANY_CHAIN_TOKEN_TO_ANY_CHAIN_TOKEN: 'ANY_CHAIN_TOKEN_TO_ANY_CHAIN_TOKEN',
+    ANY_CHAIN_TOKEN_TO_ZETA_TOKEN: 'ANY_CHAIN_TOKEN_TO_ZETA_TOKEN'
 } as const;
 
 export type EddyRoutingDirection = (typeof ERD)[keyof typeof ERD];
@@ -41,6 +41,7 @@ export function eddyRoutingDirection(
         );
         if (from.isNative && to.isNative) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_NATIVE;
         if (from.isNative && isSupportedToken) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_TOKEN;
+        if (!from.isNative && isSupportedToken) return ERD.ANY_CHAIN_TOKEN_TO_ZETA_TOKEN;
     }
 
     if (
@@ -52,4 +53,24 @@ export function eddyRoutingDirection(
     }
 
     throw new NotSupportedTokensError();
+}
+
+/**
+ * Check if route is Bsc(ETH) <-> Ethereum(ETH), Ethereum(USDT) <-> Zetachain(USDT.ETH) etc.
+ */
+export function isDirectBridge(
+    from: PriceTokenAmount<EvmBlockchainName>,
+    toToken: PriceToken<EvmBlockchainName>
+): boolean {
+    return (
+        compareAddresses(from.symbol, toToken.symbol) ||
+        ZETA_CHAIN_SUPPORTED_TOKENS.some(zrcToken => {
+            return (
+                (compareAddresses(from.symbol, zrcToken.zetaSymbol) &&
+                    compareAddresses(toToken.symbol, zrcToken.commonSymbol)) ||
+                (compareAddresses(toToken.symbol, zrcToken.zetaSymbol) &&
+                    compareAddresses(from.symbol, zrcToken.commonSymbol))
+            );
+        })
+    );
 }

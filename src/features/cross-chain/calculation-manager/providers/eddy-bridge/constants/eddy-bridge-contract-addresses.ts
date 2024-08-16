@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/b
 import { TssAvailableEddyBridgeChain } from './eddy-bridge-supported-chains';
 
 export const EDDY_OMNI_CONTRACT_IN_ZETACHAIN = '0xD494685B830e8C81Af6c7DA2B6E6C70e526019cE';
-export const EDDY_CONTRACT_IN_ZETACHAIN_FOR_ANY_CHAIN_BRIDGING =
+export const EDDY_OMNI_CONTRACT_IN_ZETACHAIN_FOR_ANY_CHAIN =
     '0x3BdEA1CB47Ce41d3c7F6886A42117266EC457370';
 
 export const TSS_ADDRESSES_EDDY_BRIDGE: Record<TssAvailableEddyBridgeChain, string> = {

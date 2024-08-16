@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
@@ -15,7 +14,6 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { ZETA_CHAIN_SUPPORTED_TOKENS } from './constants/eddy-bridge-contract-addresses';
 import {
     EddyBridgeSupportedChain,
     eddyBridgeSupportedChains
@@ -24,7 +22,7 @@ import { EDDY_BRIDGE_LIMITS } from './constants/swap-limits';
 import { EddyBridgeTrade } from './eddy-bridge-trade';
 import { EddyBridgeApiService } from './services/eddy-bridge-api-service';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import { EddyRoutingDirection, eddyRoutingDirection } from './utils/eddy-bridge-routing-directions';
+import { isDirectBridge } from './utils/eddy-bridge-routing-directions';
 import { findCompatibleZrc20TokenAddress } from './utils/find-transit-token-address';
 
 export class EddyBridgeProvider extends CrossChainProvider {
@@ -53,7 +51,6 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 throw new NotSupportedTokensError();
             }
 
-            const routingDirection = eddyRoutingDirection(from, toToken);
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
@@ -67,7 +64,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
 
             const [eddySlippage, { toAmount, gasInTargetChain }] = await Promise.all([
                 EddyBridgeContractService.getEddySlipage(),
-                this.getToTokenAmount(fromWithoutFee, toToken, options, routingDirection)
+                this.getToTokenAmount(fromWithoutFee, toToken, options)
             ]);
 
             const to = await PriceTokenAmount.createToken({
@@ -82,8 +79,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                           from: fromWithoutFee,
                           toToken: to,
                           providerAddress: options.providerAddress,
-                          slippage: options.slippageTolerance,
-                          routingDirection: routingDirection
+                          slippage: options.slippageTolerance
                       })
                     : null;
 
@@ -95,8 +91,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: eddySlippage,
-                    prevGasAmountInNonZetaChain: gasInTargetChain,
-                    routingDirection: routingDirection
+                    prevGasAmountInNonZetaChain: gasInTargetChain
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
@@ -153,8 +148,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
     private async getToTokenAmount(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        options: RequiredCrossChainOptions,
-        _routingDirection: EddyRoutingDirection
+        options: RequiredCrossChainOptions
     ): Promise<{ toAmount: BigNumber; gasInTargetChain: BigNumber | undefined }> {
         const eddyFee = await EddyBridgeContractService.getPlatformFee();
         const ratioToAmount = 1 - eddyFee;
@@ -162,10 +156,12 @@ export class EddyBridgeProvider extends CrossChainProvider {
         const isSwapFromZetachain = from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
         const isSwapToZetachain = toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
 
-        if (this.isDirectBridge(from, toToken)) {
-            const gasInTargetChainNonWei = await EddyBridgeContractService.getGasInTargetChain(
-                from
-            );
+        if (isDirectBridge(from, toToken)) {
+            const gasInTargetChainNonWei =
+                // takes additional gas-fee only for Bsc, Ethereum, Bitcoin
+                toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN
+                    ? new BigNumber(0)
+                    : await EddyBridgeContractService.getGasInTargetChain(from);
             const toAmount = from.tokenAmount
                 .multipliedBy(ratioToAmount)
                 .minus(gasInTargetChainNonWei);
@@ -204,6 +200,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
             return { toAmount, gasInTargetChain: undefined };
         }
 
+        // BSC <-> Ethereum
         const fromZrc20Token = await PriceTokenAmount.createToken({
             address: findCompatibleZrc20TokenAddress(from),
             blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
@@ -230,26 +227,6 @@ export class EddyBridgeProvider extends CrossChainProvider {
         });
 
         return calcData.to.tokenAmount;
-    }
-
-    /**
-     * Check if route is Bsc(ETH) <-> Ethereum(ETH), Ethereum(USDT) <-> Zetachain(USDT.ETH) etc.
-     */
-    private isDirectBridge(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>
-    ): boolean {
-        return (
-            compareAddresses(from.symbol, toToken.symbol) ||
-            ZETA_CHAIN_SUPPORTED_TOKENS.some(zrcToken => {
-                return (
-                    (compareAddresses(from.symbol, zrcToken.zetaSymbol) &&
-                        compareAddresses(toToken.symbol, zrcToken.commonSymbol)) ||
-                    (compareAddresses(toToken.symbol, zrcToken.zetaSymbol) &&
-                        compareAddresses(from.symbol, zrcToken.commonSymbol))
-                );
-            })
-        );
     }
 
     private checkIsSupportedRoute(

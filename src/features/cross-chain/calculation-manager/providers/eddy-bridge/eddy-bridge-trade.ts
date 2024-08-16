@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { UnnecessaryApproveError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -25,21 +24,22 @@ import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
-    EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
-    TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS,
-    TSS_ADDRESSES_EDDY_BRIDGE
+    CUSTODY_ADDRESSES,
+    EDDY_OMNI_CONTRACT_IN_ZETACHAIN
 } from './constants/eddy-bridge-contract-addresses';
-import {
-    EddyBridgeSupportedChain,
-    TssAvailableEddyBridgeChain
-} from './constants/eddy-bridge-supported-chains';
-import { EDDY_BRIDGE_ABI } from './constants/edyy-bridge-abi';
+import { EddyBridgeSupportedChain } from './constants/eddy-bridge-supported-chains';
 import {
     EddyBridgeGetGasDataParams,
     EddyBridgeTradeConstructorParams
 } from './models/eddy-trade-types';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import { EddyRoutingDirection, ERD } from './utils/eddy-bridge-routing-directions';
+import {
+    EddyRoutingDirection,
+    eddyRoutingDirection,
+    ERD,
+    isDirectBridge
+} from './utils/eddy-bridge-routing-directions';
+import { EddyBridgeEvmConfigFactory } from './utils/eddy-evm-config-factory';
 export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData({
@@ -47,8 +47,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         from,
         providerAddress,
         toToken,
-        slippage,
-        routingDirection
+        slippage
     }: EddyBridgeGetGasDataParams): Promise<GasData | null> {
         const trade = new EddyBridgeTrade({
             crossChainTrade: {
@@ -58,8 +57,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 priceImpact: 0,
                 feeInfo,
                 slippage,
-                prevGasAmountInNonZetaChain: new BigNumber(0),
-                routingDirection
+                prevGasAmountInNonZetaChain: new BigNumber(0)
             },
             providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             routePath: []
@@ -101,11 +99,18 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         return this.from.blockchain as EddyBridgeSupportedChain;
     }
 
-    // EddyFinance has deployed contract only in ZetaChain, other routes go directly via `transfer`
     protected get fromContractAddress(): string {
-        return this.isProxyTrade
-            ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : EDDY_OMNI_CONTRACT_IN_ZETACHAIN;
+        if (this.isProxyTrade) return rubicProxyContractAddress[this.fromBlockchain].gateway;
+
+        switch (this.routingDirection) {
+            case ERD.ANY_CHAIN_TOKEN_TO_ANY_CHAIN_TOKEN:
+            case ERD.ANY_CHAIN_TOKEN_TO_ZETA_TOKEN:
+                return CUSTODY_ADDRESSES[this.fromBlockchain]!;
+            case ERD.ZETA_TOKEN_TO_ANY_CHAIN_ALL:
+                return EDDY_OMNI_CONTRACT_IN_ZETACHAIN;
+            default:
+                return EDDY_OMNI_CONTRACT_IN_ZETACHAIN;
+        }
     }
 
     protected get methodName(): string {
@@ -125,7 +130,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.to.decimals
         );
         this.prevGasAmountInNonZetaChain = params.crossChainTrade.prevGasAmountInNonZetaChain;
-        this.routingDirection = params.crossChainTrade.routingDirection;
+        this.routingDirection = eddyRoutingDirection(this.from, this.to);
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -183,60 +188,28 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     protected async getTransactionConfigAndAmount(
         _receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        let config = {} as EvmEncodeConfig;
-        const wrappedZetaAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN]!.address;
+        const evmConfig = new EddyBridgeEvmConfigFactory(
+            this.from,
+            this.to,
+            this.walletAddress || FAKE_WALLET_ADDRESS,
+            this.routingDirection
+        ).evmConfig;
 
-        if (this.routingDirection === ERD.ANY_CHAIN_NATIVE_TO_ZETA_NATIVE) {
-            const walletAddress = this.walletAddress || FAKE_WALLET_ADDRESS;
-            let data =
-                EDDY_OMNI_CONTRACT_IN_ZETACHAIN +
-                walletAddress.slice(2) +
-                wrappedZetaAddress.slice(2);
-
-            config = {
-                data,
-                to: TSS_ADDRESSES_EDDY_BRIDGE[this.fromBlockchain as TssAvailableEddyBridgeChain],
-                value: this.from.stringWeiAmount
-            };
-        } else if (this.routingDirection === ERD.ZETA_NATIVE_TO_ANY_CHAIN_ALL) {
-            const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.to.symbol];
-            config = EvmWeb3Pure.encodeMethodCall(
-                EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
-                EDDY_BRIDGE_ABI,
-                'transferZetaToConnectedChain',
-                ['0x', wrappedZetaAddress, destZrc20TokenAddress],
-                this.from.stringWeiAmount
-            );
-        } else if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
-            const srcZrc20TokenAddress = this.from.address;
-            const destZrc20TokenAddress = TOKEN_SYMBOL_TO_ZETACHAIN_ADDRESS[this.to.symbol];
-            const methodArgs = [
-                '0x',
-                this.from.stringWeiAmount,
-                srcZrc20TokenAddress,
-                destZrc20TokenAddress
-            ];
-            config = EvmWeb3Pure.encodeMethodCall(
-                EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
-                EDDY_BRIDGE_ABI,
-                'withdrawToNativeChain',
-                methodArgs,
-                '0'
-            );
-        }
-
-        if (this.routingDirection === ERD.ZETA_TOKEN_TO_ANY_CHAIN_NATIVE) {
+        if (
+            isDirectBridge(this.from, this.to) &&
+            this.to.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN
+        ) {
             const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
-            const newNonWeiAmount = Web3Pure.fromWei(this.to.stringWeiAmount, this.to.decimals)
+            const newNonWeiAmount = this.to.tokenAmount
                 .plus(this.prevGasAmountInNonZetaChain!)
                 .minus(newGasAmount);
             const newWeiAmount = Web3Pure.toWei(newNonWeiAmount, this.to.decimals);
 
-            return { config, amount: newWeiAmount };
+            return { config: evmConfig, amount: newWeiAmount };
         }
 
         return {
-            config,
+            config: evmConfig,
             amount: this.to.stringWeiAmount
         };
     }
