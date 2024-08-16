@@ -11,15 +11,19 @@ import { findCompatibleZrc20TokenAddress } from '../utils/find-transit-token-add
 
 export class EddyBridgeContractService {
     public static async getPlatformFee(): Promise<number> {
-        const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
-        const res = await web3Public.callContractMethod<number>(
-            EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
-            EDDY_BRIDGE_ABI,
-            'platformFee',
-            []
-        );
-        // eddy currently takes 1% from bridged amount (platformFee = 10, ratioToAmount in than case = 0.99)
-        return res / 1_000;
+        try {
+            const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
+            const res = await web3Public.callContractMethod<number>(
+                EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
+                EDDY_BRIDGE_ABI,
+                'platformFee',
+                []
+            );
+            // eddy currently takes 1% from bridged amount (platformFee = 10, ratioToAmount in than case = 0.99)
+            return res / 1_000;
+        } catch (err) {
+            return 0;
+        }
     }
 
     /**
@@ -43,14 +47,14 @@ export class EddyBridgeContractService {
             'withdrawGasFee',
             []
         );
-        const gasFeeNonWei = Web3Pure.fromWei(res?.[1] || 0, zrc20Token.decimals);
+        // 18 decimals cause they send always gas-fee in Eth format
+        const gasFeeNonWei = Web3Pure.fromWei(res?.[1] || 0, 18);
 
         return gasFeeNonWei;
     }
 
     /**
-     *
-     * @returns eddy static slippage from 0 to 1
+     * @returns eddy static slippage
      */
     public static async getEddySlipage(): Promise<number> {
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);

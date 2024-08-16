@@ -33,12 +33,7 @@ import {
     EddyBridgeTradeConstructorParams
 } from './models/eddy-trade-types';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import {
-    EddyRoutingDirection,
-    eddyRoutingDirection,
-    ERD,
-    isDirectBridge
-} from './utils/eddy-bridge-routing-directions';
+import { EddyRoutingDirection, ERD, isDirectBridge } from './utils/eddy-bridge-routing-directions';
 import { EddyBridgeEvmConfigFactory } from './utils/eddy-evm-config-factory';
 export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -47,7 +42,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         from,
         providerAddress,
         toToken,
-        slippage
+        slippage,
+        routingDirection
     }: EddyBridgeGetGasDataParams): Promise<GasData | null> {
         const trade = new EddyBridgeTrade({
             crossChainTrade: {
@@ -57,7 +53,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 priceImpact: 0,
                 feeInfo,
                 slippage,
-                prevGasAmountInNonZetaChain: new BigNumber(0)
+                prevGasAmountInNonZetaChain: new BigNumber(0),
+                routingDirection
             },
             providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             routePath: []
@@ -130,7 +127,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.to.decimals
         );
         this.prevGasAmountInNonZetaChain = params.crossChainTrade.prevGasAmountInNonZetaChain;
-        this.routingDirection = eddyRoutingDirection(this.from, this.to);
+        this.routingDirection = params.crossChainTrade.routingDirection;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {

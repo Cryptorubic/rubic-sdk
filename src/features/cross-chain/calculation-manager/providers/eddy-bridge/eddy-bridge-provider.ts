@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
@@ -22,7 +22,7 @@ import { EDDY_BRIDGE_LIMITS } from './constants/swap-limits';
 import { EddyBridgeTrade } from './eddy-bridge-trade';
 import { EddyBridgeApiService } from './services/eddy-bridge-api-service';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import { isDirectBridge } from './utils/eddy-bridge-routing-directions';
+import { eddyRoutingDirection, isDirectBridge } from './utils/eddy-bridge-routing-directions';
 import { findCompatibleZrc20TokenAddress } from './utils/find-transit-token-address';
 
 export class EddyBridgeProvider extends CrossChainProvider {
@@ -46,10 +46,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 options?.receiverAddress,
                 options?.fromAddress || walletAddress
             );
-            const isSupportedRoute = this.checkIsSupportedRoute(from, toToken);
-            if (!isSupportedRoute) {
-                throw new NotSupportedTokensError();
-            }
+            const routingDirection = eddyRoutingDirection(from, toToken);
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -79,7 +76,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
                           from: fromWithoutFee,
                           toToken: to,
                           providerAddress: options.providerAddress,
-                          slippage: options.slippageTolerance
+                          slippage: options.slippageTolerance,
+                          routingDirection
                       })
                     : null;
 
@@ -91,7 +89,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: eddySlippage,
-                    prevGasAmountInNonZetaChain: gasInTargetChain
+                    prevGasAmountInNonZetaChain: gasInTargetChain,
+                    routingDirection
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
@@ -114,7 +113,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const limits = EDDY_BRIDGE_LIMITS.find(info => fromWithoutFee.isEqualTo(info));
         if (!limits) {
-            throw new NotSupportedTokensError();
+            return { trade, tradeType: this.type };
+            // throw new NotSupportedTokensError();
         }
         let hasEnoughCapacity: boolean = true;
 
@@ -161,7 +161,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 // takes additional gas-fee only for Bsc, Ethereum, Bitcoin
                 toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN
                     ? new BigNumber(0)
-                    : await EddyBridgeContractService.getGasInTargetChain(from);
+                    : await EddyBridgeContractService.getGasInTargetChain(toToken);
             const toAmount = from.tokenAmount
                 .multipliedBy(ratioToAmount)
                 .minus(gasInTargetChainNonWei);
@@ -227,22 +227,6 @@ export class EddyBridgeProvider extends CrossChainProvider {
         });
 
         return calcData.to.tokenAmount;
-    }
-
-    private checkIsSupportedRoute(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>
-    ): boolean {
-        if (
-            from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
-            toToken.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
-            !from.isNative &&
-            toToken.isNative
-        ) {
-            return false;
-        }
-
-        return true;
     }
 
     protected async getRoutePath(

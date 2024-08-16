@@ -36,8 +36,10 @@ export function eddyRoutingDirection(
         from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
         to.blockchain === BLOCKCHAIN_NAME.ZETACHAIN
     ) {
-        const isSupportedToken = ZETA_CHAIN_SUPPORTED_TOKENS.some(zrcToken =>
-            compareAddresses(zrcToken.address, to.address)
+        const isSupportedToken = ZETA_CHAIN_SUPPORTED_TOKENS.some(
+            zrcToken =>
+                compareAddresses(zrcToken.address, to.address) &&
+                from.blockchain === zrcToken.relativeChain
         );
         if (from.isNative && to.isNative) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_NATIVE;
         if (from.isNative && isSupportedToken) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_TOKEN;
@@ -62,15 +64,5 @@ export function isDirectBridge(
     from: PriceTokenAmount<EvmBlockchainName>,
     toToken: PriceToken<EvmBlockchainName>
 ): boolean {
-    return (
-        compareAddresses(from.symbol, toToken.symbol) ||
-        ZETA_CHAIN_SUPPORTED_TOKENS.some(zrcToken => {
-            return (
-                (compareAddresses(from.symbol, zrcToken.zetaSymbol) &&
-                    compareAddresses(toToken.symbol, zrcToken.commonSymbol)) ||
-                (compareAddresses(toToken.symbol, zrcToken.zetaSymbol) &&
-                    compareAddresses(from.symbol, zrcToken.commonSymbol))
-            );
-        })
-    );
+    return compareAddresses(from.symbol, toToken.symbol);
 }

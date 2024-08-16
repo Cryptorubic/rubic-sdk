@@ -8,7 +8,7 @@ import { ZETA_CHAIN_SUPPORTED_TOKENS } from '../constants/eddy-bridge-contract-a
 export function findCompatibleZrc20TokenAddress(token: PriceToken<EvmBlockchainName>): string {
     const transitTokenInZetachain = ZETA_CHAIN_SUPPORTED_TOKENS.find(
         zrcToken =>
-            compareAddresses(zrcToken.commonSymbol, token.symbol) &&
+            compareAddresses(zrcToken.symbol, token.symbol) &&
             zrcToken.relativeChain === token.blockchain
     );
     if (!transitTokenInZetachain) throw new NotSupportedTokensError();

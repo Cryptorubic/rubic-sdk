@@ -19,45 +19,38 @@ export const CUSTODY_ADDRESSES: Partial<Record<EvmBlockchainName, string>> = {
 export const ZETA_CHAIN_SUPPORTED_TOKENS: ZetachainTokenInfo[] = [
     {
         address: '0xd97b1de3619ed2c6beb3860147e30ca8a7dc9891',
-        zetaSymbol: 'ETH.ETH',
-        commonSymbol: 'ETH',
+        symbol: 'ETH',
         relativeChain: BLOCKCHAIN_NAME.ETHEREUM
     },
     {
         address: '0x48f80608b672dc30dc7e3dbbd0343c5f02c738eb',
-        zetaSymbol: 'BNB.BNB',
-        commonSymbol: 'BNB',
+        symbol: 'BNB',
         relativeChain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
     },
     {
         address: '0x0cbe0dF132a6c6B4a2974Fa1b7Fb953CF0Cc798a',
-        zetaSymbol: 'USDC.ETH',
-        commonSymbol: 'USDC',
+        symbol: 'USDC',
         relativeChain: BLOCKCHAIN_NAME.ETHEREUM
     },
     {
         address: '0x7c8dDa80bbBE1254a7aACf3219EBe1481c6E01d7',
-        zetaSymbol: 'USDT.ETH',
-        commonSymbol: 'USDT',
+        symbol: 'USDT',
         relativeChain: BLOCKCHAIN_NAME.ETHEREUM
     },
     {
         address: '0x05BA149A7bd6dC1F937fA9046A9e05C05f3b18b0',
-        zetaSymbol: 'USDC.BSC',
-        commonSymbol: 'USDC',
+        symbol: 'USDC',
         relativeChain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
     },
     {
         address: '0x91d4F0D54090Df2D81e834c3c8CE71C6c865e79F',
-        zetaSymbol: 'USDT.BSC',
-        commonSymbol: 'USDT',
+        symbol: 'USDT',
         relativeChain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
     }
 ];
 
 interface ZetachainTokenInfo {
-    zetaSymbol: string;
-    commonSymbol: string;
+    symbol: string;
     relativeChain: EvmBlockchainName;
     address: string;
 }
