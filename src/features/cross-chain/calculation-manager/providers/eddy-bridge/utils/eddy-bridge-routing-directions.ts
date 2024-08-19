@@ -4,6 +4,7 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 import { ZETA_CHAIN_SUPPORTED_TOKENS } from '../constants/eddy-bridge-contract-addresses';
+import { findCompatibleZrc20TokenAddress } from './find-transit-token-address';
 
 // Eddy Routing Direction
 export const ERD = {
@@ -18,32 +19,34 @@ export const ERD = {
 
 export type EddyRoutingDirection = (typeof ERD)[keyof typeof ERD];
 
+// eslint-disable-next-line complexity
 export function eddyRoutingDirection(
     from: PriceTokenAmount<EvmBlockchainName>,
     to: PriceToken<EvmBlockchainName>
 ): EddyRoutingDirection {
     if (from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
-        const isSupportedToken = ZETA_CHAIN_SUPPORTED_TOKENS.some(
-            zrcToken =>
-                compareAddresses(zrcToken.address, from.address) &&
-                to.blockchain === zrcToken.relativeChain
+        const isSupportedFromToken = ZETA_CHAIN_SUPPORTED_TOKENS.some(zrcToken =>
+            compareAddresses(zrcToken.address, from.address)
         );
-        if (from.isNative) return ERD.ZETA_NATIVE_TO_ANY_CHAIN_ALL;
-        if (isSupportedToken) return ERD.ZETA_TOKEN_TO_ANY_CHAIN_ALL;
+        const isSupportedToToken = !!findCompatibleZrc20TokenAddress(to);
+
+        if (from.isNative && isSupportedToToken) return ERD.ZETA_NATIVE_TO_ANY_CHAIN_ALL;
+        if (isSupportedFromToken && isSupportedToToken) return ERD.ZETA_TOKEN_TO_ANY_CHAIN_ALL;
     }
 
     if (
         from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
         to.blockchain === BLOCKCHAIN_NAME.ZETACHAIN
     ) {
-        const isSupportedToken = ZETA_CHAIN_SUPPORTED_TOKENS.some(
-            zrcToken =>
-                compareAddresses(zrcToken.address, to.address) &&
-                from.blockchain === zrcToken.relativeChain
+        const isSupportedToToken = ZETA_CHAIN_SUPPORTED_TOKENS.some(zrcToken =>
+            compareAddresses(zrcToken.address, to.address)
         );
+        const isSupportedFromToken = !!findCompatibleZrc20TokenAddress(from);
+
         if (from.isNative && to.isNative) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_NATIVE;
-        if (from.isNative && isSupportedToken) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_TOKEN;
-        if (!from.isNative && isSupportedToken) return ERD.ANY_CHAIN_TOKEN_TO_ZETA_TOKEN;
+        if (from.isNative && isSupportedToToken) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_TOKEN;
+        if (!from.isNative && isSupportedToToken && isSupportedFromToken)
+            return ERD.ANY_CHAIN_TOKEN_TO_ZETA_TOKEN;
     }
 
     if (

@@ -50,6 +50,7 @@ export class EddyBridgeEvmConfigFactory {
         this.evmConfig = configBuilder.apply(this);
     }
 
+    // +
     private createAnyChainNativeToZetaNativeConfig(): EvmEncodeConfig {
         const data =
             EDDY_OMNI_CONTRACT_IN_ZETACHAIN +
@@ -63,17 +64,14 @@ export class EddyBridgeEvmConfigFactory {
         };
     }
 
+    // +
     private createAnyChainTokenToZetaTokenConfig(): EvmEncodeConfig {
-        const slicedWalletAddress = this.walletAddress.slice(2);
-        const slicedEddyContractAddress = EDDY_OMNI_CONTRACT_IN_ZETACHAIN.slice(2);
-        const slicedDestZrc20Address = this.to.address.slice(2);
+        const msg =
+            EDDY_OMNI_CONTRACT_IN_ZETACHAIN +
+            this.walletAddress.slice(2) +
+            this.to.address.slice(2);
 
-        const methodArgs = [
-            slicedWalletAddress,
-            this.from.address,
-            this.from.stringWeiAmount,
-            [slicedEddyContractAddress, slicedWalletAddress, slicedDestZrc20Address]
-        ];
+        const methodArgs = [this.walletAddress, this.from.address, this.from.stringWeiAmount, msg];
         const config = EvmWeb3Pure.encodeMethodCall(
             CUSTODY_ADDRESSES[this.from.blockchain]!,
             CUSTODY_ABI,
@@ -85,10 +83,12 @@ export class EddyBridgeEvmConfigFactory {
         return config;
     }
 
+    // +
     private createAnyChainNativeToZetaTokenConfig(): EvmEncodeConfig {
-        const slicedDestZrc20Address = this.to.address.slice(2);
         const data =
-            EDDY_OMNI_CONTRACT_IN_ZETACHAIN + this.walletAddress.slice(2) + slicedDestZrc20Address;
+            EDDY_OMNI_CONTRACT_IN_ZETACHAIN +
+            this.walletAddress.slice(2) +
+            this.to.address.slice(2);
 
         return {
             data,
@@ -115,15 +115,13 @@ export class EddyBridgeEvmConfigFactory {
 
     private createAnyChainTokenToAnyChainTokenConfig(): EvmEncodeConfig {
         const slicedWalletAddress = this.walletAddress.slice(2);
-        const slicedEddyContractAddress = EDDY_OMNI_CONTRACT_IN_ZETACHAIN_FOR_ANY_CHAIN.slice(2);
         const slicedSrcZrc20Address = findCompatibleZrc20TokenAddress(this.from).slice(2);
+        const msg =
+            EDDY_OMNI_CONTRACT_IN_ZETACHAIN_FOR_ANY_CHAIN +
+            slicedSrcZrc20Address +
+            slicedWalletAddress;
 
-        const methodArgs = [
-            slicedWalletAddress,
-            this.from.address,
-            this.from.stringWeiAmount,
-            [slicedEddyContractAddress, slicedSrcZrc20Address, slicedWalletAddress]
-        ];
+        const methodArgs = [this.walletAddress, this.from.address, this.from.stringWeiAmount, msg];
         const config = EvmWeb3Pure.encodeMethodCall(
             CUSTODY_ADDRESSES[this.from.blockchain]!,
             CUSTODY_ABI,
@@ -135,6 +133,7 @@ export class EddyBridgeEvmConfigFactory {
         return config;
     }
 
+    // +
     private createZetaTokenToAnyChainAllConfig(): EvmEncodeConfig {
         const srcZrc20TokenAddress = this.from.address;
         const destZrc20TokenAddress = findCompatibleZrc20TokenAddress(this.to);
@@ -155,6 +154,7 @@ export class EddyBridgeEvmConfigFactory {
         return config;
     }
 
+    // +
     private createZetaNativeToAnyChainAllConfig(): EvmEncodeConfig {
         const destZrc20TokenAddress = findCompatibleZrc20TokenAddress(this.to);
         const config = EvmWeb3Pure.encodeMethodCall(
