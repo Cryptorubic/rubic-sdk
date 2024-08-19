@@ -8,7 +8,7 @@ type StargateV2TokenAddress = Record<
     Partial<Record<string, StargateV2BridgeToken>>
 >;
 
-export const stargateV2TokenAddress: StargateV2TokenAddress = {
+const addresses: StargateV2TokenAddress = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         '0x0000000000000000000000000000000000000000': stargateV2BridgeToken.ETH,
         '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48': stargateV2BridgeToken.USDC,
@@ -64,5 +64,37 @@ export const stargateV2TokenAddress: StargateV2TokenAddress = {
     },
     [BLOCKCHAIN_NAME.AURORA]: {
         '0x368ebb46aca6b8d0787c96b2b20bd3cc3f2c45f7': stargateV2BridgeToken.USDC
+    },
+    // [BLOCKCHAIN_NAME.KLAYTN]: {
+    //     '0xe2053bcf56d2030d2470fb454574237cf9ee3d4b': stargateV2BridgeToken.USDC,
+    //     '0x9025095263d1e548dc890a7589a4c78038ac40ab': stargateV2BridgeToken.USDT,
+    //     '0x55acee547df909cf844e32dd66ee55a6f81dc71b': stargateV2BridgeToken.WETH
+    // },
+    [BLOCKCHAIN_NAME.TAIKO]: {
+        '0x19e26B0638bf63aa9fa4d14c6baF8D52eBE86C5C': stargateV2BridgeToken.USDC,
+        '0x9c2dc7377717603eB92b2655c5f2E7997a4945BD': stargateV2BridgeToken.USDT
+    },
+    [BLOCKCHAIN_NAME.SEI]: {
+        '0x160345fC359604fC6e70E3c5fAcbdE5F7A9342d8': stargateV2BridgeToken.WETH
+    },
+    [BLOCKCHAIN_NAME.FLARE]: {
+        '0xFbDa5F676cB37624f28265A144A48B0d6e87d3b6': stargateV2BridgeToken.USDC,
+        '0x0B38e83B86d491735fEaa0a791F65c2B99535396': stargateV2BridgeToken.USDT,
+        '0x1502FA4be69d526124D453619276FacCab275d3D': stargateV2BridgeToken.WETH
     }
 };
+
+export const stargateV2TokenAddress = Object.entries(addresses).reduce(
+    (acc, [chainName, tokens]) => {
+        const supportedChain = chainName as StargateV2SupportedBlockchains;
+        acc[supportedChain] = {} as Partial<Record<string, StargateV2BridgeToken>>;
+        for (const tokenAddress in tokens) {
+            const stargateTokenSymbol = tokens[tokenAddress];
+            const addressToLower = tokenAddress.toLowerCase();
+            acc[supportedChain][addressToLower] = stargateTokenSymbol;
+        }
+
+        return acc;
+    },
+    {} as StargateV2TokenAddress
+);
