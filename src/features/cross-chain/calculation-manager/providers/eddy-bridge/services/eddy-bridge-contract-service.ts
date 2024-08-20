@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceToken } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -27,30 +28,30 @@ export class EddyBridgeContractService {
     }
 
     /**
-     * @param token source chain token
+     * @param toToken target chain token
+     * @returns gasFee in target token units
      */
-    public static async getGasInTargetChain(
-        token: PriceToken<EvmBlockchainName>
+    public static async getGasInDestTokenUnits(
+        toToken: PriceToken<EvmBlockchainName>
     ): Promise<BigNumber> {
-        const zrc20Token =
-            token.blockchain === BLOCKCHAIN_NAME.ZETACHAIN
-                ? token
-                : await PriceToken.createToken({
-                      address: findCompatibleZrc20TokenAddress(token),
-                      blockchain: BLOCKCHAIN_NAME.ZETACHAIN
-                  });
+        if (toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) return new BigNumber(0);
 
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
         const res = await web3Public.callContractMethod<[string, string]>(
-            zrc20Token.address,
+            findCompatibleZrc20TokenAddress(toToken),
             ZRC_20_ABI,
             'withdrawGasFee',
             []
         );
-        // 18 decimals cause they send always gas-fee in Eth format
-        const gasFeeNonWei = Web3Pure.fromWei(res?.[1] || 0, 18);
 
-        return gasFeeNonWei;
+        const gasFeeNonWei = Web3Pure.fromWei(res?.[1] || 0, 18);
+        const nativeTokenWithPrice = await PriceToken.createFromToken(
+            nativeTokensList[toToken.blockchain]
+        );
+        const gasFeeUsd = gasFeeNonWei.multipliedBy(nativeTokenWithPrice.price);
+        const gasFeeInDestTokenAmount = gasFeeUsd.dividedBy(toToken.price);
+
+        return gasFeeInDestTokenAmount;
     }
 
     /**

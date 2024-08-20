@@ -33,7 +33,7 @@ import {
     EddyBridgeTradeConstructorParams
 } from './models/eddy-trade-types';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import { EddyRoutingDirection, ERD, isDirectBridge } from './utils/eddy-bridge-routing-directions';
+import { EddyRoutingDirection, ERD } from './utils/eddy-bridge-routing-directions';
 import { EddyBridgeEvmConfigFactory } from './utils/eddy-evm-config-factory';
 export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -87,7 +87,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     private readonly slippage: number;
     /** */
 
-    // used for checkAmountChange in pairs ZetaChain.ETH->Ethreum.ETH & ZetaChain.BNB->Binance.BNB (non wei)
+    // gas amount in toToken units (non wei)
     private readonly prevGasAmountInNonZetaChain: BigNumber | undefined;
 
     private readonly routingDirection: EddyRoutingDirection;
@@ -192,11 +192,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.routingDirection
         ).evmConfig;
 
-        if (
-            isDirectBridge(this.from, this.to) &&
-            this.to.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN
-        ) {
-            const newGasAmount = await EddyBridgeContractService.getGasInTargetChain(this.from);
+        if (this.to.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN) {
+            const newGasAmount = await EddyBridgeContractService.getGasInDestTokenUnits(this.from);
             const newNonWeiAmount = this.to.tokenAmount
                 .plus(this.prevGasAmountInNonZetaChain!)
                 .minus(newGasAmount);

@@ -150,23 +150,21 @@ export class EddyBridgeProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<{ toAmount: BigNumber; gasInTargetChain: BigNumber | undefined }> {
-        const eddyFee = await EddyBridgeContractService.getPlatformFee();
+        const [eddyFee, gasFeeInDestTokenUnits] = await Promise.all([
+            EddyBridgeContractService.getPlatformFee(),
+            EddyBridgeContractService.getGasInDestTokenUnits(toToken)
+        ]);
         const ratioToAmount = 1 - eddyFee;
 
         const isSwapFromZetachain = from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
         const isSwapToZetachain = toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
 
         if (isDirectBridge(from, toToken)) {
-            const gasInTargetChainNonWei =
-                // takes additional gas-fee only for Bsc, Ethereum, Bitcoin
-                toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN
-                    ? new BigNumber(0)
-                    : await EddyBridgeContractService.getGasInTargetChain(toToken);
             const toAmount = from.tokenAmount
                 .multipliedBy(ratioToAmount)
-                .minus(gasInTargetChainNonWei);
+                .minus(gasFeeInDestTokenUnits);
 
-            return { toAmount, gasInTargetChain: gasInTargetChainNonWei };
+            return { toAmount, gasInTargetChain: gasFeeInDestTokenUnits };
         }
 
         // Zetachain(ZETA) -> Ethereum(ETH), Zetachain(BNB) -> Bsc(USDT)
@@ -185,7 +183,10 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 options
             );
 
-            return { toAmount, gasInTargetChain: undefined };
+            return {
+                toAmount: toAmount.minus(gasFeeInDestTokenUnits),
+                gasInTargetChain: gasFeeInDestTokenUnits
+            };
         }
 
         // Ethereum(ETH) -> Zetachain(ZETA), Bsc(USDT) -> Zetachain(BNB)
@@ -212,7 +213,10 @@ export class EddyBridgeProvider extends CrossChainProvider {
         });
         const toAmount = await this.calculateOnChainToAmount(fromZrc20Token, toZrc20Token, options);
 
-        return { toAmount, gasInTargetChain: undefined };
+        return {
+            toAmount: toAmount.minus(gasFeeInDestTokenUnits),
+            gasInTargetChain: gasFeeInDestTokenUnits
+        };
     }
 
     private async calculateOnChainToAmount(
