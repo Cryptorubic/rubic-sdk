@@ -69,7 +69,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     TAIKO: 'TAIKO',
     SEI: 'SEI',
     CORE: 'CORE',
-    BAHAMUT: 'BAHAMUT'
+    BAHAMUT: 'BAHAMUT',
+    BITLAYER: 'BITLAYER'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
