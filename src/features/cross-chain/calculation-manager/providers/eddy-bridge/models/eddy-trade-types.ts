@@ -24,8 +24,9 @@ export interface EddyBridgeTradeConstructorParams {
         feeInfo: FeeInfo;
         priceImpact: number | null;
         slippage: number;
-        prevGasAmountInNonZetaChain: BigNumber | undefined;
+        prevGasFeeInDestTokenUnits: BigNumber | undefined;
         routingDirection: EddyRoutingDirection;
+        ratioToAmount: number;
     };
     providerAddress: string;
     routePath: RubicStep[];

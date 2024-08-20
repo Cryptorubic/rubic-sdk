@@ -16,18 +16,8 @@ import { EddyRoutingDirection, ERD } from './eddy-bridge-routing-directions';
 import { findCompatibleZrc20TokenAddress } from './find-transit-token-address';
 
 export class EddyBridgeEvmConfigFactory {
-    private _evmConfig!: EvmEncodeConfig;
-
     private get wrappedZetaAddress(): string {
         return wrappedNativeTokensList[BLOCKCHAIN_NAME.ZETACHAIN]!.address;
-    }
-
-    public get evmConfig(): EvmEncodeConfig {
-        return this._evmConfig;
-    }
-
-    public set evmConfig(value: EvmEncodeConfig) {
-        this._evmConfig = value;
     }
 
     private readonly evmConfigBuilders: Map<EddyRoutingDirection, () => EvmEncodeConfig> = new Map([
@@ -44,13 +34,18 @@ export class EddyBridgeEvmConfigFactory {
         private readonly from: PriceTokenAmount<EvmBlockchainName>,
         private readonly to: PriceTokenAmount<EvmBlockchainName>,
         private readonly walletAddress: string,
-        routingDirection: EddyRoutingDirection
-    ) {
-        const configBuilder = this.evmConfigBuilders.get(routingDirection) as () => EvmEncodeConfig;
-        this.evmConfig = configBuilder.apply(this);
+        private readonly routingDirection: EddyRoutingDirection
+    ) {}
+
+    public getEvmConfig(): EvmEncodeConfig {
+        const configBuilder = this.evmConfigBuilders.get(
+            this.routingDirection
+        ) as () => EvmEncodeConfig;
+        const evmConfig = configBuilder.apply(this);
+
+        return evmConfig;
     }
 
-    // +
     private createAnyChainNativeToZetaNativeConfig(): EvmEncodeConfig {
         const data =
             EDDY_OMNI_CONTRACT_IN_ZETACHAIN +
@@ -64,7 +59,6 @@ export class EddyBridgeEvmConfigFactory {
         };
     }
 
-    // +
     private createAnyChainTokenToZetaTokenConfig(): EvmEncodeConfig {
         const msg =
             EDDY_OMNI_CONTRACT_IN_ZETACHAIN +
@@ -83,7 +77,6 @@ export class EddyBridgeEvmConfigFactory {
         return config;
     }
 
-    // +
     private createAnyChainNativeToZetaTokenConfig(): EvmEncodeConfig {
         const data =
             EDDY_OMNI_CONTRACT_IN_ZETACHAIN +
@@ -133,7 +126,6 @@ export class EddyBridgeEvmConfigFactory {
         return config;
     }
 
-    // +
     private createZetaTokenToAnyChainAllConfig(): EvmEncodeConfig {
         const srcZrc20TokenAddress = this.from.address;
         const destZrc20TokenAddress = findCompatibleZrc20TokenAddress(this.to);
@@ -154,7 +146,6 @@ export class EddyBridgeEvmConfigFactory {
         return config;
     }
 
-    // +
     private createZetaNativeToAnyChainAllConfig(): EvmEncodeConfig {
         const destZrc20TokenAddress = findCompatibleZrc20TokenAddress(this.to);
         const config = EvmWeb3Pure.encodeMethodCall(

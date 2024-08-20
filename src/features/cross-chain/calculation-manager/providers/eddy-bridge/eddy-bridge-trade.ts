@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { UnnecessaryApproveError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -33,7 +33,7 @@ import {
     EddyBridgeTradeConstructorParams
 } from './models/eddy-trade-types';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import { EddyRoutingDirection, ERD } from './utils/eddy-bridge-routing-directions';
+import { EddyRoutingDirection, ERD, isDirectBridge } from './utils/eddy-bridge-routing-directions';
 import { EddyBridgeEvmConfigFactory } from './utils/eddy-evm-config-factory';
 export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -53,8 +53,9 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 priceImpact: 0,
                 feeInfo,
                 slippage,
-                prevGasAmountInNonZetaChain: new BigNumber(0),
-                routingDirection
+                prevGasFeeInDestTokenUnits: new BigNumber(0),
+                routingDirection,
+                ratioToAmount: 1
             },
             providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             routePath: []
@@ -88,7 +89,10 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** */
 
     // gas amount in toToken units (non wei)
-    private readonly prevGasAmountInNonZetaChain: BigNumber | undefined;
+    private readonly prevGasFeeInDestTokenUnits: BigNumber | undefined;
+
+    // 0.99 if eddyFee is 1%, usage: finalAmount = toAmount * ratioToAmount
+    private readonly ratioToAmount: number;
 
     private readonly routingDirection: EddyRoutingDirection;
 
@@ -126,7 +130,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.to.weiAmountMinusSlippage(this.slippage),
             this.to.decimals
         );
-        this.prevGasAmountInNonZetaChain = params.crossChainTrade.prevGasAmountInNonZetaChain;
+        this.prevGasFeeInDestTokenUnits = params.crossChainTrade.prevGasFeeInDestTokenUnits;
         this.routingDirection = params.crossChainTrade.routingDirection;
     }
 
@@ -190,17 +194,20 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.to,
             this.walletAddress || FAKE_WALLET_ADDRESS,
             this.routingDirection
-        ).evmConfig;
+        ).getEvmConfig();
 
-        if (this.to.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN) {
-            const newGasAmount = await EddyBridgeContractService.getGasInDestTokenUnits(this.from);
+        const newGasAmount = await EddyBridgeContractService.getGasInDestTokenUnits(this.from);
+
+        if (isDirectBridge(this.from, this.to)) {
             const newNonWeiAmount = this.to.tokenAmount
-                .plus(this.prevGasAmountInNonZetaChain!)
+                .plus(this.prevGasFeeInDestTokenUnits!)
                 .minus(newGasAmount);
             const newWeiAmount = Web3Pure.toWei(newNonWeiAmount, this.to.decimals);
-
             return { config: evmConfig, amount: newWeiAmount };
         }
+
+        // const isSwapFromZetachain = this.from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
+        // const isSwapToZetachain = this.to.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
 
         return {
             config: evmConfig,

@@ -59,10 +59,19 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const [eddySlippage, { toAmount, gasInTargetChain }] = await Promise.all([
+            const [eddySlippage, eddyFee, gasFeeInDestTokenUnits] = await Promise.all([
                 EddyBridgeContractService.getEddySlipage(),
-                this.getToTokenAmount(fromWithoutFee, toToken, options)
+                EddyBridgeContractService.getPlatformFee(),
+                EddyBridgeContractService.getGasInDestTokenUnits(toToken)
             ]);
+            const ratioToAmount = 1 - eddyFee;
+            const toAmount = await this.getToTokenAmount(
+                fromWithoutFee,
+                toToken,
+                options,
+                ratioToAmount,
+                gasFeeInDestTokenUnits
+            );
 
             const to = await PriceTokenAmount.createToken({
                 ...toToken.asStruct,
@@ -89,8 +98,9 @@ export class EddyBridgeProvider extends CrossChainProvider {
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: eddySlippage,
-                    prevGasAmountInNonZetaChain: gasInTargetChain,
-                    routingDirection
+                    prevGasFeeInDestTokenUnits: gasFeeInDestTokenUnits,
+                    routingDirection,
+                    ratioToAmount
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
@@ -148,14 +158,10 @@ export class EddyBridgeProvider extends CrossChainProvider {
     private async getToTokenAmount(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        options: RequiredCrossChainOptions
-    ): Promise<{ toAmount: BigNumber; gasInTargetChain: BigNumber | undefined }> {
-        const [eddyFee, gasFeeInDestTokenUnits] = await Promise.all([
-            EddyBridgeContractService.getPlatformFee(),
-            EddyBridgeContractService.getGasInDestTokenUnits(toToken)
-        ]);
-        const ratioToAmount = 1 - eddyFee;
-
+        options: RequiredCrossChainOptions,
+        ratioToAmount: number,
+        gasFeeInDestTokenUnits: BigNumber
+    ): Promise<BigNumber> {
         const isSwapFromZetachain = from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
         const isSwapToZetachain = toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
 
@@ -164,7 +170,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 .multipliedBy(ratioToAmount)
                 .minus(gasFeeInDestTokenUnits);
 
-            return { toAmount, gasInTargetChain: gasFeeInDestTokenUnits };
+            return toAmount;
         }
 
         // Zetachain(ZETA) -> Ethereum(ETH), Zetachain(BNB) -> Bsc(USDT)
@@ -183,10 +189,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 options
             );
 
-            return {
-                toAmount: toAmount.minus(gasFeeInDestTokenUnits),
-                gasInTargetChain: gasFeeInDestTokenUnits
-            };
+            return toAmount.minus(gasFeeInDestTokenUnits);
         }
 
         // Ethereum(ETH) -> Zetachain(ZETA), Bsc(USDT) -> Zetachain(BNB)
@@ -198,7 +201,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
             });
             const toAmount = await this.calculateOnChainToAmount(fromZrc20Token, toToken, options);
 
-            return { toAmount, gasInTargetChain: undefined };
+            return toAmount;
         }
 
         // BSC <-> Ethereum
@@ -213,10 +216,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
         });
         const toAmount = await this.calculateOnChainToAmount(fromZrc20Token, toZrc20Token, options);
 
-        return {
-            toAmount: toAmount.minus(gasFeeInDestTokenUnits),
-            gasInTargetChain: gasFeeInDestTokenUnits
-        };
+        return toAmount.minus(gasFeeInDestTokenUnits);
     }
 
     private async calculateOnChainToAmount(
