@@ -1,11 +1,11 @@
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-import { EddyFinanceProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/eddy-finance/eddy-finance-provider';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -23,7 +23,11 @@ import { EddyBridgeTrade } from './eddy-bridge-trade';
 import { EddyBridgeApiService } from './services/eddy-bridge-api-service';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
 import { eddyRoutingDirection, isDirectBridge } from './utils/eddy-bridge-routing-directions';
-import { findCompatibleZrc20TokenAddress } from './utils/find-transit-token-address';
+import {
+    EDDY_CALCULATION_TYPES,
+    EddyBridgeCalculationFactory,
+    EddyCalculationType
+} from './utils/eddy-calculation-factory';
 
 export class EddyBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE;
@@ -69,14 +73,16 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 fromWithoutFee,
                 toToken,
                 options,
-                ratioToAmount,
-                gasFeeInDestTokenUnits
+                ratioToAmount
             );
 
-            const to = await PriceTokenAmount.createToken({
-                ...toToken.asStruct,
-                tokenAmount: toAmount
-            });
+            const [to, nativeSrcChainToken] = await Promise.all([
+                PriceTokenAmount.createToken({
+                    ...toToken.asStruct,
+                    tokenAmount: toAmount
+                }),
+                PriceToken.createFromToken(nativeTokensList[from.blockchain])
+            ]);
 
             const gasData =
                 options.gasCalculation === 'enabled'
@@ -92,7 +98,15 @@ export class EddyBridgeProvider extends CrossChainProvider {
 
             const trade = new EddyBridgeTrade({
                 crossChainTrade: {
-                    feeInfo,
+                    feeInfo: {
+                        ...feeInfo,
+                        provider: {
+                            cryptoFee: {
+                                amount: gasFeeInDestTokenUnits,
+                                token: nativeSrcChainToken
+                            }
+                        }
+                    },
                     from: fromWithoutFee,
                     gasData,
                     to,
@@ -159,78 +173,35 @@ export class EddyBridgeProvider extends CrossChainProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions,
-        ratioToAmount: number,
-        gasFeeInDestTokenUnits: BigNumber
+        ratioToAmount: number
     ): Promise<BigNumber> {
-        const isSwapFromZetachain = from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
-        const isSwapToZetachain = toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
+        const calculationType = this.getCalculationType(from, toToken);
+        const calculationFactory = new EddyBridgeCalculationFactory(
+            from,
+            toToken,
+            calculationType,
+            options,
+            ratioToAmount
+        );
+        const toAmount = calculationFactory.calculatePureToAmount();
 
-        if (isDirectBridge(from, toToken)) {
-            const toAmount = from.tokenAmount
-                .multipliedBy(ratioToAmount)
-                .minus(gasFeeInDestTokenUnits);
-
-            return toAmount;
-        }
-
-        // Zetachain(ZETA) -> Ethereum(ETH), Zetachain(BNB) -> Bsc(USDT)
-        if (isSwapFromZetachain) {
-            const fromZrc20Token = new PriceTokenAmount({
-                ...from.asStruct,
-                tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
-            });
-            const toZrc20Token = await PriceToken.createToken({
-                address: findCompatibleZrc20TokenAddress(toToken),
-                blockchain: BLOCKCHAIN_NAME.ZETACHAIN
-            });
-            const toAmount = await this.calculateOnChainToAmount(
-                fromZrc20Token,
-                toZrc20Token,
-                options
-            );
-
-            return toAmount.minus(gasFeeInDestTokenUnits);
-        }
-
-        // Ethereum(ETH) -> Zetachain(ZETA), Bsc(USDT) -> Zetachain(BNB)
-        if (isSwapToZetachain) {
-            const fromZrc20Token = await PriceTokenAmount.createToken({
-                address: findCompatibleZrc20TokenAddress(from),
-                blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
-                tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
-            });
-            const toAmount = await this.calculateOnChainToAmount(fromZrc20Token, toToken, options);
-
-            return toAmount;
-        }
-
-        // BSC <-> Ethereum
-        const fromZrc20Token = await PriceTokenAmount.createToken({
-            address: findCompatibleZrc20TokenAddress(from),
-            blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
-            tokenAmount: from.tokenAmount.multipliedBy(ratioToAmount)
-        });
-        const toZrc20Token = await PriceToken.createToken({
-            address: findCompatibleZrc20TokenAddress(toToken),
-            blockchain: BLOCKCHAIN_NAME.ZETACHAIN
-        });
-        const toAmount = await this.calculateOnChainToAmount(fromZrc20Token, toZrc20Token, options);
-
-        return toAmount.minus(gasFeeInDestTokenUnits);
+        return toAmount;
     }
 
-    private async calculateOnChainToAmount(
-        fromZrc20Token: PriceTokenAmount<EvmBlockchainName>,
-        toZrc20Token: PriceToken<EvmBlockchainName>,
-        options: RequiredCrossChainOptions
-    ): Promise<BigNumber> {
-        const calcData = await new EddyFinanceProvider().calculate(fromZrc20Token, toZrc20Token, {
-            ...options,
-            gasCalculation: 'disabled',
-            useProxy: false
-        });
-
-        return calcData.to.tokenAmount;
+    private getCalculationType(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>
+    ): EddyCalculationType {
+        if (isDirectBridge(from, toToken)) {
+            return EDDY_CALCULATION_TYPES.DIRECT_BRIDGE;
+        }
+        if (from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
+            return EDDY_CALCULATION_TYPES.SWAP_FROM_ZETACHAIN;
+        }
+        if (toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
+            return EDDY_CALCULATION_TYPES.SWAP_TO_ZETACHAIN;
+        }
+        return EDDY_CALCULATION_TYPES.SWAP_BETWEEN_OTHER_CHAINS;
     }
 
     protected async getRoutePath(
