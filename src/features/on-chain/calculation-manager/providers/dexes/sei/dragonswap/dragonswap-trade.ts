@@ -1,5 +1,7 @@
+import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -34,5 +36,20 @@ export class DragonSwapTrade extends UniswapV2AbstractTrade {
             return this.encodeProxy(options);
         }
         return this.encodeDirect(options);
+    }
+
+    protected override async checkAllowanceAndApprove(
+        options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
+    ): Promise<void> {
+        const approveOptions: EvmBasicTransactionOptions = {
+            onTransactionHash: options?.onApprove,
+            gas: options?.approveGasLimit || undefined,
+            gasPriceOptions: {
+                ...options?.gasPriceOptions,
+                maxPriorityFeePerGas: '100000000000',
+                maxFeePerGas: '100000000000'
+            }
+        };
+        return await super.checkAllowanceAndApprove(approveOptions);
     }
 }
