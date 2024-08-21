@@ -58,6 +58,7 @@ import { WagyuSwapProvider } from 'src/features/on-chain/calculation-manager/pro
 import { EddyFinanceProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/eddy-finance/eddy-finance-provider';
 import { MuteSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/mute-swap/mute-swap-provider';
 
+import { KujataBahamutProvider } from '../../providers/dexes/bahamut/kujata-bahamut/kujata-bahamut-provider';
 import { SilkSwapBahamutProvider } from '../../providers/dexes/bahamut/silk-swap-bahamut/silk-swap-bahamut-provider';
 import { SushiSwapZetachainProvider } from '../../providers/dexes/zetachain/sushi-swap-zetachain/sushi-swap-zetachain-provider';
 
@@ -157,5 +158,6 @@ export const UniswapV2TradeProviders = [
     // Sei
     DragonSwapProvider,
     //Bahamut
-    SilkSwapBahamutProvider
+    SilkSwapBahamutProvider,
+    KujataBahamutProvider
 ] as const;

@@ -8,6 +8,12 @@ type StargateV2ContractAddress = Record<
     Partial<Record<StargateV2BridgeToken, string>>
 >;
 
+export const chainsWithoutPoolBalanceMethodOnContract = [
+    BLOCKCHAIN_NAME.TAIKO,
+    BLOCKCHAIN_NAME.SEI,
+    BLOCKCHAIN_NAME.FLARE
+] as const;
+
 export const stargateV2ContractAddress: StargateV2ContractAddress = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         [stargateV2BridgeToken.ETH]: '0x77b2043768d28E9C9aB44E1aBfC95944bcE57931',
@@ -64,22 +70,30 @@ export const stargateV2ContractAddress: StargateV2ContractAddress = {
     },
     [BLOCKCHAIN_NAME.AURORA]: {
         [stargateV2BridgeToken.USDC]: '0x81F6138153d473E8c5EcebD3DC8Cd4903506B075'
-    }
+    },
     // [BLOCKCHAIN_NAME.KLAYTN]: {
-    //     [stargateV2BridgeToken.ETH]: '0xBB4957E44401a31ED81Cab33539d9e8993FA13Ce',
-    //     [stargateV2BridgeToken.USDC]: '0x01A7c805cc47AbDB254CD8AaD29dE5e447F59224',
-    //     [stargateV2BridgeToken.USDT]: '0x8619bA1B324e099CB2227060c4BC5bDEe14456c6'
+    //     [stargateV2BridgeToken.WETH]: '0x55acee547df909cf844e32dd66ee55a6f81dc71b',
+    //     [stargateV2BridgeToken.USDC]: '0xe2053bcf56d2030d2470fb454574237cf9ee3d4b',
+    //     [stargateV2BridgeToken.USDT]: '0x9025095263d1e548dc890a7589a4c78038ac40ab'
     // },
+    [BLOCKCHAIN_NAME.TAIKO]: {
+        // contract StargateOFTUSDC
+        [stargateV2BridgeToken.USDC]: '0x77C71633C34C3784ede189d74223122422492a0f',
+        // contract StargateOFTUSDT
+        [stargateV2BridgeToken.USDT]: '0x1C10CC06DC6D35970d1D53B2A23c76ef370d4135'
+    },
     // [BLOCKCHAIN_NAME.IOTA]: {
     //     [stargateV2BridgeToken.ETH]: '0x9c2dc7377717603eB92b2655c5f2E7997a4945BD',
     //     [stargateV2BridgeToken.USDC]: '0x8e8539e4CcD69123c623a106773F2b0cbbc58746',
     //     [stargateV2BridgeToken.USDT]: '0x77C71633C34C3784ede189d74223122422492a0f'
     // },
-    // [BLOCKCHAIN_NAME.TAIKO]: {
-    //     [stargateV2BridgeToken.USDC]: '0x77C71633C34C3784ede189d74223122422492a0f',
-    //     [stargateV2BridgeToken.USDT]: '0x1C10CC06DC6D35970d1D53B2A23c76ef370d4135'
-    // },
-    // [BLOCKCHAIN_NAME.SEI]: {
-    //     [stargateV2BridgeToken.WETH]: '0x5c386D85b1B82FD9Db681b9176C8a4248bb6345B'
-    // }
+    [BLOCKCHAIN_NAME.SEI]: {
+        // contract OFTTokenETH
+        [stargateV2BridgeToken.WETH]: '0x5c386D85b1B82FD9Db681b9176C8a4248bb6345B'
+    },
+    [BLOCKCHAIN_NAME.FLARE]: {
+        [stargateV2BridgeToken.USDC]: '0x77C71633C34C3784ede189d74223122422492a0f',
+        [stargateV2BridgeToken.USDT]: '0x1C10CC06DC6D35970d1D53B2A23c76ef370d4135',
+        [stargateV2BridgeToken.WETH]: '0x8e8539e4CcD69123c623a106773F2b0cbbc58746'
+    }
 };
