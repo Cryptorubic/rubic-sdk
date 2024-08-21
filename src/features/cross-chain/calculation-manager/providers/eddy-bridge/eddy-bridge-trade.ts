@@ -10,6 +10,7 @@ import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-a
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { TransactionReceipt } from 'web3-eth';
 
+import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
@@ -33,7 +34,8 @@ import {
     EddyBridgeTradeConstructorParams
 } from './models/eddy-trade-types';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import { EddyRoutingDirection, ERD, isDirectBridge } from './utils/eddy-bridge-routing-directions';
+import { EddyRoutingDirection, ERD } from './utils/eddy-bridge-routing-directions';
+import { EddyBridgeCalculationFactory } from './utils/eddy-calculation-factory';
 import { EddyBridgeEvmConfigFactory } from './utils/eddy-evm-config-factory';
 export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -43,7 +45,8 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
         providerAddress,
         toToken,
         slippage,
-        routingDirection
+        routingDirection,
+        quoteOptions
     }: EddyBridgeGetGasDataParams): Promise<GasData | null> {
         const trade = new EddyBridgeTrade({
             crossChainTrade: {
@@ -53,9 +56,9 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 priceImpact: 0,
                 feeInfo,
                 slippage,
-                prevGasFeeInDestTokenUnits: new BigNumber(0),
                 routingDirection,
-                ratioToAmount: 1
+                ratioToAmount: 1,
+                quoteOptions
             },
             providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             routePath: []
@@ -88,11 +91,10 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     private readonly slippage: number;
     /** */
 
-    // gas amount in toToken units (non wei)
-    private readonly prevGasFeeInDestTokenUnits: BigNumber | undefined;
-
     // 0.99 if eddyFee is 1%, usage: finalAmount = toAmount * ratioToAmount
     private readonly ratioToAmount: number;
+
+    private readonly quoteOptions: RequiredCrossChainOptions;
 
     private readonly routingDirection: EddyRoutingDirection;
 
@@ -130,8 +132,9 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.to.weiAmountMinusSlippage(this.slippage),
             this.to.decimals
         );
-        this.prevGasFeeInDestTokenUnits = params.crossChainTrade.prevGasFeeInDestTokenUnits;
         this.routingDirection = params.crossChainTrade.routingDirection;
+        this.ratioToAmount = params.crossChainTrade.ratioToAmount;
+        this.quoteOptions = params.crossChainTrade.quoteOptions;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -196,22 +199,22 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.routingDirection
         ).getEvmConfig();
 
-        const newGasAmount = await EddyBridgeContractService.getGasInDestTokenUnits(this.from);
-
-        if (isDirectBridge(this.from, this.to)) {
-            const newNonWeiAmount = this.to.tokenAmount
-                .plus(this.prevGasFeeInDestTokenUnits!)
-                .minus(newGasAmount);
-            const newWeiAmount = Web3Pure.toWei(newNonWeiAmount, this.to.decimals);
-            return { config: evmConfig, amount: newWeiAmount };
-        }
-
-        // const isSwapFromZetachain = this.from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
-        // const isSwapToZetachain = this.to.blockchain === BLOCKCHAIN_NAME.ZETACHAIN;
+        const gasFeeInSrcTokenUnits = await EddyBridgeContractService.getGasFeeInDestChain(
+            this.from,
+            this.to
+        );
+        const calculationFactory = new EddyBridgeCalculationFactory(
+            this.from,
+            this.to,
+            this.quoteOptions,
+            this.ratioToAmount,
+            gasFeeInSrcTokenUnits
+        );
+        const toStringWeiAmount = await calculationFactory.calculateToStringWeiAmount();
 
         return {
             config: evmConfig,
-            amount: this.to.stringWeiAmount
+            amount: toStringWeiAmount
         };
     }
 

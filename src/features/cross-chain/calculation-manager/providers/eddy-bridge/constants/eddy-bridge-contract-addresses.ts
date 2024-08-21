@@ -1,4 +1,5 @@
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 
 import { TssAvailableEddyBridgeChain } from './eddy-bridge-supported-chains';
 
@@ -17,6 +18,16 @@ export const CUSTODY_ADDRESSES: Partial<Record<EvmBlockchainName, string>> = {
 };
 
 export const ZETA_CHAIN_SUPPORTED_TOKENS: ZetachainTokenInfo[] = [
+    {
+        address: EvmWeb3Pure.EMPTY_ADDRESS,
+        symbol: 'ZETA',
+        relativeChain: BLOCKCHAIN_NAME.ETHEREUM
+    },
+    {
+        address: EvmWeb3Pure.EMPTY_ADDRESS,
+        symbol: 'ZETA',
+        relativeChain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
+    },
     {
         address: '0xd97b1de3619ed2c6beb3860147e30ca8a7dc9891',
         symbol: 'ETH',

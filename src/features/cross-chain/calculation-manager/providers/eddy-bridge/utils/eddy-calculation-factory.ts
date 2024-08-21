@@ -1,29 +1,19 @@
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EddyFinanceProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/eddy-finance/eddy-finance-provider';
 
 import { RequiredCrossChainOptions } from '../../../models/cross-chain-options';
+import {
+    EDDY_CALCULATION_TYPES,
+    EddyCalculationType,
+    getEddyCalculationType
+} from './eddy-bridge-routing-directions';
 import { findCompatibleZrc20TokenAddress } from './find-transit-token-address';
 
-export const EDDY_CALCULATION_TYPES = {
-    DIRECT_BRIDGE: 'DIRECT_BRIDGE',
-    SWAP_FROM_ZETACHAIN: 'SWAP_FROM_ZETACHAIN',
-    SWAP_TO_ZETACHAIN: 'SWAP_TO_ZETACHAIN',
-    SWAP_BETWEEN_OTHER_CHAINS: 'SWAP_BETWEEN_OTHER_CHAINS'
-} as const;
-
-export type EddyCalculationType =
-    (typeof EDDY_CALCULATION_TYPES)[keyof typeof EDDY_CALCULATION_TYPES];
-
 export class EddyBridgeCalculationFactory {
-    constructor(
-        private readonly from: PriceTokenAmount<EvmBlockchainName>,
-        private readonly toToken: PriceToken<EvmBlockchainName>,
-        private readonly calculationType: EddyCalculationType,
-        private readonly options: RequiredCrossChainOptions,
-        private readonly ratioToAmount: number
-    ) {}
+    private calculationType: EddyCalculationType;
 
     private readonly calculators: Map<EddyCalculationType, () => Promise<BigNumber>> = new Map([
         [EDDY_CALCULATION_TYPES.DIRECT_BRIDGE, this.calculateDirectBridge],
@@ -32,10 +22,28 @@ export class EddyBridgeCalculationFactory {
         [EDDY_CALCULATION_TYPES.SWAP_BETWEEN_OTHER_CHAINS, this.calculateSwapBetweenOtherChains]
     ]);
 
-    public async calculatePureToAmount(): Promise<BigNumber> {
+    constructor(
+        private readonly from: PriceTokenAmount<EvmBlockchainName>,
+        private readonly toToken: PriceToken<EvmBlockchainName>,
+        private readonly options: RequiredCrossChainOptions,
+        private readonly ratioToAmount: number,
+        private readonly gasFeeInSrcTokenUnits: BigNumber
+    ) {
+        this.calculationType = getEddyCalculationType(from, toToken);
+    }
+
+    public async calculateToAmount(): Promise<BigNumber> {
         const calculatorFn = this.calculators.get(this.calculationType)!;
         const toAmount = await calculatorFn.apply(this);
-        return toAmount;
+        const toAmountWithGasInDestChain = toAmount.minus(this.gasFeeInSrcTokenUnits);
+
+        return toAmountWithGasInDestChain;
+    }
+
+    public async calculateToStringWeiAmount(): Promise<string> {
+        const nonWeiAmount = await this.calculateToAmount();
+        const weiAmount = Web3Pure.toWei(nonWeiAmount, this.toToken.decimals);
+        return weiAmount;
     }
 
     private async calculateDirectBridge(): Promise<BigNumber> {

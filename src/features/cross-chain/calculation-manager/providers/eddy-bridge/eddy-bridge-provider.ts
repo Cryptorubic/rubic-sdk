@@ -1,7 +1,5 @@
-import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
@@ -22,12 +20,8 @@ import { EDDY_BRIDGE_LIMITS } from './constants/swap-limits';
 import { EddyBridgeTrade } from './eddy-bridge-trade';
 import { EddyBridgeApiService } from './services/eddy-bridge-api-service';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
-import { eddyRoutingDirection, isDirectBridge } from './utils/eddy-bridge-routing-directions';
-import {
-    EDDY_CALCULATION_TYPES,
-    EddyBridgeCalculationFactory,
-    EddyCalculationType
-} from './utils/eddy-calculation-factory';
+import { eddyRoutingDirection } from './utils/eddy-bridge-routing-directions';
+import { EddyBridgeCalculationFactory } from './utils/eddy-calculation-factory';
 
 export class EddyBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE;
@@ -63,26 +57,26 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const [eddySlippage, eddyFee, gasFeeInDestTokenUnits] = await Promise.all([
+            const [eddySlippage, eddyFee, gasFeeInSrcTokenUnits] = await Promise.all([
                 EddyBridgeContractService.getEddySlipage(),
                 EddyBridgeContractService.getPlatformFee(),
-                EddyBridgeContractService.getGasInDestTokenUnits(toToken)
+                EddyBridgeContractService.getGasFeeInDestChain(from, toToken)
             ]);
             const ratioToAmount = 1 - eddyFee;
-            const toAmount = await this.getToTokenAmount(
-                fromWithoutFee,
+
+            const calculationFactory = new EddyBridgeCalculationFactory(
+                from,
                 toToken,
                 options,
-                ratioToAmount
+                ratioToAmount,
+                gasFeeInSrcTokenUnits
             );
+            const toAmount = await calculationFactory.calculateToAmount();
 
-            const [to, nativeSrcChainToken] = await Promise.all([
-                PriceTokenAmount.createToken({
-                    ...toToken.asStruct,
-                    tokenAmount: toAmount
-                }),
-                PriceToken.createFromToken(nativeTokensList[from.blockchain])
-            ]);
+            const to = await PriceTokenAmount.createToken({
+                ...toToken.asStruct,
+                tokenAmount: toAmount
+            });
 
             const gasData =
                 options.gasCalculation === 'enabled'
@@ -92,28 +86,21 @@ export class EddyBridgeProvider extends CrossChainProvider {
                           toToken: to,
                           providerAddress: options.providerAddress,
                           slippage: options.slippageTolerance,
-                          routingDirection
+                          routingDirection,
+                          quoteOptions: options
                       })
                     : null;
 
             const trade = new EddyBridgeTrade({
                 crossChainTrade: {
-                    feeInfo: {
-                        ...feeInfo,
-                        provider: {
-                            cryptoFee: {
-                                amount: gasFeeInDestTokenUnits,
-                                token: nativeSrcChainToken
-                            }
-                        }
-                    },
+                    feeInfo,
                     from: fromWithoutFee,
                     gasData,
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: eddySlippage,
-                    prevGasFeeInDestTokenUnits: gasFeeInDestTokenUnits,
                     routingDirection,
+                    quoteOptions: options,
                     ratioToAmount
                 },
                 providerAddress: options.providerAddress,
@@ -167,41 +154,6 @@ export class EddyBridgeProvider extends CrossChainProvider {
         }
 
         return { trade, tradeType: this.type };
-    }
-
-    private async getToTokenAmount(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>,
-        options: RequiredCrossChainOptions,
-        ratioToAmount: number
-    ): Promise<BigNumber> {
-        const calculationType = this.getCalculationType(from, toToken);
-        const calculationFactory = new EddyBridgeCalculationFactory(
-            from,
-            toToken,
-            calculationType,
-            options,
-            ratioToAmount
-        );
-        const toAmount = calculationFactory.calculatePureToAmount();
-
-        return toAmount;
-    }
-
-    private getCalculationType(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>
-    ): EddyCalculationType {
-        if (isDirectBridge(from, toToken)) {
-            return EDDY_CALCULATION_TYPES.DIRECT_BRIDGE;
-        }
-        if (from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
-            return EDDY_CALCULATION_TYPES.SWAP_FROM_ZETACHAIN;
-        }
-        if (toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
-            return EDDY_CALCULATION_TYPES.SWAP_TO_ZETACHAIN;
-        }
-        return EDDY_CALCULATION_TYPES.SWAP_BETWEEN_OTHER_CHAINS;
     }
 
     protected async getRoutePath(

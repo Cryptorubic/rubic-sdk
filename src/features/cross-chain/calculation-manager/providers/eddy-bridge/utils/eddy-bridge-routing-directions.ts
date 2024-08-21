@@ -19,6 +19,16 @@ export const ERD = {
 
 export type EddyRoutingDirection = (typeof ERD)[keyof typeof ERD];
 
+export const EDDY_CALCULATION_TYPES = {
+    DIRECT_BRIDGE: 'DIRECT_BRIDGE',
+    SWAP_FROM_ZETACHAIN: 'SWAP_FROM_ZETACHAIN',
+    SWAP_TO_ZETACHAIN: 'SWAP_TO_ZETACHAIN',
+    SWAP_BETWEEN_OTHER_CHAINS: 'SWAP_BETWEEN_OTHER_CHAINS'
+} as const;
+
+export type EddyCalculationType =
+    (typeof EDDY_CALCULATION_TYPES)[keyof typeof EDDY_CALCULATION_TYPES];
+
 // eslint-disable-next-line complexity
 export function eddyRoutingDirection(
     from: PriceTokenAmount<EvmBlockchainName>,
@@ -45,17 +55,19 @@ export function eddyRoutingDirection(
 
         if (from.isNative && to.isNative) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_NATIVE;
         if (from.isNative && isSupportedToToken) return ERD.ANY_CHAIN_NATIVE_TO_ZETA_TOKEN;
-        if (!from.isNative && isSupportedToToken && isSupportedFromToken)
+        if (!from.isNative && isSupportedToToken && isSupportedFromToken && !to.isNative) {
             return ERD.ANY_CHAIN_TOKEN_TO_ZETA_TOKEN;
+        }
     }
+    // BSC <-> ETH routes are not supported
 
-    if (
-        from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
-        to.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN
-    ) {
-        if (from.isNative && !to.isNative) return ERD.ANY_CHAIN_NATIVE_TO_ANY_CHAIN_TOKEN;
-        if (!from.isNative && !to.isNative) return ERD.ANY_CHAIN_TOKEN_TO_ANY_CHAIN_TOKEN;
-    }
+    // if (
+    //     from.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN &&
+    //     to.blockchain !== BLOCKCHAIN_NAME.ZETACHAIN
+    // ) {
+    //     if (from.isNative && !to.isNative) return ERD.ANY_CHAIN_NATIVE_TO_ANY_CHAIN_TOKEN;
+    //     if (!from.isNative && !to.isNative) return ERD.ANY_CHAIN_TOKEN_TO_ANY_CHAIN_TOKEN;
+    // }
 
     throw new NotSupportedTokensError();
 }
@@ -68,4 +80,20 @@ export function isDirectBridge(
     toToken: PriceToken<EvmBlockchainName>
 ): boolean {
     return compareAddresses(from.symbol, toToken.symbol);
+}
+
+export function getEddyCalculationType(
+    from: PriceTokenAmount<EvmBlockchainName>,
+    toToken: PriceToken<EvmBlockchainName>
+): EddyCalculationType {
+    if (isDirectBridge(from, toToken)) {
+        return EDDY_CALCULATION_TYPES.DIRECT_BRIDGE;
+    }
+    if (from.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
+        return EDDY_CALCULATION_TYPES.SWAP_FROM_ZETACHAIN;
+    }
+    if (toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
+        return EDDY_CALCULATION_TYPES.SWAP_TO_ZETACHAIN;
+    }
+    return EDDY_CALCULATION_TYPES.SWAP_BETWEEN_OTHER_CHAINS;
 }

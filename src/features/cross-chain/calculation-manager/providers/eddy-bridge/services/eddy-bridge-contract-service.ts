@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import { PriceToken } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -28,30 +27,35 @@ export class EddyBridgeContractService {
     }
 
     /**
+     * Eddy takes gasFee in source chain native currency
      * @param toToken target chain token
-     * @returns gasFee in target token units
      */
-    public static async getGasInDestTokenUnits(
+    public static async getGasFeeInDestChain(
+        fromToken: PriceToken<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
     ): Promise<BigNumber> {
         if (toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) return new BigNumber(0);
 
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
-        const res = await web3Public.callContractMethod<[string, string]>(
+        const res = await web3Public.callContractMethod<{ 0: string; 1: string }>(
             findCompatibleZrc20TokenAddress(toToken),
             ZRC_20_ABI,
             'withdrawGasFee',
             []
         );
+        const { 0: zrc20GasFeeTokenAddress, 1: zrc20WeiAmount } = res;
 
-        const gasFeeNonWei = Web3Pure.fromWei(res?.[1] || 0, 18);
-        const nativeTokenWithPrice = await PriceToken.createFromToken(
-            nativeTokensList[toToken.blockchain]
-        );
-        const gasFeeUsd = gasFeeNonWei.multipliedBy(nativeTokenWithPrice.price);
-        const gasFeeInDestTokenAmount = gasFeeUsd.dividedBy(toToken.price);
+        const zrc20TokenWithPrice = await PriceToken.createToken({
+            address: zrc20GasFeeTokenAddress,
+            blockchain: BLOCKCHAIN_NAME.ZETACHAIN
+        });
+        const gasFeeUsdt = Web3Pure.fromWei(
+            zrc20WeiAmount || 0,
+            zrc20TokenWithPrice.decimals
+        ).multipliedBy(zrc20TokenWithPrice.price);
+        const gasFeeInSrcTokenEquivalent = gasFeeUsdt.dividedBy(fromToken.price);
 
-        return gasFeeInDestTokenAmount;
+        return gasFeeInSrcTokenEquivalent;
     }
 
     /**
