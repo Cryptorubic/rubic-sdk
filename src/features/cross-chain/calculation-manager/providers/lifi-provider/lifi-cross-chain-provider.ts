@@ -312,8 +312,15 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const lifiSteps = (route.steps[0] as LifiStep).includedSteps;
         const crossChainStep = lifiSteps.find(el => el.type === 'cross')!;
 
-        const fromTransit = crossChainStep.action.fromToken.address;
-        const toTransit = crossChainStep.action.toToken.address;
+        const isFromNativeSolanaToken = from.isNative && from.blockchain === BLOCKCHAIN_NAME.SOLANA;
+        const isToNativeSolanaToken = to.isNative && to.blockchain === BLOCKCHAIN_NAME.SOLANA;
+
+        const fromTransit = isFromNativeSolanaToken
+            ? from.address
+            : crossChainStep.action.fromToken.address;
+        const toTransit = isToNativeSolanaToken
+            ? to.address
+            : crossChainStep.action.toToken.address;
 
         const fromTokenAmount = await TokenAmount.createToken({
             address: fromTransit,
