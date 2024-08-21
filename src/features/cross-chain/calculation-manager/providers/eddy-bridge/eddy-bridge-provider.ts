@@ -1,4 +1,4 @@
-import { MaxAmountError, MinAmountError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
@@ -124,8 +124,7 @@ export class EddyBridgeProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const limits = EDDY_BRIDGE_LIMITS.find(info => fromWithoutFee.isEqualTo(info));
         if (!limits) {
-            return { trade, tradeType: this.type };
-            // throw new NotSupportedTokensError();
+            throw new NotSupportedTokensError();
         }
         let hasEnoughCapacity: boolean = true;
 

@@ -34,42 +34,50 @@ export class EddyBridgeContractService {
         fromToken: PriceToken<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
     ): Promise<BigNumber> {
-        if (toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) return new BigNumber(0);
+        try {
+            if (toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) return new BigNumber(0);
 
-        const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
-        const res = await web3Public.callContractMethod<{ 0: string; 1: string }>(
-            findCompatibleZrc20TokenAddress(toToken),
-            ZRC_20_ABI,
-            'withdrawGasFee',
-            []
-        );
-        const { 0: zrc20GasFeeTokenAddress, 1: zrc20WeiAmount } = res;
+            const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
+            const res = await web3Public.callContractMethod<{ 0: string; 1: string }>(
+                findCompatibleZrc20TokenAddress(toToken),
+                ZRC_20_ABI,
+                'withdrawGasFee',
+                []
+            );
+            const { 0: zrc20GasFeeTokenAddress, 1: zrc20WeiAmount } = res;
 
-        const zrc20TokenWithPrice = await PriceToken.createToken({
-            address: zrc20GasFeeTokenAddress,
-            blockchain: BLOCKCHAIN_NAME.ZETACHAIN
-        });
-        const gasFeeUsdt = Web3Pure.fromWei(
-            zrc20WeiAmount || 0,
-            zrc20TokenWithPrice.decimals
-        ).multipliedBy(zrc20TokenWithPrice.price);
-        const gasFeeInSrcTokenEquivalent = gasFeeUsdt.dividedBy(fromToken.price);
+            const zrc20TokenWithPrice = await PriceToken.createToken({
+                address: zrc20GasFeeTokenAddress,
+                blockchain: BLOCKCHAIN_NAME.ZETACHAIN
+            });
+            const gasFeeUsdt = Web3Pure.fromWei(
+                zrc20WeiAmount || 0,
+                zrc20TokenWithPrice.decimals
+            ).multipliedBy(zrc20TokenWithPrice.price);
+            const gasFeeInSrcTokenEquivalent = gasFeeUsdt.dividedBy(fromToken.price);
 
-        return gasFeeInSrcTokenEquivalent;
+            return gasFeeInSrcTokenEquivalent;
+        } catch (err) {
+            throw err;
+        }
     }
 
     /**
      * @returns eddy static slippage
      */
     public static async getEddySlipage(): Promise<number> {
-        const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
-        const res = await web3Public.callContractMethod<number>(
-            EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
-            EDDY_BRIDGE_ABI,
-            'slippage',
-            []
-        );
-        // if res equals to 10 then 10 / 1000 = 1%
-        return res / 1_000;
+        try {
+            const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
+            const res = await web3Public.callContractMethod<number>(
+                EDDY_OMNI_CONTRACT_IN_ZETACHAIN,
+                EDDY_BRIDGE_ABI,
+                'slippage',
+                []
+            );
+            // if res equals to 10 then 10 / 1000 = 1%
+            return res / 1_000;
+        } catch (err) {
+            return 0.02;
+        }
     }
 }
