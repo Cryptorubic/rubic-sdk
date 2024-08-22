@@ -27,7 +27,7 @@ export interface EddyBridgeTradeConstructorParams {
         slippage: number;
         routingDirection: EddyRoutingDirection;
         quoteOptions: RequiredCrossChainOptions;
-        ratioToAmount: number;
+        // ratioToAmount: number;
     };
     providerAddress: string;
     routePath: RubicStep[];

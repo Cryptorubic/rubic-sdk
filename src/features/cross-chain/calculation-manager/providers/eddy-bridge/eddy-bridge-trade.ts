@@ -2,14 +2,17 @@ import BigNumber from 'bignumber.js';
 import { UnnecessaryApproveError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { ContractParams } from 'src/features/common/models/contract-params';
-import { EddyQuoterControllerFactory } from 'src/features/cross-chain/calculation-manager/providers/eddy-bridge/utils/eddy-quoter-controller-factory';
+import { QuoteRequest } from 'src/features/cross-chain/calculation-manager/providers/eddy-bridge/models/eddy-bridge-api-types';
+import { EddyBridgeApiService } from 'src/features/cross-chain/calculation-manager/providers/eddy-bridge/services/eddy-bridge-api-service';
 import { EddySwapControllerFactory } from 'src/features/cross-chain/calculation-manager/providers/eddy-bridge/utils/eddy-swap-controller-factory';
+import { findApiTokenAddress } from 'src/features/cross-chain/calculation-manager/providers/eddy-bridge/utils/find-api-token-address';
 import { TransactionReceipt } from 'web3-eth';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -35,7 +38,6 @@ import {
     EddyBridgeGetGasDataParams,
     EddyBridgeTradeConstructorParams
 } from './models/eddy-trade-types';
-import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
 import { EddyRoutingDirection, ERD } from './utils/eddy-bridge-routing-directions';
 
 export class EddyBridgeTrade extends EvmCrossChainTrade {
@@ -58,7 +60,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
                 feeInfo,
                 slippage,
                 routingDirection,
-                ratioToAmount: 1,
+                // ratioToAmount: 1,
                 quoteOptions
             },
             providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
@@ -90,10 +92,6 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     public readonly priceImpact: number | null;
 
     private readonly slippage: number;
-    /** */
-
-    // 0.99 if eddyFee is 1%, usage: finalAmount = toAmount * ratioToAmount
-    private readonly ratioToAmount: number;
 
     private readonly quoteOptions: RequiredCrossChainOptions;
 
@@ -134,7 +132,6 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.to.decimals
         );
         this.routingDirection = params.crossChainTrade.routingDirection;
-        this.ratioToAmount = params.crossChainTrade.ratioToAmount;
         this.quoteOptions = params.crossChainTrade.quoteOptions;
     }
 
@@ -200,22 +197,23 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.routingDirection
         ).getEvmConfig();
 
-        const gasFeeInSrcTokenUnits = await EddyBridgeContractService.getGasFeeInDestChain(
-            this.from,
-            this.to
-        );
+        const fromChainId = blockchainId[this.from.blockchain];
+        const toChainId = blockchainId[this.to.blockchain];
+        const zrcFrom = findApiTokenAddress(this.from);
+        const zrcTo = findApiTokenAddress(this.to);
 
-        const toStringWeiAmount = await EddyQuoterControllerFactory.createController(
-            this.from,
-            this.to,
-            this.quoteOptions,
-            this.ratioToAmount,
-            gasFeeInSrcTokenUnits
-        ).calculateToStringWeiAmount();
+        const quoteParams: QuoteRequest = {
+            fromAmount: this.from.stringWeiAmount,
+            fromChainId: fromChainId,
+            fromToken: zrcFrom,
+            toChainId: toChainId,
+            toToken: zrcTo
+        };
+        const { outputAmount } = await EddyBridgeApiService.fetchRates(quoteParams);
 
         return {
             config: evmConfig,
-            amount: toStringWeiAmount
+            amount: outputAmount
         };
     }
 

@@ -35,16 +35,16 @@ export class EddyBridgeContractService {
         toToken: PriceToken<EvmBlockchainName>
     ): Promise<BigNumber> {
         try {
-            if (toToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) return new BigNumber(0);
+            if (fromToken.blockchain === BLOCKCHAIN_NAME.ZETACHAIN) {
+                return new BigNumber(0);
+            }
 
             const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZETACHAIN);
-            const res = await web3Public.callContractMethod<{ 0: string; 1: string }>(
-                findCompatibleZrc20TokenAddress(toToken),
-                ZRC_20_ABI,
-                'withdrawGasFee',
-                []
-            );
-            const { 0: zrc20GasFeeTokenAddress, 1: zrc20WeiAmount } = res;
+            const res = await web3Public.callContractMethod<{
+                zrc20GasFeeTokenAddress: string;
+                zrc20WeiAmount: string;
+            }>(findCompatibleZrc20TokenAddress(toToken), ZRC_20_ABI, 'withdrawGasFee', []);
+            const { zrc20GasFeeTokenAddress, zrc20WeiAmount } = res;
 
             const zrc20TokenWithPrice = await PriceToken.createToken({
                 address: zrc20GasFeeTokenAddress,

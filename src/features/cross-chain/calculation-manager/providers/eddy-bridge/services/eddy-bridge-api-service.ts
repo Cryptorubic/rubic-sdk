@@ -4,7 +4,11 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
 
-import { ZetaChainForeignCoinsRes } from '../models/eddy-bridge-api-types';
+import {
+    QuoteRequest,
+    QuoteResponse,
+    ZetaChainForeignCoinsRes
+} from '../models/eddy-bridge-api-types';
 import { findCompatibleZrc20TokenAddress } from '../utils/find-transit-token-address';
 
 export class EddyBridgeApiService {
@@ -25,5 +29,10 @@ export class EddyBridgeApiService {
         }
 
         return tokenInfo.liquidity_cap;
+    }
+
+    public static async fetchRates(params: QuoteRequest): Promise<QuoteResponse> {
+        const api = 'https://api.eddy.finance/api/v1/swap/get-quote-bridge';
+        return Injector.httpClient.post<QuoteResponse>(api, params);
     }
 }
