@@ -4,6 +4,7 @@ import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/b
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { EddyQuoterControllerFactory } from 'src/features/cross-chain/calculation-manager/providers/eddy-bridge/utils/eddy-quoter-controller-factory';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -21,7 +22,6 @@ import { EddyBridgeTrade } from './eddy-bridge-trade';
 import { EddyBridgeApiService } from './services/eddy-bridge-api-service';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
 import { eddyRoutingDirection } from './utils/eddy-bridge-routing-directions';
-import { EddyBridgeCalculationFactory } from './utils/eddy-calculation-factory';
 
 export class EddyBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE;
@@ -64,14 +64,13 @@ export class EddyBridgeProvider extends CrossChainProvider {
             ]);
             const ratioToAmount = 1 - eddyFee;
 
-            const calculationFactory = new EddyBridgeCalculationFactory(
+            const toAmount = await EddyQuoterControllerFactory.createController(
                 from,
                 toToken,
                 options,
                 ratioToAmount,
                 gasFeeInSrcTokenUnits
-            );
-            const toAmount = await calculationFactory.calculateToAmount();
+            ).calculateToAmount();
 
             const to = await PriceTokenAmount.createToken({
                 ...toToken.asStruct,

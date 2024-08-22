@@ -8,6 +8,8 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { EddyQuoterControllerFactory } from 'src/features/cross-chain/calculation-manager/providers/eddy-bridge/utils/eddy-quoter-controller-factory';
+import { EddySwapControllerFactory } from 'src/features/cross-chain/calculation-manager/providers/eddy-bridge/utils/eddy-swap-controller-factory';
 import { TransactionReceipt } from 'web3-eth';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -35,8 +37,7 @@ import {
 } from './models/eddy-trade-types';
 import { EddyBridgeContractService } from './services/eddy-bridge-contract-service';
 import { EddyRoutingDirection, ERD } from './utils/eddy-bridge-routing-directions';
-import { EddyBridgeCalculationFactory } from './utils/eddy-calculation-factory';
-import { EddyBridgeEvmConfigFactory } from './utils/eddy-evm-config-factory';
+
 export class EddyBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData({
@@ -192,7 +193,7 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
     protected async getTransactionConfigAndAmount(
         _receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        const evmConfig = new EddyBridgeEvmConfigFactory(
+        const evmConfig = EddySwapControllerFactory.createController(
             this.from,
             this.to,
             this.walletAddress || FAKE_WALLET_ADDRESS,
@@ -203,14 +204,14 @@ export class EddyBridgeTrade extends EvmCrossChainTrade {
             this.from,
             this.to
         );
-        const calculationFactory = new EddyBridgeCalculationFactory(
+
+        const toStringWeiAmount = await EddyQuoterControllerFactory.createController(
             this.from,
             this.to,
             this.quoteOptions,
             this.ratioToAmount,
             gasFeeInSrcTokenUnits
-        );
-        const toStringWeiAmount = await calculationFactory.calculateToStringWeiAmount();
+        ).calculateToStringWeiAmount();
 
         return {
             config: evmConfig,
