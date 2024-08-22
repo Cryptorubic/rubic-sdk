@@ -488,5 +488,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'FLR',
         symbol: 'FLR',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.GRAVITY]: new Token({
+        blockchain: BLOCKCHAIN_NAME.GRAVITY,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Gravity',
+        symbol: 'G',
+        decimals: 18
     })
 };

@@ -464,5 +464,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped FTN',
         symbol: 'WFTN',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.GRAVITY]: new Token({
+        blockchain: BLOCKCHAIN_NAME.GRAVITY,
+        address: '0xBB859E225ac8Fb6BE1C7e38D87b767e95Fef0EbD',
+        name: 'Wrapped Gravity',
+        symbol: 'WG',
+        decimals: 18
     })
 };

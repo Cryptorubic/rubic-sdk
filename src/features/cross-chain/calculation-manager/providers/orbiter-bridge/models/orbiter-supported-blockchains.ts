@@ -24,7 +24,8 @@ export const orbiterSupportedBlockchains = [
     BLOCKCHAIN_NAME.CORE,
     // BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.ZK_LINK,
-    BLOCKCHAIN_NAME.MERLIN
+    BLOCKCHAIN_NAME.MERLIN,
+    BLOCKCHAIN_NAME.GRAVITY
 ] as const;
 
 export type OrbiterSupportedBlockchain = (typeof orbiterSupportedBlockchains)[number];
