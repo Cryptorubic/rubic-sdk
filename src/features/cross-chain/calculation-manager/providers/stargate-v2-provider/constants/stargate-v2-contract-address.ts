@@ -11,7 +11,8 @@ type StargateV2ContractAddress = Record<
 export const chainsWithoutPoolBalanceMethodOnContract = [
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.SEI,
-    BLOCKCHAIN_NAME.FLARE
+    BLOCKCHAIN_NAME.FLARE,
+    BLOCKCHAIN_NAME.GRAVITY
 ] as const;
 
 export const stargateV2ContractAddress: StargateV2ContractAddress = {
