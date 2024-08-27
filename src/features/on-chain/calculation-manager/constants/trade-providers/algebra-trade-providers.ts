@@ -18,5 +18,5 @@ export const AlgebraTradeProviders = [
     BerachainTestnetAlgebraProvider,
     ModeAlgebraProvider,
     BlastFenixProvider,
-    CamelotGravityProvider
+    //CamelotGravityProvider
 ] as const;
