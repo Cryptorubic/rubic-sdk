@@ -7,7 +7,6 @@ import { QuickSwapV3Provider } from 'src/features/on-chain/calculation-manager/p
 import { QuickSwapV3PolygonZKEVMProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon-zkevm/quick-swap-v3/quick-swap-v3-provider';
 
 import { AlgebraIntegralProvider } from '../../providers/dexes/arthera-testnet/algebra-integral/algebra-integral-provider';
-import { CamelotGravityProvider } from '../../providers/dexes/gravity/camelot-gravity/camelot-gravity-provider';
 
 export const AlgebraTradeProviders = [
     AlgebraProvider,
@@ -17,6 +16,6 @@ export const AlgebraTradeProviders = [
     CamelotArbitrumProvider,
     BerachainTestnetAlgebraProvider,
     ModeAlgebraProvider,
-    BlastFenixProvider,
+    BlastFenixProvider
     //CamelotGravityProvider
 ] as const;
