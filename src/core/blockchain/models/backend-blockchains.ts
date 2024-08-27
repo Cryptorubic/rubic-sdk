@@ -144,6 +144,7 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.SEI]: 'sei',
     [BLOCKCHAIN_NAME.CORE]: 'core',
     [BLOCKCHAIN_NAME.BAHAMUT]: 'bahamut',
+    [BLOCKCHAIN_NAME.BITLAYER]: 'bitlayer',
     [BLOCKCHAIN_NAME.GRAVITY]: 'gravity'
 } as const;
 

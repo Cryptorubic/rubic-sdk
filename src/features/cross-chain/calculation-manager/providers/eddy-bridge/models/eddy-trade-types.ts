@@ -1,7 +1,7 @@
-import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
+import { RequiredCrossChainOptions } from '../../../models/cross-chain-options';
 import { GasData } from '../../common/emv-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../../common/models/fee-info';
 import { RubicStep } from '../../common/models/rubicStep';
@@ -14,6 +14,7 @@ export interface EddyBridgeGetGasDataParams {
     providerAddress: string;
     slippage: number;
     routingDirection: EddyRoutingDirection;
+    quoteOptions: RequiredCrossChainOptions;
 }
 
 export interface EddyBridgeTradeConstructorParams {
@@ -24,8 +25,9 @@ export interface EddyBridgeTradeConstructorParams {
         feeInfo: FeeInfo;
         priceImpact: number | null;
         slippage: number;
-        prevGasAmountInNonZetaChain: BigNumber | undefined;
         routingDirection: EddyRoutingDirection;
+        quoteOptions: RequiredCrossChainOptions;
+        // ratioToAmount: number;
     };
     providerAddress: string;
     routePath: RubicStep[];

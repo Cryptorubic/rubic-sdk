@@ -33,8 +33,9 @@ export const mesonCrossChainSupportedChains = [
     BLOCKCHAIN_NAME.ZK_LINK,
     BLOCKCHAIN_NAME.ZK_SYNC,
     BLOCKCHAIN_NAME.CORE,
-    BLOCKCHAIN_NAME.KROMA
-    // BLOCKCHAIN_NAME.TAIKO
+    BLOCKCHAIN_NAME.KROMA,
+    // BLOCKCHAIN_NAME.TAIKO,
+    BLOCKCHAIN_NAME.BITLAYER
 ] as const;
 
 export type MesonSupportedBlockchain = (typeof mesonCrossChainSupportedChains)[number];

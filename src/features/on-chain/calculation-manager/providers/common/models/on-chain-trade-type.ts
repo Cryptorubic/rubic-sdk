@@ -67,6 +67,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     LUA_SWAP: 'LUA_SWAP',
     LIFI: 'LIFI',
 
+    MACARON: 'MACARON',
     MAVERICK: 'MAVERICK',
     MDEX: 'MDEX',
     MERLIN_SWAP: 'MERLIN_SWAP',

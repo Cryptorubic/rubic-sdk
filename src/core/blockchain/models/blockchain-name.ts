@@ -70,6 +70,7 @@ export const EVM_BLOCKCHAIN_NAME = {
     SEI: 'SEI',
     CORE: 'CORE',
     BAHAMUT: 'BAHAMUT',
+    BITLAYER: 'BITLAYER',
     GRAVITY: 'GRAVITY'
 } as const;
 
