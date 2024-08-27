@@ -63,7 +63,7 @@ export const ON_CHAIN_TRADE_TYPE = {
 
     KIM: 'KIM',
     KYBER_SWAP: 'KYBER_SWAP',
-
+    KUJATA: 'KUJATA',
     LUA_SWAP: 'LUA_SWAP',
     LIFI: 'LIFI',
 
