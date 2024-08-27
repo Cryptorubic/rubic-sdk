@@ -18,6 +18,7 @@ export const stargateV2SupportedBlockchains = [
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.SEI,
     BLOCKCHAIN_NAME.FLARE
+    // BLOCKCHAIN_NAME.GRAVITY
     // BLOCKCHAIN_NAME.IOTA,
 ];
 
