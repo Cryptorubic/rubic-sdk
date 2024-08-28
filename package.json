@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "6.0.0-alpha.ton.41",
+    "version": "6.0.0-alpha.ton.42",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -82,6 +82,7 @@
         "@solana/web3.js": "^1.89.1",
         "@solflare-wallet/utl-sdk": "^1.4.0",
         "@ton/core": "^0.56.3",
+        "@ton/crypto": "^3.3.0",
         "@ton/ton": "^13.11.2",
         "@tonconnect/ui": "^2.0.5",
         "@viaprotocol/router-sdk": "^1.0.7",
