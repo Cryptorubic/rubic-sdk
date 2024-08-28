@@ -1,4 +1,5 @@
 import { SwapRequestError } from 'src/common/errors';
+import { NotSupportedRegionError } from 'src/common/errors/swap/not-supported-region';
 import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
@@ -12,7 +13,6 @@ import {
     BridgersSwapRequest,
     BridgersSwapResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
-import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainPlatformFee } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
@@ -127,15 +127,8 @@ export class BridgersTrade extends TronOnChainTrade {
         fromAddress?: string;
         receiverAddress?: string;
     }): Promise<TronBridgersTransactionData> {
-        const fromTokenAddress = createTokenNativeAddressProxy(
-            this.from,
-            bridgersNativeAddress
-        ).address;
-        const toTokenAddress = createTokenNativeAddressProxy(
-            this.to,
-            bridgersNativeAddress
-        ).address;
-
+        const fromTokenAddress = this.from.isNative ? bridgersNativeAddress : this.from.address;
+        const toTokenAddress = this.to.isNative ? bridgersNativeAddress : this.to.address;
         const fromAddress = options.fromAddress || this.walletAddress;
         const toAddress = options.receiverAddress || fromAddress;
 
@@ -156,7 +149,11 @@ export class BridgersTrade extends TronOnChainTrade {
 
         const swapData = await Injector.httpClient.post<
             BridgersSwapResponse<TronBridgersTransactionData>
-        >('https://sswap.swft.pro/api/sswap/swap', swapRequest);
+        >('https://api.bridgers.xyz/api/sswap/swap', swapRequest);
+
+        if (swapData.resCode === 1146) {
+            throw new NotSupportedRegionError();
+        }
         return swapData.data.txData;
     }
 }
