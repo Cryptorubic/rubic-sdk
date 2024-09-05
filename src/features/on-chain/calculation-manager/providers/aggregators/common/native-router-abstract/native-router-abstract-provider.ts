@@ -25,7 +25,7 @@ import { NativeRouterApiService } from './services/native-router-api-service';
 export abstract class NativeRouterAbstractProvider<
     T extends NativeRouterAbstractTrade = NativeRouterAbstractTrade
 > extends AggregatorOnChainProvider {
-    private readonly nativeTokenAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+    private readonly nativeTokenAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
     protected abstract createNativeRouterTradeInstance(tradeInstance: NativeRouterTradeInstance): T;
     public async calculate(
@@ -42,16 +42,19 @@ export abstract class NativeRouterAbstractProvider<
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
             const fromAddress = this.getWalletAddress(from.blockchain) || fakeAddress;
-            const chain = this.getBlockchainById(from.blockchain);
+            const fromChain = this.getBlockchainById(from.blockchain);
+            const toChain = this.getBlockchainById(toToken.blockchain);
             const path = this.getRoutePath(from, toToken);
             const fromTokenAddress = from.isNative ? this.nativeTokenAddress : from.address;
             const toTokenAddress = toToken.isNative ? this.nativeTokenAddress : toToken.address;
+
             const nativeRouterQuoteParams: NativeRouterQuoteRequestParams = {
-                chain: chain,
-                tokenIn: fromTokenAddress,
-                tokenOut: toTokenAddress,
+                src_chain: fromChain,
+                dst_chain: toChain,
+                token_out: toTokenAddress,
+                token_in: fromTokenAddress,
                 amount: fromWithoutFee.tokenAmount.toString(),
-                fromAddress: fromAddress,
+                from_address: fromAddress,
                 slippage: options.slippageTolerance * 100
             };
             const { amountOut, txRequest } = await NativeRouterApiService.getFirmQuote(

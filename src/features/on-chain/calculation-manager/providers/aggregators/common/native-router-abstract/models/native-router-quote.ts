@@ -1,12 +1,14 @@
 import { NativeRouterTransactionRequest } from './native-router-transaction-request';
 
 export interface NativeRouterQuoteRequestParams {
-    chain: string;
-    tokenIn: string;
-    tokenOut: string;
+    src_chain: string;
+    dst_chain: string;
+    token_in: string;
+    token_out: string;
     amount: string;
-    fromAddress: string;
+    from_address: string;
     slippage?: number;
+    to_address?: string;
 }
 
 export interface NativeRouterQuoteResponse {
