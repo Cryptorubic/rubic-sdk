@@ -12,7 +12,8 @@ export const odosSupportedBlockchains = [
     BLOCKCHAIN_NAME.FANTOM,
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.MANTLE,
-    BLOCKCHAIN_NAME.MODE
+    BLOCKCHAIN_NAME.MODE,
+    BLOCKCHAIN_NAME.SCROLL
 ] as const;
 
 export type OdosSupportedBlockchain = (typeof odosSupportedBlockchains)[number];
