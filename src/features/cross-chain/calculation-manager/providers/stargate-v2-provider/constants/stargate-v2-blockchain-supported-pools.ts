@@ -74,4 +74,9 @@ export const stargateV2BlockchainSupportedPools: Record<StargateV2SupportedBlock
             stargateV2PoolId[stargateV2BridgeToken.USDT],
             stargateV2PoolId[stargateV2BridgeToken.WETH]
         ]
+        // [BLOCKCHAIN_NAME.GRAVITY]: [
+        //     stargateV2PoolId[stargateV2BridgeToken.USDC],
+        //     stargateV2PoolId[stargateV2BridgeToken.USDT],
+        //     stargateV2PoolId[stargateV2BridgeToken.WETH]
+        // ]
     };

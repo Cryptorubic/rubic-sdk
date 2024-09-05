@@ -20,5 +20,6 @@ export const stargateV2ChainIds: Record<StargateV2SupportedBlockchains, number> 
     [BLOCKCHAIN_NAME.TAIKO]: 30290,
     [BLOCKCHAIN_NAME.SEI]: 30280,
     [BLOCKCHAIN_NAME.FLARE]: 30295
+    // [BLOCKCHAIN_NAME.GRAVITY]: 30294
     // [BLOCKCHAIN_NAME.IOTA]: 30284,
 };
