@@ -65,6 +65,7 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
 
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
+import { EywaApiService } from '../calculation-manager/providers/eywa-provider/services/eywa-api-service';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
 import { OwlToApiService } from '../calculation-manager/providers/owl-to-bridge/services/owl-to-api-service';
@@ -100,7 +101,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE]: this.getOwlToDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.EYWA_V2]: this.getEywaDstSwapStatus
     };
 
     /**
@@ -732,5 +734,34 @@ export class CrossChainStatusManager {
         const txStatusData = await RouterApiService.getTxStatus(data);
 
         return txStatusData;
+    }
+
+    private async getEywaDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const transitChainRequestId = await EywaApiService.getRequestId(data.srcTxHash, 1);
+
+        if (!transitChainRequestId) {
+            throw new RubicSdkError('requestId has not been created yet');
+        }
+
+        const transitChainTxData = await EywaApiService.getTxStatus(transitChainRequestId);
+
+        if (transitChainTxData.destination.status === 'completed') {
+            const events = transitChainTxData.destination.events;
+            const dstChainRequestId = events[events.length - 1]!.args.nextRequestId;
+
+            const dstChainTxData = await EywaApiService.getTxStatus(dstChainRequestId);
+
+            if (dstChainTxData.destination.status === 'completed') {
+                return {
+                    status: TX_STATUS.SUCCESS,
+                    hash: dstChainTxData.destination.transactionHash
+                };
+            }
+        }
+
+        return {
+            status: TX_STATUS.PENDING,
+            hash: null
+        };
     }
 }
