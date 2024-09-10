@@ -6,6 +6,9 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { SquidrouterEstimation } from 'src/features/common/providers/squidrouter/models/estimation-response';
+import { SquidrouterTransactionRequest } from 'src/features/common/providers/squidrouter/models/transaction-request';
+import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -19,14 +22,10 @@ import {
     SquidrouterCrossChainSupportedBlockchain,
     squidrouterCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
-import { SquidrouterEstimation } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/estimation-response';
-import { SquidrouterTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-request';
 import { SquidrouterCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-trade';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export class SquidrouterCrossChainProvider extends CrossChainProvider {
-    public static readonly apiEndpoint = 'https://api.0xsquid.com/v1/';
-
     private readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER;
@@ -80,11 +79,10 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 toAddress: receiver,
                 slippage: Number(options.slippageTolerance * 100)
             };
+
             const {
                 route: { transactionRequest, estimate }
-            } = await SquidrouterCrossChainTrade.getResponseFromApiToTransactionRequest(
-                requestParams
-            );
+            } = await SquidRouterApiService.getRoute(requestParams);
 
             const squidGasData: GasData = {
                 gasLimit: new BigNumber(transactionRequest.gasLimit).plus(useProxy ? 120000 : 0),

@@ -1,4 +1,5 @@
-import { SquidrouterEstimation } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/estimation-response';
+import { SquidrouterEstimation } from './estimation-response';
+import { SquidrouterTransactionRequest } from './transaction-request';
 
 export interface SquirouterTransaction {
     readonly routeType: string;
@@ -25,5 +26,14 @@ export interface SquidrouterTransactionResponse {
          * Transaction data.
          */
         readonly transactionRequest: SquirouterTransaction;
+
+        readonly params: SquidrouterTransactionRequest;
     };
+}
+
+export interface SquidrouterTxStatusParams {
+    requestId: string;
+    transactionId: string;
+    fromChainId: number;
+    toChainId: number;
 }

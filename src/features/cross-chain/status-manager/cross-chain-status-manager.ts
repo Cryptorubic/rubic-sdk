@@ -22,6 +22,7 @@ import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
+import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
@@ -43,7 +44,6 @@ import {
     LIFI_SWAP_STATUS,
     LifiSwapStatus
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
-import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
 import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
@@ -53,7 +53,6 @@ import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/mod
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
 import { RubicBackendPsStatus } from 'src/features/cross-chain/status-manager/models/rubic-backend-ps-status';
 import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
-import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
 import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
 import {
     BtcStatusResponse,
@@ -601,10 +600,12 @@ export class CrossChainStatusManager {
 
     private async getSquidrouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { status, toChain } = await this.httpClient.get<SquidrouterApiResponse>(
-                `${SquidrouterCrossChainProvider.apiEndpoint}status?transactionId=${data.srcTxHash}`,
-                { headers: { 'x-integrator-id': 'rubic-api' } }
-            );
+            const { status, toChain } = await SquidRouterApiService.getTxStatus({
+                transactionId: data.srcTxHash,
+                requestId: '',
+                fromChainId: blockchainId[data.fromBlockchain],
+                toChainId: blockchainId[data.toBlockchain]
+            });
 
             if (
                 status === SQUIDROUTER_TRANSFER_STATUS.DEST_EXECUTED ||
