@@ -599,12 +599,15 @@ export class CrossChainStatusManager {
     }
 
     private async getSquidrouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.squidrouterRequestId) {
+            throw new RubicSdkError('Must provide squidrouter request id');
+        }
         try {
             const { status, toChain } = await SquidRouterApiService.getTxStatus({
                 transactionId: data.srcTxHash,
-                requestId: '',
-                fromChainId: blockchainId[data.fromBlockchain],
-                toChainId: blockchainId[data.toBlockchain]
+                requestId: data.squidrouterRequestId,
+                fromChainId: blockchainId[data.fromBlockchain].toString(),
+                toChainId: blockchainId[data.toBlockchain].toString()
             });
 
             if (

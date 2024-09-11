@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Injector } from 'src/core/injector/injector';
 import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
 
@@ -12,18 +13,21 @@ export class SquidRouterApiService {
 
     public static async getRoute(
         requestParams: SquidrouterTransactionRequest
-    ): Promise<SquidrouterTransactionResponse> {
-        const res = await Injector.httpClient.post<{
-            headers: { [key: string]: string };
-            route: SquidrouterTransactionResponse;
-        }>(`${SquidRouterApiService.baseUrl}/route`, requestParams, {
-            headers: {
-                'x-integrator-id': 'rubic-api'
+    ): Promise<{ tx: SquidrouterTransactionResponse; requestId: string }> {
+        const res = await axios.post<SquidrouterTransactionResponse>(
+            `${SquidRouterApiService.baseUrl}/route`,
+            requestParams,
+            {
+                headers: {
+                    'x-integrator-id': 'rubic-api'
+                }
             }
-        });
+        );
 
-        console.log(res.headers);
-        return res.route;
+        return {
+            tx: res.data,
+            requestId: res.headers['x-request-id']
+        };
     }
 
     public static getTxStatus(params: SquidrouterTxStatusParams): Promise<SquidrouterApiResponse> {

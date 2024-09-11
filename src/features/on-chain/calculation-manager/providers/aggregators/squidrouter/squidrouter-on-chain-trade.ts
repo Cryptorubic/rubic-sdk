@@ -31,6 +31,8 @@ export class SquidRouterOnChainTrade extends AggregatorEvmOnChainTrade {
 
     public readonly providerGateway: string;
 
+    public squidrouterRequestId: string | undefined;
+
     public get dexContractAddress(): string {
         throw new RubicSdkError('Dex address is unknown before swap is started');
     }
@@ -55,16 +57,18 @@ export class SquidRouterOnChainTrade extends AggregatorEvmOnChainTrade {
         };
 
         const {
-            route: { transactionRequest, estimate }
+            tx: { route },
+            requestId
         } = await SquidRouterApiService.getRoute(requestParams);
+        this.squidrouterRequestId = requestId;
 
         return {
             tx: {
-                data: transactionRequest.data,
-                value: transactionRequest.value,
-                to: transactionRequest.targetAddress
+                data: route.transactionRequest.data,
+                value: route.transactionRequest.value,
+                to: route.transactionRequest.target
             },
-            toAmount: estimate.toAmount
+            toAmount: route.estimate.toAmount
         };
     }
 }

@@ -3,7 +3,7 @@ import { SquidrouterTransactionRequest } from './transaction-request';
 
 export interface SquirouterTransaction {
     readonly routeType: string;
-    readonly targetAddress: string;
+    readonly target: string;
     readonly data: string;
     readonly value: string;
     readonly gasLimit: string;
@@ -34,6 +34,6 @@ export interface SquidrouterTransactionResponse {
 export interface SquidrouterTxStatusParams {
     requestId: string;
     transactionId: string;
-    fromChainId: number;
-    toChainId: number;
+    fromChainId: string;
+    toChainId: string;
 }

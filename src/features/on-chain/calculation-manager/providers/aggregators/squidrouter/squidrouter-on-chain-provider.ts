@@ -2,7 +2,6 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { SquidrouterTransactionRequest } from 'src/features/common/providers/squidrouter/models/transaction-request';
 import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
 import {
@@ -24,7 +23,7 @@ import { SquidRouterOnChainTrade } from './squidrouter-on-chain-trade';
 export class SquidRouterOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.SQUIDROUTER;
 
-    private readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+    private readonly nativeAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
     protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return squidrouterCrossChainSupportedBlockchains.some(item => item === blockchain);
@@ -37,27 +36,29 @@ export class SquidRouterOnChainProvider extends AggregatorOnChainProvider {
     ): Promise<OnChainTrade | OnChainTradeError> {
         const fromBlockchain = from.blockchain as SquidrouterCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SquidrouterCrossChainSupportedBlockchain;
-        const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
-            from.blockchain
-        ).address;
-
         try {
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
 
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
-            const receiver = walletAddress || fakeAddress;
+            const fromAddress = options?.fromAddress || fakeAddress;
+
+            const receiver = fromAddress;
             const requestParams: SquidrouterTransactionRequest = {
-                fromChain: blockchainId[fromBlockchain],
+                fromAddress,
+                fromChain: blockchainId[fromBlockchain].toString(),
                 fromToken: from.isNative ? this.nativeAddress : from.address,
                 fromAmount: fromWithoutFee.stringWeiAmount,
-                toChain: blockchainId[toBlockchain],
+                toChain: blockchainId[toBlockchain].toString(),
                 toToken: toToken.isNative ? this.nativeAddress : toToken.address,
                 toAddress: receiver,
                 slippage: Number(options.slippageTolerance * 100)
             };
 
-            const { route } = await SquidRouterApiService.getRoute(requestParams);
-            const providerGateway = route.transactionRequest.targetAddress;
+            const {
+                tx: { route }
+            } = await SquidRouterApiService.getRoute(requestParams);
+
+            const providerGateway = route.transactionRequest.target;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,

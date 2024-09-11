@@ -33,8 +33,6 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
  */
 export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
-    public readonly transitUSDAmount: BigNumber;
-
     private readonly cryptoFeeToken: PriceTokenAmount;
 
     private readonly slippage: number;
@@ -42,6 +40,8 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     private readonly onChainTrade: EvmOnChainTrade | null;
 
     private readonly transactionRequest: SquidrouterTransactionRequest;
+
+    public squidrouterRequestId: string | undefined;
 
     /** @internal */
     public static async getGasData(
@@ -69,7 +69,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                     allowanceTarget: '',
                     slippage: 0,
                     feeInfo,
-                    transitUSDAmount: new BigNumber(NaN),
                     cryptoFeeToken: from,
                     onChainTrade: null,
                     onChainSubtype: { from: undefined, to: undefined },
@@ -133,7 +132,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             allowanceTarget: string;
             slippage: number;
             feeInfo: FeeInfo;
-            transitUSDAmount: BigNumber;
             cryptoFeeToken: PriceTokenAmount;
             onChainTrade: EvmOnChainTrade | null;
             onChainSubtype: OnChainSubtype;
@@ -156,7 +154,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.onChainSubtype = crossChainTrade.onChainSubtype;
         this.transactionRequest = crossChainTrade.transactionRequest;
-        this.transitUSDAmount = crossChainTrade.transitUSDAmount;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -275,16 +272,17 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         };
 
         const {
-            route: { transactionRequest, estimate }
+            tx: { route },
+            requestId
         } = await SquidRouterApiService.getRoute(requestParams);
-
+        this.squidrouterRequestId = requestId;
         return {
             config: {
-                data: transactionRequest.data,
-                value: transactionRequest.value,
-                to: transactionRequest.targetAddress
+                data: route.transactionRequest.data,
+                value: route.transactionRequest.value,
+                to: route.transactionRequest.target
             },
-            amount: estimate.toAmount
+            amount: route.estimate.toAmount
         };
     }
 }
