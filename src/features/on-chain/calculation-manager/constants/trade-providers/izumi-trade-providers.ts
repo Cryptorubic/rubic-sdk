@@ -15,6 +15,7 @@ import { IzumiZkLinkProvider } from 'src/features/on-chain/calculation-manager/p
 import { IzumiZksyncProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/izumi-zksync/izumi-zksync-provider';
 
 import { IzumiArbitrumProvider } from '../../providers/dexes/arbitrum/izumi-arbitrum/izumi-arbitrum-provider';
+import { IzumiGravityProvider } from '../../providers/dexes/gravity/izumi-gravity/izumi-gravity-provider';
 import { IzumiKromaProvider } from '../../providers/dexes/kroma/izumi-kroma/izumi-kroma-provider';
 
 export const izumiTradeProviders = [
@@ -36,5 +37,6 @@ export const izumiTradeProviders = [
     IzumiBlastProvider,
     // IzumiMerlinProvider,
     IzumiScrollProvider,
-    IzumiXlayerProvider
+    IzumiXlayerProvider,
+    IzumiGravityProvider
 ];

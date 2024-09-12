@@ -70,5 +70,10 @@ export const cbridgeContractAddress: Record<
         providerGateway: '0x358234B325EF9eA8115291A8b81b7d33A2Fa762D',
         providerRouter: '0x358234B325EF9eA8115291A8b81b7d33A2Fa762D',
         rubicRouter: '0x841ce48F9446C8E281D3F1444cB859b4A6D0738C'
+    },
+    [BLOCKCHAIN_NAME.GRAVITY]: {
+        providerGateway: '0x9B36f165baB9ebe611d491180418d8De4b8f3a1f',
+        providerRouter: '0x9B36f165baB9ebe611d491180418d8De4b8f3a1f',
+        rubicRouter: '0x33798753ec66aEc00ed7E337B41F444f53A63333'
     }
 };
