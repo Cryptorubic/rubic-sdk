@@ -6,12 +6,12 @@ import { IzumiProvider } from '../../common/izumi-abstract/izumi-provider';
 export class IzumiGravityProvider extends IzumiProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.GRAVITY;
 
-    protected readonly dexAddress = '';
+    protected readonly dexAddress = '0x3EF68D3f7664b2805D4E88381b64868a56f88bC4';
 
     protected readonly config = {
         maxTransitTokens: 1,
-        quoterAddress: '',
-        liquidityManagerAddress: '',
+        quoterAddress: '0x33531bDBFE34fa6Fd5963D0423f7699775AacaaF',
+        liquidityManagerAddress: '0x19b683A2F45012318d9B2aE1280d68d3eC54D663',
         routingTokenAddresses: [
             wrappedNativeTokensList[BLOCKCHAIN_NAME.GRAVITY]!.address, // WG
             '0xf6f832466Cd6C21967E0D954109403f36Bc8ceaA', // WETH
