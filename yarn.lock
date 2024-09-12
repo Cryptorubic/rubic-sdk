@@ -984,6 +984,11 @@
   resolved "https://registry.yarnpkg.com/@debridge-finance/debridge-external-call/-/debridge-external-call-1.0.7.tgz#f7e8f85193de27a6552a07cc52e4d8d8df2c7460"
   integrity sha512-MA93NzDNhgI5KzpMFuenWp5Qfm13q1fkuvge903Kg9/o1JcDgL0coH2Nf0I0OZctqlGC3d34wj3ABQzCaB8KAw==
 
+"@dedust/sdk@^0.8.7":
+  version "0.8.7"
+  resolved "https://registry.yarnpkg.com/@dedust/sdk/-/sdk-0.8.7.tgz#77ed0dc09f68da7184b3b9a38e9f8e0431f7b95b"
+  integrity sha512-xW7bcdIUD09t9h5iUA+jCR0qLOnjvloYXNgEJbajPmIdXrCal8R+UoLE26a/5as0h6B2DmuC4peSYMoiHDFSlg==
+
 "@discoveryjs/json-ext@0.5.7", "@discoveryjs/json-ext@^0.5.0":
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.7.tgz#1d572bfbbe14b7704e0ba0f39b74815b84870d70"

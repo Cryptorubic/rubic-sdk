@@ -1,24 +1,19 @@
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
-import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
 import { TonWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/ton-web3-public/ton-web3-public';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { TransactionConfig } from 'web3-core';
 
 import { GasFeeInfo } from '../evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../on-chain-trade';
-import {
-    TonEncodedConfigAndToAmount,
-    TonOnChainTradeStruct
-} from './models/ton-on-chian-trade-types';
+import { TonOnChainTradeStruct } from './models/ton-on-chian-trade-types';
 
-export abstract class TonOnChainTrade extends OnChainTrade {
+export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
@@ -33,7 +28,7 @@ export abstract class TonOnChainTrade extends OnChainTrade {
 
     protected readonly fromWithoutFee: PriceTokenAmount<TonBlockchainName>;
 
-    private skipAmountCheck: boolean = false;
+    protected skipAmountCheck: boolean = false;
 
     protected get spenderAddress(): string {
         throw new RubicSdkError('No spender address!');
@@ -69,59 +64,26 @@ export abstract class TonOnChainTrade extends OnChainTrade {
         throw new Error('Method is not supported');
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string> {
-        await this.checkWalletState(options?.testMode);
-
-        const { onConfirm } = options;
-        let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
-
-        const fromAddress = this.walletAddress;
-        const receiverAddress = options.receiverAddress || this.walletAddress;
-
-        const tonEncodedConfig = await this.encode({
-            fromAddress,
-            receiverAddress,
-            skipAmountCheck: this.skipAmountCheck,
-            ...(options?.referrer && { referrer: options?.referrer })
-        });
-
-        try {
-            await this.web3Private.sendTransaction({
-                onTransactionHash,
-                messages: [tonEncodedConfig]
-            });
-            return transactionHash!;
-        } catch (err) {
-            throw parseError(err);
-        }
+    public async encode(): Promise<T> {
+        throw new RubicSdkError(
+            'Method not implemented! Use custom swap methods on each child class!'
+        );
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<TonEncodedConfig> {
+    protected async makePreSwapChecks(options: EncodeTransactionOptions): Promise<void> {
+        checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
         await this.checkFromAddress(options.fromAddress);
         await this.checkReceiverAddress(options.receiverAddress);
+
         if (!options.skipAmountCheck) {
             this.skipAmountCheck = true;
-            await this.handleAmountCheckBeforeSwap(options);
+            const toWeiAmount = await this.calculateOutputAmount(options);
+            this.checkAmountChange(toWeiAmount, this.to.stringWeiAmount);
         }
-
-        return this.encodeDirect(options);
     }
 
-    public abstract encodeDirect(options: EncodeTransactionOptions): Promise<TonEncodedConfig>;
-
-    private async handleAmountCheckBeforeSwap(options: EncodeTransactionOptions): Promise<void> {
-        const { toAmount } = await this.getTransactionConfigAndAmount(options);
-
-        this.checkAmountChange(toAmount, this.to.stringWeiAmount);
-    }
-
-    protected abstract getTransactionConfigAndAmount(
-        options: EncodeTransactionOptions
-    ): Promise<TonEncodedConfigAndToAmount>;
+    /**
+     * recalculates and returns output stringWeiAmount
+     */
+    protected abstract calculateOutputAmount(options: EncodeTransactionOptions): Promise<string>;
 }

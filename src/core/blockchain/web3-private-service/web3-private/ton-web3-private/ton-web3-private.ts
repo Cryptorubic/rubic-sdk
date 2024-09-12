@@ -1,3 +1,4 @@
+import { TonClient4 } from '@ton/ton';
 import { TonConnectUI } from '@tonconnect/ui';
 import { RubicSdkError } from 'src/common/errors';
 import { waitFor } from 'src/common/utils/waitFor';
@@ -17,6 +18,12 @@ export class TonWeb3Private extends Web3Private {
     private readonly tonApi: TonApiService = new TonApiService();
 
     private readonly tonConnectUI: TonConnectUI;
+
+    private readonly _tonClient: TonClient4;
+
+    public get tonClient(): TonClient4 {
+        return this._tonClient;
+    }
 
     public async getBlockchainName(): Promise<BlockchainName> {
         return BLOCKCHAIN_NAME.TON;
@@ -41,7 +48,7 @@ export class TonWeb3Private extends Web3Private {
         }
     }
 
-    private async waitForTransactionReceipt(boc: string): Promise<boolean> {
+    private async waitForTransactionReceipt(txHash: string): Promise<boolean> {
         let isCompleted = false;
         const startTimeMS = Date.now();
         const timeLimitMS = 600 * 1000;
@@ -55,12 +62,15 @@ export class TonWeb3Private extends Web3Private {
                 return true;
             }
             await waitFor(30_000);
-            isCompleted = await this.tonApi.checkIsTxCompleted(boc);
+            isCompleted = await this.tonApi.checkIsTxCompleted(txHash);
         }
     }
 
     constructor(tonProviderCore: TonWalletProviderCore) {
         super(tonProviderCore.address);
         this.tonConnectUI = tonProviderCore.core;
+        this._tonClient = new TonClient4({
+            endpoint: 'https://mainnet-v4.tonhubapi.com'
+        });
     }
 }

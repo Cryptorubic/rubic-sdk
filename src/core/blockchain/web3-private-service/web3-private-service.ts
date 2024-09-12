@@ -3,6 +3,7 @@ import {
     BlockchainName,
     EvmBlockchainName,
     SolanaBlockchainName,
+    TonBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE, ChainType } from 'src/core/blockchain/models/chain-type';
@@ -56,6 +57,7 @@ export class Web3PrivateService {
     public getWeb3Private(chainType: 'EVM'): EvmWeb3Private;
     public getWeb3Private(chainType: 'TRON'): TronWeb3Private;
     public getWeb3Private(chainType: 'SOLANA'): SolanaWeb3Private;
+    public getWeb3Private(chainType: 'TON'): TonWeb3Private;
     public getWeb3Private(chainType: ChainType): never;
     public getWeb3Private(chainType: ChainType) {
         if (!Web3PrivateService.isSupportedChainType(chainType)) {
@@ -72,6 +74,7 @@ export class Web3PrivateService {
     public getWeb3PrivateByBlockchain(blockchain: EvmBlockchainName): EvmWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: SolanaBlockchainName): SolanaWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: TronBlockchainName): TronWeb3Private;
+    public getWeb3PrivateByBlockchain(blockchain: TonBlockchainName): TonWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: Web3PrivateSupportedBlockchain): Web3Private;
     public getWeb3PrivateByBlockchain(blockchain: BlockchainName): never;
     public getWeb3PrivateByBlockchain(blockchain: BlockchainName) {
