@@ -1,5 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    NotSupportedTokensError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -145,7 +150,12 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const transit = onChainTrade ? transitCurrency! || nativeCurrency! : fromCurrency!;
 
         try {
-            const toAmount = await this.getToAmount(transit, toCurrency, transitMinAmount);
+            const { toAmount, quoteError } = await this.getToAmount(
+                transit,
+                toCurrency,
+                transitMinAmount,
+                from.symbol
+            );
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -174,7 +184,13 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 options.providerAddress,
                 await this.getRoutePath(from, to)
             );
-
+            if (quoteError) {
+                return {
+                    trade,
+                    error: quoteError,
+                    tradeType: this.type
+                };
+            }
             const error = await this.checkMinMaxAmounts(transitFromToken, transit, toCurrency);
             if (error) {
                 return {
@@ -256,17 +272,33 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
     private async getToAmount(
         fromCurrency: ChangenowCurrency,
         toCurrency: ChangenowCurrency,
-        fromAmount: BigNumber
-    ): Promise<BigNumber> {
-        const res = await ChangeNowCrossChainApiService.getQuoteTx({
-            fromCurrency: fromCurrency.ticker,
-            toCurrency: toCurrency.ticker,
-            fromAmount: fromAmount.toFixed(),
-            fromNetwork: fromCurrency.network,
-            toNetwork: toCurrency.network
-        });
+        fromAmount: BigNumber,
+        fromSymbol: string
+    ): Promise<{
+        toAmount: BigNumber;
+        quoteError?: RubicSdkError;
+    }> {
+        try {
+            const res = await ChangeNowCrossChainApiService.getQuoteTx({
+                fromCurrency: fromCurrency.ticker,
+                toCurrency: toCurrency.ticker,
+                fromAmount: fromAmount.toFixed(),
+                fromNetwork: fromCurrency.network,
+                toNetwork: toCurrency.network
+            });
 
-        return new BigNumber(res.toAmount);
+            return { toAmount: new BigNumber(res.toAmount) };
+        } catch (err) {
+            const error = err?.error;
+            if (error?.message?.includes('Out of min amount')) {
+                const minAmount = new BigNumber(error?.payload?.range?.minAmount);
+                return {
+                    toAmount: new BigNumber(0),
+                    quoteError: new MinAmountError(minAmount, fromSymbol)
+                };
+            }
+            throw new RubicSdkError(error?.message);
+        }
     }
 
     private async getMinMaxRange(

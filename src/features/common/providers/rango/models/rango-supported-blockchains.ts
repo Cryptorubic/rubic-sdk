@@ -13,9 +13,9 @@ export const rangoSupportedBlockchains = [
     BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.ZK_SYNC,
     BLOCKCHAIN_NAME.BASE,
-    BLOCKCHAIN_NAME.LINEA
-    // BLOCKCHAIN_NAME.BLAST
-    // BLOCKCHAIN_NAME.SCROLL
+    BLOCKCHAIN_NAME.LINEA,
+    BLOCKCHAIN_NAME.BLAST,
+    BLOCKCHAIN_NAME.SCROLL
 ] as const;
 
 export type RangoSupportedBlockchain = (typeof rangoSupportedBlockchains)[number];

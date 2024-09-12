@@ -79,3 +79,18 @@ export const EDDY_BRIDGE_ABI = [
         type: 'function'
     }
 ] as AbiItem[];
+
+export const CUSTODY_ABI = [
+    {
+        inputs: [
+            { internalType: 'bytes', name: 'recipient', type: 'bytes' },
+            { internalType: 'contract IERC20', name: 'asset', type: 'address' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            { internalType: 'bytes', name: 'message', type: 'bytes' }
+        ],
+        name: 'deposit',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function'
+    }
+] as AbiItem[];

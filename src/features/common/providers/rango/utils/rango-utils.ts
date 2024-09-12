@@ -10,7 +10,10 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import { rangoApiBlockchainNames, RangoBlockchainName } from '../models/rango-api-blockchain-names';
 import { RANGO_SWAP_STATUS, RangoSwapStatus } from '../models/rango-api-status-types';
@@ -63,8 +66,12 @@ export class RangoUtils {
     }
 
     public static getTradeTypeForRubic(
-        rangoTradeType: RangoTradeType
+        rangoTradeType: RangoTradeType,
+        type: 'cross-chain' | 'on-chain'
     ): BridgeType | OnChainTradeType {
-        return RANGO_TO_RUBIC_PROVIDERS[rangoTradeType] || CROSS_CHAIN_TRADE_TYPE.RANGO;
+        if (type === 'cross-chain') {
+            return RANGO_TO_RUBIC_PROVIDERS[rangoTradeType] || CROSS_CHAIN_TRADE_TYPE.RANGO;
+        }
+        return RANGO_TO_RUBIC_PROVIDERS[rangoTradeType] || ON_CHAIN_TRADE_TYPE.RANGO;
     }
 }

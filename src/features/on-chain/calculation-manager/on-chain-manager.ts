@@ -20,6 +20,7 @@ import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/mod
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
+import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
 import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/providers/common/evm-wrap-trade/evm-wrap-trade';
 import {
     OnChainCalculationOptions,
@@ -278,33 +279,33 @@ export class OnChainManager {
     }
 
     private async calculateLifiTrade(
-        _from: PriceTokenAmount,
-        _to: PriceToken,
-        _options: RequiredOnChainManagerCalculationOptions
+        from: PriceTokenAmount,
+        to: PriceToken,
+        options: RequiredOnChainManagerCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            throw Error('Lifi has been compromised');
-            // const disabledProviders = [
-            //     ...this.LIFI_DISABLED_PROVIDERS,
-            //     ...options.disabledProviders
-            // ];
-            //
-            // const calculationOptions: LifiCalculationOptions = {
-            //     ...options,
-            //     slippageTolerance: options?.slippageTolerance!,
-            //     gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
-            //     disabledProviders
-            // };
-            //
-            // const lifiAggregator = new this.AGGREGATORS.LIFI();
-            //
-            // const lifiCalculationCall = lifiAggregator.calculate(
-            //     from as PriceTokenAmount<EvmBlockchainName>,
-            //     to as PriceTokenAmount<EvmBlockchainName>,
-            //     calculationOptions
-            // );
-            //
-            // return pTimeout(lifiCalculationCall, options.timeout);
+            // throw Error('Lifi has been compromised');
+            const disabledProviders = [
+                ...this.LIFI_DISABLED_PROVIDERS,
+                ...options.disabledProviders
+            ];
+
+            const calculationOptions: LifiCalculationOptions = {
+                ...options,
+                slippageTolerance: options?.slippageTolerance!,
+                gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
+                disabledProviders
+            };
+
+            const lifiAggregator = new this.AGGREGATORS.LIFI();
+
+            const lifiCalculationCall = lifiAggregator.calculate(
+                from as PriceTokenAmount<EvmBlockchainName>,
+                to as PriceTokenAmount<EvmBlockchainName>,
+                calculationOptions
+            );
+
+            return pTimeout(lifiCalculationCall, options.timeout);
         } catch (err) {
             console.debug('[RUBIC_SDK] Trade calculation error occurred for lifi.', err);
             return { type: ON_CHAIN_TRADE_TYPE.LIFI, error: err };

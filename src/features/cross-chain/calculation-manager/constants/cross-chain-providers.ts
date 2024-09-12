@@ -4,6 +4,7 @@ import { BridgersCrossChainProvider } from 'src/features/cross-chain/calculation
 import { CbridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-provider';
 import { ChangenowCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/changenow-cross-chain-provider';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
+import { LifiCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-provider';
 import { PulseChainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/pulse-chain-cross-chain-provider';
 // import { ScrollBridgeProvider } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/scroll-bridge-provider';
 import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
@@ -16,16 +17,18 @@ import { MesonCrossChainProvider } from '../providers/meson-provider/meson-cross
 import { OrbiterBridgeProvider } from '../providers/orbiter-bridge/orbiter-bridge-provider';
 import { OwlToBridgeProvider } from '../providers/owl-to-bridge/owl-to-bridge-provider';
 import { RangoCrossChainProvider } from '../providers/rango-provider/rango-cross-chain-provider';
+import { RouterCrossChainProvider } from '../providers/router-provider/router-cross-chain-provider';
+import { StargateV2CrossChainProvider } from '../providers/stargate-v2-provider/stargate-v2-cross-chain-provider';
 // import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
 import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-provider';
 
 const proxyProviders = [
     SymbiosisCrossChainProvider,
-    // StargateCrossChainProvider,
+    StargateV2CrossChainProvider,
+    //StargateCrossChainProvider,
     XyCrossChainProvider,
     CbridgeCrossChainProvider,
-    // Possibly Compromised
-    // LifiCrossChainProvider,
+    LifiCrossChainProvider,
     SquidrouterCrossChainProvider,
     RangoCrossChainProvider,
     PulseChainCrossChainProvider,
@@ -33,7 +36,8 @@ const proxyProviders = [
     ArchonBridgeProvider,
     MesonCrossChainProvider,
     OwlToBridgeProvider,
-    EddyBridgeProvider
+    EddyBridgeProvider,
+    RouterCrossChainProvider
 ] as const;
 
 const nonProxyProviders = [

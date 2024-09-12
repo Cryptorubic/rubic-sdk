@@ -15,7 +15,7 @@ export const owlToSupportedBlockchains = [
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.KROMA,
     BLOCKCHAIN_NAME.MANTA_PACIFIC,
-    // BLOCKCHAIN_NAME.METIS,
+    BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.XLAYER,
     BLOCKCHAIN_NAME.MANTLE,
     BLOCKCHAIN_NAME.BLAST,
@@ -23,7 +23,8 @@ export const owlToSupportedBlockchains = [
     BLOCKCHAIN_NAME.MERLIN,
     BLOCKCHAIN_NAME.MODE,
     BLOCKCHAIN_NAME.TAIKO,
-    BLOCKCHAIN_NAME.CORE
+    BLOCKCHAIN_NAME.CORE,
+    BLOCKCHAIN_NAME.BITLAYER
 ] as const;
 
 export type OwlToSupportedBlockchain = (typeof owlToSupportedBlockchains)[number];

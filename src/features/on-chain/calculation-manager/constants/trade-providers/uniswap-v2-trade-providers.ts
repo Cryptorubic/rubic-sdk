@@ -7,6 +7,7 @@ import { PangolinProvider } from 'src/features/on-chain/calculation-manager/prov
 import { SushiSwapAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
 import { AerodromeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/aerodrome/aerodrome-provider';
 import { BaseSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/base-swap/base-swap-provider';
+import { MacaronProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bitlayer/macaron/macaron-provider';
 import { UniSwapV2BlastProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/blast/uni-swap-v2-blast/uni-swap-v2-blast-provider';
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
@@ -58,7 +59,8 @@ import { WagyuSwapProvider } from 'src/features/on-chain/calculation-manager/pro
 import { EddyFinanceProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/eddy-finance/eddy-finance-provider';
 import { MuteSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/mute-swap/mute-swap-provider';
 
-import { UniswapV2BahamutProvider } from '../../providers/dexes/bahamut/uniswap-v2-bahamut/uniswap-v2-bahamut-provider';
+import { KujataBahamutProvider } from '../../providers/dexes/bahamut/kujata-bahamut/kujata-bahamut-provider';
+import { SilkSwapBahamutProvider } from '../../providers/dexes/bahamut/silk-swap-bahamut/silk-swap-bahamut-provider';
 import { SushiSwapZetachainProvider } from '../../providers/dexes/zetachain/sushi-swap-zetachain/sushi-swap-zetachain-provider';
 
 export const UniswapV2TradeProviders = [
@@ -157,5 +159,8 @@ export const UniswapV2TradeProviders = [
     // Sei
     DragonSwapProvider,
     //Bahamut
-    UniswapV2BahamutProvider
+    SilkSwapBahamutProvider,
+    KujataBahamutProvider,
+    // Bitlayer
+    MacaronProvider
 ] as const;

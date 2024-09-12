@@ -135,7 +135,6 @@ export class BridgersTrade extends TronOnChainTrade {
             this.to,
             bridgersNativeAddress
         ).address;
-
         const fromAddress = options.fromAddress || this.walletAddress;
         const toAddress = options.receiverAddress || fromAddress;
 
@@ -157,6 +156,7 @@ export class BridgersTrade extends TronOnChainTrade {
         const swapData = await Injector.httpClient.post<
             BridgersSwapResponse<TronBridgersTransactionData>
         >('https://sswap.swft.pro/api/sswap/swap', swapRequest);
+
         return swapData.data.txData;
     }
 }

@@ -147,6 +147,6 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
             .dp(2, BigNumber.ROUND_HALF_UP)
             .toNumber();
 
-        return impact > 0 ? impact : 0;
+        return impact;
     }
 }
