@@ -149,6 +149,7 @@ export class EvmWeb3Private extends Web3Private {
         options: EvmTransactionOptions
     ): Promise<TransactionReceipt> {
         try {
+            // @TODO use simulate instead
             const gaslessParams = {
                 from: this.address,
                 to: toAddress,
@@ -455,5 +456,39 @@ export class EvmWeb3Private extends Web3Private {
             undefined,
             gasfullParams
         );
+    }
+
+    public async simulateTransaction(
+        toAddress: string,
+        options: EvmTransactionOptions
+    ): Promise<EvmTransactionOptions> {
+        try {
+            const gaslessParams = {
+                from: this.address,
+                to: toAddress,
+                value: Web3Private.stringifyAmount(options.value || 0),
+                ...(options.data && { data: options.data }),
+                ...(options?.chainId && { chainId: options.chainId })
+            };
+
+            const gas = await this.web3.eth.estimateGas(gaslessParams as TransactionConfig);
+
+            const gasfulParams = {
+                ...gaslessParams,
+                ...getGasOptions(options),
+                gas: Web3Private.stringifyAmount(gas, options?.gasLimitRatio || 1.05)
+            };
+
+            try {
+                await this.web3.eth.estimateGas(gasfulParams as TransactionConfig);
+
+                return gasfulParams;
+            } catch {
+                throw new RubicSdkError('Low native value');
+            }
+        } catch (err) {
+            console.debug('Call tokens transfer error', err);
+            throw EvmWeb3Private.parseError(err as Web3Error);
+        }
     }
 }
