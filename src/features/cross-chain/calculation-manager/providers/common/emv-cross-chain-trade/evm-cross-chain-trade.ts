@@ -164,6 +164,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         fromAddress: string,
         options: SwapTransactionOptions = {}
     ): Promise<EvmTransactionOptions | never> {
+        this.apiFromAddress = fromAddress;
         if (!options?.testMode) {
             await this.checkTradeErrors();
         }
