@@ -1,4 +1,5 @@
 import { toNano } from '@ton/core';
+import { parseError } from 'src/common/utils/errors';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
@@ -39,21 +40,20 @@ export class DedustOnChainTrade extends TonOnChainTrade {
             transactionHash = hash;
         };
 
-        const fromAddress = this.walletAddress;
-        const receiverAddress = options.receiverAddress || this.walletAddress;
-
         await this.makePreSwapChecks({
-            fromAddress,
-            receiverAddress,
+            fromAddress: this.walletAddress,
+            receiverAddress: this.walletAddress,
             skipAmountCheck: this.skipAmountCheck,
             ...(options?.referrer && { referrer: options?.referrer })
         });
 
         try {
-            await this.web3Private.sendTransaction({
-                onTransactionHash,
-                messages: [tonEncodedConfig]
-            });
+            await this.dedustSwapService.sendTransaction(
+                this.from,
+                this.to,
+                this.walletAddress,
+                onTransactionHash
+            );
             return transactionHash!;
         } catch (err) {
             throw parseError(err);

@@ -5,14 +5,16 @@ import {
     MAINNET_FACTORY_ADDR,
     Pool,
     PoolType,
-    ReadinessStatus
+    ReadinessStatus,
+    VaultJetton,
+    VaultNative
 } from '@dedust/sdk';
 import { Address, OpenedContract, Sender, toNano } from '@ton/core';
 import { TonClient4 } from '@ton/ton';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Injector } from 'src/core/injector/injector';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
 import { DEDUST_GAS } from '../constants/dedust-gas';
 
@@ -62,11 +64,33 @@ export class DedustSwapService {
         return Asset.jetton(openedTokenContract.address);
     }
 
+    private async getVault<T extends VaultNative | VaultJetton>(
+        token: PriceToken
+    ): Promise<OpenedContract<T>> {
+        if (token.isNative) {
+            const nativeVault = this.tonClient.open(await this.factory.getNativeVault());
+            if ((await nativeVault.getReadinessStatus()) !== ReadinessStatus.READY) {
+                throw new RubicSdkError('Vault (TON) does not exist.');
+            }
+
+            return nativeVault as OpenedContract<T>;
+        }
+
+        const parsedAddress = Address.parse(token.address);
+        const jettonVault = this.tonClient.open(await this.factory.getJettonVault(parsedAddress));
+
+        if ((await jettonVault.getReadinessStatus()) !== ReadinessStatus.READY) {
+            throw new Error(`Vault (${token.symbol}) does not exist.`);
+        }
+
+        return jettonVault as OpenedContract<T>;
+    }
+
     public async sendTransaction(
         from: PriceTokenAmount,
         to: PriceTokenAmount,
         walletAddress: string,
-        options: SwapTransactionOptions
+        onHash: (hash: string) => void
     ): Promise<void> {
         const fromAsset = this.getTokenAsset(from);
         const toAsset = this.getTokenAsset(to);
@@ -85,7 +109,8 @@ export class DedustSwapService {
         const minAmountOut = (expectedAmountOut * 99n) / 100n;
 
         if (from.isNative) {
-            const nativeVault = this.tonClient.open(await this.factory.getNativeVault());
+            const nativeVault = await this.getVault<VaultNative>(from);
+            // const nativeVault = this.tonClient.open(await this.factory.getNativeVault());
 
             await nativeVault.sendSwap(sender, {
                 poolAddress: pool.address,
@@ -93,7 +118,17 @@ export class DedustSwapService {
                 limit: minAmountOut,
                 gasAmount: toNano(DEDUST_GAS)
             });
+            // @TODO set correct Hash;
+            onHash('');
         } else {
+            const jettonVault = await this.getVault<VaultJetton>(from);
+            const parsedAddress = Address.parse(from.address);
+            const jettonRoot = this.tonClient.open(JettonRoot.createFromAddress(parsedAddress));
+            const jettonWallet = this.tonClient.open(await jettonRoot.getWallet(sender.address!));
+
+            await jettonWallet.sendTransfer(sender);
+            // @TODO set correct Hash;
+            onHash('');
         }
     }
 }
