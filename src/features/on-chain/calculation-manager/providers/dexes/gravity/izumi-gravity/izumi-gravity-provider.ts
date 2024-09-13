@@ -18,6 +18,6 @@ export class IzumiGravityProvider extends IzumiProvider {
             '0xFbDa5F676cB37624f28265A144A48B0d6e87d3b6' // USDC
         ],
         multicallAddress: '0x7a524c7e82874226F0b51aade60A1BE4D430Cf0F',
-        supportedFees: [0.05, 0.3, 1]
+        supportedFees: [10000, 3000, 500]
     };
 }
