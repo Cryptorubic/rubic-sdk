@@ -279,6 +279,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         fromAddress: string,
         options: SwapTransactionOptions = {}
     ): Promise<EvmTransactionOptions | never> {
+        this.apiFromAddress = fromAddress;
         if (!options?.testMode) {
             await this.checkWalletState(options?.testMode);
         }
