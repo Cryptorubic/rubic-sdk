@@ -291,10 +291,14 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const { data, value, to } = await this.encode({ ...options, fromAddress });
 
         try {
-            const gasfullOptions = await this.web3Private.simulateTransaction(to, {
-                data,
-                value
-            });
+            const gasfullOptions = await this.web3Private.simulateTransaction(
+                to,
+                {
+                    data,
+                    value
+                },
+                this.from.blockchain
+            );
             return gasfullOptions;
         } catch (err) {
             throw err;
