@@ -126,7 +126,16 @@ export class DedustSwapService {
             const jettonRoot = this.tonClient.open(JettonRoot.createFromAddress(parsedAddress));
             const jettonWallet = this.tonClient.open(await jettonRoot.getWallet(sender.address!));
 
-            await jettonWallet.sendTransfer(sender);
+            await jettonWallet.sendTransfer(sender, toNano(0.3), {
+                amount: fromAmount,
+                destination: jettonVault.address,
+                responseAddress: sender.address,
+                forwardAmount: toNano(0.25),
+                forwardPayload: VaultJetton.createSwapPayload({
+                    poolAddress: pool.address,
+                    limit: minAmountOut
+                })
+            });
             // @TODO set correct Hash;
             onHash('');
         }
