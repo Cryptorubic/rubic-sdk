@@ -281,7 +281,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     ): Promise<EvmTransactionOptions | never> {
         this.apiFromAddress = fromAddress;
         if (!options?.testMode) {
-            await this.checkWalletState(options?.testMode);
+            await this.checkWalletState(options.testMode);
         }
         await this.checkReceiverAddress(
             options.receiverAddress,
@@ -291,15 +291,19 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const { data, value, to } = await this.encode({ ...options, fromAddress });
 
         try {
-            const gasfullOptions = await this.web3Private.simulateTransaction(
-                to,
-                {
-                    data,
-                    value
-                },
-                this.from.blockchain
-            );
-            return gasfullOptions;
+            if (!options?.testMode) {
+                const gasfullOptions = await this.web3Private.simulateTransaction(
+                    to,
+                    {
+                        data,
+                        value
+                    },
+                    this.from.blockchain
+                );
+                return gasfullOptions;
+            }
+
+            return { data, value, to };
         } catch (err) {
             throw err;
         }
