@@ -160,6 +160,32 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         }
     }
 
+    public async getData(
+        fromAddress: string,
+        options: SwapTransactionOptions = {}
+    ): Promise<EvmTransactionOptions | never> {
+        this.apiFromAddress = fromAddress;
+        if (!options?.testMode) {
+            await this.checkTradeErrors();
+        }
+        await this.checkReceiverAddress(
+            options.receiverAddress,
+            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+        );
+
+        const { data, value, to } = await this.encode({ ...options, fromAddress });
+
+        try {
+            const gasfullOptions = await this.web3Private.simulateTransaction(to, {
+                data,
+                value
+            });
+            return gasfullOptions;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     /**
      *
      * @returns txHash(srcTxHash) | never

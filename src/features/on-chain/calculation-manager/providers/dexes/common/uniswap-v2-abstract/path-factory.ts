@@ -177,16 +177,18 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         let gasLimit = this.getDefaultGases(sortedRoutes.slice(0, 1))[0];
 
         if (this.walletAddress) {
-            const callData = await this.getGasRequests(sortedRoutes.slice(0, 1))[0];
-            if (!callData) {
-                throw new RubicSdkError('Call data has to be defined');
-            }
-            const estimatedGas = (
-                await this.web3Public.batchEstimatedGas(this.walletAddress, [callData])
-            )[0];
-            if (estimatedGas?.isFinite()) {
-                gasLimit = estimatedGas;
-            }
+            try {
+                const callData = await this.getGasRequests(sortedRoutes.slice(0, 1))[0];
+                if (!callData) {
+                    throw new RubicSdkError('Call data has to be defined');
+                }
+                const estimatedGas = (
+                    await this.web3Public.batchEstimatedGas(this.walletAddress, [callData])
+                )[0];
+                if (estimatedGas?.isFinite()) {
+                    gasLimit = estimatedGas;
+                }
+            } catch {}
         }
 
         if (!sortedRoutes?.[0]) {

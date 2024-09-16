@@ -6,27 +6,18 @@ import {
 } from '../models/native-router-quote';
 
 export class NativeRouterApiService {
-    private static NATIVE_ROUTER_API_KEY = 'f78e017fa4039cf40c055d6e864bd90df27903cc';
+    private static apiKey = 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4';
 
-    private static NATIVE_ROUTER_ENDPOINT = 'https://newapi.native.org/v1';
+    private static nativeRouterProxy = 'https://x-api.rubic.exchange/native/api/v1';
 
     public static async getFirmQuote(
         request: NativeRouterQuoteRequestParams
     ): Promise<NativeRouterQuoteResponse> {
         const result = await Injector.httpClient.get<NativeRouterQuoteResponse>(
-            `${this.NATIVE_ROUTER_ENDPOINT}/firm-quote`,
+            `${NativeRouterApiService.nativeRouterProxy}/firm-quote`,
             {
-                params: {
-                    chain: request.chain,
-                    token_in: request.tokenIn,
-                    token_out: request.tokenOut,
-                    from_address: request.fromAddress,
-                    amount: request.amount,
-                    slippage: request.slippage as number
-                },
-                headers: {
-                    apiKey: this.NATIVE_ROUTER_API_KEY
-                }
+                params: { ...request },
+                headers: { apiKey: NativeRouterApiService.apiKey }
             }
         );
         return result;

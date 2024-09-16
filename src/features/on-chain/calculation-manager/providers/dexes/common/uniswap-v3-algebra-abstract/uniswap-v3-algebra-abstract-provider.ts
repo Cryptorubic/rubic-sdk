@@ -35,6 +35,7 @@ import { UniSwapV3ScrollSepoliaTrade } from 'src/features/on-chain/calculation-m
 import { AbiItem } from 'web3-utils';
 
 import { AlgebraIntegralTrade } from '../../arthera-testnet/algebra-integral/algebra-integral-trade';
+import { CamelotGravityTrade } from '../../gravity/camelot-gravity/camelot-gravity-trade';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -53,7 +54,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         | typeof UniSwapV3ScrollSepoliaTrade
         | typeof BerachainTestnetAlgebraTrade
         | typeof ModeAlgebraTrade
-        | typeof BlastFenixTrade;
+        | typeof BlastFenixTrade
+        | typeof CamelotGravityTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 

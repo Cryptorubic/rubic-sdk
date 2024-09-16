@@ -269,8 +269,9 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
 
         const { tx, estimation } =
             await DlnApiService.fetchCrossChainSwapData<DlnEvmTransactionResponse>(params);
-
-        return { config: tx, amount: estimation.dstChainTokenOut.maxTheoreticalAmount };
+        const toAmount = new BigNumber(estimation.dstChainTokenOut.maxTheoreticalAmount);
+        const receivedAmount = toAmount.gt(0) ? toAmount.toFixed() : '0';
+        return { config: tx, amount: receivedAmount };
     }
 
     public getTradeInfo(): TradeInfo {
