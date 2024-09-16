@@ -47,7 +47,7 @@ export class DedustSwapService {
         );
 
         if ((await pool.getReadinessStatus()) !== ReadinessStatus.READY) {
-            throw new Error(`[DedustOnChainProvider_getPool] Pool does not exist.`);
+            throw new Error(`[DedustSwapService_getPool] Pool does not exist.`);
         }
 
         return pool;

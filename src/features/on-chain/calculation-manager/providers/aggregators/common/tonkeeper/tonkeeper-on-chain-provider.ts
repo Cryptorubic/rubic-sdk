@@ -24,8 +24,9 @@ export abstract class TonkeeperOnChainProvider<
 > extends AggregatorOnChainProvider {
     protected abstract tonkeeperDexType: TonkeeperDexType;
 
-    public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
-        return blockchain === BLOCKCHAIN_NAME.TON;
+    public isSupportedBlockchain(_blockchain: BlockchainName): _blockchain is TonBlockchainName {
+        return false;
+        // return blockchain === BLOCKCHAIN_NAME.TON;
     }
 
     public async calculate(

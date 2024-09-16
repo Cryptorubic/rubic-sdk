@@ -70,36 +70,6 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
         }
     }
 
-    // private async getPool(fromAsset: Asset, toAsset: Asset): Promise<OpenedContract<Pool>> {
-    //     const tonClient = Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).tonClient;
-    //     const factory = tonClient.open(Factory.createFromAddress(MAINNET_FACTORY_ADDR));
-
-    //     const pool = tonClient.open(
-    //         Pool.createFromAddress(
-    //             await factory.getPoolAddress({
-    //                 poolType: PoolType.VOLATILE,
-    //                 assets: [fromAsset, toAsset]
-    //             })
-    //         )
-    //     );
-
-    //     if ((await pool.getReadinessStatus()) !== ReadinessStatus.READY) {
-    //         throw new Error(`[DedustOnChainProvider_getPool] Pool does not exist.`);
-    //     }
-
-    //     return pool;
-    // }
-
-    // private getTokenAsset(token: PriceToken): Asset {
-    //     if (token.isNative) return Asset.native();
-
-    //     const tonClient = Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).tonClient;
-    //     const parsedAddress = Address.parse(token.address);
-    //     const openedTokenContract = tonClient.open(JettonRoot.createFromAddress(parsedAddress));
-
-    //     return Asset.jetton(openedTokenContract.address);
-    // }
-
     protected async getGasFeeInfo(): Promise<GasFeeInfo | null> {
         return {
             gasPrice: new BigNumber(1),
