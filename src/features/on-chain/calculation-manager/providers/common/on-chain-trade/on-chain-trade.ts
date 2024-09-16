@@ -44,6 +44,12 @@ export abstract class OnChainTrade {
 
     public abstract readonly feeInfo: FeeInfo;
 
+    private _apiFromAddress: string | null = null;
+
+    public set apiFromAddress(value: string | null) {
+        this._apiFromAddress = value;
+    }
+
     /**
      * Type of instant trade provider.
      */
@@ -66,7 +72,7 @@ export abstract class OnChainTrade {
     }
 
     protected get walletAddress(): string {
-        return this.web3Private.address;
+        return this._apiFromAddress ?? this.web3Private.address;
     }
 
     protected get httpClient(): HttpClient {
