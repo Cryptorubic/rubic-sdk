@@ -20,7 +20,7 @@ import { DedustSwapService } from './services/dedust-swap-service';
 export class DedustOnChainProvider extends AggregatorOnChainProvider {
     public tradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
 
-    private readonly dedustSwapService = new DedustSwapService();
+    private dedustSwapService!: DedustSwapService;
 
     public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
         return blockchain === BLOCKCHAIN_NAME.TON;
@@ -32,6 +32,7 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
+            this.dedustSwapService = new DedustSwapService();
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
             const fromAsset = this.dedustSwapService.getTokenAsset(fromWithoutFee);
             const toAsset = this.dedustSwapService.getTokenAsset(toToken);

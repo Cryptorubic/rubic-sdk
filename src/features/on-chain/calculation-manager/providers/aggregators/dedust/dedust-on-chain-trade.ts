@@ -8,7 +8,7 @@ import { TonOnChainTrade } from '../../common/on-chain-trade/ton-on-chain-trade/
 import { DedustOnChainTradeStruct } from './models/dedust-trade-types';
 import { DedustSwapService } from './services/dedust-swap-service';
 
-export class DedustOnChainTrade extends TonOnChainTrade {
+export class DedustOnChainTrade extends TonOnChainTrade<undefined> {
     public type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
 
     private readonly dedustSwapService = new DedustSwapService();

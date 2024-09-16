@@ -11,7 +11,6 @@ import { OdosOnChainProvider } from '../providers/aggregators/odos/odos-on-chain
 import { OkuSwapOnChainProvider } from '../providers/aggregators/okuswap/okuswap-on-chain-provider';
 import { OpenOceanProvider } from '../providers/aggregators/open-ocean/open-ocean-provider';
 import { RangoOnChainProvider } from '../providers/aggregators/rango/rango-on-chain-provider';
-import { StonfiOnChainProvider } from '../providers/aggregators/stonfi/stonfi-on-chain-provider';
 import { ZetaSwapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
@@ -27,7 +26,6 @@ export const AGGREGATORS_ON_CHAIN = {
     ONE_INCH: OneInchProvider,
     ZETA_SWAP: ZetaSwapProvider,
     NATIVE_ROUTER: NativeRouterProvider,
-    DEDUST: DedustOnChainProvider,
-    STONFI: StonfiOnChainProvider
+    DEDUST: DedustOnChainProvider
     // SYMBIOSIS: SymbiosisOnChainProvider
 } as const;

@@ -2,7 +2,6 @@ import {
     Asset,
     Factory,
     JettonRoot,
-    MAINNET_FACTORY_ADDR,
     Pool,
     PoolType,
     ReadinessStatus,
@@ -23,34 +22,33 @@ export class DedustSwapService {
 
     private readonly tonClient: TonClient4;
 
+    private get mainnetFactoryAddress(): Address {
+        return Address.parse('EQBfBWT7X2BHg9tXAxzhz2aKiNTU1tpt5NsiK0uSDW_YAJ67');
+        // return MAINNET_FACTORY_ADDR;
+    }
+
     constructor() {
         this.tonClient = Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).tonClient;
-        this.factory = this.tonClient.open(Factory.createFromAddress(MAINNET_FACTORY_ADDR));
-    }
-
-    public getFactory(): OpenedContract<Factory> {
-        return this.factory;
-    }
-
-    public getTonClient(): TonClient4 {
-        return this.tonClient;
+        this.factory = this.tonClient.open(Factory.createFromAddress(this.mainnetFactoryAddress));
     }
 
     public async getPool(fromAsset: Asset, toAsset: Asset): Promise<OpenedContract<Pool>> {
-        const pool = this.tonClient.open(
-            Pool.createFromAddress(
-                await this.factory.getPoolAddress({
-                    poolType: PoolType.VOLATILE,
-                    assets: [fromAsset, toAsset]
-                })
-            )
-        );
+        try {
+            const poolAddress = await this.factory.getPoolAddress({
+                poolType: PoolType.VOLATILE,
+                assets: [fromAsset, toAsset]
+            });
+            const pool = this.tonClient.open(Pool.createFromAddress(poolAddress));
 
-        if ((await pool.getReadinessStatus()) !== ReadinessStatus.READY) {
-            throw new Error(`[DedustSwapService_getPool] Pool does not exist.`);
+            if ((await pool.getReadinessStatus()) !== ReadinessStatus.READY) {
+                throw new Error(`[DedustSwapService_getPool] Pool does not exist.`);
+            }
+
+            return pool;
+        } catch (err) {
+            console.log('STACK_TRACE ==> ', err.stack);
+            throw err;
         }
-
-        return pool;
     }
 
     public getTokenAsset(token: PriceToken): Asset {
@@ -110,7 +108,6 @@ export class DedustSwapService {
 
         if (from.isNative) {
             const nativeVault = await this.getVault<VaultNative>(from);
-            // const nativeVault = this.tonClient.open(await this.factory.getNativeVault());
 
             await nativeVault.sendSwap(sender, {
                 poolAddress: pool.address,
