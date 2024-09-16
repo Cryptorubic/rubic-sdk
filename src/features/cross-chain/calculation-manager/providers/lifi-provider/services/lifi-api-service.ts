@@ -33,7 +33,8 @@ export class LifiApiService {
                 fromAddress,
                 toAddress,
                 slippage,
-                integrator: 'rubic'
+                integrator: 'rubic',
+                fee: 0.05
             },
             headers: { 'x-lifi-api-key': this.LIFI_API_KEY }
         });
