@@ -91,7 +91,7 @@ export abstract class CrossChainTrade<T = unknown> {
     }
 
     protected get walletAddress(): string {
-        return this.web3Private.address;
+        return this._apiFromAddress ?? this.web3Private.address;
     }
 
     protected abstract get methodName(): string;
@@ -137,6 +137,12 @@ export abstract class CrossChainTrade<T = unknown> {
         if (shouldThrowError) {
             throw new UpdatedRatesError(oldWeiAmount, newWeiAmount);
         }
+    }
+
+    private _apiFromAddress: string | null = null;
+
+    public set apiFromAddress(value: string | null) {
+        this._apiFromAddress = value;
     }
 
     protected constructor(

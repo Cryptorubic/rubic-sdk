@@ -68,6 +68,8 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.SEI]: 1329,
     [BLOCKCHAIN_NAME.CORE]: 1116,
     [BLOCKCHAIN_NAME.BAHAMUT]: 5165,
+    [BLOCKCHAIN_NAME.BITLAYER]: 200901,
+    [BLOCKCHAIN_NAME.GRAVITY]: 1625,
     // Tesnents
     [BLOCKCHAIN_NAME.GOERLI]: 5,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: 87,
@@ -82,5 +84,6 @@ export const blockchainId: Record<BlockchainName, number> = {
     // Non EVN blockchains
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
     [BLOCKCHAIN_NAME.FILECOIN]: 314,
-    [BLOCKCHAIN_NAME.SOLANA]: 7565164
+    [BLOCKCHAIN_NAME.SOLANA]: 7565164,
+    [BLOCKCHAIN_NAME.DOGECOIN]: 2000
 };

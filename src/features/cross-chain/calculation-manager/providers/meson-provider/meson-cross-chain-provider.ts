@@ -170,7 +170,9 @@ export class MesonCrossChainProvider extends CrossChainProvider {
 
         const foundToken = token.isNative
             ? foundChain.tokens.find(apiToken => !Object.hasOwn(apiToken, 'addr'))
-            : foundChain.tokens.find(apiToken => compareAddresses(apiToken.addr!, token.address));
+            : foundChain.tokens.find(apiToken =>
+                  apiToken?.addr ? compareAddresses(apiToken.addr, token.address) : false
+              );
 
         if (!foundToken) {
             throw new NotSupportedTokensError();

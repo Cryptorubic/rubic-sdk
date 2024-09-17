@@ -21,4 +21,9 @@ export interface EvmTransactionOptions extends EvmBasicTransactionOptions {
      * gasLimit multiplier (to change ratio for specific chain)
      */
     gasLimitRatio?: number;
+
+    /**
+     * Address send transaction to
+     */
+    to?: string;
 }

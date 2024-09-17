@@ -69,13 +69,18 @@ export const rangoContractAddresses: Record<RangoSupportedBlockchain, UniversalC
         providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
+    },
+    [BLOCKCHAIN_NAME.BLAST]: {
+        providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
+        providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
+    },
+    [BLOCKCHAIN_NAME.SCROLL]: {
+        providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
+        providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
     }
-    // [BLOCKCHAIN_NAME.BLAST]: {
-    //     providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
-    //     providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
-    //     rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
-    // }
-    // [BLOCKCHAIN_NAME.SCROLL]: {
+    // [BLOCKCHAIN_NAME.FANTOM]: {
     //     providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
     //     providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
     //     rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router

@@ -84,7 +84,7 @@ export abstract class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrad
         try {
             const { amountOut, txRequest } = await NativeRouterApiService.getFirmQuote({
                 ...this.nativeRouterQuoteParams,
-                fromAddress: account
+                from_address: account
             });
 
             const tx: EvmEncodeConfig = {
