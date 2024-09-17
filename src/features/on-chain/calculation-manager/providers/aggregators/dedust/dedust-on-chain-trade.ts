@@ -1,4 +1,3 @@
-import { toNano } from '@ton/core';
 import { parseError } from 'src/common/utils/errors';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -17,27 +16,15 @@ export class DedustOnChainTrade extends TonOnChainTrade<undefined> {
         super(tradeStruct, providerAddress);
     }
 
-    protected async calculateOutputAmount(_options: EncodeTransactionOptions): Promise<string> {
-        const fromAsset = this.dedustSwapService.getTokenAsset(this.from);
-        const toAsset = this.dedustSwapService.getTokenAsset(this.to);
-        const pool = await this.dedustSwapService.getPool(fromAsset, toAsset);
-        const { amountOut } = await pool.getEstimatedSwapOut({
-            assetIn: fromAsset,
-            amountIn: toNano(this.fromWithoutFee.tokenAmount.toFixed())
-        });
-
-        return amountOut.toString();
-    }
-
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState(options?.testMode);
 
-        let transactionHash: string;
+        let txHash: string;
         const onTransactionHash = (hash: string) => {
             if (options.onConfirm) {
                 options.onConfirm(hash);
             }
-            transactionHash = hash;
+            txHash = hash;
         };
 
         await this.makePreSwapChecks({
@@ -52,11 +39,16 @@ export class DedustOnChainTrade extends TonOnChainTrade<undefined> {
                 this.from,
                 this.to,
                 this.walletAddress,
+                this.slippageTolerance,
                 onTransactionHash
             );
-            return transactionHash!;
+            return txHash!;
         } catch (err) {
             throw parseError(err);
         }
+    }
+
+    protected calculateOutputAmount(_options: EncodeTransactionOptions): Promise<string> {
+        return this.dedustSwapService.calcOutputAmount(this.from, this.to);
     }
 }

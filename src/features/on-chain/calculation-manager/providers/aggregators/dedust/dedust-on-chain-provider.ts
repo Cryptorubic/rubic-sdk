@@ -1,4 +1,3 @@
-import { toNano } from '@ton/core';
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import {
@@ -20,7 +19,7 @@ import { DedustSwapService } from './services/dedust-swap-service';
 export class DedustOnChainProvider extends AggregatorOnChainProvider {
     public tradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
 
-    private dedustSwapService!: DedustSwapService;
+    private readonly dedustSwapService = new DedustSwapService();
 
     public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
         return blockchain === BLOCKCHAIN_NAME.TON;
@@ -32,20 +31,12 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            this.dedustSwapService = new DedustSwapService();
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
-            const fromAsset = this.dedustSwapService.getTokenAsset(fromWithoutFee);
-            const toAsset = this.dedustSwapService.getTokenAsset(toToken);
-
-            const pool = await this.dedustSwapService.getPool(fromAsset, toAsset);
-            const { amountOut } = await pool.getEstimatedSwapOut({
-                assetIn: fromAsset,
-                amountIn: toNano(fromWithoutFee.tokenAmount.toFixed())
-            });
+            const toStringWeiAmount = await this.dedustSwapService.calcOutputAmount(from, toToken);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                weiAmount: new BigNumber(amountOut.toString())
+                weiAmount: new BigNumber(toStringWeiAmount)
             });
 
             return new DedustOnChainTrade(

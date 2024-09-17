@@ -21,4 +21,6 @@ export interface TonEncodedConfig {
      * body.toBoc().toString('base64')
      */
     payload?: string;
+
+    stateInit?: string;
 }

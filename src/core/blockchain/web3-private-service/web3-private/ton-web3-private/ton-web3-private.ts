@@ -1,4 +1,4 @@
-import { TonClient4 } from '@ton/ton';
+import { TonClient } from '@ton/ton';
 import { TonConnectUI } from '@tonconnect/ui';
 import { RubicSdkError } from 'src/common/errors';
 import { waitFor } from 'src/common/utils/waitFor';
@@ -19,9 +19,9 @@ export class TonWeb3Private extends Web3Private {
 
     private readonly tonConnectUI: TonConnectUI;
 
-    private readonly _tonClient: TonClient4;
+    private readonly _tonClient: TonClient;
 
-    public get tonClient(): TonClient4 {
+    public get tonClient(): TonClient {
         return this._tonClient;
     }
 
@@ -69,8 +69,9 @@ export class TonWeb3Private extends Web3Private {
     constructor(tonProviderCore: TonWalletProviderCore) {
         super(tonProviderCore.address);
         this.tonConnectUI = tonProviderCore.core;
-        this._tonClient = new TonClient4({
-            endpoint: 'https://mainnet-v4.tonhubapi.com'
+        this._tonClient = new TonClient({
+            endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+            apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
         });
     }
 }
