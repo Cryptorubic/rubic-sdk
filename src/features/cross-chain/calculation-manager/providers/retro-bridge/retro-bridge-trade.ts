@@ -4,7 +4,6 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -23,11 +22,11 @@ import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { RubicStep } from '../common/models/rubicStep';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { retroBridgeContractAddresses } from './constants/retro-bridge-contract-address';
 import { RetroBridgeSupportedBlockchain } from './constants/retro-bridge-supported-blockchain';
+import { retroBridgeSwapAbi } from './constants/retro-bridge-swap-abi';
 import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
-import { retroBridgeContractAddresses } from './constants/retro-bridge-contract-address';
-import { retroBridgeSwapAbi } from './constants/retro-bridge-swap-abi';
 export class RetroBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
@@ -87,7 +86,7 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
     protected get fromContractAddress(): string {
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : retroBridgeContractAddresses[this.fromBlockchain]
+            : retroBridgeContractAddresses[this.fromBlockchain];
     }
 
     protected get methodName(): string {
@@ -196,7 +195,9 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
 
         const value = this.from.isNative ? transferAmount : '0';
 
-        const methodArguments = this.from.isNative ? [this.walletAddress] : [this.walletAddress, this.from.address, transferAmount];
+        const methodArguments = this.from.isNative
+            ? [this.walletAddress]
+            : [this.walletAddress, this.from.address, transferAmount];
 
         const methodName = this.from.isWrapped ? 'transferEther' : 'transferToken';
 
@@ -206,7 +207,7 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
             methodName,
             methodArguments,
             value
-        )
+        );
 
         return { config, amount: this.to.stringWeiAmount };
     }

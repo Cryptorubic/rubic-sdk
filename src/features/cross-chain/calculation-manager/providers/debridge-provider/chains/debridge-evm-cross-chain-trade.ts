@@ -29,6 +29,8 @@ import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manag
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
+import { deBridgeReferralCode } from '../constants/debridge-code';
+
 /**
  * Calculated DeBridge cross-chain trade.
  */
@@ -264,7 +266,7 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
             srcChainOrderAuthorityAddress: sameChain
                 ? receiverAddress || walletAddress
                 : walletAddress,
-            referralCode: '4350'
+            referralCode: deBridgeReferralCode
         };
 
         const { tx, estimation } =

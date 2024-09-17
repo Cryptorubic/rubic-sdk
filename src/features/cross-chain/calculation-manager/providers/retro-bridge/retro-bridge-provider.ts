@@ -2,7 +2,11 @@ import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
-import { BLOCKCHAIN_NAME, BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
@@ -10,7 +14,9 @@ import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { CrossChainProvider } from '../common/cross-chain-provider';
 import { CalculationResult } from '../common/models/calculation-result';
+import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
+import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     RetroBridgeSupportedBlockchain,
     retroBridgeSupportedBlockchain
@@ -18,8 +24,6 @@ import {
 import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
 import { RetroBridgeTrade } from './retro-bridge-trade';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
-import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { FeeInfo } from '../common/models/fee-info';
 
 export class RetroBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE;
@@ -51,11 +55,11 @@ export class RetroBridgeProvider extends CrossChainProvider {
             );
             const srcChain =
                 fromWithoutFee.blockchain === BLOCKCHAIN_NAME.ETHEREUM
-                    ? fromWithoutFee.name : fromWithoutFee.blockchain;
+                    ? fromWithoutFee.name
+                    : fromWithoutFee.blockchain;
 
             const dstChain =
-                toToken.blockchain === BLOCKCHAIN_NAME.ETHEREUM
-                    ? toToken.name : toToken.blockchain;
+                toToken.blockchain === BLOCKCHAIN_NAME.ETHEREUM ? toToken.name : toToken.blockchain;
             const quoteSendParams: RetroBridgeQuoteSendParams = {
                 source_chain: srcChain,
                 destination_chain: dstChain,
@@ -136,13 +140,10 @@ export class RetroBridgeProvider extends CrossChainProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
     ): Promise<void | never> {
-        const srcChain =
-            from.blockchain === BLOCKCHAIN_NAME.ETHEREUM
-                ? from.name : from.blockchain;
+        const srcChain = from.blockchain === BLOCKCHAIN_NAME.ETHEREUM ? from.name : from.blockchain;
 
         const dstChain =
-            toToken.blockchain === BLOCKCHAIN_NAME.ETHEREUM
-                ? toToken.name : toToken.blockchain;
+            toToken.blockchain === BLOCKCHAIN_NAME.ETHEREUM ? toToken.name : toToken.blockchain;
         const tokenLimits = await RetroBridgeApiService.getTokenLimits(
             srcChain,
             dstChain,
