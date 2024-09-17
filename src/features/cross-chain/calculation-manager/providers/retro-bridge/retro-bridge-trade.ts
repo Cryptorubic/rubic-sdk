@@ -199,7 +199,7 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
             ? [this.walletAddress]
             : [this.walletAddress, this.from.address, transferAmount];
 
-        const methodName = this.from.isWrapped ? 'transferEther' : 'transferToken';
+        const methodName = this.from.isNative ? 'transferEther' : 'transferToken';
 
         const config = EvmWeb3Pure.encodeMethodCall(
             retroBridgeContractAddresses[this.fromBlockchain],
