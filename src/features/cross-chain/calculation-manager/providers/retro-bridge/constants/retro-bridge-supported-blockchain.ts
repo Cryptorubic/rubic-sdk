@@ -18,8 +18,13 @@ export const retroBridgeSupportedBlockchain = [
     BLOCKCHAIN_NAME.MANTLE,
     BLOCKCHAIN_NAME.KROMA,
     BLOCKCHAIN_NAME.ZETACHAIN,
-    BLOCKCHAIN_NAME.TON,
-    BLOCKCHAIN_NAME.BLAST
+    BLOCKCHAIN_NAME.BLAST,
+    BLOCKCHAIN_NAME.ZK_LINK,
+    BLOCKCHAIN_NAME.TAIKO,
+    BLOCKCHAIN_NAME.METIS,
+    BLOCKCHAIN_NAME.XLAYER,
+    BLOCKCHAIN_NAME.POLYGON_ZKEVM,
+    BLOCKCHAIN_NAME.GRAVITY
 ];
 
 export type RetroBridgeSupportedBlockchain = (typeof retroBridgeSupportedBlockchain)[number];

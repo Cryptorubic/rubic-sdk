@@ -26,6 +26,8 @@ import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/
 import { RetroBridgeSupportedBlockchain } from './constants/retro-bridge-supported-blockchain';
 import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
+import { retroBridgeContractAddresses } from './constants/retro-bridge-contract-address';
+import { retroBridgeSwapAbi } from './constants/retro-bridge-swap-abi';
 export class RetroBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
@@ -83,7 +85,9 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain].gateway;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : retroBridgeContractAddresses[this.fromBlockchain]
     }
 
     protected get methodName(): string {
@@ -190,24 +194,19 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         this.retroBridgeId = retroBridgeOrder.transaction_id;
         const transferAmount = this.from.stringWeiAmount;
 
-        const config: EvmEncodeConfig = { to: '', data: '', value: '' };
+        const value = this.from.isNative ? transferAmount : '0';
 
-        if (this.from.isNative) {
-            config.value = transferAmount;
-            config.data = '0x';
-            config.to = retroBridgeOrder.hot_wallet_address;
-        } else {
-            const encodedConfig = EvmWeb3Pure.encodeMethodCall(
-                this.from.address,
-                ERC20_TOKEN_ABI,
-                'transfer',
-                [retroBridgeOrder.hot_wallet_address, transferAmount],
-                '0'
-            );
-            config.value = encodedConfig.value;
-            config.to = encodedConfig.to;
-            config.data = encodedConfig.data;
-        }
+        const methodArguments = this.from.isNative ? [this.walletAddress] : [this.walletAddress, this.from.address, transferAmount];
+
+        const methodName = this.from.isWrapped ? 'transferEther' : 'transferToken';
+
+        const config = EvmWeb3Pure.encodeMethodCall(
+            retroBridgeContractAddresses[this.fromBlockchain],
+            retroBridgeSwapAbi,
+            methodName,
+            methodArguments,
+            value
+        )
 
         return { config, amount: this.to.stringWeiAmount };
     }

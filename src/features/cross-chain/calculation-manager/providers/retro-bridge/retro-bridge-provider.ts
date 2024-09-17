@@ -18,6 +18,8 @@ import {
 import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
 import { RetroBridgeTrade } from './retro-bridge-trade';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
+import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { FeeInfo } from '../common/models/fee-info';
 
 export class RetroBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE;
@@ -31,7 +33,7 @@ export class RetroBridgeProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const useProxy = false;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
         const fromBlockchain = from.blockchain as RetroBridgeSupportedBlockchain;
         try {
             await this.checkMinMaxAmount(from, toToken);
@@ -114,6 +116,20 @@ export class RetroBridgeProvider extends CrossChainProvider {
         toToken: PriceTokenAmount<EvmBlockchainName>
     ): Promise<RubicStep[]> {
         return [{ type: 'cross-chain', provider: this.type, path: [from, toToken] }];
+    }
+
+    protected async getFeeInfo(
+        fromBlockchain: RetroBridgeSupportedBlockchain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
+    ): Promise<FeeInfo> {
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 
     private async checkMinMaxAmount(
