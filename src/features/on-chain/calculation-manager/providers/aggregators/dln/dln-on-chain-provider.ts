@@ -24,6 +24,7 @@ import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-man
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { deBridgeReferralCode } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-code';
 
 export class DlnOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.DLN;
@@ -70,7 +71,8 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
             tokenInAmount: fromWithoutFee.stringWeiAmount,
             slippage,
             tokenOut: DlnUtils.getSupportedAddress(toToken),
-            tokenOutRecipient: fakeReceiver
+            tokenOutRecipient: fakeReceiver,
+            referralCode: deBridgeReferralCode
         };
 
         const debridgeResponse = await DlnApiService.fetchOnChainSwapData(requestParams);
