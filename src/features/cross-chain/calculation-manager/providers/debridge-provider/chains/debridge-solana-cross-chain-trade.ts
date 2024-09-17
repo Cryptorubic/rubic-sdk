@@ -20,6 +20,7 @@ import { DebridgeSolanaCrossChainTradeConstructor } from 'src/features/cross-cha
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { DlnSolanaTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+
 import { deBridgeReferralCode } from '../constants/debridge-code';
 
 /**

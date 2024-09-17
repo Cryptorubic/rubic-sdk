@@ -28,6 +28,7 @@ import { DlnEvmTransactionResponse } from 'src/features/cross-chain/calculation-
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+
 import { deBridgeReferralCode } from '../constants/debridge-code';
 
 /**

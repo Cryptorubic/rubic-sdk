@@ -7,6 +7,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { DlnUtils } from 'src/features/common/providers/dln/dln-utils';
+import { deBridgeReferralCode } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-code';
 import {
     DlnOnChainSupportedBlockchain,
     dlnOnChainSupportedBlockchains
@@ -24,7 +25,6 @@ import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-man
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { deBridgeReferralCode } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-code';
 
 export class DlnOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.DLN;
