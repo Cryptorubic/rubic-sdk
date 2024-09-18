@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
+import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -25,6 +25,8 @@ import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RouterCrossChainSupportedBlockchains } from './constants/router-cross-chain-supported-chains';
 import { RouterCrossChainUtilService } from './utils/router-cross-chain-util-service.ts';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class RouterCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
@@ -179,7 +181,7 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
                 methodArguments,
                 value,
                 {
-                    gasPrice: gasPrice
+                    gasPrice,
                 }
             );
             const sendingToken = this.from.isNative ? [] : [this.from.address];
@@ -223,7 +225,7 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             data: txn.data,
             value: txn.value,
             to: txn.to,
-            gasPrice: txn.gasPrice
+            gasPrice: txn.gasPrice,
         };
 
         return { config, amount: destination.tokenAmount };
@@ -237,5 +239,93 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
+    }
+
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkTradeErrors();
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasPriceOptions } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+        gasPriceOptions
+        try {
+            const config = await this.setTransactionConfig(
+                false,
+                options.useCacheData || false,
+                options?.receiverAddress
+            );
+            if ('data' in config) {
+                const { data, value, to, gasPrice } = config;
+                await this.web3Private.trySendTransaction(to, {
+                    data,
+                    value,
+                    onTransactionHash,
+                    gasPriceOptions: {
+                        ...gasPriceOptions,
+                        gasPrice
+                    },
+                    gasLimitRatio: this.gasLimitRatio,
+
+                });
+                return transactionHash!;
+            }
+
+            throw new Error('Invalid transaction config');
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        if (!options?.testMode) {
+            await this.checkTradeErrors();
+        }
+        await this.checkReceiverAddress(
+            options.receiverAddress,
+            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+        );
+        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
+
+        const fromAddress = this.walletAddress;
+
+        const { data, value, to, gasPrice } = await this.encode({ ...options, fromAddress });
+
+        const { onConfirm, gasPriceOptions } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        try {
+            await this.web3Private[method](to, {
+                data,
+                value,
+                onTransactionHash,
+                gasPriceOptions: {
+                    ...gasPriceOptions,
+                    gasPrice
+                },
+                gasLimitRatio: this.gasLimitRatio,
+                ...(options?.useEip155 && {
+                    chainId: `0x${blockchainId[this.from.blockchain].toString(16)}`
+                })
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw err;
+        }
     }
 }
