@@ -2,32 +2,49 @@ import {
     Asset,
     Factory,
     JettonRoot,
+    JettonWallet,
     Pool,
     PoolType,
     ReadinessStatus,
+    SwapStep,
     VaultJetton,
     VaultNative
 } from '@dedust/sdk';
-import { Address, OpenedContract, Sender, toNano } from '@ton/core';
+import { Address, beginCell, OpenedContract, Sender, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
+import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { Injector } from 'src/core/injector/injector';
 
 import { DEDUST_GAS } from '../constants/dedust-gas';
+import { DedustTxStep } from '../models/dedust-api-types';
+import { DedustApiService } from './dedust-api-service';
 import { DedustTxSender } from './dedust-sender-class';
 
 export class DedustSwapService {
+    private static instance: DedustSwapService;
+
     private readonly factory: OpenedContract<Factory>;
 
     private readonly tonClient: TonClient;
+
+    private txSteps: DedustTxStep[] = [];
+
+    public static getInstance(): DedustSwapService {
+        if (!this.instance) {
+            this.instance = new DedustSwapService();
+        }
+
+        return this.instance;
+    }
 
     private get mainnetFactoryAddress(): Address {
         return Address.parse('EQBfBWT7X2BHg9tXAxzhz2aKiNTU1tpt5NsiK0uSDW_YAJ67');
     }
 
-    constructor() {
+    private constructor() {
         this.tonClient = new TonClient({
             endpoint: 'https://toncenter.com/api/v2/jsonRPC',
             apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
@@ -36,36 +53,48 @@ export class DedustSwapService {
     }
 
     /**
-     * @returns weiAmount in BigNumber format
+     *     this.httpService
+            .post(
+                '',
+                {
+                    from: 'jetton:0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe',
+                    to: 'jetton:0:c95e05ef7644c21b437af9ee81d7e7e5d54d4b9cf1cc629aa2a3750403d28067',
+                    amount: '10000000'
+                },
+                'https://api.dedust.io/v2/routing/plan'
+            )
+            .pipe(delay(4000))
+            .subscribe(val => console.log('DEDUST_SUB_RESULT ===> ', val));
+     */
+
+    /**
+     * @returns string wei amount
      */
     public async calcOutputAmount(from: PriceTokenAmount, to: PriceToken): Promise<string> {
-        if (this.isMultihopSwap(from, to)) {
-            const ton = nativeTokensList[BLOCKCHAIN_NAME.TON];
-            const firstPoolSrcAsset = this.getTokenAsset(from);
-            const secondPoolSrcAsset = this.getTokenAsset(ton);
+        if (this.maybeMultihopSwap(from, to)) {
+            const pools = await DedustApiService.findBestPools(from, to);
+            if (!pools.length) {
+                throw new RubicSdkError(
+                    '[DedustSwapService_calcOutputAmount] Pools are not found!'
+                );
+            }
 
-            const firstPool = await this.getPool(from, ton);
-            const secondPool = await this.getPool(ton, to);
+            this.cacheStepsOnCalculation(pools);
+            const outputWeiAmountString = pools.at(-1)!.amountOut;
 
-            const { amountOut: firstPoolAmountOut } = await firstPool.getEstimatedSwapOut({
-                assetIn: firstPoolSrcAsset,
-                amountIn: toNano(from.tokenAmount.toFixed())
-            });
-
-            const { amountOut } = await secondPool.getEstimatedSwapOut({
-                assetIn: secondPoolSrcAsset,
-                amountIn: firstPoolAmountOut
-            });
-
-            return amountOut.toString();
+            return outputWeiAmountString;
         }
 
         const fromAsset = this.getTokenAsset(from);
         const pool = await this.getPool(from, to);
         const { amountOut } = await pool.getEstimatedSwapOut({
             assetIn: fromAsset,
-            amountIn: toNano(from.tokenAmount.toFixed())
+            amountIn: BigInt(from.stringWeiAmount)
         });
+
+        this.cacheStepsOnCalculation([
+            { amountOut: amountOut.toString(), poolAddress: pool.address }
+        ]);
 
         return amountOut.toString();
     }
@@ -77,22 +106,34 @@ export class DedustSwapService {
         slippage: number,
         onHash: (hash: string) => void
     ): Promise<void> {
-        const sender: Sender = new DedustTxSender(walletAddress, onHash);
-        const minAmountOut = BigInt(to.tokenAmount.multipliedBy(1 - slippage).toFixed());
+        const web3Private = Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON);
+        const sender: Sender = new DedustTxSender(walletAddress, web3Private, onHash);
+        const minAmountOut = BigInt(to.weiAmount.multipliedBy(1 - slippage).toFixed(0));
 
-        if (from.isNative) {
-            await this.swapTonToJetton(from, to, sender, minAmountOut);
-        } else if (to.isNative) {
-            await this.swapJettonToTon(from, to, sender, minAmountOut);
-        } else {
-            await this.swapJettonsWithMultihop(from, to, sender, minAmountOut);
+        try {
+            if (from.isNative) {
+                await this.swapTonToJetton(from, sender, minAmountOut);
+            } else if (to.isNative) {
+                await this.swapJettonToTon(from, sender, minAmountOut);
+            } else {
+                await this.swapJettonToJetton(from, sender, slippage);
+            }
+        } catch (err) {
+            throw err;
         }
     }
 
     /**
-     * uses more than 1 pool
+     * Stores found pools in calcOutputAmount method and reuses its in sendTransaction methods
      */
-    private isMultihopSwap(from: Token, to: Token): boolean {
+    private cacheStepsOnCalculation(steps: DedustTxStep[]): void {
+        this.txSteps = steps;
+    }
+
+    /**
+     * maybe uses more than 1 pool
+     */
+    private maybeMultihopSwap(from: Token, to: Token): boolean {
         return !from.isNative && !to.isNative;
     }
 
@@ -152,16 +193,15 @@ export class DedustSwapService {
 
     private async swapTonToJetton(
         from: PriceTokenAmount,
-        to: PriceTokenAmount,
         sender: Sender,
         minAmountOut: bigint
     ): Promise<void> {
-        const pool = await this.getPool(from, to);
+        const poolAddress = this.txSteps[0]!.poolAddress;
         const nativeVault = await this.getVault<VaultNative>(from);
         const fromAmount = toNano(from.tokenAmount.toFixed());
 
         await nativeVault.sendSwap(sender, {
-            poolAddress: pool.address,
+            poolAddress,
             amount: fromAmount,
             limit: minAmountOut,
             gasAmount: toNano(DEDUST_GAS)
@@ -170,55 +210,92 @@ export class DedustSwapService {
 
     private async swapJettonToTon(
         from: PriceTokenAmount,
-        to: PriceTokenAmount,
         sender: Sender,
         minAmountOut: bigint
     ): Promise<void> {
-        const pool = await this.getPool(from, to);
+        const poolAddress = this.txSteps[0]!.poolAddress;
         const jettonVault = await this.getVault<VaultJetton>(from);
         const parsedAddress = Address.parse(from.address);
-        const jettonRoot = this.tonClient.open(JettonRoot.createFromAddress(parsedAddress));
-        const jettonWallet = this.tonClient.open(await jettonRoot.getWallet(sender.address!));
 
-        await jettonWallet.sendTransfer(sender, toNano(0.3), {
-            amount: toNano(from.tokenAmount.toFixed()),
+        const result = await this.tonClient.runMethod(parsedAddress, 'get_wallet_address', [
+            { type: 'slice', cell: beginCell().storeAddress(sender.address).endCell() }
+        ]);
+        const jettonWalletAddress = result.stack.readAddress();
+        const jettonWallet = this.tonClient.open(
+            JettonWallet.createFromAddress(jettonWalletAddress)
+        );
+
+        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS), {
+            amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
             forwardAmount: toNano(0.25),
             forwardPayload: VaultJetton.createSwapPayload({
-                poolAddress: pool.address,
+                poolAddress,
                 limit: minAmountOut
             })
         });
     }
 
-    private async swapJettonsWithMultihop(
+    private async swapJettonToJetton(
         from: PriceTokenAmount,
-        to: PriceTokenAmount,
         sender: Sender,
-        minAmountOut: bigint
+        slippage: number
     ): Promise<void> {
-        const ton = nativeTokensList[BLOCKCHAIN_NAME.TON];
-        const firstPool = await this.getPool(from, ton);
-        const secondPool = await this.getPool(ton, to);
-
         const jettonVault = await this.getVault<VaultJetton>(from);
         const parsedAddress = Address.parse(from.address);
         const jettonRoot = this.tonClient.open(JettonRoot.createFromAddress(parsedAddress));
         const jettonWallet = this.tonClient.open(await jettonRoot.getWallet(sender.address!));
 
-        await jettonWallet.sendTransfer(sender, toNano('0.3'), {
-            amount: toNano(from.tokenAmount.toFixed()),
+        const initParams = {
+            poolAddress: this.txSteps[0]!.poolAddress,
+            limit: BigInt(this.txSteps[0]!.amountOut),
+            next: {}
+        } as SwapStep;
+
+        const swapPayloadParams = this.makeSwapPayloadParams(
+            initParams,
+            initParams.next!,
+            this.txSteps,
+            slippage
+        );
+
+        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS), {
+            amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
             forwardAmount: toNano('0.25'),
-            forwardPayload: VaultJetton.createSwapPayload({
-                poolAddress: firstPool.address,
-                limit: minAmountOut,
-                next: {
-                    poolAddress: secondPool.address
-                }
-            })
+            forwardPayload: VaultJetton.createSwapPayload(swapPayloadParams)
         });
+    }
+
+    private makeSwapPayloadParams(
+        payloadParams: SwapStep,
+        next: SwapStep,
+        txSteps: DedustTxStep[],
+        slippage: number
+    ): SwapStep {
+        if (!txSteps.length) return payloadParams;
+
+        const step = txSteps[0]!;
+        const minAmountOut = BigInt(
+            new BigNumber(step.amountOut).multipliedBy(1 - slippage).toFixed(0)
+        );
+
+        if (txSteps.length === this.txSteps.length) {
+            payloadParams.poolAddress = step.poolAddress;
+            payloadParams.limit = minAmountOut;
+        } else {
+            next.poolAddress = step.poolAddress;
+            next.limit = minAmountOut;
+        }
+
+        const slicedSteps = txSteps.slice(1);
+        if (slicedSteps.length) {
+            next.next = {} as SwapStep;
+            next = next.next;
+        }
+
+        return this.makeSwapPayloadParams(payloadParams, next, slicedSteps, slippage);
     }
 }

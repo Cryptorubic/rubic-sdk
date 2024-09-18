@@ -19,7 +19,7 @@ import { DedustSwapService } from './services/dedust-swap-service';
 export class DedustOnChainProvider extends AggregatorOnChainProvider {
     public tradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
 
-    private readonly dedustSwapService = new DedustSwapService();
+    private readonly dedustSwapService = DedustSwapService.getInstance();
 
     public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
         return blockchain === BLOCKCHAIN_NAME.TON;

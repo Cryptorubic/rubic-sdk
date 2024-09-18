@@ -1,0 +1,34 @@
+import { Address } from '@ton/core';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
+import { Injector } from 'src/core/injector/injector';
+
+import { DedustPoolsResponse, DedustTxStep } from '../models/dedust-api-types';
+
+export class DedustApiService {
+    private static readonly apiUrl = 'https://api.dedust.io/v2';
+
+    public static async findBestPools(from: PriceTokenAmount, to: Token): Promise<DedustTxStep[]> {
+        const [fromAddresses, toAddresses] = await Promise.all([
+            TonWeb3Pure.getAllFormatsOfAddress(from.address),
+            TonWeb3Pure.getAllFormatsOfAddress(to.address)
+        ]);
+
+        const fromRawAddress = from.isNative ? 'native' : `jetton:${fromAddresses.raw_form}`;
+        const toRawAddress = to.isNative ? 'native' : `jetton:${toAddresses.raw_form}`;
+
+        const [pools] = await Injector.httpClient.post<DedustPoolsResponse>(
+            `${this.apiUrl}/routing/plan`,
+            {
+                from: fromRawAddress,
+                to: toRawAddress,
+                amount: from.stringWeiAmount
+            }
+        );
+
+        return pools.map(p => ({
+            amountOut: p.amountOut,
+            poolAddress: Address.parse(p.pool.address)
+        }));
+    }
+}

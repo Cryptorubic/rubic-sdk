@@ -1,16 +1,14 @@
 import { Address, beginCell, Sender, SenderArguments, storeStateInit } from '@ton/core';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
-import { Injector } from 'src/core/injector/injector';
 
 export class DedustTxSender implements Sender {
     public readonly address: Address;
 
-    private get web3Private(): TonWeb3Private {
-        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.TON);
-    }
-
-    constructor(walletAddress: string, private readonly onHash: (hash: string) => void) {
+    constructor(
+        walletAddress: string,
+        private readonly web3Private: TonWeb3Private,
+        private readonly onHash: (hash: string) => void
+    ) {
         this.address = Address.parse(walletAddress);
     }
 
@@ -28,11 +26,9 @@ export class DedustTxSender implements Sender {
             stateInit
         };
 
-        try {
-            await this.web3Private.sendTransaction({
-                messages: [message],
-                onTransactionHash: this.onHash
-            });
-        } catch (_) {}
+        await this.web3Private.sendTransaction({
+            messages: [message],
+            onTransactionHash: this.onHash
+        });
     }
 }

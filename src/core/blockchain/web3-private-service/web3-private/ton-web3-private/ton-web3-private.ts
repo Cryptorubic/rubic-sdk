@@ -1,14 +1,13 @@
 import { TonClient } from '@ton/ton';
 import { TonConnectUI } from '@tonconnect/ui';
-import { RubicSdkError } from 'src/common/errors';
+import { RubicSdkError, UserRejectError } from 'src/common/errors';
+import { parseError } from 'src/common/utils/errors';
 import { waitFor } from 'src/common/utils/waitFor';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TonWalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 
-import { EvmWeb3Private } from '../evm-web3-private/evm-web3-private';
-import { Web3Error } from '../models/web3.error';
 import { Web3Private } from '../web3-private';
 import { TonTransactionOptions } from './models/ton-types';
 
@@ -44,7 +43,11 @@ export class TonWeb3Private extends Web3Private {
             return boc;
         } catch (err) {
             console.error(`Send transaction error. ${err}`);
-            throw EvmWeb3Private.parseError(err as Web3Error);
+
+            if (err.message.includes('Reject request')) {
+                throw new UserRejectError();
+            }
+            throw parseError(err);
         }
     }
 
