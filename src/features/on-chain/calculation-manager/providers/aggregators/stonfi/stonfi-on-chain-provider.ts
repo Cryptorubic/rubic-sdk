@@ -12,27 +12,60 @@ import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
-import { DEDUST_GAS } from '../dedust/constants/dedust-gas';
+import { TON_DEFAULT_GAS } from '../dedust/constants/dedust-gas';
+import { StonfiSwapService } from './services/stonfi-api-service';
+import { StonfiOnChainTrade } from './stonfi-on-chain-trade';
 
 export class StonfiOnChainProvider extends AggregatorOnChainProvider {
     public tradeType = ON_CHAIN_TRADE_TYPE.STONFI;
+
+    private readonly stonfiSwapService = StonfiSwapService.getInstance();
 
     public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
         return blockchain === BLOCKCHAIN_NAME.TON;
     }
 
     public async calculate(
-        _from: PriceTokenAmount<TonBlockchainName>,
-        _toToken: PriceToken<TonBlockchainName>,
-        _options: RequiredOnChainCalculationOptions
+        from: PriceTokenAmount<TonBlockchainName>,
+        toToken: PriceToken<TonBlockchainName>,
+        options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        throw new Error('Method not implemented.');
+        try {
+            const { amountOutWei } = await this.stonfiSwapService.makeQuoteRequest(
+                from,
+                toToken,
+                options.slippageTolerance
+            );
+            const to = new PriceTokenAmount({
+                ...toToken.asStruct,
+                weiAmount: new BigNumber(amountOutWei)
+            });
+
+            return new StonfiOnChainTrade(
+                {
+                    from,
+                    to,
+                    gasFeeInfo: await this.getGasFeeInfo(),
+                    path: this.getRoutePath(from, toToken),
+                    slippageTolerance: options.slippageTolerance,
+                    useProxy: false,
+                    withDeflation: options.withDeflation,
+                    usedForCrossChain: false
+                },
+                options.providerAddress
+            );
+        } catch (err) {
+            return {
+                type: this.tradeType,
+                error: err
+            };
+        }
     }
 
-    protected async getGasFeeInfo(): Promise<GasFeeInfo | null> {
-        return {
+    protected getGasFeeInfo(): Promise<GasFeeInfo | null> {
+        return Promise.resolve({
             gasPrice: new BigNumber(1),
-            gasLimit: new BigNumber(DEDUST_GAS)
-        };
+            gasLimit: new BigNumber(TON_DEFAULT_GAS)
+        });
     }
 }

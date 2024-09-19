@@ -15,11 +15,12 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
+
+import { SolanaOnChainTradeStruct } from './models/solana-on-chain-trade-struct';
 
 export abstract class SolanaOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount<SolanaBlockchainName>;
@@ -67,10 +68,7 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.SOLANA);
     }
 
-    protected constructor(
-        tradeStruct: OnChainTradeStruct<SolanaBlockchainName>,
-        providerAddress: string
-    ) {
+    protected constructor(tradeStruct: SolanaOnChainTradeStruct, providerAddress: string) {
         super(providerAddress);
 
         this.from = tradeStruct.from;

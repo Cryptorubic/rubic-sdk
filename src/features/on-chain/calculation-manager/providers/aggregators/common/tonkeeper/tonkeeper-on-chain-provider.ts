@@ -36,12 +36,10 @@ export abstract class TonkeeperOnChainProvider<
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
             const [fromRawAddress, toRawAddress] = this.getRawAddresses(from, toToken);
-            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
-
             const bestRoute = await TonkeeperApiService.makeQuoteReq(
                 fromRawAddress,
                 toRawAddress,
-                fromWithoutFee.stringWeiAmount,
+                from.stringWeiAmount,
                 this.tonkeeperDexType
             );
             const to = new PriceTokenAmount({
@@ -57,8 +55,6 @@ export abstract class TonkeeperOnChainProvider<
                 withDeflation: options.withDeflation,
                 gasFeeInfo: null,
                 path: this.getRoutePath(from, toToken),
-                proxyFeeInfo,
-                fromWithoutFee,
                 tradeType: this.tradeType,
                 tonkeeperDexType: this.tonkeeperDexType,
                 bestRoute,

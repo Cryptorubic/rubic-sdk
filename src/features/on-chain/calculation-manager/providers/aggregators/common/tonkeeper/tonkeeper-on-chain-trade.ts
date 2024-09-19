@@ -84,7 +84,7 @@ export class TonkeeperOnChainTrade<
         const bestRoute = await TonkeeperApiService.makeQuoteReq(
             this.rawAddresses.fromRawAddress,
             this.rawAddresses.toRawAddress,
-            this.fromWithoutFee.stringWeiAmount,
+            this.from.stringWeiAmount,
             this.tonkeeperDexType
         );
 

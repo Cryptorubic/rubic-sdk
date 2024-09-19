@@ -3,6 +3,7 @@ import {
     Factory,
     JettonRoot,
     JettonWallet,
+    MAINNET_FACTORY_ADDR,
     Pool,
     PoolType,
     ReadinessStatus,
@@ -13,12 +14,12 @@ import {
 import { Address, beginCell, OpenedContract, Sender, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
+import { LowSlippageError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Injector } from 'src/core/injector/injector';
 
-import { DEDUST_GAS } from '../constants/dedust-gas';
+import { TON_DEFAULT_GAS } from '../constants/dedust-gas';
 import { DedustTxStep } from '../models/dedust-api-types';
 import { DedustApiService } from './dedust-api-service';
 import { DedustTxSender } from './dedust-sender-class';
@@ -41,7 +42,7 @@ export class DedustSwapService {
     }
 
     private get mainnetFactoryAddress(): Address {
-        return Address.parse('EQBfBWT7X2BHg9tXAxzhz2aKiNTU1tpt5NsiK0uSDW_YAJ67');
+        return MAINNET_FACTORY_ADDR;
     }
 
     private constructor() {
@@ -116,6 +117,7 @@ export class DedustSwapService {
             } else if (to.isNative) {
                 await this.swapJettonToTon(from, sender, minAmountOut);
             } else {
+                if (slippage < 0.1) throw new LowSlippageError(0.1);
                 await this.swapJettonToJetton(from, sender, slippage);
             }
         } catch (err) {
@@ -204,7 +206,7 @@ export class DedustSwapService {
             poolAddress,
             amount: fromAmount,
             limit: minAmountOut,
-            gasAmount: toNano(DEDUST_GAS)
+            gasAmount: toNano(TON_DEFAULT_GAS)
         });
     }
 
@@ -225,7 +227,7 @@ export class DedustSwapService {
             JettonWallet.createFromAddress(jettonWalletAddress)
         );
 
-        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS), {
+        await jettonWallet.sendTransfer(sender, toNano(TON_DEFAULT_GAS), {
             amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
@@ -260,7 +262,7 @@ export class DedustSwapService {
             slippage
         );
 
-        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS), {
+        await jettonWallet.sendTransfer(sender, toNano(TON_DEFAULT_GAS), {
             amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
@@ -278,11 +280,12 @@ export class DedustSwapService {
         if (!txSteps.length) return payloadParams;
 
         const step = txSteps[0]!;
+        const isFirstStep = txSteps.length === this.txSteps.length;
         const minAmountOut = BigInt(
             new BigNumber(step.amountOut).multipliedBy(1 - slippage).toFixed(0)
         );
 
-        if (txSteps.length === this.txSteps.length) {
+        if (isFirstStep) {
             payloadParams.poolAddress = step.poolAddress;
             payloadParams.limit = minAmountOut;
         } else {
@@ -291,7 +294,7 @@ export class DedustSwapService {
         }
 
         const slicedSteps = txSteps.slice(1);
-        if (slicedSteps.length) {
+        if (slicedSteps.length && !isFirstStep) {
             next.next = {} as SwapStep;
             next = next.next;
         }

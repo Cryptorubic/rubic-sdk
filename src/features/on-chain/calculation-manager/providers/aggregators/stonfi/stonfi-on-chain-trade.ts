@@ -5,10 +5,12 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { TonOnChainTrade } from '../../common/on-chain-trade/ton-on-chain-trade/ton-on-chain-trade';
-import { StonfiApiService } from './services/stonfi-api-service';
+import { StonfiSwapService } from './services/stonfi-api-service';
 
 export class StonfiOnChainTrade extends TonOnChainTrade<TonEncodedConfig> {
     public type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.STONFI;
+
+    private readonly stonfiSwapService = StonfiSwapService.getInstance();
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string> {
         await this.checkWalletState(options?.testMode);
@@ -58,12 +60,12 @@ export class StonfiOnChainTrade extends TonOnChainTrade<TonEncodedConfig> {
     }
 
     protected async calculateOutputAmount(_options: EncodeTransactionOptions): Promise<string> {
-        const { outputAmountWei } = await StonfiApiService.makeQuoteRequest(
+        const { amountOutWei } = await this.stonfiSwapService.makeQuoteRequest(
             this.from,
             this.to,
             this.slippageTolerance
         );
 
-        return outputAmountWei;
+        return amountOutWei;
     }
 }

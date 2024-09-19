@@ -25,8 +25,8 @@ export interface StonfiQuoteResponse {
 }
 
 export interface StonfiQuoteInfo {
-    outputAmountWei: string;
-    minOutputAmountWei: string;
+    amountOutWei: string;
+    minAmountOutWei: string;
     stonfiFee: string;
 }
 

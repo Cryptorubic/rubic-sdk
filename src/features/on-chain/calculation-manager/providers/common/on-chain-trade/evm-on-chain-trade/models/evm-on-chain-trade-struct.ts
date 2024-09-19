@@ -14,8 +14,6 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
     gasFeeInfo: GasFeeInfo | null;
 
     useProxy: boolean;
-    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    fromWithoutFee: PriceTokenAmount<T>;
 
     withDeflation: {
         from: IsDeflationToken;
@@ -27,4 +25,6 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
 
 export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainName> {
     permit2ApproveAddress?: string;
+    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 }

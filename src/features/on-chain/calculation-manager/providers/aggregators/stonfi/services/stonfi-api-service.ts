@@ -5,13 +5,23 @@ import { Injector } from 'src/core/injector/injector';
 import { BOUNCEABLE_TON_NATIVE_ADDRESS } from '../constants/ton-address';
 import { StonfiQuoteInfo, StonfiQuoteResponse } from '../models/stonfi-api-types';
 
-export class StonfiApiService {
-    private static readonly apiUrl = 'https://api.ston.fi/v1';
+export class StonfiSwapService {
+    private static instance: StonfiSwapService;
 
-    private static tonClient: TonClient;
+    private readonly apiUrl = 'https://api.ston.fi/v1';
 
-    constructor() {
-        StonfiApiService.tonClient = new TonClient({
+    private tonClient!: TonClient;
+
+    public static getInstance(): StonfiSwapService {
+        if (!this.instance) {
+            this.instance = new StonfiSwapService();
+        }
+
+        return this.instance;
+    }
+
+    private constructor() {
+        this.tonClient = new TonClient({
             endpoint: 'https://toncenter.com/api/v2/jsonRPC',
             apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
         });
@@ -46,7 +56,7 @@ export class StonfiApiService {
     //     return {};
     // }
 
-    public static async makeQuoteRequest(
+    public async makeQuoteRequest(
         from: PriceTokenAmount,
         to: PriceToken,
         slippage: number
@@ -61,8 +71,8 @@ export class StonfiApiService {
             );
 
             return {
-                minOutputAmountWei: res.min_ask_units,
-                outputAmountWei: res.ask_units,
+                minAmountOutWei: res.min_ask_units,
+                amountOutWei: res.ask_units,
                 stonfiFee: res.fee_units
             };
         } catch (err) {

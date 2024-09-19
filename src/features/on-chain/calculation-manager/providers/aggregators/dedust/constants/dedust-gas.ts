@@ -1,1 +1,1 @@
-export const DEDUST_GAS = 0.3;
+export const TON_DEFAULT_GAS = 0.3;

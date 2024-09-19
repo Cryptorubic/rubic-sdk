@@ -1,6 +1,6 @@
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
-import { BLOCKCHAIN_NAME, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
 import { TonWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/ton-web3-public/ton-web3-public';
 import { Injector } from 'src/core/injector/injector';
@@ -26,8 +26,6 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
 
     public readonly gasFeeInfo: GasFeeInfo | null;
 
-    protected readonly fromWithoutFee: PriceTokenAmount<TonBlockchainName>;
-
     protected skipAmountCheck: boolean = false;
 
     protected get spenderAddress(): string {
@@ -49,7 +47,6 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.path = tradeStruct.path;
-        this.fromWithoutFee = tradeStruct.fromWithoutFee;
     }
 
     public override async needApprove(): Promise<boolean> {

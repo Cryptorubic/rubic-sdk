@@ -7,4 +7,8 @@ export interface TonEncodedConfigAndToAmount<T> {
     toAmount: string;
 }
 
-export interface TonOnChainTradeStruct extends OnChainTradeStruct<TonBlockchainName> {}
+export type TonOnChainTradeStruct = Omit<
+    OnChainTradeStruct<TonBlockchainName>,
+    'fromWithoutFee' | 'proxyFeeInfo'
+>;
+// export interface TonOnChainTradeStruct extends OnChainTradeStruct<TonBlockchainName> {}

@@ -12,7 +12,7 @@ import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
-import { DEDUST_GAS } from './constants/dedust-gas';
+import { TON_DEFAULT_GAS } from './constants/dedust-gas';
 import { DedustOnChainTrade } from './dedust-on-chain-trade';
 import { DedustSwapService } from './services/dedust-swap-service';
 
@@ -31,7 +31,6 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
             const toStringWeiAmount = await this.dedustSwapService.calcOutputAmount(from, toToken);
 
             const to = new PriceTokenAmount({
@@ -44,8 +43,6 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
                     from,
                     to,
                     gasFeeInfo: await this.getGasFeeInfo(),
-                    fromWithoutFee,
-                    proxyFeeInfo,
                     slippageTolerance: options.slippageTolerance,
                     useProxy: false,
                     withDeflation: options.withDeflation,
@@ -62,10 +59,10 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
         }
     }
 
-    protected async getGasFeeInfo(): Promise<GasFeeInfo | null> {
-        return {
+    protected getGasFeeInfo(): Promise<GasFeeInfo | null> {
+        return Promise.resolve({
             gasPrice: new BigNumber(1),
-            gasLimit: new BigNumber(DEDUST_GAS)
-        };
+            gasLimit: new BigNumber(TON_DEFAULT_GAS)
+        });
     }
 }
