@@ -5,12 +5,13 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { TonOnChainTrade } from '../../common/on-chain-trade/ton-on-chain-trade/ton-on-chain-trade';
-import { StonfiSwapService } from './services/stonfi-api-service';
+import { StonfiApiService } from './services/stonfi-api-service';
+import { StonfiSwapService } from './services/stonfi-swap-service';
 
 export class StonfiOnChainTrade extends TonOnChainTrade<TonEncodedConfig> {
     public type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.STONFI;
 
-    private readonly stonfiSwapService = StonfiSwapService.getInstance();
+    private readonly stonfiSwapService = new StonfiSwapService();
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string> {
         await this.checkWalletState(options?.testMode);
@@ -47,20 +48,18 @@ export class StonfiOnChainTrade extends TonOnChainTrade<TonEncodedConfig> {
     }
 
     private async encodeDirect(): Promise<TonEncodedConfig> {
-        // const { body, to, value } = await StonfiApiService.getTxParams(
-        //     this.bestRoute,
-        //     this.walletAddress,
-        //     this.slippageTolerance
-        // );
-        return {
-            address: 'to',
-            amount: 'value',
-            payload: 'body'
-        };
+        const tonConfig = this.stonfiSwapService.getTxParams(
+            this.from,
+            this.to,
+            this.walletAddress,
+            this.toTokenAmountMin.stringWeiAmount
+        );
+
+        return tonConfig;
     }
 
     protected async calculateOutputAmount(_options: EncodeTransactionOptions): Promise<string> {
-        const { amountOutWei } = await this.stonfiSwapService.makeQuoteRequest(
+        const { amountOutWei } = await StonfiApiService.makeQuoteRequest(
             this.from,
             this.to,
             this.slippageTolerance

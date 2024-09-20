@@ -2878,6 +2878,11 @@
     eventemitter3 "^5.0.0"
     lodash "^4.17.21"
 
+"@ston-fi/sdk@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@ston-fi/sdk/-/sdk-1.2.0.tgz#afcb499c3bd2e12967b4f5db412e51834e85f7ff"
+  integrity sha512-qOPYnVkLov+HozImJAZ0o2ghTV4DNKKKkE2JYFnIeXr9eHvUvcxIwvcknNvNARqbuPDkBsC/7PhHDve6XEh00Q==
+
 "@supercharge/promise-pool@^2.1.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@supercharge/promise-pool/-/promise-pool-2.4.0.tgz#6050eea8c2d7f92ddd4ddc582ee328b15c034ad3"

@@ -12,44 +12,30 @@ import {
     VaultNative
 } from '@dedust/sdk';
 import { Address, beginCell, OpenedContract, Sender, toNano } from '@ton/core';
-import { TonClient } from '@ton/ton';
 import BigNumber from 'bignumber.js';
 import { LowSlippageError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client-instance';
 import { Injector } from 'src/core/injector/injector';
 
-import { TON_DEFAULT_GAS } from '../constants/dedust-gas';
+import { DEDUST_GAS } from '../constants/dedust-gas';
 import { DedustTxStep } from '../models/dedust-api-types';
 import { DedustApiService } from './dedust-api-service';
 import { DedustTxSender } from './dedust-sender-class';
 
 export class DedustSwapService {
-    private static instance: DedustSwapService;
-
     private readonly factory: OpenedContract<Factory>;
 
-    private readonly tonClient: TonClient;
+    private readonly tonClient = TonClientInstance.getInstance();
 
     private txSteps: DedustTxStep[] = [];
-
-    public static getInstance(): DedustSwapService {
-        if (!this.instance) {
-            this.instance = new DedustSwapService();
-        }
-
-        return this.instance;
-    }
 
     private get mainnetFactoryAddress(): Address {
         return MAINNET_FACTORY_ADDR;
     }
 
-    private constructor() {
-        this.tonClient = new TonClient({
-            endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-            apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
-        });
+    constructor() {
         this.factory = this.tonClient.open(Factory.createFromAddress(this.mainnetFactoryAddress));
     }
 
@@ -206,7 +192,7 @@ export class DedustSwapService {
             poolAddress,
             amount: fromAmount,
             limit: minAmountOut,
-            gasAmount: toNano(TON_DEFAULT_GAS)
+            gasAmount: toNano(DEDUST_GAS)
         });
     }
 
@@ -227,11 +213,11 @@ export class DedustSwapService {
             JettonWallet.createFromAddress(jettonWalletAddress)
         );
 
-        await jettonWallet.sendTransfer(sender, toNano(TON_DEFAULT_GAS), {
+        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS), {
             amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
-            forwardAmount: toNano(0.25),
+            forwardAmount: toNano(0.15),
             forwardPayload: VaultJetton.createSwapPayload({
                 poolAddress,
                 limit: minAmountOut
@@ -262,11 +248,11 @@ export class DedustSwapService {
             slippage
         );
 
-        await jettonWallet.sendTransfer(sender, toNano(TON_DEFAULT_GAS), {
+        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS), {
             amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
-            forwardAmount: toNano('0.25'),
+            forwardAmount: toNano(0.15),
             forwardPayload: VaultJetton.createSwapPayload(swapPayloadParams)
         });
     }

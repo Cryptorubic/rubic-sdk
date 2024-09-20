@@ -10,7 +10,7 @@ import { DedustSwapService } from './services/dedust-swap-service';
 export class DedustOnChainTrade extends TonOnChainTrade<undefined> {
     public type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
 
-    private readonly dedustSwapService = DedustSwapService.getInstance();
+    private readonly dedustSwapService = new DedustSwapService();
 
     constructor(tradeStruct: DedustOnChainTradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);

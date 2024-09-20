@@ -12,14 +12,14 @@ import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
-import { TON_DEFAULT_GAS } from './constants/dedust-gas';
+import { DEDUST_GAS } from './constants/dedust-gas';
 import { DedustOnChainTrade } from './dedust-on-chain-trade';
 import { DedustSwapService } from './services/dedust-swap-service';
 
 export class DedustOnChainProvider extends AggregatorOnChainProvider {
     public tradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
 
-    private readonly dedustSwapService = DedustSwapService.getInstance();
+    private readonly dedustSwapService = new DedustSwapService();
 
     public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
         return blockchain === BLOCKCHAIN_NAME.TON;
@@ -62,7 +62,7 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
     protected getGasFeeInfo(): Promise<GasFeeInfo | null> {
         return Promise.resolve({
             gasPrice: new BigNumber(1),
-            gasLimit: new BigNumber(TON_DEFAULT_GAS)
+            gasLimit: new BigNumber(DEDUST_GAS)
         });
     }
 }
