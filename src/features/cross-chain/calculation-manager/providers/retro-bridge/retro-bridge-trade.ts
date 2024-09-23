@@ -4,6 +4,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -193,21 +194,16 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         this.retroBridgeId = retroBridgeOrder.transaction_id;
         const transferAmount = this.from.stringWeiAmount;
 
-        const value = this.from.isNative ? transferAmount : '0';
+        let config: EvmEncodeConfig = { to: '', data: '', value: '' };
 
-        const methodArguments = this.from.isNative
-            ? [this.walletAddress]
-            : [this.walletAddress, this.from.address, transferAmount];
-
-        const methodName = this.from.isNative ? 'transferEther' : 'transferToken';
-
-        const config = EvmWeb3Pure.encodeMethodCall(
-            retroBridgeContractAddresses[this.fromBlockchain],
-            retroBridgeSwapAbi,
-            methodName,
-            methodArguments,
-            value
-        );
+        if (this.isProxyTrade) {
+            config = this.createProxyEvmConfig(transferAmount);
+        } else {
+            config = this.createEvmConfigWithoutProxy(
+                transferAmount,
+                retroBridgeOrder.hot_wallet_address
+            );
+        }
 
         return { config, amount: this.to.stringWeiAmount };
     }
@@ -243,5 +239,51 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
             signature,
             this.chainType
         );
+    }
+
+    private createProxyEvmConfig(transferAmount: string): EvmEncodeConfig {
+        const value = this.from.isNative ? transferAmount : '0';
+
+        const methodArguments = this.from.isNative
+            ? [this.walletAddress]
+            : [this.walletAddress, this.from.address, transferAmount];
+
+        const methodName = this.from.isNative ? 'transferEther' : 'transferToken';
+
+        const config = EvmWeb3Pure.encodeMethodCall(
+            retroBridgeContractAddresses[this.fromBlockchain],
+            retroBridgeSwapAbi,
+            methodName,
+            methodArguments,
+            value
+        );
+
+        return config;
+    }
+
+    private createEvmConfigWithoutProxy(
+        transferAmount: string,
+        hotWalletAddress: string
+    ): EvmEncodeConfig {
+        const config: EvmEncodeConfig = { to: '', data: '', value: '' };
+
+        if (this.from.isNative) {
+            config.value = transferAmount;
+            config.data = '0x';
+            config.to = hotWalletAddress;
+        } else {
+            const encodedConfig = EvmWeb3Pure.encodeMethodCall(
+                this.from.address,
+                ERC20_TOKEN_ABI,
+                'transfer',
+                [hotWalletAddress, transferAmount],
+                '0'
+            );
+            config.value = encodedConfig.value;
+            config.to = encodedConfig.to;
+            config.data = encodedConfig.data;
+        }
+
+        return config;
     }
 }
