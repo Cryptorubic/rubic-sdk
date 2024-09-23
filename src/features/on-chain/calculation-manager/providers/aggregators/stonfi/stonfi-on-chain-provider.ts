@@ -46,14 +46,14 @@ export class StonfiOnChainProvider extends AggregatorOnChainProvider {
             const tradeStruct = {
                 from,
                 to,
-                gasFeeInfo: {},
+                gasFeeInfo: null,
                 path: this.getRoutePath(from, toToken),
                 slippageTolerance: options.slippageTolerance,
                 useProxy: false,
                 withDeflation: options.withDeflation,
                 usedForCrossChain: false
-            };
-            tradeStruct.gasFeeInfo = this.getGasFeeInfo(tradeStruct);
+            } as TonOnChainTradeStruct;
+            tradeStruct.gasFeeInfo = await this.getGasFeeInfo(tradeStruct);
 
             return new StonfiOnChainTrade(tradeStruct, options.providerAddress);
         } catch (err) {
