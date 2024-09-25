@@ -137,8 +137,9 @@ export class DedustSwapService {
                 assets: [fromAsset, toAsset]
             });
             const pool = this.tonClient.open(Pool.createFromAddress(poolAddress));
+            const status = await pool.getReadinessStatus();
 
-            if ((await pool.getReadinessStatus()) !== ReadinessStatus.READY) {
+            if (status !== ReadinessStatus.READY) {
                 throw new Error(`[DedustSwapService_getPool] Pool does not exist.`);
             }
 
@@ -164,7 +165,8 @@ export class DedustSwapService {
     ): Promise<OpenedContract<T>> {
         if (token.isNative) {
             const nativeVault = this.tonClient.open(await this.factory.getNativeVault());
-            if ((await nativeVault.getReadinessStatus()) !== ReadinessStatus.READY) {
+            const status = await nativeVault.getReadinessStatus();
+            if (status !== ReadinessStatus.READY) {
                 throw new RubicSdkError('Vault (TON) does not exist.');
             }
 
@@ -173,8 +175,9 @@ export class DedustSwapService {
 
         const parsedAddress = Address.parse(token.address);
         const jettonVault = this.tonClient.open(await this.factory.getJettonVault(parsedAddress));
+        const status = await jettonVault.getReadinessStatus();
 
-        if ((await jettonVault.getReadinessStatus()) !== ReadinessStatus.READY) {
+        if (status !== ReadinessStatus.READY) {
             throw new Error(`Vault (${token.symbol}) does not exist.`);
         }
 

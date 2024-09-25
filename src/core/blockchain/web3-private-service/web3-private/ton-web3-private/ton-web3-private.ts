@@ -24,8 +24,8 @@ export class TonWeb3Private extends Web3Private {
         return this._tonClient;
     }
 
-    public async getBlockchainName(): Promise<BlockchainName> {
-        return BLOCKCHAIN_NAME.TON;
+    public getBlockchainName(): Promise<BlockchainName> {
+        return Promise.resolve(BLOCKCHAIN_NAME.TON);
     }
 
     public async sendTransaction(options: TonTransactionOptions): Promise<string> {
