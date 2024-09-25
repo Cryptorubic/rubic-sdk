@@ -120,6 +120,7 @@ export class EddyFinanceTrade extends UniswapV2AbstractTrade {
         if (!availableDexs.includes(routerAddress.toLowerCase())) {
             throw new NotWhitelistedProviderError(routerAddress, undefined, 'dex');
         }
+
         await ProxyCrossChainEvmTrade.checkDexWhiteList(
             this.from.blockchain,
             routerAddress,
