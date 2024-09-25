@@ -28,8 +28,7 @@ export class TonWeb3Public extends Web3Public {
     }
 
     public async healthCheck(timeoutMs: number): Promise<boolean> {
-        const fallback = () => false;
-        const isAlive = await pTimeout(this.tonApi.healthcheck(), timeoutMs, fallback);
+        const isAlive = await pTimeout(this.tonApi.healthcheck(), timeoutMs, () => false);
         return isAlive;
     }
 

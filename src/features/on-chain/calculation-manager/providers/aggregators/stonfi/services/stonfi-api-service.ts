@@ -16,7 +16,7 @@ export class StonfiApiService {
             const srcTokenAddress = from.isNative ? BOUNCEABLE_TON_NATIVE_ADDRESS : from.address;
             const dstTokenAddress = to.isNative ? BOUNCEABLE_TON_NATIVE_ADDRESS : to.address;
 
-            let queryParams = `offer_address=${srcTokenAddress}&ask_address=${dstTokenAddress}&units=${from.stringWeiAmount}&slippage_tolerance=${slippage}`;
+            const queryParams = `offer_address=${srcTokenAddress}&ask_address=${dstTokenAddress}&units=${from.stringWeiAmount}&slippage_tolerance=${slippage}`;
             const res = await Injector.httpClient.post<StonfiQuoteResponse>(
                 `${this.apiUrl}/swap/simulate?${queryParams}`
             );

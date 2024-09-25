@@ -7,7 +7,6 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -125,10 +124,6 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
         return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
     }
 
-    protected get evmWeb3Private(): EvmWeb3Private {
-        return Injector.web3PrivateService.getWeb3Private('EVM');
-    }
-
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -175,11 +170,13 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
             options?.useCacheData || false,
             options?.receiverAddress
         );
-        const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
-        const receiverAccount = isEvmDestination ? options.receiverAddress : this.walletAddress;
 
-        let receiverAddress = receiverAccount;
+        const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
+        let receiverAddress = isEvmDestination
+            ? options.receiverAddress || this.walletAddress
+            : options.receiverAddress;
         let toAddress = '';
+
         if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
             const tronHexReceiverAddress = await this.tronWeb3Public.convertTronAddressToHex(
                 options.receiverAddress!
@@ -196,7 +193,6 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
             toAddress = '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
         }
 
-
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
             { ...options, receiverAddress },
             {
@@ -207,8 +203,7 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
                 srcChainTrade: null,
                 providerAddress: this.providerAddress,
                 type: `native:${this.type}`,
-                fromAddress: this.walletAddress,
-
+                fromAddress: this.walletAddress
             }
         );
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
@@ -271,7 +266,7 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
                 options?.receiverAddress
             );
 
-            await this.evmWeb3Private.trySendTransaction(to, {
+            await this.web3Private.trySendTransaction(to, {
                 data,
                 value,
                 onTransactionHash,

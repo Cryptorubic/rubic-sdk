@@ -139,7 +139,6 @@ export class Web3PrivateService {
         chainType: Web3PrivateSupportedChainType,
         walletProviderCore: WalletProviderCore
     ) {
-        console.log('updateWeb3Private_address ==> ', walletProviderCore.address);
         this.web3PrivateStorage = {
             ...this.web3PrivateStorage,
             [chainType]: this.createWeb3Private[chainType](walletProviderCore)
