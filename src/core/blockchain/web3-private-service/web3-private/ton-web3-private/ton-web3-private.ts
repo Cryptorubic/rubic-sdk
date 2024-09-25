@@ -1,3 +1,4 @@
+import { TonClient } from '@ton/ton';
 import { TonConnectUI } from '@tonconnect/ui';
 import { RubicSdkError, UserRejectError } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
@@ -16,6 +17,12 @@ export class TonWeb3Private extends Web3Private {
     private readonly tonApi: TonApiService = new TonApiService();
 
     private readonly tonConnectUI: TonConnectUI;
+
+    private readonly _tonClient: TonClient;
+
+    public getTonClient(): TonClient {
+        return this._tonClient;
+    }
 
     public async getBlockchainName(): Promise<BlockchainName> {
         return BLOCKCHAIN_NAME.TON;
@@ -65,5 +72,9 @@ export class TonWeb3Private extends Web3Private {
     constructor(tonProviderCore: TonWalletProviderCore) {
         super(tonProviderCore.address);
         this.tonConnectUI = tonProviderCore.core;
+        this._tonClient = new TonClient({
+            endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+            apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
+        });
     }
 }

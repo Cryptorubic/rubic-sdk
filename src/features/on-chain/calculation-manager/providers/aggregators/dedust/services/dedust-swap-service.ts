@@ -12,11 +12,11 @@ import {
     VaultNative
 } from '@dedust/sdk';
 import { Address, beginCell, OpenedContract, Sender, toNano } from '@ton/core';
+import { TonClient } from '@ton/ton';
 import BigNumber from 'bignumber.js';
 import { LowSlippageError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client-instance';
 import { Injector } from 'src/core/injector/injector';
 
 import { DEDUST_GAS } from '../constants/dedust-gas';
@@ -27,7 +27,9 @@ import { DedustTxSender } from './dedust-sender-class';
 export class DedustSwapService {
     private readonly factory: OpenedContract<Factory>;
 
-    private readonly tonClient = TonClientInstance.getInstance();
+    private get tonClient(): TonClient {
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).getTonClient();
+    }
 
     private txSteps: DedustTxStep[] = [];
 
