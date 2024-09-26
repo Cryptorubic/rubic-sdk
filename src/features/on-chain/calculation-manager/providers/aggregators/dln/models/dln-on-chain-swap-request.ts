@@ -2,4 +2,5 @@ import { DlnOnChainEstimateRequest } from 'src/features/on-chain/calculation-man
 
 export interface DlnOnChainSwapRequest extends DlnOnChainEstimateRequest {
     tokenOutRecipient: string;
+    referralCode: string;
 }
