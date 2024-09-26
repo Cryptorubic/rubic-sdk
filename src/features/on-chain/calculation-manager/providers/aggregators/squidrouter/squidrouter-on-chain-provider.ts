@@ -54,9 +54,7 @@ export class SquidRouterOnChainProvider extends AggregatorOnChainProvider {
                 slippage: Number(options.slippageTolerance * 100)
             };
 
-            const {
-                tx: { route }
-            } = await SquidRouterApiService.getRoute(requestParams);
+            const { route } = await SquidRouterApiService.getRoute(requestParams);
 
             const providerGateway = route.transactionRequest.target;
 

@@ -84,9 +84,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
             };
 
             const {
-                tx: {
-                    route: { transactionRequest, estimate }
-                }
+                route: { transactionRequest, estimate }
             } = await SquidRouterApiService.getRoute(requestParams);
 
             const squidGasData: GasData = {

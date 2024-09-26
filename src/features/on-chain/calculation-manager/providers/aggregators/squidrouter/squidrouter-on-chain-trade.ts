@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SquidrouterTransactionRequest } from 'src/features/common/providers/squidrouter/models/transaction-request';
 import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
+import { SquidrouterContractAddress } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-contract-address';
+import { SquidrouterCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
 
 import { getOnChainGasData } from '../../../utils/get-on-chain-gas-data';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
@@ -34,7 +35,8 @@ export class SquidRouterOnChainTrade extends AggregatorEvmOnChainTrade {
     public squidrouterRequestId: string | undefined;
 
     public get dexContractAddress(): string {
-        throw new RubicSdkError('Dex address is unknown before swap is started');
+        const fromBlockchain = this.from.blockchain as SquidrouterCrossChainSupportedBlockchain;
+        return SquidrouterContractAddress[fromBlockchain].providerRouter;
     }
 
     constructor(
@@ -56,11 +58,9 @@ export class SquidRouterOnChainTrade extends AggregatorEvmOnChainTrade {
             toAddress: options.receiverAddress || this.walletAddress
         };
 
-        const {
-            tx: { route },
-            requestId
-        } = await SquidRouterApiService.getRoute(requestParams);
-        this.squidrouterRequestId = requestId;
+        const res = await SquidRouterApiService.getRoute(requestParams);
+        this.squidrouterRequestId = res['x-request-id'];
+        const route = res.route;
 
         return {
             tx: {

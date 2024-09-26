@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Injector } from 'src/core/injector/injector';
 import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
 
@@ -11,23 +10,22 @@ import {
 export class SquidRouterApiService {
     private static readonly baseUrl = 'https://apiplus.squidrouter.com/v2';
 
+    private static apiKey = 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4';
+
     public static async getRoute(
         requestParams: SquidrouterTransactionRequest
-    ): Promise<{ tx: SquidrouterTransactionResponse; requestId: string }> {
-        const res = await axios.post<SquidrouterTransactionResponse>(
-            `${SquidRouterApiService.baseUrl}/route`,
+    ): Promise<SquidrouterTransactionResponse> {
+        const res = await Injector.httpClient.post<SquidrouterTransactionResponse>(
+            'https://x-api.rubic.exchange/squidrouter/api/route',
             requestParams,
             {
                 headers: {
-                    'x-integrator-id': 'rubic-api'
+                    apikey: SquidRouterApiService.apiKey
                 }
             }
         );
 
-        return {
-            tx: res.data,
-            requestId: res.headers['x-request-id']
-        };
+        return res;
     }
 
     public static getTxStatus(params: SquidrouterTxStatusParams): Promise<SquidrouterApiResponse> {

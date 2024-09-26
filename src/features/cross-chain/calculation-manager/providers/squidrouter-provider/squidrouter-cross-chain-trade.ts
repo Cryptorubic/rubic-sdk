@@ -271,11 +271,11 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             toAddress: receiverAddress
         };
 
-        const {
-            tx: { route },
-            requestId
-        } = await SquidRouterApiService.getRoute(requestParams);
-        this.squidrouterRequestId = requestId;
+        const res = await SquidRouterApiService.getRoute(requestParams);
+        this.squidrouterRequestId = res['x-request-id'];
+
+        const route = res.route;
+
         return {
             config: {
                 data: route.transactionRequest.data,

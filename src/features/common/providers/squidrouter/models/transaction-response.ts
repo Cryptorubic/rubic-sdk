@@ -29,6 +29,7 @@ export interface SquidrouterTransactionResponse {
 
         readonly params: SquidrouterTransactionRequest;
     };
+    'x-request-id': string;
 }
 
 export interface SquidrouterTxStatusParams {
