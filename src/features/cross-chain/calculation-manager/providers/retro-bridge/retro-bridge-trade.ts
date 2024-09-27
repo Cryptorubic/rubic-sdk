@@ -187,7 +187,8 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         const retroBridgeOrder = await RetroBridgeApiService.createTransaction(
             {
                 ...this.quoteSendParams,
-                receiver_wallet: receiverAddress || this.walletAddress
+                receiver_wallet: receiverAddress || this.walletAddress,
+                sender_wallet: this.walletAddress
             },
             this.chainType
         );

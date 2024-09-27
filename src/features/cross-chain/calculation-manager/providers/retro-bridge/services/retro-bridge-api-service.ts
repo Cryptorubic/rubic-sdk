@@ -123,16 +123,17 @@ export class RetroBridgeApiService {
         const { data } = await Injector.httpClient.get<RetroBridgeStatusResponse>(
             `${this.RETRO_BRIDGE_API_ENDPOINT}/bridge/${transactionId}/info`
         );
+        const txStatus = data.status.toLowerCase();
 
-        if (data.status === RETRO_BRIDGE_TX_STATUS.COMPLETED) {
+        if (txStatus === RETRO_BRIDGE_TX_STATUS.COMPLETED) {
             return {
                 hash: data.destination_tx_hash,
                 status: TX_STATUS.PENDING
             };
         }
         if (
-            data.status === RETRO_BRIDGE_TX_STATUS.SEND_FAILED ||
-            data.status === RETRO_BRIDGE_TX_STATUS.REJECTED
+            txStatus === RETRO_BRIDGE_TX_STATUS.SEND_FAILED ||
+            txStatus === RETRO_BRIDGE_TX_STATUS.REJECTED
         ) {
             return {
                 hash: data.source_tx_hash,

@@ -20,6 +20,7 @@ export interface RetroBridgeQuoteResponse {
 
 export interface RetroBridgeTxSendParams extends RetroBridgeQuoteSendParams {
     receiver_wallet: string;
+    sender_wallet: string;
 }
 
 export interface RetroBridgeTxResponse {

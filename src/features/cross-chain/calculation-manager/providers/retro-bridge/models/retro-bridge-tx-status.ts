@@ -1,12 +1,12 @@
 export const RETRO_BRIDGE_TX_STATUS = {
-    PENDING: 'Pending',
-    WAIT_DEPOSIT: 'Wait deposit',
-    DEPOSITED: 'Deposited',
-    SENDING: 'Sending',
-    SENT: 'Sent',
-    COMPLETED: 'Completed',
-    SEND_FAILED: 'Send failed',
-    REJECTED: 'Rejected'
+    PENDING: 'pending',
+    WAIT_DEPOSIT: 'wait deposit',
+    DEPOSITED: 'deposited',
+    SENDING: 'sending',
+    SENT: 'sent',
+    COMPLETED: 'completed',
+    SEND_FAILED: 'send failed',
+    REJECTED: 'rejected'
 } as const;
 
 export type RetroBridgeTxStatus =
