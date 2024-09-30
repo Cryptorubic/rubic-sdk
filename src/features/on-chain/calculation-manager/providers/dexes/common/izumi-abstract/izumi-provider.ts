@@ -1,7 +1,7 @@
 import { getMulticallContracts } from 'iziswap-sdk/lib/base';
 import { searchPathQuery } from 'iziswap-sdk/lib/search/func';
 import { SearchPathQueryParams, SwapDirection } from 'iziswap-sdk/lib/search/types';
-import { RubicSdkError } from 'src/common/errors';
+import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { wrappedAddress } from 'src/common/tokens/constants/wrapped-addresses';
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
@@ -47,6 +47,10 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
         readonly quoterAddress: string;
         readonly multicallAddress: string;
         readonly supportedFees: number[];
+        readonly tokenBlackList?: {
+            direction: string;
+            tokenAddress: string;
+        }[];
     };
 
     public async calculate(
@@ -54,6 +58,21 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
         to: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<EvmOnChainTrade> {
+        if (this.config?.tokenBlackList) {
+            const isDisabledToken = this.config.tokenBlackList?.some(disabledToken => {
+                const tokenAddress = disabledToken.direction === 'from' ? from.address : to.address;
+
+                if (compareAddresses(tokenAddress, disabledToken.tokenAddress)) {
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (isDisabledToken) {
+                throw new NotSupportedTokensError();
+            }
+        }
         const fullOptions = combineOptions(options, this.defaultOptions);
 
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
