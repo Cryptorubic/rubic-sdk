@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import { MaxDecimalsError } from 'src/common/errors/swap/max-decimals.error';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -23,6 +24,8 @@ import { RetroBridgeTrade } from './retro-bridge-trade';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
 
 export class RetroBridgeProvider extends CrossChainProvider {
+    private readonly MAX_DECIMAL = 6;
+
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE;
 
     public isSupportedBlockchain(blockchain: BlockchainName): boolean {
@@ -37,6 +40,7 @@ export class RetroBridgeProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
         const fromBlockchain = from.blockchain as RetroBridgeSupportedBlockchain;
         try {
+            this.checkFromAmountDecimals(from);
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
@@ -115,6 +119,16 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 routePath
             );
 
+            const isDecimalsGtThanMax = this.checkFromAmountDecimals(from);
+
+            if (isDecimalsGtThanMax) {
+                return {
+                    trade,
+                    tradeType: this.type,
+                    error: new MaxDecimalsError(this.MAX_DECIMAL)
+                };
+            }
+
             return {
                 trade,
                 tradeType: this.type
@@ -176,6 +190,20 @@ export class RetroBridgeProvider extends CrossChainProvider {
         if (from.weiAmount.gt(maxSendAmount)) {
             throw new MaxAmountError(new BigNumber(tokenLimits.max_send), from.symbol);
         }
+    }
+
+    private checkFromAmountDecimals(from: PriceTokenAmount): boolean {
+        if (from.decimals > this.MAX_DECIMAL) {
+            const stringAmount = from.tokenAmount.toFixed();
+
+            const amountDecimals = stringAmount.split('.')[1]?.length ?? 0;
+
+            if (amountDecimals > this.MAX_DECIMAL) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private getBlockchainTicker(blockchain: RetroBridgeSupportedBlockchain): string {
