@@ -93,7 +93,7 @@ export class IzumiTrade extends EvmOnChainTrade {
         const { swapCalling, options: data } = getSwapChainWithExactInputCall(
             swapContract,
             this.walletAddress,
-            chain,
+            chain ?? chainId,
             swapParams,
             gasPriceInfo.gasPrice.toFixed()
         );

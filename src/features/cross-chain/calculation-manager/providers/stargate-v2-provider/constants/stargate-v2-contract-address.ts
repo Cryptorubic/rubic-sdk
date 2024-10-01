@@ -96,10 +96,10 @@ export const stargateV2ContractAddress: StargateV2ContractAddress = {
         [stargateV2BridgeToken.USDC]: '0x77C71633C34C3784ede189d74223122422492a0f',
         [stargateV2BridgeToken.USDT]: '0x1C10CC06DC6D35970d1D53B2A23c76ef370d4135',
         [stargateV2BridgeToken.WETH]: '0x8e8539e4CcD69123c623a106773F2b0cbbc58746'
+    },
+    [BLOCKCHAIN_NAME.GRAVITY]: {
+        [stargateV2BridgeToken.USDC]: '0xC1B8045A6ef2934Cf0f78B0dbD489969Fa9Be7E4',
+        [stargateV2BridgeToken.USDT]: '0x0B38e83B86d491735fEaa0a791F65c2B99535396',
+        [stargateV2BridgeToken.WETH]: '0x17d65bF79E77B6Ab21d8a0afed3bC8657d8Ee0B2'
     }
-    // [BLOCKCHAIN_NAME.GRAVITY]: {
-    //     [stargateV2BridgeToken.USDC]: '0xC1B8045A6ef2934Cf0f78B0dbD489969Fa9Be7E4',
-    //     [stargateV2BridgeToken.USDT]: '0x0B38e83B86d491735fEaa0a791F65c2B99535396',
-    //     [stargateV2BridgeToken.WETH]: '0x17d65bF79E77B6Ab21d8a0afed3bC8657d8Ee0B2'
-    // }
 };

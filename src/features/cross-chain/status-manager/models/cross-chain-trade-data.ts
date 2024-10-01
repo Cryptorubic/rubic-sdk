@@ -59,4 +59,9 @@ export interface CrossChainTradeData {
      * Taiko bridge transaction ID.
      */
     taikoTransactionId?: string;
+
+    /**
+     * Squidrouter request id.
+     */
+    squidrouterRequestId?: string;
 }
