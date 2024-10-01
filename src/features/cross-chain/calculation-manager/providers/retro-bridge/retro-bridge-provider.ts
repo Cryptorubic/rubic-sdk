@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -37,8 +37,6 @@ export class RetroBridgeProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
         const fromBlockchain = from.blockchain as RetroBridgeSupportedBlockchain;
         try {
-            await this.checkMinMaxAmount(from, toToken);
-
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
@@ -68,6 +66,23 @@ export class RetroBridgeProvider extends CrossChainProvider {
                     fromWithoutFee.decimals
                 ).toFixed()
             };
+
+            try {
+                await this.checkMinMaxAmount(from, toToken);
+            } catch (err) {
+                if (err instanceof MinAmountError || err instanceof MaxAmountError) {
+                    return this.getEmptyTrade(
+                        from,
+                        toToken,
+                        feeInfo,
+                        quoteSendParams,
+                        options.providerAddress,
+                        err
+                    );
+                }
+                throw err;
+            }
+
             const retroBridgeQuoteConfig = await RetroBridgeApiService.getQuote(quoteSendParams);
 
             const to = new PriceTokenAmount({
@@ -156,10 +171,10 @@ export class RetroBridgeProvider extends CrossChainProvider {
         const maxSendAmount = new BigNumber(Web3Pure.toWei(tokenLimits.max_send, from.decimals));
 
         if (from.weiAmount.lt(minSendAmount)) {
-            throw new MinAmountError(minSendAmount, from.symbol);
+            throw new MinAmountError(new BigNumber(tokenLimits.min_send), from.symbol);
         }
         if (from.weiAmount.gt(maxSendAmount)) {
-            throw new MaxAmountError(maxSendAmount, from.symbol);
+            throw new MaxAmountError(new BigNumber(tokenLimits.max_send), from.symbol);
         }
     }
 
@@ -170,5 +185,39 @@ export class RetroBridgeProvider extends CrossChainProvider {
             return blockchain;
         }
         return blockchainTicker;
+    }
+
+    private getEmptyTrade(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
+        feeInfo: FeeInfo,
+        quoteSendParams: RetroBridgeQuoteSendParams,
+        providerAddress: string,
+        error?: RubicSdkError
+    ): CalculationResult {
+        const to = new PriceTokenAmount({
+            ...toToken.asStruct,
+            tokenAmount: new BigNumber(0)
+        });
+
+        const trade = new RetroBridgeTrade(
+            {
+                from,
+                feeInfo,
+                to,
+                priceImpact: null,
+                slippage: 0,
+                gasData: null,
+                quoteSendParams
+            },
+            providerAddress,
+            []
+        );
+
+        return {
+            tradeType: this.type,
+            trade,
+            error
+        };
     }
 }
