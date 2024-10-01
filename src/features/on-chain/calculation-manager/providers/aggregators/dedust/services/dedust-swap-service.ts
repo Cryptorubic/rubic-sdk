@@ -60,7 +60,7 @@ export class DedustSwapService {
      * @returns string wei amount
      */
     public async calcOutputAmount(from: PriceTokenAmount, to: PriceToken): Promise<string> {
-        if (this.maybeMultihopSwap(from, to)) {
+        if (this.maybeMultistepSwap(from, to)) {
             const pools = await DedustApiService.findBestPools(from, to);
             if (!pools.length) {
                 throw new RubicSdkError(
@@ -113,6 +113,10 @@ export class DedustSwapService {
         }
     }
 
+    public isMultistepSwap(): boolean {
+        return this.txSteps.length > 1;
+    }
+
     /**
      * Stores found pools in calcOutputAmount method and reuses its in sendTransaction methods
      */
@@ -123,7 +127,7 @@ export class DedustSwapService {
     /**
      * maybe uses more than 1 pool
      */
-    private maybeMultihopSwap(from: Token, to: Token): boolean {
+    private maybeMultistepSwap(from: Token, to: Token): boolean {
         return !from.isNative && !to.isNative;
     }
 

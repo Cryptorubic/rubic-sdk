@@ -9,7 +9,7 @@ import { StonfiApiService } from './services/stonfi-api-service';
 import { StonfiSwapService } from './services/stonfi-swap-service';
 
 export class StonfiOnChainTrade extends TonOnChainTrade<TonEncodedConfig> {
-    public type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.STONFI;
+    public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.STONFI;
 
     private readonly stonfiSwapService = new StonfiSwapService();
 

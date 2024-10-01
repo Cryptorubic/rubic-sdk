@@ -38,16 +38,21 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
                 weiAmount: new BigNumber(toStringWeiAmount)
             });
 
+            const slippage = this.dedustSwapService.isMultistepSwap()
+                ? 0.1
+                : options.slippageTolerance;
+
             return new DedustOnChainTrade(
                 {
                     from,
                     to,
                     gasFeeInfo: await this.getGasFeeInfo(),
-                    slippageTolerance: options.slippageTolerance,
+                    slippageTolerance: slippage,
                     useProxy: false,
                     withDeflation: options.withDeflation,
                     path: this.getRoutePath(from, toToken),
-                    usedForCrossChain: false
+                    usedForCrossChain: false,
+                    isMultistepSwap: this.dedustSwapService.isMultistepSwap()
                 },
                 options.providerAddress
             );

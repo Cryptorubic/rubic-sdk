@@ -8,12 +8,15 @@ import { DedustOnChainTradeStruct } from './models/dedust-trade-types';
 import { DedustSwapService } from './services/dedust-swap-service';
 
 export class DedustOnChainTrade extends TonOnChainTrade<undefined> {
-    public type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
+    public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
+
+    public readonly isTonMultistepTrade: boolean;
 
     private readonly dedustSwapService = new DedustSwapService();
 
     constructor(tradeStruct: DedustOnChainTradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);
+        this.isTonMultistepTrade = tradeStruct.isMultistepSwap;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
