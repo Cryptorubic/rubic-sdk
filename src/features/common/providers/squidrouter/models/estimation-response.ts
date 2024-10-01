@@ -8,41 +8,6 @@ interface Token {
     readonly coingeckoId: string;
 }
 
-interface Dex {
-    readonly chainName: string;
-    readonly dexName: string;
-    readonly swapRouter: string;
-    readonly factory: string;
-    readonly isStable: boolean;
-}
-
-interface RouteElement {
-    readonly type: string;
-    readonly dex: Dex;
-    readonly path: string[];
-    readonly squidCallType: number;
-    readonly fromToken: Token;
-    readonly toToken: Token;
-    readonly fromAmount: string;
-    readonly toAmount: string;
-    readonly exchangeRate: string;
-    readonly priceImpact: string;
-    readonly dynamicSlippage: number;
-}
-
-interface BridgeRouteElement {
-    readonly callData: string;
-    readonly callType: number;
-    readonly estimatedGas: string;
-    readonly payload: {
-        inputPos: number;
-        tokenAddress: string;
-    };
-    readonly target: string;
-    readonly type: string;
-    readonly value: string;
-}
-
 interface FeeCost {
     readonly name: string;
     readonly description: string;
@@ -73,13 +38,22 @@ export interface SquidrouterEstimation {
     readonly toAmount: string;
     readonly toAmountMin: string;
     readonly toAmountUSD: string;
-    readonly route: {
-        readonly fromChain: RouteElement[];
-        readonly toChain: RouteElement[] | BridgeRouteElement[];
-    };
+    readonly actions: SquidrouterAction[];
     readonly feeCosts: FeeCost[];
     readonly gasCosts: GasCost[];
     readonly estimatedRouteDuration: number;
     readonly exchangeRate: string;
     readonly aggregatePriceImpact: string;
+}
+
+interface SquidrouterAction {
+    chainType: string;
+    description: string;
+    provider: string;
+    fromAmount: string;
+    toAmount: string;
+    fromChain: string;
+    toChain: string;
+    fromToken: Token;
+    toToken: Token;
 }
