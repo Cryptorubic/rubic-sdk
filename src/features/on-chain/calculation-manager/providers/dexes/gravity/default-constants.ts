@@ -13,7 +13,7 @@ const defaultGravityRoutingProvidersAddresses = [
 
 const defaultGravityWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.GRAVITY]!.address;
 
-export const defaultzGravityProviderConfiguration: UniswapV2ProviderConfiguration = {
+export const defaultGravityProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 1,
     routingProvidersAddresses: defaultGravityRoutingProvidersAddresses,
     wethAddress: defaultGravityWethAddress
