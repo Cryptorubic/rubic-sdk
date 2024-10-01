@@ -5,6 +5,7 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { Injector } from 'src/core/injector/injector';
 
+import { STONFI_REFERRAL_ADDRESS } from '../constants/ton-addresses';
 import { convertTxParamsToTonConfig } from '../utils/convert-params-to-ton-config';
 
 export class StonfiSwapService {
@@ -28,7 +29,8 @@ export class StonfiSwapService {
                 proxyTon: new pTON.v1(),
                 offerAmount: from.stringWeiAmount,
                 askJettonAddress: to.address,
-                minAskAmount: minAmountOutWei
+                minAskAmount: minAmountOutWei,
+                referralAddress: STONFI_REFERRAL_ADDRESS
             });
 
             return convertTxParamsToTonConfig(txParams);
@@ -40,7 +42,8 @@ export class StonfiSwapService {
                 offerJettonAddress: from.address,
                 offerAmount: from.stringWeiAmount,
                 proxyTon: new pTON.v1(),
-                minAskAmount: minAmountOutWei
+                minAskAmount: minAmountOutWei,
+                referralAddress: STONFI_REFERRAL_ADDRESS
             });
 
             return convertTxParamsToTonConfig(txParams);
@@ -51,7 +54,8 @@ export class StonfiSwapService {
             offerJettonAddress: from.address,
             offerAmount: from.stringWeiAmount,
             askJettonAddress: to.address,
-            minAskAmount: minAmountOutWei
+            minAskAmount: minAmountOutWei,
+            referralAddress: STONFI_REFERRAL_ADDRESS
         });
 
         return convertTxParamsToTonConfig(txParams);
