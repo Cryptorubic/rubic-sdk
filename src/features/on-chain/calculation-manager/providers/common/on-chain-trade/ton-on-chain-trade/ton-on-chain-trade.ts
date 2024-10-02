@@ -28,7 +28,7 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
 
     public readonly path = [];
 
-    public readonly routingPath: RubicStep[];
+    private readonly routingPath: RubicStep[];
 
     protected skipAmountCheck: boolean = false;
 
