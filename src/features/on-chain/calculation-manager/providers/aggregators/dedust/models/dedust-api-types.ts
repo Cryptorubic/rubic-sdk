@@ -19,6 +19,8 @@ interface DedustApiPoolInfo {
 export interface DedustTxStep {
     poolAddress: Address;
     amountOut: string;
+    srcTokenAddress: string;
+    dstTokenAddress: string;
 }
 
 /**

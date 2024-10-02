@@ -54,7 +54,6 @@ export abstract class TonkeeperOnChainProvider<
                 useProxy: false,
                 withDeflation: options.withDeflation,
                 gasFeeInfo: null,
-                path: this.getRoutePath(from, toToken),
                 tradeType: this.tradeType,
                 tonkeeperDexType: this.tonkeeperDexType,
                 bestRoute,

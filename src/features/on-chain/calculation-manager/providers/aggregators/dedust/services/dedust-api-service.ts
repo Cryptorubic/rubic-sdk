@@ -28,7 +28,15 @@ export class DedustApiService {
 
         return pools.map(p => ({
             amountOut: p.amountOut,
-            poolAddress: Address.parse(p.pool.address)
+            poolAddress: Address.parse(p.pool.address),
+            srcTokenAddress: this.convertApiTokenAddressToPlain(p.assetIn),
+            dstTokenAddress: this.convertApiTokenAddressToPlain(p.assetOut)
         }));
+    }
+
+    private static convertApiTokenAddressToPlain(address: string): string {
+        if (address === 'native') return TonWeb3Pure.nativeTokenAddress;
+
+        return Address.parse(address.replace(/jetton:/i, '')).toString();
     }
 }

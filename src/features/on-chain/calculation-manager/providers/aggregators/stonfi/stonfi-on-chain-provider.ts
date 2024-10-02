@@ -5,6 +5,7 @@ import {
     BlockchainName,
     TonBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
@@ -14,14 +15,11 @@ import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/model
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { TonOnChainTradeStruct } from '../../common/on-chain-trade/ton-on-chain-trade/models/ton-on-chian-trade-types';
 import { StonfiApiService } from './services/stonfi-api-service';
-import { StonfiSwapService } from './services/stonfi-swap-service';
 import { StonfiOnChainTrade } from './stonfi-on-chain-trade';
 import { getStonfiGasLimit } from './utils/get-stonfi-gas';
 
 export class StonfiOnChainProvider extends AggregatorOnChainProvider {
     public tradeType = ON_CHAIN_TRADE_TYPE.STONFI;
-
-    private readonly stonfiSwapService = new StonfiSwapService();
 
     public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
         return blockchain === BLOCKCHAIN_NAME.TON;
@@ -43,15 +41,23 @@ export class StonfiOnChainProvider extends AggregatorOnChainProvider {
                 weiAmount: new BigNumber(amountOutWei)
             });
 
+            const routingPath = [
+                {
+                    type: 'on-chain',
+                    provider: this.tradeType,
+                    path: [from, to]
+                }
+            ] as RubicStep[];
+
             const tradeStruct = {
                 from,
                 to,
                 gasFeeInfo: null,
-                path: this.getRoutePath(from, toToken),
                 slippageTolerance: options.slippageTolerance,
                 useProxy: false,
                 withDeflation: options.withDeflation,
-                usedForCrossChain: false
+                usedForCrossChain: false,
+                routingPath
             } as TonOnChainTradeStruct;
             tradeStruct.gasFeeInfo = await this.getGasFeeInfo(tradeStruct);
 

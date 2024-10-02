@@ -9,7 +9,6 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
     to: PriceTokenAmount<T>;
 
     slippageTolerance: number;
-    path: ReadonlyArray<Token>;
 
     gasFeeInfo: GasFeeInfo | null;
 
@@ -27,4 +26,5 @@ export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainN
     permit2ApproveAddress?: string;
     proxyFeeInfo: OnChainProxyFeeInfo | undefined;
     fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+    path: ReadonlyArray<Token>;
 }

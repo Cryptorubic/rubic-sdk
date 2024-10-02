@@ -19,8 +19,6 @@ import { DedustSwapService } from './services/dedust-swap-service';
 export class DedustOnChainProvider extends AggregatorOnChainProvider {
     public tradeType = ON_CHAIN_TRADE_TYPE.DEDUST;
 
-    private readonly dedustSwapService = new DedustSwapService();
-
     public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
         return blockchain === BLOCKCHAIN_NAME.TON;
     }
@@ -31,16 +29,17 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            const toStringWeiAmount = await this.dedustSwapService.calcOutputAmount(from, toToken);
+            const dedustSwapService = new DedustSwapService();
+            const toStringWeiAmount = await dedustSwapService.calcOutputAmount(from, toToken);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 weiAmount: new BigNumber(toStringWeiAmount)
             });
 
-            const slippage = this.dedustSwapService.isMultistepSwap()
-                ? 0.1
-                : options.slippageTolerance;
+            const slippage = dedustSwapService.isMultistepSwap() ? 0.1 : options.slippageTolerance;
+
+            const routingPath = await dedustSwapService.getRoutePath();
 
             return new DedustOnChainTrade(
                 {
@@ -50,9 +49,8 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
                     slippageTolerance: slippage,
                     useProxy: false,
                     withDeflation: options.withDeflation,
-                    path: this.getRoutePath(from, toToken),
-                    usedForCrossChain: false,
-                    isMultistepSwap: this.dedustSwapService.isMultistepSwap()
+                    routingPath,
+                    usedForCrossChain: false
                 },
                 options.providerAddress
             );

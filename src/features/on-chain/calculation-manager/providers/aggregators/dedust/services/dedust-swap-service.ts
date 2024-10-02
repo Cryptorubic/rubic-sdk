@@ -16,9 +16,12 @@ import { TonClient } from '@ton/ton';
 import BigNumber from 'bignumber.js';
 import { LowSlippageError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Injector } from 'src/core/injector/injector';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
+import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type';
 import { DEDUST_GAS } from '../constants/dedust-gas';
 import { DedustTxStep } from '../models/dedust-api-types';
 import { DedustApiService } from './dedust-api-service';
@@ -27,9 +30,7 @@ import { DedustTxSender } from './dedust-sender-class';
 export class DedustSwapService {
     private readonly factory: OpenedContract<Factory>;
 
-    private get tonClient(): TonClient {
-        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).getTonClient();
-    }
+    private readonly tonClient: TonClient;
 
     private txSteps: DedustTxStep[] = [];
 
@@ -38,6 +39,7 @@ export class DedustSwapService {
     }
 
     constructor() {
+        this.tonClient = Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).getTonClient();
         this.factory = this.tonClient.open(Factory.createFromAddress(this.mainnetFactoryAddress));
     }
 
@@ -82,7 +84,12 @@ export class DedustSwapService {
         });
 
         this.cacheStepsOnCalculation([
-            { amountOut: amountOut.toString(), poolAddress: pool.address }
+            {
+                amountOut: amountOut.toString(),
+                poolAddress: pool.address,
+                srcTokenAddress: from.address,
+                dstTokenAddress: to.address
+            }
         ]);
 
         return amountOut.toString();
@@ -115,6 +122,28 @@ export class DedustSwapService {
 
     public isMultistepSwap(): boolean {
         return this.txSteps.length > 1;
+    }
+
+    public async getRoutePath(): Promise<RubicStep[]> {
+        const promises = this.txSteps.map(async step => {
+            const srcToken = await Token.createToken({
+                address: step.srcTokenAddress,
+                blockchain: BLOCKCHAIN_NAME.TON
+            });
+            const dstToken = await Token.createToken({
+                address: step.dstTokenAddress,
+                blockchain: BLOCKCHAIN_NAME.TON
+            });
+            return {
+                provider: ON_CHAIN_TRADE_TYPE.DEDUST,
+                type: 'on-chain',
+                path: [srcToken, dstToken]
+            };
+        });
+
+        const path = await Promise.all(promises);
+
+        return path as RubicStep[];
     }
 
     /**

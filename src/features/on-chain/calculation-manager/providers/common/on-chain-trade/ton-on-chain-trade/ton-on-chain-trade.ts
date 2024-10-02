@@ -1,5 +1,5 @@
 import { RubicSdkError } from 'src/common/errors';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
 import { TonWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/ton-web3-public/ton-web3-public';
@@ -7,6 +7,8 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { TransactionConfig } from 'web3-core';
 
 import { GasFeeInfo } from '../evm-on-chain-trade/models/gas-fee-info';
@@ -20,13 +22,19 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
 
     public readonly slippageTolerance: number;
 
-    public readonly path: ReadonlyArray<Token>;
-
     public readonly feeInfo: FeeInfo = {};
 
     public readonly gasFeeInfo: GasFeeInfo | null;
 
+    public readonly path = [];
+
+    public readonly routingPath: RubicStep[];
+
     protected skipAmountCheck: boolean = false;
+
+    public get isMultistepSwap(): boolean {
+        return this.routingPath.length > 1;
+    }
 
     protected get spenderAddress(): string {
         throw new RubicSdkError('No spender address!');
@@ -46,7 +54,7 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
         this.to = tradeStruct.to;
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.gasFeeInfo = tradeStruct.gasFeeInfo;
-        this.path = tradeStruct.path;
+        this.routingPath = tradeStruct.routingPath;
     }
 
     public override async needApprove(): Promise<boolean> {
@@ -83,4 +91,14 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
      * recalculates and returns output stringWeiAmount
      */
     protected abstract calculateOutputAmount(options: EncodeTransactionOptions): Promise<string>;
+
+    public override getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: null,
+            feeInfo: this.feeInfo,
+            priceImpact: this.priceImpact ?? null,
+            slippage: this.slippageTolerance * 100,
+            routePath: this.routingPath
+        };
+    }
 }
