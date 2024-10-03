@@ -46,6 +46,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     ECHO_DEX: 'ECHO_DEX',
     EDDY_FINANCE: 'EDDY_FINANCE',
     ELK: 'ELK',
+    EYWA_SWAP: 'EYWA_SWAP',
 
     FENIX_V2: 'FENIX_V2',
     FENIX_V3: 'FENIX_V3',
