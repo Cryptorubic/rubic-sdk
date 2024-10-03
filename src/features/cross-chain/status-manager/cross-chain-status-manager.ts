@@ -9,6 +9,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { RubicSdkError } from 'src/common/errors';
 import {
     BLOCKCHAIN_NAME,
+    EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -62,6 +63,7 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { acrossFundsDepositedInputs } from '../calculation-manager/providers/across-provider/constants/across-deposit-abi';
 import { AcrossApiService } from '../calculation-manager/providers/across-provider/services/across-api-service';
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
@@ -740,11 +742,11 @@ export class CrossChainStatusManager {
         return txStatusData;
     }
 
-    private getAcrossDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        if (!data.acrossDepositId) {
-            throw new RubicSdkError('Must provide acrossDepositId');
-        }
+    private async getAcrossDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const depositId = await Injector.web3PublicService
+            .getWeb3Public(data.fromBlockchain as EvmBlockchainName)
+            .getTxDecodedLogData(data.srcTxHash, acrossFundsDepositedInputs, 'depositId');
         const srcChainId = blockchainId[data.fromBlockchain];
-        return AcrossApiService.getTxStatus(srcChainId, data.acrossDepositId);
+        return AcrossApiService.getTxStatus(srcChainId, Number(depositId));
     }
 }

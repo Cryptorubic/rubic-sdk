@@ -60,8 +60,8 @@ export class AcrossCrossChainProvider extends CrossChainProvider {
                 skipAmountLimit: true
             };
 
-            const quote = await AcrossApiService.getFeeQuote(quoteRequestParams);
-            const toAmount = fromWithoutFee.weiAmount.minus(quote.totalRelayFee.total);
+            const feeQuote = await AcrossApiService.getFeeQuote(quoteRequestParams);
+            const toAmount = fromWithoutFee.weiAmount.minus(feeQuote.totalRelayFee.total);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -97,7 +97,7 @@ export class AcrossCrossChainProvider extends CrossChainProvider {
             );
 
             try {
-                this.checkMinMaxAmounts(from, quote.limits);
+                this.checkMinMaxAmounts(from, feeQuote.limits);
             } catch (err) {
                 return {
                     trade,

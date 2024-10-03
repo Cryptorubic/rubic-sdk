@@ -1,14 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
@@ -26,7 +21,7 @@ import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { AccrossCcrSupportedChains } from './constants/across-ccr-supported-chains';
 import { acrossContractAddresses } from './constants/across-contract-addresses';
-import { acrossDepositAbi, acrossFundsDepositedInputs } from './constants/across-deposit-abi';
+import { acrossDepositAbi } from './constants/across-deposit-abi';
 import { AcrossFeeQuoteRequestParams, AcrossFeeQuoteResponse } from './models/across-fee-quote';
 import { AcrossApiService } from './services/across-api-service';
 
@@ -62,8 +57,6 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
     }
 
     private readonly uniqCodeWithSeparator = '1dc0de003c';
-
-    public acrossDepositId = 0;
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ACROSS;
 
@@ -244,54 +237,5 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
 
     private getFillDeadline(): number {
         return Math.round(Date.now() / 1000) + 18_000;
-    }
-
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        if (!options?.testMode) {
-            await this.checkTradeErrors();
-        }
-        await this.checkReceiverAddress(
-            options.receiverAddress,
-            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
-        );
-        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
-
-        const fromAddress = this.walletAddress;
-
-        const { data, value, to } = await this.encode({ ...options, fromAddress });
-
-        const { onConfirm, gasPriceOptions } = options;
-        let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
-
-        try {
-            await this.web3Private[method](to, {
-                data,
-                value,
-                onTransactionHash,
-                gasPriceOptions,
-                gasLimitRatio: this.gasLimitRatio,
-                ...(options?.useEip155 && {
-                    chainId: `0x${blockchainId[this.from.blockchain].toString(16)}`
-                })
-            });
-
-            const encodedId = await Injector.web3PublicService
-                .getWeb3Public(this.fromBlockchain)
-                .getTxDecodedData(transactionHash!, acrossFundsDepositedInputs, 'depositId');
-            this.acrossDepositId = Number(encodedId);
-
-            return transactionHash!;
-        } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
-            }
-            throw err;
-        }
     }
 }

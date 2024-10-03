@@ -685,7 +685,11 @@ export class EvmWeb3Public extends Web3Public {
         return tokens;
     }
 
-    public async getTxDecodedData(hash: string, inputs: AbiInput[], key: string): Promise<string> {
+    public async getTxDecodedLogData(
+        hash: string,
+        inputs: AbiInput[],
+        key: string
+    ): Promise<string> {
         const receipt = await this.getTransactionReceipt(hash);
         let decodedData: { [key: string]: string } = {};
 
