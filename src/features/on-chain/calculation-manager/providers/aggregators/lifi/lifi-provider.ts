@@ -38,7 +38,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
         gasCalculation: 'calculate'
     };
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return lifiOnChainSupportedBlockchains.some(chain => chain === blockchain);
     }
 
@@ -47,10 +47,6 @@ export class LifiProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: LifiCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError('Blockchain is not supported');
-        }
-
         if (options.withDeflation.from.isDeflation) {
             throw new RubicSdkError('[RUBIC_SDK] Lifi does not work if source token is deflation.');
         }

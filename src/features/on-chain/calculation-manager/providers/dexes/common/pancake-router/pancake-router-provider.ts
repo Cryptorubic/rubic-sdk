@@ -74,12 +74,24 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
         const fromChainId = blockchainId[from.blockchain];
         const currencyA = from.isNative
             ? PancakeNative.onChain(fromChainId)
-            : new PancakeToken(fromChainId, from.address, from.decimals, from.symbol, from.name);
+            : new PancakeToken(
+                  fromChainId,
+                  from.address as `0x${string}`,
+                  from.decimals,
+                  from.symbol,
+                  from.name
+              );
 
         const toChainId = blockchainId[to.blockchain];
         const currencyB = to.isNative
             ? PancakeNative.onChain(toChainId)
-            : new PancakeToken(toChainId, to.address, to.decimals, to.symbol, to.name);
+            : new PancakeToken(
+                  toChainId,
+                  to.address as `0x${string}`,
+                  to.decimals,
+                  to.symbol,
+                  to.name
+              );
 
         const fromCurrency = CurrencyAmount.fromRawAmount(currencyA, weiAmountWithoutFee);
         const quoteProvider = SmartRouter.createQuoteProvider({
@@ -111,6 +123,7 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
             tokenAmount: new BigNumber(toAmount)
         });
 
+        //@ts-ignore
         const path = await this.getPath(from, to, trade.routes?.[0]?.path || []);
         const tradeStruct: PancakeRouterTradeStruct = {
             from,

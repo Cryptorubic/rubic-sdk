@@ -1,4 +1,3 @@
-import { NotSupportedBlockchain } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
@@ -13,7 +12,7 @@ import { NativeRouterTrade } from './native-router-trade';
 export class NativeRouterProvider extends NativeRouterAbstractProvider<NativeRouterTrade> {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.NATIVE_ROUTER;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return nativeRouterSupportedBlockchains.some(chain => chain === blockchain);
     }
 
@@ -28,9 +27,6 @@ export class NativeRouterProvider extends NativeRouterAbstractProvider<NativeRou
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<NativeRouterTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new NotSupportedBlockchain();
-        }
         return super.calculate(from, toToken, options);
     }
 }

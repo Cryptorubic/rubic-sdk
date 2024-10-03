@@ -4,7 +4,7 @@
 export interface HttpClient {
     post<ResponseBody>(
         url: string,
-        body: Object,
+        body?: Object,
         options?: {
             headers?: {
                 [header: string]: string;

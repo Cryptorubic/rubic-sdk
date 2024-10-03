@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
+import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
@@ -13,19 +13,14 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import {
-    OptionsGasParams,
-    TransactionGasParams
-} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-params';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
+
+import { SolanaOnChainTradeStruct } from './models/solana-on-chain-trade-struct';
 
 export abstract class SolanaOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount<SolanaBlockchainName>;
@@ -59,13 +54,11 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         to: IsDeflationToken;
     };
 
-    public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
-
     protected get spenderAddress(): string {
-        return this.useProxy
-            ? rubicProxyContractAddress[this.from.blockchain].gateway
-            : this.dexContractAddress;
+        throw new RubicSdkError('No spender address!');
     }
+
+    public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     protected get web3Public(): SolanaWeb3Public {
         return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SOLANA);
@@ -75,10 +68,7 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.SOLANA);
     }
 
-    protected constructor(
-        tradeStruct: OnChainTradeStruct<SolanaBlockchainName>,
-        providerAddress: string
-    ) {
+    protected constructor(tradeStruct: SolanaOnChainTradeStruct, providerAddress: string) {
         super(providerAddress);
 
         this.from = tradeStruct.from;
@@ -208,24 +198,4 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
      * Encodes trade to swap it directly through dex contract.
      */
     public abstract encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig>;
-
-    protected getGasParams(
-        options: OptionsGasParams,
-        calculatedGasFee: OptionsGasParams = {
-            gasLimit: this.gasFeeInfo?.gasLimit?.toFixed(),
-            gasPrice: this.gasFeeInfo?.gasPrice?.toFixed()
-        }
-    ): TransactionGasParams {
-        return {
-            gas: options.gasLimit || calculatedGasFee.gasLimit,
-            gasPrice: options.gasPrice || calculatedGasFee.gasPrice,
-            maxPriorityFeePerGas:
-                options.maxPriorityFeePerGas || calculatedGasFee.maxPriorityFeePerGas,
-            maxFeePerGas: options.maxFeePerGas || calculatedGasFee.maxFeePerGas
-        };
-    }
-
-    protected async getSwapData(_options: GetContractParamsOptions): Promise<unknown[]> {
-        throw new Error('Method is not supported');
-    }
 }

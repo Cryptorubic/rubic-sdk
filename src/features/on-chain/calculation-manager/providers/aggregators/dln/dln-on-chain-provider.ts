@@ -34,7 +34,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
         gasCalculation: 'calculate'
     };
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return dlnOnChainSupportedBlockchains.some(
             supportedNetwork => supportedNetwork === blockchain
         );
@@ -45,10 +45,6 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<DlnOnChainSupportedBlockchain>,
         options: DlnOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError('Blockchain is not supported');
-        }
-
         if (options.withDeflation.from.isDeflation || options.withDeflation.to.isDeflation) {
             throw new RubicSdkError('[RUBIC_SDK] DLN does not work if source token is deflation.');
         }

@@ -9,7 +9,7 @@ import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/uti
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 
 export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
@@ -54,7 +54,7 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
     //@TODO - CHECK IF we need to pass fromAddress with proxy or remove it after listing
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const requestBody = await SymbiosisParser.getSwapRequestBody(this.from, this.to, {
             receiverAddress: options.receiverAddress,
             fromAddress: this.walletAddress,

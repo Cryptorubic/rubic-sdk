@@ -9,7 +9,7 @@ import { SquidrouterCrossChainSupportedBlockchain } from 'src/features/cross-cha
 import { getOnChainGasData } from '../../../utils/get-on-chain-gas-data';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { SquidRouterOnChainTradeStruct } from './models/squidrouter-on-chain-trade-struct';
 
 export class SquidRouterOnChainTrade extends AggregatorEvmOnChainTrade {
@@ -52,7 +52,7 @@ export class SquidRouterOnChainTrade extends AggregatorEvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const requestParams: SquidrouterTransactionRequest = {
             ...this.requestParams,
             toAddress: options.receiverAddress || this.walletAddress
