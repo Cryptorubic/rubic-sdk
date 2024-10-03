@@ -20,7 +20,7 @@ export class TonWeb3Private extends Web3Private {
 
     private readonly _tonClient: TonClient;
 
-    public getTonClient(): TonClient {
+    public get tonClient(): TonClient {
         return this._tonClient;
     }
 

@@ -10,7 +10,13 @@ import { convertTxParamsToTonConfig } from '../utils/convert-params-to-ton-confi
 
 export class StonfiSwapService {
     private get tonClient(): TonClient {
-        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).getTonClient();
+        return (
+            Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).tonClient ||
+            new TonClient({
+                endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+                apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
+            })
+        );
     }
 
     private readonly stonfiRouter = this.tonClient.open(new DEX.v1.Router());
