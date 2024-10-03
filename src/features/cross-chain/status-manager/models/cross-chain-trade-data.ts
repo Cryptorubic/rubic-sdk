@@ -64,4 +64,9 @@ export interface CrossChainTradeData {
      * Squidrouter request id.
      */
     squidrouterRequestId?: string;
+
+    /**
+     * Across deposit id.
+     */
+    acrossDepositId?: number;
 }

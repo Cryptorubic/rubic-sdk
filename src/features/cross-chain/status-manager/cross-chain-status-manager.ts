@@ -62,6 +62,7 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { AcrossApiService } from '../calculation-manager/providers/across-provider/services/across-api-service';
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
@@ -99,7 +100,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE]: this.getOwlToDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus
     };
 
     /**
@@ -736,5 +738,13 @@ export class CrossChainStatusManager {
         const txStatusData = await RouterApiService.getTxStatus(data);
 
         return txStatusData;
+    }
+
+    private getAcrossDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.acrossDepositId) {
+            throw new RubicSdkError('Must provide acrossDepositId');
+        }
+        const srcChainId = blockchainId[data.fromBlockchain];
+        return AcrossApiService.getTxStatus(srcChainId, data.acrossDepositId);
     }
 }
