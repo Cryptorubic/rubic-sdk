@@ -1,0 +1,77 @@
+{
+    "typedData": {
+        "primaryType": "Order",
+        "types": {
+            "EIP712Domain": [
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "version",
+                    "type": "string"
+                },
+                {
+                    "name": "chainId",
+                    "type": "uint256"
+                },
+                {
+                    "name": "verifyingContract",
+                    "type": "address"
+                }
+            ],
+            "Order": [
+                {
+                    "name": "salt",
+                    "type": "uint256"
+                },
+                {
+                    "name": "maker",
+                    "type": "address"
+                },
+                {
+                    "name": "receiver",
+                    "type": "address"
+                },
+                {
+                    "name": "makerAsset",
+                    "type": "address"
+                },
+                {
+                    "name": "takerAsset",
+                    "type": "address"
+                },
+                {
+                    "name": "makingAmount",
+                    "type": "uint256"
+                },
+                {
+                    "name": "takingAmount",
+                    "type": "uint256"
+                },
+                {
+                    "name": "makerTraits",
+                    "type": "uint256"
+                }
+            ]
+        },
+        "domain": {
+            "name": "1inch Aggregation Router",
+            "version": "6",
+            "chainId": 1,
+            "verifyingContract": "0x111111125421ca6dc452d289314280a0f8842a65"
+        },
+        "message": {
+            "maker": "0x2210f8de2f3406aa38e7388c176b5e5c9b8352e8",
+            "makerAsset": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+            "takerAsset": "0xda0000d4000015a526378bb6fafc650cea5966f8",
+            "makerTraits": "62419173104490761595518734106457236408761197002983276552889498510122771546112",
+            "salt": "102412815603508502318180937246070791509362563834032598598791855802040821868990",
+            "makingAmount": "100000000",
+            "takingAmount": "83914262536168788284",
+            "receiver": "0xa7bcb4eac8964306f9e3764f67db6a7af6ddf99a"
+        }
+    },
+    "orderHash": "0xdaa3823cd11ee80240dbf78619a81e7c2012fb6e1a16efc6670316bede070b2f",
+    "extension": "0x000001390000005e0000005e0000005e0000005e0000002f0000000000000000a7bcb4eac8964306f9e3764f67db6a7af6ddf99a11f129000021a666fffabf0000b41bddf81320b0007811f129003ca7bcb4eac8964306f9e3764f67db6a7af6ddf99a11f129000021a666fffabf0000b41bddf81320b0007811f129003ca7bcb4eac8964306f9e3764f67db6a7af6ddf99a03e82210f8de2f3406aa38e7388c176b5e5c9b8352e866fffaa772f8a0c8c415454f629c00000a315b47a8c3780434b153667588db4ca628526e20000000000000000000000000000000000000000000000000000000000000000000000000000000000000003800000000000000000000000055d398326f99059ff775485246999027b3197955000000000000000000066f25e52cb75000000000000000000003baf82d03a0000000000000000120000000a80000000c000001e000000168000000cc00000024"
+}
