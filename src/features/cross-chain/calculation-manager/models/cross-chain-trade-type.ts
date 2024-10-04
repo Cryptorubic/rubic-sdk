@@ -21,7 +21,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     ARCHON_BRIDGE: 'archon_bridge',
     MESON: 'meson',
     EDDY_BRIDGE: 'eddy_bridge',
-    ROUTER: 'router'
+    ROUTER: 'router',
+    ONEINCH: 'oneinch'
 } as const;
 
 export type CrossChainTradeType =
