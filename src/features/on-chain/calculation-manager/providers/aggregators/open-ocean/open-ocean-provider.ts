@@ -17,22 +17,30 @@ import {
     OpenoceanOnChainSupportedBlockchain,
     openoceanOnChainSupportedBlockchains
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
-import { OpenOceanQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-quote-response';
+import {
+    OpenOceanQuoteRequest,
+    OpenOceanQuoteResponse
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-quote-response';
 import { OpenOceanTokenListResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-token-list-response';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
 import { OpenOceanTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/open-ocean-trade';
 import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { OpenOceanApiService } from '../common/open-ocean/open-ocean-api-service';
+import { X_API_KEY } from './constants/api-key';
 import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 
 export class OpenOceanProvider extends AggregatorOnChainProvider {
-    public readonly tradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
+    public readonly tradeType: OnChainTradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
 
     public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
@@ -57,23 +65,9 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
                 .getWeb3Public(blockchain)
                 .getGasPrice();
             const isArbitrum = blockchain === BLOCKCHAIN_NAME.ARBITRUM;
-            const apiUrl = openOceanApiUrl.quote(openOceanBlockchainName[blockchain]);
+
             const quoteResponse = await pTimeout(
-                Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
-                    headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' },
-                    params: {
-                        chain: openOceanBlockchainName[blockchain],
-                        inTokenAddress: this.getTokenAddress(fromWithoutFee),
-                        outTokenAddress: this.getTokenAddress(toToken),
-                        amount: fromWithoutFee.tokenAmount.toString(),
-                        slippage: options.slippageTolerance! * 100,
-                        gasPrice: isArbitrum
-                            ? ARBITRUM_GAS_PRICE
-                            : Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
-                                  .multipliedBy(10 ** 9)
-                                  .toString()
-                    }
-                }),
+                this.getQuote(from, toToken, options.slippageTolerance, isArbitrum, gasPrice),
                 7_000
             );
 
@@ -125,7 +119,7 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
         }
     }
 
-    private getTokenAddress(token: PriceToken): string {
+    protected getTokenAddress(token: PriceToken): string {
         if (token.isNative) {
             if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
                 return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
@@ -148,14 +142,47 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
         }
     }
 
+    protected async getQuote(
+        from: PriceTokenAmount,
+        toToken: PriceToken,
+        slippage: number,
+        isArbitrum: boolean,
+        gasPrice: string
+    ): Promise<OpenOceanQuoteResponse> {
+        const blockchain = from.blockchain as OpenoceanOnChainSupportedBlockchain;
+        const apiUrl = openOceanApiUrl.quote(openOceanBlockchainName[blockchain]);
+
+        const quoteRequestParams: OpenOceanQuoteRequest = {
+            chain: openOceanBlockchainName[blockchain],
+            inTokenAddress: this.getTokenAddress(from),
+            outTokenAddress: this.getTokenAddress(toToken),
+            amount: from.tokenAmount.toString(),
+            slippage: slippage * 100,
+            gasPrice: isArbitrum
+                ? ARBITRUM_GAS_PRICE
+                : Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
+                      .multipliedBy(10 ** 9)
+                      .toString()
+        };
+
+        return OpenOceanApiService.getQuote<OpenOceanQuoteRequest, OpenOceanQuoteResponse>(
+            quoteRequestParams,
+            apiUrl,
+            X_API_KEY
+        );
+    }
+
     private async checkIsSupportedTokens(from: PriceTokenAmount, to: PriceToken): Promise<void> {
         const apiUrl = openOceanApiUrl.tokenList(
             openOceanBlockchainName[from.blockchain as OpenoceanOnChainSupportedBlockchain]
         );
-        const tokenListResponse = await Injector.httpClient.get<OpenOceanTokenListResponse>(
-            apiUrl,
-            { headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' } }
-        );
+
+        const tokenListResponse =
+            await OpenOceanApiService.getSupportedTokenList<OpenOceanTokenListResponse>(
+                apiUrl,
+                X_API_KEY
+            );
+
         const tokens = tokenListResponse?.data?.map(token => token.address.toLocaleLowerCase());
         const isSupportedTokens =
             Boolean(tokens.length) &&

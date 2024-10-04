@@ -4,8 +4,6 @@ import { PriceToken } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -16,13 +14,21 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { openOceanApiUrl } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/get-open-ocean-api-url';
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-blockchain';
 import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
-import { OpenoceanSwapQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-cean-swap-quote-response';
+import {
+    OpenOceanSwapQuoteRequest,
+    OpenoceanSwapQuoteResponse
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-cean-swap-quote-response';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { OpenOceanApiService } from '../common/open-ocean/open-ocean-api-service';
+import { X_API_KEY } from './constants/api-key';
 import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 
 export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
@@ -34,7 +40,7 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         return getOnChainGasData(openOceanTrade);
     }
 
-    public readonly type = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
+    public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
 
@@ -74,38 +80,15 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         const gasPrice = await Injector.web3PublicService
             .getWeb3Public(this.from.blockchain)
             .getGasPrice();
-        const walletAddress = (
-            Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM) as EvmWeb3Private
-        ).address;
-        const apiUrl = openOceanApiUrl.swapQuote(
-            openOceanBlockchainName[this.from.blockchain as OpenoceanOnChainSupportedBlockchain]
-        );
+
         const isArbitrum = this.from.blockchain === BLOCKCHAIN_NAME.ARBITRUM;
-        const swapQuoteResponse = await Injector.httpClient.get<OpenoceanSwapQuoteResponse>(
-            apiUrl,
-            {
-                headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' },
-                params: {
-                    chain: openOceanBlockchainName[
-                        this.from.blockchain as OpenoceanOnChainSupportedBlockchain
-                    ],
-                    inTokenAddress: this.getTokenAddress(this.from),
-                    outTokenAddress: this.getTokenAddress(this.to),
-                    amount: this.fromWithoutFee.tokenAmount.toString(),
-                    gasPrice: isArbitrum
-                        ? ARBITRUM_GAS_PRICE
-                        : Web3Pure.fromWei(
-                              gasPrice,
-                              nativeTokensList[this.from.blockchain].decimals
-                          )
-                              .multipliedBy(10 ** 9)
-                              .toString(),
-                    slippage: this.slippageTolerance * 100,
-                    account: options.receiverAddress || walletAddress,
-                    referrer: '0x429A3A1a2623DFb520f1D93F64F38c0738418F1f'
-                }
-            }
+
+        const swapQuoteResponse = await this.getSwapQuote(
+            isArbitrum,
+            gasPrice,
+            options?.receiverAddress || this.walletAddress
         );
+
         const { data, to, value, outAmount: toAmount } = swapQuoteResponse.data;
 
         return {
@@ -118,7 +101,36 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         };
     }
 
-    private getTokenAddress(token: PriceToken): string {
+    protected getSwapQuote(isArbitrum: boolean, gasPrice: string, account: string) {
+        const swapQuoteParams: OpenOceanSwapQuoteRequest = {
+            chain: openOceanBlockchainName[
+                this.from.blockchain as OpenoceanOnChainSupportedBlockchain
+            ],
+            inTokenAddress: this.getTokenAddress(this.from),
+            outTokenAddress: this.getTokenAddress(this.to),
+            amount: this.fromWithoutFee.tokenAmount.toString(),
+            gasPrice: isArbitrum
+                ? ARBITRUM_GAS_PRICE
+                : Web3Pure.fromWei(gasPrice, nativeTokensList[this.from.blockchain].decimals)
+                      .multipliedBy(10 ** 9)
+                      .toString(),
+            slippage: this.slippageTolerance * 100,
+            account,
+            referrer: '0x429A3A1a2623DFb520f1D93F64F38c0738418F1f'
+        };
+
+        const apiUrl = openOceanApiUrl.swapQuote(
+            openOceanBlockchainName[this.from.blockchain as OpenoceanOnChainSupportedBlockchain]
+        );
+
+        return OpenOceanApiService.getQuote<OpenOceanSwapQuoteRequest, OpenoceanSwapQuoteResponse>(
+            swapQuoteParams,
+            apiUrl,
+            X_API_KEY
+        );
+    }
+
+    protected getTokenAddress(token: PriceToken): string {
         if (token.isNative) {
             if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
                 return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
