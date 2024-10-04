@@ -55,7 +55,6 @@ import { RubicBackendPsStatus } from 'src/features/cross-chain/status-manager/mo
 import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
 import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
 import {
-    BtcStatusResponse,
     DE_BRIDGE_API_STATE_STATUS,
     GetDstTxDataFn,
     SymbiosisApiResponse
@@ -257,11 +256,7 @@ export class CrossChainStatusManager {
                     dstTxStatus === SYMBIOSIS_SWAP_STATUS.SUCCESS &&
                     targetTokenNetwork === toBlockchainId
                 ) {
-                    if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
-                        dstTxData.status = TX_STATUS.SUCCESS;
-                    } else {
-                        dstTxData = await this.getBitcoinStatus(tx!.hash);
-                    }
+                    dstTxData.status = TX_STATUS.SUCCESS;
                 }
 
                 return dstTxData;
@@ -390,38 +385,6 @@ export class CrossChainStatusManager {
             data.fromBlockchain as BridgersCrossChainSupportedBlockchain,
             'rubic'
         );
-    }
-
-    /**
-     * @internal
-     * Get transaction status in bitcoin network;
-     * @param hash Bitcoin transaction hash.
-     */
-    private async getBitcoinStatus(hash: string): Promise<TxStatusData> {
-        let bitcoinTransactionStatus: BtcStatusResponse;
-        const dstTxData: TxStatusData = {
-            status: TX_STATUS.PENDING,
-            hash: null
-        };
-        try {
-            const btcStatusApi = 'https://blockchain.info/rawtx/';
-            bitcoinTransactionStatus = await this.httpClient.get<BtcStatusResponse>(
-                `${btcStatusApi}${hash}`
-            );
-            dstTxData.hash = bitcoinTransactionStatus?.hash || null;
-        } catch {
-            return {
-                status: TX_STATUS.PENDING,
-                hash: null
-            };
-        }
-
-        const isCompleted = bitcoinTransactionStatus?.block_index !== undefined;
-        if (isCompleted) {
-            dstTxData.status = TX_STATUS.SUCCESS;
-        }
-
-        return dstTxData;
     }
 
     private async getMultichainDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
