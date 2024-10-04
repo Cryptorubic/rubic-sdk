@@ -1,3 +1,5 @@
+import { OpenOceanQuoteRequest } from './open-ocean-quote-response';
+
 export interface OpenoceanSwapQuoteResponse {
     code: number;
     data: {
@@ -8,3 +10,8 @@ export interface OpenoceanSwapQuoteResponse {
     };
     error?: string;
 }
+
+export type OpenOceanSwapQuoteRequest = OpenOceanQuoteRequest & {
+    account: string;
+    referrer: string;
+};
