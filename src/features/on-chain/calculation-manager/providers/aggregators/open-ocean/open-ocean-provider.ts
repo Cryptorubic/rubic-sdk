@@ -48,6 +48,20 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
         return openoceanOnChainSupportedBlockchains.some(item => item === blockchain);
     }
 
+    protected createTradeInstance(
+        openOceanTradeStruct: OpenOceanTradeStruct,
+        gasFeeInfo: GasFeeInfo | null,
+        providerAddress: string
+    ): OpenOceanTrade {
+        return new OpenOceanTrade(
+            {
+                ...openOceanTradeStruct,
+                gasFeeInfo
+            },
+            providerAddress
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
@@ -104,11 +118,9 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
                     ? await this.getGasFeeInfo(openOceanTradeStruct)
                     : null;
 
-            return new OpenOceanTrade(
-                {
-                    ...openOceanTradeStruct,
-                    gasFeeInfo
-                },
+            return this.createTradeInstance(
+                openOceanTradeStruct,
+                gasFeeInfo,
                 options.providerAddress
             );
         } catch (error) {

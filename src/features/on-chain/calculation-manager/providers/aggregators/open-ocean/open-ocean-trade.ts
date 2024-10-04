@@ -101,7 +101,11 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         };
     }
 
-    protected getSwapQuote(isArbitrum: boolean, gasPrice: string, account: string) {
+    protected getSwapQuote(
+        isArbitrum: boolean,
+        gasPrice: string,
+        account: string
+    ): Promise<OpenoceanSwapQuoteResponse> {
         const swapQuoteParams: OpenOceanSwapQuoteRequest = {
             chain: openOceanBlockchainName[
                 this.from.blockchain as OpenoceanOnChainSupportedBlockchain
