@@ -21,13 +21,11 @@ import { RetroBridgeProvider } from '../providers/retro-bridge/retro-bridge-prov
 import { RouterCrossChainProvider } from '../providers/router-provider/router-cross-chain-provider';
 import { StargateV2CrossChainProvider } from '../providers/stargate-v2-provider/stargate-v2-cross-chain-provider';
 // import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
-// import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
 import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-provider';
 
 const proxyProviders = [
     SymbiosisCrossChainProvider,
     StargateV2CrossChainProvider,
-    //StargateCrossChainProvider,
     XyCrossChainProvider,
     CbridgeCrossChainProvider,
     LifiCrossChainProvider,
