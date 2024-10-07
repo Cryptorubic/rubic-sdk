@@ -35,7 +35,7 @@ export class AcrossCrossChainProvider extends CrossChainProvider {
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as AccrossCcrSupportedChains;
-        const useProxy = false;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
             const feeInfo = await this.getFeeInfo(
