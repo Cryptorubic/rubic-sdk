@@ -16,6 +16,7 @@ export interface RetroBridgeQuoteResponse {
     swap_fee_in_usd: number;
     full_fee: number;
     fee_asset: string;
+    hot_wallet_address: string;
 }
 
 export interface RetroBridgeTxSendParams extends RetroBridgeQuoteSendParams {

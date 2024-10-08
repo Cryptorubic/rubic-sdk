@@ -26,7 +26,10 @@ import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/
 import { retroBridgeContractAddresses } from './constants/retro-bridge-contract-address';
 import { RetroBridgeSupportedBlockchain } from './constants/retro-bridge-supported-blockchain';
 import { retroBridgeSwapAbi } from './constants/retro-bridge-swap-abi';
-import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
+import {
+    RetroBridgeQuoteSendParams,
+    RetroBridgeTxResponse
+} from './models/retro-bridge-quote-send-params';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
 export class RetroBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -36,7 +39,8 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         feeInfo: FeeInfo,
         slippage: number,
         providerAddress: string,
-        quoteSendParams: RetroBridgeQuoteSendParams
+        quoteSendParams: RetroBridgeQuoteSendParams,
+        hotWalletAddress: string
     ): Promise<GasData | null> {
         const trade = new RetroBridgeTrade(
             {
@@ -46,7 +50,9 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
                 priceImpact: null,
                 slippage,
                 gasData: null,
-                quoteSendParams
+                quoteSendParams,
+                hotWalletAddress,
+                isSimulation: true
             },
             providerAddress,
             []
@@ -78,6 +84,10 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
 
     private readonly quoteSendParams: RetroBridgeQuoteSendParams;
 
+    private readonly isSimulation: boolean;
+
+    private readonly hotWalletAddress: string;
+
     public retroBridgeId = '';
 
     private get fromBlockchain(): RetroBridgeSupportedBlockchain {
@@ -107,6 +117,8 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
             slippage: number;
             gasData: GasData | null;
             quoteSendParams: RetroBridgeQuoteSendParams;
+            hotWalletAddress: string;
+            isSimulation?: boolean;
         },
         providerAddress: string,
         routePath: RubicStep[]
@@ -120,6 +132,8 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.quoteSendParams = crossChainTrade.quoteSendParams;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
+        this.hotWalletAddress = crossChainTrade.hotWalletAddress;
+        this.isSimulation = crossChainTrade?.isSimulation ? crossChainTrade.isSimulation : false;
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -184,15 +198,25 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         if (needAuthWallet) {
             throw new RubicSdkError('Need to authorize the wallet via authWallet method');
         }
-        const retroBridgeOrder = await RetroBridgeApiService.createTransaction(
-            {
-                ...this.quoteSendParams,
-                receiver_wallet: receiverAddress || this.walletAddress,
-                sender_wallet: this.walletAddress
-            },
-            this.chainType
-        );
-        this.retroBridgeId = retroBridgeOrder.transaction_id;
+
+        let retroBridgeOrder: RetroBridgeTxResponse = {
+            hot_wallet_address: this.hotWalletAddress,
+            transaction_id: ''
+        };
+
+        if (!this.isSimulation) {
+            retroBridgeOrder = await RetroBridgeApiService.createTransaction(
+                {
+                    ...this.quoteSendParams,
+                    receiver_wallet: receiverAddress || this.walletAddress,
+                    sender_wallet: this.walletAddress
+                },
+                this.chainType
+            );
+
+            this.retroBridgeId = retroBridgeOrder.transaction_id;
+        }
+
         const transferAmount = this.from.stringWeiAmount;
 
         let config: EvmEncodeConfig = { to: '', data: '', value: '' };

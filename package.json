@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.34.0-alpha-retro-bridge.4",
+    "version": "5.34.0-alpha-retro-bridge.5",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",

@@ -101,7 +101,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
                           feeInfo,
                           options.slippageTolerance,
                           options.providerAddress,
-                          quoteSendParams
+                          quoteSendParams,
+                          retroBridgeQuoteConfig.hot_wallet_address
                       )
                     : null;
             const routePath = await this.getRoutePath(from, to);
@@ -113,7 +114,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: options.slippageTolerance,
                     gasData,
-                    quoteSendParams
+                    quoteSendParams,
+                    hotWalletAddress: retroBridgeQuoteConfig.hot_wallet_address
                 },
                 options.providerAddress,
                 routePath
@@ -236,7 +238,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 priceImpact: null,
                 slippage: 0,
                 gasData: null,
-                quoteSendParams
+                quoteSendParams,
+                hotWalletAddress: ''
             },
             providerAddress,
             []
