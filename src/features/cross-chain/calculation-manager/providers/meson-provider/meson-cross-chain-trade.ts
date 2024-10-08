@@ -51,7 +51,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
                 },
                 providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                 routePath: [],
-                useProxy: false
+                useProxy: true
             });
 
             return getCrossChainGasData(trade);

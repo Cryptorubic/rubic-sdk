@@ -10,6 +10,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { rangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
 import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
 import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
@@ -149,8 +150,12 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo?.rubicProxy?.platformFee?.percent
+        );
         const extraNativeFee = this.from.isNative
-            ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+            ? new BigNumber(providerValue).minus(fromWithoutFee.stringWeiAmount).toFixed()
             : new BigNumber(providerValue).toFixed();
 
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(

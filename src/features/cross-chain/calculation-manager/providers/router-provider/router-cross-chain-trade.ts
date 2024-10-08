@@ -8,6 +8,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { RouterQuoteResponseConfig } from 'src/features/common/providers/router/models/router-quote-response-config';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
@@ -159,9 +160,15 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
                     toAddress: receivingAsset
                 }
             );
+
+            const fromWithoutFee = getFromWithoutFee(
+                this.from,
+                this.feeInfo?.rubicProxy?.platformFee?.percent
+            );
             const extraNativeFee = this.from.isNative
-                ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+                ? new BigNumber(providerValue).minus(fromWithoutFee.stringWeiAmount).toFixed()
                 : new BigNumber(providerValue).toFixed();
+
             const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
                 to!,
                 data! as string,
@@ -241,3 +248,12 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 }
+
+/**
+ * FROM - 100
+ * FROM+PERCENT - 103
+ * FROM-PERCENT - 97
+ *
+ * FROM-PERCENT - > api -> FROM-PERCENT+EXTRA
+ * FROM-PERCENT+EXTRA - FROM >< 0
+ */
