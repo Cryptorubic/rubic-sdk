@@ -1,8 +1,10 @@
-import { RubicSdkError } from 'src/common/errors';
+import { InsufficientFundsError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
 import { TonWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/ton-web3-public/ton-web3-public';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
@@ -75,10 +77,28 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
         );
     }
 
+    protected async checkNativeBalance(): Promise<void> {
+        const balanceWei = await this.web3Public.getBalance(this.walletAddress);
+        const balanceNonWei = Web3Pure.fromWei(
+            balanceWei,
+            nativeTokensList[BLOCKCHAIN_NAME.TON].decimals
+        );
+        const requiredBalanceNonWei = this.gasFeeInfo!.gasLimit!.plus(0.01);
+
+        if (balanceNonWei.lt(requiredBalanceNonWei)) {
+            throw new InsufficientFundsError(
+                nativeTokensList[BLOCKCHAIN_NAME.TON],
+                balanceNonWei,
+                requiredBalanceNonWei
+            );
+        }
+    }
+
     protected async makePreSwapChecks(options: EncodeTransactionOptions): Promise<void> {
         checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
         await this.checkFromAddress(options.fromAddress);
-        await this.checkReceiverAddress(options.receiverAddress);
+        await this.checkNativeBalance();
+        await this.checkBalance();
 
         if (!options.skipAmountCheck) {
             this.skipAmountCheck = true;

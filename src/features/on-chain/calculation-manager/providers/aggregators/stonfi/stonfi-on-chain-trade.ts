@@ -14,8 +14,6 @@ export class StonfiOnChainTrade extends TonOnChainTrade<TonEncodedConfig> {
     private readonly stonfiSwapService = new StonfiSwapService();
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string> {
-        await this.checkWalletState(options?.testMode);
-
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (options.onConfirm) {
@@ -24,12 +22,10 @@ export class StonfiOnChainTrade extends TonOnChainTrade<TonEncodedConfig> {
             transactionHash = hash;
         };
 
-        const fromAddress = this.walletAddress;
-        const receiverAddress = options.receiverAddress || this.walletAddress;
-
+        await this.checkWalletState(options?.testMode);
         await this.makePreSwapChecks({
-            fromAddress,
-            receiverAddress,
+            fromAddress: this.walletAddress,
+            receiverAddress: options.receiverAddress,
             skipAmountCheck: this.skipAmountCheck,
             ...(options?.referrer && { referrer: options?.referrer })
         });

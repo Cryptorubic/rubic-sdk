@@ -17,8 +17,6 @@ export class DedustOnChainTrade extends TonOnChainTrade<undefined> {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkWalletState(options?.testMode);
-
         let txHash: string;
         const onTransactionHash = (hash: string) => {
             if (options.onConfirm) {
@@ -27,9 +25,10 @@ export class DedustOnChainTrade extends TonOnChainTrade<undefined> {
             txHash = hash;
         };
 
+        await this.checkWalletState(options?.testMode);
         await this.makePreSwapChecks({
             fromAddress: this.walletAddress,
-            receiverAddress: this.walletAddress,
+            receiverAddress: options.receiverAddress,
             skipAmountCheck: this.skipAmountCheck,
             ...(options?.referrer && { referrer: options?.referrer })
         });

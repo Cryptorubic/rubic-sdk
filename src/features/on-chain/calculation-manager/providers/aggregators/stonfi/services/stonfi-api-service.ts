@@ -1,7 +1,7 @@
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { Injector } from 'src/core/injector/injector';
 
-import { BOUNCEABLE_TON_NATIVE_ADDRESS, STONFI_REFERRAL_ADDRESS } from '../constants/ton-addresses';
+import { BOUNCEABLE_TON_NATIVE_ADDRESS, STONFI_REFERRAL_ADDRESS } from '../constants/addresses';
 import { StonfiQuoteInfo, StonfiQuoteResponse } from '../models/stonfi-api-types';
 
 export class StonfiApiService {
