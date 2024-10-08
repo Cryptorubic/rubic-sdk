@@ -108,13 +108,7 @@ export abstract class CrossChainTrade<T = unknown> {
         );
     }
 
-    protected get isProxyTrade(): boolean {
-        const fee = this.feeInfo.rubicProxy;
-        const hasFixedFee = Boolean(fee?.fixedFee?.amount?.gt(0));
-        const hasPlatformFee = Number(fee?.platformFee?.percent) > 0;
-
-        return hasFixedFee || hasPlatformFee;
-    }
+    protected isProxyTrade: boolean;
 
     protected get amountToCheck(): string {
         return this.to.stringWeiAmount;
@@ -147,8 +141,11 @@ export abstract class CrossChainTrade<T = unknown> {
 
     protected constructor(
         protected readonly providerAddress: string,
-        protected readonly routePath: RubicStep[]
-    ) {}
+        protected readonly routePath: RubicStep[],
+        protected readonly useProxy: boolean
+    ) {
+        this.isProxyTrade = useProxy;
+    }
 
     /**
      * Returns true, if allowance is not enough.

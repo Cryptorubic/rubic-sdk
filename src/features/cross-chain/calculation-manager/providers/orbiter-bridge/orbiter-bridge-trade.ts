@@ -46,7 +46,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                     quoteConfig
                 },
                 routePath: [],
-                providerAddress
+                providerAddress,
+                useProxy: false
             });
 
             return getCrossChainGasData(trade);
@@ -95,7 +96,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: OrbiterTradeParams) {
-        super(params.providerAddress, params.routePath);
+        super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.toTokenAmountMin = params.crossChainTrade.to.tokenAmount;

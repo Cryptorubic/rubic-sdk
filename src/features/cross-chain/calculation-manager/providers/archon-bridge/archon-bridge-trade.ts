@@ -79,9 +79,10 @@ export class ArchonBridgeTrade extends EvmCrossChainTrade {
             feeInfo: FeeInfo;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

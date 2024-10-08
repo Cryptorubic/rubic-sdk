@@ -63,7 +63,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
                     toTokenAmountMin: new BigNumber(0)
                 },
                 providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                routePath
+                routePath,
+                false
             );
 
             return getCrossChainGasData(trade, receiverAddress);
@@ -130,9 +131,10 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             toTokenAmountMin: BigNumber;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.feeInfo = crossChainTrade.feeInfo;

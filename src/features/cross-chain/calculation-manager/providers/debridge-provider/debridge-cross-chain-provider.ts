@@ -173,7 +173,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         onChainTrade: null
                     },
                     options.providerAddress,
-                    await this.getRoutePath(debridgeResponse.estimation, from, to)
+                    await this.getRoutePath(debridgeResponse.estimation, from, to),
+                    useProxy
                 ),
                 tradeType: this.type
             };

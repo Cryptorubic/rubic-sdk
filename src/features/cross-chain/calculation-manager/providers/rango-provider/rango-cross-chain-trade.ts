@@ -55,7 +55,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                     swapQueryParams
                 },
                 routePath,
-                providerAddress: swapQueryParams.toAddress
+                providerAddress: swapQueryParams.toAddress,
+                useProxy: false
             });
 
             return getCrossChainGasData(trade, receiverAddress);
@@ -108,7 +109,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: RangoCrossChainTradeConstructorParams) {
-        super(params.providerAddress, params.routePath);
+        super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.toTokenAmountMin = params.crossChainTrade.toTokenAmountMin;

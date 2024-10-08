@@ -50,7 +50,8 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
                     targetAssetString
                 },
                 providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                routePath: []
+                routePath: [],
+                useProxy: false
             });
 
             return getCrossChainGasData(trade);
@@ -101,7 +102,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: MesonCrossChainTradeConstructorParams) {
-        super(params.providerAddress, params.routePath);
+        super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.feeInfo = params.crossChainTrade.feeInfo;

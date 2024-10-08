@@ -98,7 +98,8 @@ export class MesonCrossChainProvider extends CrossChainProvider {
                     targetAssetString
                 },
                 providerAddress: options.providerAddress,
-                routePath: await this.getRoutePath(from, to)
+                routePath: await this.getRoutePath(from, to),
+                useProxy
             });
 
             if (fromWithoutFee.tokenAmount.lt(min)) {

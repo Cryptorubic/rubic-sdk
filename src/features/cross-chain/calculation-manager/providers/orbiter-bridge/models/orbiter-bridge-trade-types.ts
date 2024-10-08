@@ -26,4 +26,5 @@ export interface OrbiterTradeParams {
     };
     providerAddress: string;
     routePath: RubicStep[];
+    useProxy: boolean;
 }

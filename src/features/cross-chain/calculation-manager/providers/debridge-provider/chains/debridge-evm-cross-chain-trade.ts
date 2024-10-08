@@ -72,7 +72,8 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
                     onChainTrade: null
                 },
                 providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                []
+                [],
+                false
             );
             return getCrossChainGasData(trade, receiverAddress);
         } catch (_err) {
@@ -122,9 +123,10 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
     constructor(
         crossChainTrade: DebridgeEvmCrossChainTradeConstructor,
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

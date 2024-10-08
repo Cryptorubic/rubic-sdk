@@ -111,7 +111,8 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                     quoteConfig
                 },
                 providerAddress: options.providerAddress,
-                routePath: await this.getRoutePath(from, to)
+                routePath: await this.getRoutePath(from, to),
+                useProxy
             });
 
             return { trade, tradeType: this.type };

@@ -143,7 +143,8 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                         transactionRequest: requestParams
                     },
                     options.providerAddress,
-                    await this.getRoutePath(estimate, from, to)
+                    await this.getRoutePath(estimate, from, to),
+                    useProxy
                 ),
                 tradeType: this.type
             };

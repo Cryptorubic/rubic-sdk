@@ -79,6 +79,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         }
 
         try {
+            const useProxy = options?.useProxy?.[this.type] ?? true;
+
             const contractAbi = BlockchainsInfo.isTronBlockchainName(fromBlockchain)
                 ? tronCommonCrossChainAbi
                 : evmCommonCrossChainAbi;
@@ -179,7 +181,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance
                     },
                     options.providerAddress,
-                    await this.getRoutePath(from, to)
+                    await this.getRoutePath(from, to),
+                    useProxy
                 );
 
                 return this.getCalculationResponse(from, transactionData, evmTrade);

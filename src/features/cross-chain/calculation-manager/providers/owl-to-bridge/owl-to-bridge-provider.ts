@@ -98,7 +98,8 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                     approveAddress: txs.transfer_body.to
                 },
                 providerAddress: options.providerAddress,
-                routePath: await this.getRoutePath(from, to)
+                routePath: await this.getRoutePath(from, to),
+                useProxy
             });
 
             if (fromWithoutFee.tokenAmount.lt(minAmountBN)) {

@@ -63,7 +63,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                 slippage
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            []
+            [],
+            false
         );
 
         return getCrossChainGasData(trade, receiverAddress);
@@ -127,9 +128,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

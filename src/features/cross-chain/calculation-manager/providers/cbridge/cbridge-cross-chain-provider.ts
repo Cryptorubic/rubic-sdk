@@ -195,7 +195,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         onChainTrade
                     },
                     options.providerAddress,
-                    await this.getRoutePath(fromToken, transitToken, to, onChainTrade)
+                    await this.getRoutePath(fromToken, transitToken, to, onChainTrade),
+                    useProxy
                 ),
                 error: amountsErrors,
                 tradeType: this.type

@@ -43,6 +43,7 @@ export class LayerZeroBridgeProvider extends CrossChainProvider {
         }
 
         try {
+            const useProxy = options?.useProxy?.[this.type] ?? true;
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: fromToken.tokenAmount
@@ -61,7 +62,8 @@ export class LayerZeroBridgeProvider extends CrossChainProvider {
                         gasData
                     },
                     options.providerAddress,
-                    await this.getRoutePath(fromToken, to)
+                    await this.getRoutePath(fromToken, to),
+                    useProxy
                 ),
                 tradeType: this.type
             };
