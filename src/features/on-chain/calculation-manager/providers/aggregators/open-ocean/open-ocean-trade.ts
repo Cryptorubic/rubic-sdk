@@ -52,7 +52,7 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         const swapQuoteResponse = await OpenOceanApiService.fetchSwapData(
             this.fromWithoutFee as PriceTokenAmount<OpenoceanOnChainSupportedBlockchain>,
             this.to,
-            options.receiverAddress || this.walletAddress,
+            options.receiverAddress || options.fromAddress,
             this.slippageTolerance
         );
         const { data, to, value, outAmount: toAmount } = swapQuoteResponse.data;
