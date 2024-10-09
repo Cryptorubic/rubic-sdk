@@ -53,7 +53,7 @@ export class OpenOceanApiService {
         const gasPriceNonWei = await this.getGasPriceNonWei(fromWithoutFee);
 
         const swapResponse = await Injector.httpClient.get<OpenoceanSwapQuoteResponse>(
-            `${this.xApiUrl}/v4/${openOceanBlockchainName[fromWithoutFee.blockchain]}/swap_quote`,
+            `${this.xApiUrl}/v4/${openOceanBlockchainName[fromWithoutFee.blockchain]}/swap`,
             {
                 headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' },
                 params: {
