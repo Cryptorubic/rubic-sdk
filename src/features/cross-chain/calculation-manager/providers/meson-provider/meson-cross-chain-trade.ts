@@ -115,11 +115,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const {
-            data,
-            value: providerValue,
-            to: providerRouter
-        } = await this.setTransactionConfig(
+        const { data, to: providerRouter } = await this.setTransactionConfig(
             false,
             options?.useCacheData || false,
             options?.receiverAddress || this.walletAddress
@@ -145,7 +141,8 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
         );
 
         const methodArguments = [bridgeData, providerData];
-        const value = this.getSwapValue(providerValue);
+        // const value = this.getSwapValue(providerValue);
+        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
             evmCommonCrossChainAbi,
@@ -156,6 +153,19 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
 
         const sendingToken = this.from.isNative ? [] : [this.from.address];
         const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        const evmdata = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].gateway,
+            gatewayRubicCrossChainAbi,
+            'startViaRubic',
+            [sendingToken, sendingAmount, transactionConfiguration.data],
+            value
+        );
+        console.log('%cMeson-DATA', 'color: greenyellow; font-size: 28px;', {
+            to: evmdata.to,
+            data: evmdata.data,
+            value: evmdata.value
+        });
 
         return {
             contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,

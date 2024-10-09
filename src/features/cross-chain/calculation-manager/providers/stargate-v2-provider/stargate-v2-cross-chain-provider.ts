@@ -113,10 +113,6 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 composeMsg: '0x',
                 oftCmd: '0x'
             };
-            console.log('%cStargateV2-Provider', 'color: red; font-size: 30px;', {
-                amount: from.tokenAmount.toFixed(),
-                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed()
-            });
 
             const { amountReceivedLD } = await this.getReceiveAmount(
                 sendParams,
@@ -145,6 +141,11 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(amountReceived, fromWithoutFee.decimals)
+            });
+            console.log('%cStargateV2-Provider', 'color: red; font-size: 30px;', {
+                amount: from.tokenAmount.toFixed(),
+                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed(),
+                receivedAmount: to.tokenAmount.toFixed()
             });
 
             const routePath = await this.getRoutePath(from, to);

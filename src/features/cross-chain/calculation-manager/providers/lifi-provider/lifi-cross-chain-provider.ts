@@ -42,7 +42,7 @@ import { LifiApiService } from './services/lifi-api-service';
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-    private readonly MIN_AMOUNT_USD = new BigNumber(30);
+    private readonly MIN_AMOUNT_USD = new BigNumber(1);
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -103,10 +103,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ...(fromAddress && { fromAddress }),
             ...(toAddress && { toAddress })
         };
-        console.log('%cLiFi-Provider', 'color: red; font-size: 30px;', {
-            amount: from.tokenAmount.toFixed(),
-            amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed()
-        });
+
         const result = await LifiApiService.getRoutes(routesRequest);
 
         const { routes } = result;
@@ -142,6 +139,11 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
             weiAmount: new BigNumber(bestRoute.toAmount)
+        });
+        console.log('%cLiFi-Provider', 'color: red; font-size: 30px;', {
+            amount: from.tokenAmount.toFixed(),
+            amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed(),
+            receivedAmount: to.tokenAmount.toFixed()
         });
 
         const priceImpact = from.calculatePriceImpactPercent(to);

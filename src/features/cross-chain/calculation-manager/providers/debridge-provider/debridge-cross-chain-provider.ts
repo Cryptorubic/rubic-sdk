@@ -84,10 +84,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
-            console.log('%cDebridge-Provider', 'color: red; font-size: 30px;', {
-                amount: from.tokenAmount.toFixed(),
-                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed()
-            });
 
             const requestParams: TransactionRequest = {
                 ...this.getAffiliateFee(fromBlockchain),
@@ -114,6 +110,11 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                     toAmount.gt(0) ? toAmount : new BigNumber(0),
                     debridgeResponse.estimation.dstChainTokenOut.decimals
                 )
+            });
+            console.log('%cDebridge-Provider', 'color: red; font-size: 30px;', {
+                amount: from.tokenAmount.toFixed(),
+                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed(),
+                receivedAmount: to.tokenAmount.toFixed()
             });
 
             const toTokenAmountMin = Web3Pure.fromWei(
