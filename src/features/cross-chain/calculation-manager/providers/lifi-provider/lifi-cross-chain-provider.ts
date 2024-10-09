@@ -103,7 +103,10 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ...(fromAddress && { fromAddress }),
             ...(toAddress && { toAddress })
         };
-
+        console.log('%cLiFi-Provider', 'color: red; font-size: 30px;', {
+            amount: from.tokenAmount.toFixed(),
+            amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed()
+        });
         const result = await LifiApiService.getRoutes(routesRequest);
 
         const { routes } = result;

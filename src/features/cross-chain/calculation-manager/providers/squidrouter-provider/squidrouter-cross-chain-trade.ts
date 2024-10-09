@@ -10,6 +10,7 @@ import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { SquidrouterTransactionRequest } from 'src/features/common/providers/squidrouter/models/transaction-request';
 import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -214,9 +215,14 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
         const extraNativeFee = this.from.isNative
-            ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+            ? new BigNumber(providerValue).minus(fromWithoutFee.stringWeiAmount).toFixed()
             : new BigNumber(providerValue).toFixed();
+
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             to,
             data!,

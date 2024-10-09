@@ -8,6 +8,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
@@ -171,9 +172,15 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
                     fromAddress: this.walletAddress
                 }
             );
+
+            const fromWithoutFee = getFromWithoutFee(
+                this.from,
+                this.feeInfo.rubicProxy?.platformFee?.percent
+            );
             const extraNativeFee = this.from.isNative
-                ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+                ? new BigNumber(providerValue).minus(fromWithoutFee.stringWeiAmount).toFixed()
                 : new BigNumber(providerValue).toFixed();
+
             const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
                 to,
                 data,

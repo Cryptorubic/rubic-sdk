@@ -113,6 +113,10 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 composeMsg: '0x',
                 oftCmd: '0x'
             };
+            console.log('%cStargateV2-Provider', 'color: red; font-size: 30px;', {
+                amount: from.tokenAmount.toFixed(),
+                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed()
+            });
 
             const { amountReceivedLD } = await this.getReceiveAmount(
                 sendParams,

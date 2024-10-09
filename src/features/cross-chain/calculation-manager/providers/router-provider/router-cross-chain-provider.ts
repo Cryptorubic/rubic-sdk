@@ -80,7 +80,10 @@ export class RouterCrossChainProvider extends CrossChainProvider {
                 from,
                 feeInfo?.rubicProxy?.platformFee?.percent
             );
-
+            console.log('%cRouter-Provider', 'color: red; font-size: 30px;', {
+                amount: from.tokenAmount.toFixed(),
+                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed()
+            });
             const routerQuoteConfig = await RouterApiService.getQuote({
                 amount: fromWithoutFee.stringWeiAmount,
                 fromTokenAddress: from.isNative ? NATIVE_TOKEN_ADDRESS : srcTokenAddress,
