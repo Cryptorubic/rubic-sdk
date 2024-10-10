@@ -499,4 +499,9 @@ export class EvmWeb3Private extends Web3Private {
             throw EvmWeb3Private.parseError(err as Web3Error);
         }
     }
+
+    public async signMessage(message: string): Promise<string> {
+        const signature = this.web3.eth.personal.sign(message, this.address, '');
+        return signature;
+    }
 }
