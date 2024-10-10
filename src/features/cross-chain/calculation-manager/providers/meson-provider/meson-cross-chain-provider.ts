@@ -68,6 +68,7 @@ export class MesonCrossChainProvider extends CrossChainProvider {
             );
 
             const toAmount = fromWithoutFee.tokenAmount.minus(mesonFee);
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: toAmount

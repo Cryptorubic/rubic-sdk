@@ -321,7 +321,7 @@ export abstract class CrossChainTrade<T = unknown> {
         } else {
             fromValue = new BigNumber(providerValue || 0);
         }
-
+        // 100 / 0.98
         return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
 
