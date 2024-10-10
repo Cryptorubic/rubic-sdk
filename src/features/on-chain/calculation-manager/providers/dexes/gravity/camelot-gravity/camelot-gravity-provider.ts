@@ -8,7 +8,7 @@ import { UniswapV3AlgebraTradeStructOmitPath } from '../../common/uniswap-v3-alg
 import { UniswapV3AlgebraAbstractProvider } from '../../common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
 import { QUICK_SWAP_V3_ROUTER_CONTRACT_ABI } from '../../polygon/quick-swap-v3/constants/swap-router-contract-data';
 import { QuickSwapV3Route } from '../../polygon/quick-swap-v3/models/quick-swap-v3-route';
-import { defaultzGravityProviderConfiguration } from '../default-constants';
+import { defaultGravityProviderConfiguration } from '../default-constants';
 import { CamelotGravityTrade } from './camelot-gravity-trade';
 import { CAMELOT_GRAVITY_ROUTER_CONTRACT_ADDRESS } from './constants/gravity-swap-router-contract-address';
 import { CAMELOT_GRAVITY_PROVIDER_CONFIGURATION } from './constants/provider-configuration';
@@ -28,7 +28,7 @@ export class CamelotGravityProvider extends UniswapV3AlgebraAbstractProvider<Cam
 
     protected readonly quoterController = new AlgebraQuoterController(
         this.blockchain,
-        defaultzGravityProviderConfiguration.routingProvidersAddresses,
+        defaultGravityProviderConfiguration.routingProvidersAddresses,
         CAMELOT_GRAVITY_QUOTER_CONTRACT_ADDRESS,
         CAMELOT_GRAVITY_QUOTER_CONTRACT_ABI
     );
