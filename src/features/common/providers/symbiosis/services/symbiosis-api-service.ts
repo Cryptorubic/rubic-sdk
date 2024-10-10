@@ -45,13 +45,8 @@ export class SymbiosisApiService {
     public static async getCrossChainSwapTx(
         params: SymbiosisSwappingParams
     ): Promise<SymbiosisTradeData> {
-        const url =
-            params.tokenOut.chainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN]
-                ? `${SYMBIOSIS_API_ENDPOINT}/v1/swap`
-                : `${SYMBIOSIS_API_ENDPOINT}/v1/swapping/exact_in?partnerId=rubic`;
-
         const res = await Injector.httpClient.post<SymbiosisTradeData | SymbiosisErrorResponse>(
-            url,
+            `${SYMBIOSIS_API_ENDPOINT}/v1/swap`,
             params
         );
 
