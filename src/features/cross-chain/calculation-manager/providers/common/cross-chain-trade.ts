@@ -300,7 +300,7 @@ export abstract class CrossChainTrade<T = unknown> {
 
     /**
      * Calculates value for swap transaction.
-     * @param providerValue Value, returned from cross-chain provider.
+     * @param providerValue Value, returned from cross-chain provider. Not '0' if from is native or provider has extranative
      */
     protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
         const nativeToken = nativeTokensList[this.from.blockchain];

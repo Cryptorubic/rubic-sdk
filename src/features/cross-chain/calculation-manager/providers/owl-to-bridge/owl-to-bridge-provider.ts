@@ -79,7 +79,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 options.gasCalculation === 'enabled'
                     ? await OwlToBridgeTrade.getGasData({
                           feeInfo,
-                          fromToken: fromWithoutFee,
+                          fromToken: from,
                           toToken: to,
                           providerAddress: options.providerAddress,
                           swapParams,
@@ -90,7 +90,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
             const trade = new OwlToBridgeTrade({
                 crossChainTrade: {
                     feeInfo,
-                    from: fromWithoutFee,
+                    from,
                     to,
                     gasData,
                     priceImpact: from.calculatePriceImpactPercent(to),
