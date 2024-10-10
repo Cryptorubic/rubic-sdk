@@ -128,7 +128,7 @@ export class RetroBridgeApiService {
         if (txStatus === RETRO_BRIDGE_TX_STATUS.COMPLETED) {
             return {
                 hash: data.destination_tx_hash,
-                status: TX_STATUS.PENDING
+                status: TX_STATUS.SUCCESS
             };
         }
         if (
