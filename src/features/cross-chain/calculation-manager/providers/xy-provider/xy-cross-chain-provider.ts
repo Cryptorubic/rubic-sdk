@@ -159,7 +159,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         bridgeDescription,
                         dstSwapDescription,
                         dstQuoteTokenAmount
-                    })
+                    }),
+                    useProxy
                 ),
                 tradeType: this.type
             };
