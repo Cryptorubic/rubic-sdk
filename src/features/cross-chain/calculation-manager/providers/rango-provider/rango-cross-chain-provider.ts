@@ -86,10 +86,6 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             });
             const routePath = await this.getRoutePath(from, to, path);
 
-            console.log('%cRango-Provider', 'color: red; font-size: 30px;', {
-                amount: from.tokenAmount.toFixed(),
-                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed()
-            });
             const swapQueryParams = await RangoCommonParser.getSwapQueryParams(
                 fromWithoutFee,
                 toToken,

@@ -142,11 +142,6 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(amountReceived, fromWithoutFee.decimals)
             });
-            console.log('%cStargateV2-Provider', 'color: red; font-size: 30px;', {
-                amount: from.tokenAmount.toFixed(),
-                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed(),
-                receivedAmount: to.tokenAmount.toFixed()
-            });
 
             const routePath = await this.getRoutePath(from, to);
             const gasData =

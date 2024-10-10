@@ -111,11 +111,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                     debridgeResponse.estimation.dstChainTokenOut.decimals
                 )
             });
-            console.log('%cDebridge-Provider', 'color: red; font-size: 30px;', {
-                amount: from.tokenAmount.toFixed(),
-                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed(),
-                receivedAmount: to.tokenAmount.toFixed()
-            });
 
             const toTokenAmountMin = Web3Pure.fromWei(
                 debridgeResponse.estimation.dstChainTokenOut.amount,

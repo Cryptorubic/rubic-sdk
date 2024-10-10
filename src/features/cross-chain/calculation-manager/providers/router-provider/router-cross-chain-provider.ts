@@ -98,11 +98,6 @@ export class RouterCrossChainProvider extends CrossChainProvider {
                     routerQuoteConfig.destination.asset.decimals
                 )
             });
-            console.log('%cRouter-Provider', 'color: red; font-size: 30px;', {
-                amount: from.tokenAmount.toFixed(),
-                amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed(),
-                receivedAmount: to.tokenAmount.toFixed()
-            });
 
             const routePath = await this.getRoutePath(from, to, routerQuoteConfig);
 

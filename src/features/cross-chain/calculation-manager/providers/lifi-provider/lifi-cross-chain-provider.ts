@@ -140,11 +140,6 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ...toToken.asStruct,
             weiAmount: new BigNumber(bestRoute.toAmount)
         });
-        console.log('%cLiFi-Provider', 'color: red; font-size: 30px;', {
-            amount: from.tokenAmount.toFixed(),
-            amountToApiWithoutRubicFee: fromWithoutFee.tokenAmount.toFixed(),
-            receivedAmount: to.tokenAmount.toFixed()
-        });
 
         const priceImpact = from.calculatePriceImpactPercent(to);
 
