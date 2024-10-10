@@ -133,7 +133,7 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         this.quoteSendParams = crossChainTrade.quoteSendParams;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.hotWalletAddress = crossChainTrade.hotWalletAddress;
-        this.isSimulation = crossChainTrade?.isSimulation ? crossChainTrade.isSimulation : false;
+        this.isSimulation = crossChainTrade.isSimulation ? crossChainTrade.isSimulation : false;
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
