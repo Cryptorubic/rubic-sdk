@@ -47,7 +47,8 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
                     acrossFeeQuoteRequestParams
                 },
                 providerAddress,
-                []
+                [],
+                false
             );
 
             return getCrossChainGasData(trade);
@@ -108,9 +109,10 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
             acrossFeeQuoteRequestParams: AcrossFeeQuoteRequestParams;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = ccrTrade.from;
         this.to = ccrTrade.to;

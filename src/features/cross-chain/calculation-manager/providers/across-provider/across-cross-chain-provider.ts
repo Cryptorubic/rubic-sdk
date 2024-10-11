@@ -93,7 +93,8 @@ export class AcrossCrossChainProvider extends CrossChainProvider {
                     acrossFeeQuoteRequestParams: quoteRequestParams
                 },
                 options.providerAddress,
-                routePath
+                routePath,
+                useProxy
             );
 
             try {
