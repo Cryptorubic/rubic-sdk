@@ -62,13 +62,12 @@ export class MesonCrossChainProvider extends CrossChainProvider {
                 from,
                 useProxy
             );
-
             const fromWithoutFee = getFromWithoutFee(
                 fromWith6Decimals,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const toAmount = from.tokenAmount.minus(mesonFee);
+            const toAmount = fromWithoutFee.tokenAmount.minus(mesonFee);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -78,7 +77,7 @@ export class MesonCrossChainProvider extends CrossChainProvider {
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await MesonCrossChainTrade.getGasData({
-                          from: fromWithoutFee,
+                          from: fromWith6Decimals,
                           feeInfo,
                           toToken: to,
                           providerAddress: options.providerAddress,
@@ -90,7 +89,7 @@ export class MesonCrossChainProvider extends CrossChainProvider {
             const trade = new MesonCrossChainTrade({
                 crossChainTrade: {
                     feeInfo,
-                    from: fromWithoutFee,
+                    from: fromWith6Decimals,
                     gasData,
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
@@ -98,7 +97,8 @@ export class MesonCrossChainProvider extends CrossChainProvider {
                     targetAssetString
                 },
                 providerAddress: options.providerAddress,
-                routePath: await this.getRoutePath(from, to)
+                routePath: await this.getRoutePath(from, to),
+                useProxy
             });
 
             if (fromWithoutFee.tokenAmount.lt(min)) {

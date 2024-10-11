@@ -124,7 +124,8 @@ export class RouterCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance
                     },
                     options.providerAddress,
-                    routePath
+                    routePath,
+                    useProxy
                 ),
                 tradeType: this.type
             };

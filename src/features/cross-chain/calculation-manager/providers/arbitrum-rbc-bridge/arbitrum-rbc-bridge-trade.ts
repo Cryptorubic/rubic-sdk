@@ -106,7 +106,7 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
         providerAddress: string,
         routePath: RubicStep[]
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, false);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

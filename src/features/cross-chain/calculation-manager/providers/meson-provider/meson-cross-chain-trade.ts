@@ -5,6 +5,7 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
@@ -50,7 +51,8 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
                     targetAssetString
                 },
                 providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                routePath: []
+                routePath: [],
+                useProxy: true
             });
 
             return getCrossChainGasData(trade);
@@ -66,7 +68,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>; // 0.0011
 
     public readonly toTokenAmountMin: BigNumber;
 
@@ -101,7 +103,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: MesonCrossChainTradeConstructorParams) {
-        super(params.providerAddress, params.routePath);
+        super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.feeInfo = params.crossChainTrade.feeInfo;
@@ -116,7 +118,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
         const {
             data,
-            value: providerValue,
+            value: providerValue, //  0.001078
             to: providerRouter
         } = await this.setTransactionConfig(
             false,
@@ -126,7 +128,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
-            fromTokenAmount: this.from,
+            fromTokenAmount: this.from, // 0.0011
             toTokenAmount: this.to,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
@@ -144,7 +146,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
         );
 
         const methodArguments = [bridgeData, providerData];
-        const value = this.getSwapValue(providerValue);
+        const value = this.getSwapValue(providerValue); // 0.0011
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
             evmCommonCrossChainAbi,
@@ -171,10 +173,15 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
         const rubicMultiProxyAddress = rubicProxyContractAddress[this.fromBlockchain].router;
         const fromAddress = this.isProxyTrade ? rubicMultiProxyAddress : this.walletAddress;
 
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
+
         const { encoded, initiator } = await MesonCcrApiService.fetchInfoForTx({
             sourceAssetString: this.sourceAssetString,
             targetAssetString: this.targetAssetString,
-            amount: this.from.tokenAmount.toFixed(),
+            amount: fromWithoutFee.tokenAmount.toFixed(),
             fromAddress,
             receiverAddress: receiverAddress || this.walletAddress,
             useProxy: this.isProxyTrade
@@ -183,7 +190,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
 
         const methodName = 'postSwapFromContract';
         const methodArgs = [encoded, postingValue, rubicMultiProxyAddress];
-        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const value = this.from.isNative ? fromWithoutFee.stringWeiAmount : '0';
 
         const config = EvmWeb3Pure.encodeMethodCall(
             mesonContractAddresses[this.fromBlockchain],

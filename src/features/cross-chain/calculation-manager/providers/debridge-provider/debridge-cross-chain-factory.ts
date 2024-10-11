@@ -16,7 +16,8 @@ export class DebridgeCrossChainFactory {
         fromBlockchain: BlockchainName,
         constructorParams: DebridgeCrossChainTradeConstructor<BlockchainName>,
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ): CrossChainTrade<EvmEncodeConfig | { data: string }> {
         if (BlockchainsInfo.isSolanaBlockchainName(fromBlockchain)) {
             return new DebridgeSolanaCrossChainTrade(
@@ -30,7 +31,8 @@ export class DebridgeCrossChainFactory {
             return new DebridgeEvmCrossChainTrade(
                 constructorParams as DebridgeEvmCrossChainTradeConstructor,
                 providerAddress,
-                routePath
+                routePath,
+                useProxy
             );
         }
         throw new Error('Can not create trade instance');

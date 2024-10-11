@@ -31,4 +31,5 @@ export interface EddyBridgeTradeConstructorParams {
     };
     providerAddress: string;
     routePath: RubicStep[];
+    useProxy: boolean;
 }

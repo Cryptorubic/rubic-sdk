@@ -5,6 +5,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
@@ -46,7 +47,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                     quoteConfig
                 },
                 routePath: [],
-                providerAddress
+                providerAddress,
+                useProxy: false
             });
 
             return getCrossChainGasData(trade);
@@ -95,7 +97,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: OrbiterTradeParams) {
-        super(params.providerAddress, params.routePath);
+        super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.toTokenAmountMin = params.crossChainTrade.to.tokenAmount;
@@ -118,7 +120,6 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             transactionHash = hash;
         };
 
-        // eslint-disable-next-line no-useless-catch
         try {
             const { data, to, value } = await this.setTransactionConfig(
                 false,
@@ -151,9 +152,18 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             options?.receiverAddress || this.walletAddress
         );
 
+        const percentFee = (this.feeInfo.rubicProxy?.platformFee?.percent || 0) / 100;
+        const fromWeiAmountWithHiddenCode = new BigNumber(this.getFromAmountWithoutFeeWithCode())
+            .dividedBy(1 - percentFee)
+            .decimalPlaces(0, 1);
+        const fromWithCode = new PriceTokenAmount({
+            ...this.from.asStruct,
+            weiAmount: fromWeiAmountWithHiddenCode
+        });
+
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
-            fromTokenAmount: this.from,
+            fromTokenAmount: fromWithCode,
             toTokenAmount: this.to,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
@@ -199,7 +209,9 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         // Orbiter deposit address to send funds money to receiverWalletAddress after transfer confirmation
         const orbiterTokensDispenser = this.quoteConfig.endpoint;
 
-        const transferAmount = this.from.stringWeiAmount;
+        // const transferAmount = this.from.stringWeiAmount;
+        const transferAmount = this.getFromAmountWithoutFeeWithCode();
+
         const encodedReceiverAndCode = OrbiterUtils.getHexDataArg(
             this.quoteConfig.vc,
             receiverAddress || this.walletAddress
@@ -223,6 +235,25 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             config,
             amount: this.to.stringWeiAmount
         };
+    }
+
+    /**
+     *  @example for native transfer
+     *   1000000 - 2%(rubicPercentFee) -> convertToCode -> 998015
+     *   amountJore -  998015 + 2%
+     *   When Jora subtracts amountJore - 2%, he will get value with orbiter-vc-code
+     */
+    private getFromAmountWithoutFeeWithCode(): string {
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
+        const transferAmount = OrbiterUtils.getAmountWithVcCode(
+            fromWithoutFee.stringWeiAmount,
+            this.quoteConfig
+        );
+
+        return transferAmount;
     }
 
     public getTradeInfo(): TradeInfo {
