@@ -695,7 +695,7 @@ export class EvmWeb3Public extends Web3Public {
 
         for (const log of receipt.logs) {
             try {
-                const data = this.web3.eth.abi.decodeLog(inputs, log.data, log.topics);
+                const data = this.web3.eth.abi.decodeLog(inputs, log.data, log.topics.slice(1));
                 if (data?.[key]) {
                     decodedData = data;
                 }
