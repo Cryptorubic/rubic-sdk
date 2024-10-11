@@ -157,10 +157,11 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             if (!amount) {
                 throw new RubicSdkError('Can not estimate trade');
             }
+            const toAmount = new BigNumber(amount).lt(0) ? 0 : amount;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: Web3Pure.fromWei(amount, toToken.decimals)
+                tokenAmount: Web3Pure.fromWei(toAmount, toToken.decimals)
             });
 
             const gasData =
@@ -194,7 +195,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         onChainTrade
                     },
                     options.providerAddress,
-                    await this.getRoutePath(fromToken, transitToken, to, onChainTrade)
+                    await this.getRoutePath(fromToken, transitToken, to, onChainTrade),
+                    useProxy
                 ),
                 error: amountsErrors,
                 tradeType: this.type

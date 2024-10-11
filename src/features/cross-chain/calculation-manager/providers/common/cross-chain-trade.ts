@@ -108,13 +108,7 @@ export abstract class CrossChainTrade<T = unknown> {
         );
     }
 
-    protected get isProxyTrade(): boolean {
-        const fee = this.feeInfo.rubicProxy;
-        const hasFixedFee = Boolean(fee?.fixedFee?.amount?.gt(0));
-        const hasPlatformFee = Number(fee?.platformFee?.percent) > 0;
-
-        return hasFixedFee || hasPlatformFee;
-    }
+    protected isProxyTrade: boolean;
 
     protected get amountToCheck(): string {
         return this.to.stringWeiAmount;
@@ -147,8 +141,11 @@ export abstract class CrossChainTrade<T = unknown> {
 
     protected constructor(
         protected readonly providerAddress: string,
-        protected readonly routePath: RubicStep[]
-    ) {}
+        protected readonly routePath: RubicStep[],
+        protected readonly useProxy: boolean
+    ) {
+        this.isProxyTrade = useProxy;
+    }
 
     /**
      * Returns true, if allowance is not enough.
@@ -303,7 +300,7 @@ export abstract class CrossChainTrade<T = unknown> {
 
     /**
      * Calculates value for swap transaction.
-     * @param providerValue Value, returned from cross-chain provider.
+     * @param providerValue Value, returned from cross-chain provider. Not '0' if from is native or provider has extranative
      */
     protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
         const nativeToken = nativeTokensList[this.from.blockchain];
@@ -324,7 +321,7 @@ export abstract class CrossChainTrade<T = unknown> {
         } else {
             fromValue = new BigNumber(providerValue || 0);
         }
-
+        // 100 / 0.98
         return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
 
