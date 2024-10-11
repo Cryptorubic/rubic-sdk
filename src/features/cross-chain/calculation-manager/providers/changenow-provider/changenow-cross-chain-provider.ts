@@ -182,7 +182,8 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             const trade = new ChangenowCrossChainTrade(
                 { ...changenowTrade, gasData },
                 options.providerAddress,
-                await this.getRoutePath(from, to)
+                await this.getRoutePath(from, to),
+                useProxy
             );
             if (quoteError) {
                 return {

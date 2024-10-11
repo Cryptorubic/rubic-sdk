@@ -42,6 +42,7 @@ export class ScrollBridgeProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = fromToken.blockchain as ScrollBridgeSupportedBlockchain;
         const toBlockchain = toToken.blockchain as ScrollBridgeSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
 
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
@@ -100,7 +101,8 @@ export class ScrollBridgeProvider extends CrossChainProvider {
                         gasData
                     },
                     options.providerAddress,
-                    await this.getRoutePath(fromToken, to)
+                    await this.getRoutePath(fromToken, to),
+                    useProxy
                 ),
                 tradeType: this.type
             };

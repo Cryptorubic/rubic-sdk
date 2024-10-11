@@ -48,7 +48,8 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
                 gasData: null
             },
             EvmWeb3Pure.EMPTY_ADDRESS,
-            []
+            [],
+            false
         );
         return getCrossChainGasData(trade);
     }
@@ -94,9 +95,10 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
             gasData: GasData | null;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
