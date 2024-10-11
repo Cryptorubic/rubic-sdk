@@ -260,7 +260,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         cryptoFeeToken: nativeToken
                     },
                     options.providerAddress,
-                    await this.getRoutePath(from, to, srcChainTrade)
+                    await this.getRoutePath(from, to, srcChainTrade),
+                    useProxy
                 ),
                 tradeType: this.type
             };

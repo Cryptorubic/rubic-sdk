@@ -23,6 +23,7 @@ export interface RangoCrossChainTradeConstructorParams {
     };
     providerAddress: string;
     routePath: RubicStep[];
+    useProxy: boolean;
 }
 
 export interface GetCrossChainTradeConstructorParamsType {

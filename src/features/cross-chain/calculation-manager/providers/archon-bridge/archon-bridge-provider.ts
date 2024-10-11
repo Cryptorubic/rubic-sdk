@@ -76,11 +76,12 @@ export class ArchonBridgeProvider extends CrossChainProvider {
         }
 
         try {
+            const useProxy = options?.useProxy?.[this.type] ?? true;
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
                 fromToken,
-                options?.useProxy?.[this.type] ?? true
+                useProxy
             );
             const fromWithoutFee = getFromWithoutFee(
                 fromToken,
@@ -120,7 +121,8 @@ export class ArchonBridgeProvider extends CrossChainProvider {
                         feeInfo
                     },
                     options.providerAddress,
-                    await this.getRoutePath(fromToken, to)
+                    await this.getRoutePath(fromToken, to),
+                    useProxy
                 ),
                 tradeType: this.type
             };

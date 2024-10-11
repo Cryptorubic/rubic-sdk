@@ -17,6 +17,7 @@ export interface MesonCrossChainTradeConstructorParams {
     };
     providerAddress: string;
     routePath: RubicStep[];
+    useProxy: boolean;
 }
 
 export interface MesonGetGasDataParams {

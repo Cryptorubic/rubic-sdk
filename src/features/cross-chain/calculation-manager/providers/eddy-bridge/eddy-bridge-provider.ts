@@ -94,7 +94,8 @@ export class EddyBridgeProvider extends CrossChainProvider {
                     quoteOptions: options
                 },
                 providerAddress: options.providerAddress,
-                routePath: await this.getRoutePath(from, to)
+                routePath: await this.getRoutePath(from, to),
+                useProxy
             });
 
             return this.getCalculationResult(fromWithoutFee, trade);

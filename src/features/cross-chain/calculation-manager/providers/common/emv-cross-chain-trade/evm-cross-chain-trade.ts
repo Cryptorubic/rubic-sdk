@@ -305,7 +305,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );
 
-        if (this.feeInfo?.rubicProxy?.fixedFee?.amount.gt(0)) {
+        if (this.isProxyTrade) {
             return this.encodeProxy(options);
         }
         return this.setTransactionConfig(
