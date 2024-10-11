@@ -55,7 +55,8 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
                 isSimulation: true
             },
             providerAddress,
-            []
+            [],
+            false
         );
         return getCrossChainGasData(trade);
     }
@@ -121,9 +122,10 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
             isSimulation?: boolean;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.feeInfo = crossChainTrade.feeInfo;

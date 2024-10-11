@@ -118,7 +118,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
                     hotWalletAddress: retroBridgeQuoteConfig.hot_wallet_address
                 },
                 options.providerAddress,
-                routePath
+                routePath,
+                useProxy
             );
 
             const isDecimalsGtThanMax = this.checkFromAmountDecimals(from);
@@ -242,7 +243,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 hotWalletAddress: ''
             },
             providerAddress,
-            []
+            [],
+            false
         );
 
         return {
