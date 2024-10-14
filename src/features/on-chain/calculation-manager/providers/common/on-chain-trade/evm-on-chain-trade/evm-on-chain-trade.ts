@@ -337,7 +337,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         );
     }
 
-    private async getProxyContractParams(
+    protected async getProxyContractParams(
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
         const swapData = await this.getSwapData(options);
@@ -379,7 +379,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         };
     }
 
-    private static getReferrerAddress(referrer: string | undefined): string {
+    protected static getReferrerAddress(referrer: string | undefined): string {
         if (referrer) {
             return '0x' + utf8ToHex(referrer).slice(2, 42).padStart(40, '0');
         }
