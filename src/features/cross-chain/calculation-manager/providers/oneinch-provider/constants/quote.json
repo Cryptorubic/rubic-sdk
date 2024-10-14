@@ -1,0 +1,111 @@
+{
+    "quoteId": "d1f3d8fb-9f09-4f42-8e07-9e22f92c0d67",
+    "srcTokenAmount": "100000000",
+    "dstTokenAmount": "89372434581186672834",
+    "presets": {
+        "fast": {
+            "auctionDuration": 180,
+            "startAuctionIn": 24,
+            "initialRateBump": 1826296,
+            "auctionStartAmount": "99239490737444279620",
+            "startAmount": "89372440568555126267",
+            "auctionEndAmount": "83914262536168788284",
+            "exclusiveResolver": null,
+            "costInDstToken": "9867057146411228060",
+            "points": [
+                {
+                    "delay": 120,
+                    "coefficient": 1253552
+                },
+                {
+                    "delay": 60,
+                    "coefficient": 1175849
+                }
+            ],
+            "allowPartialFills": false,
+            "allowMultipleFills": false,
+            "gasCost": {
+                "gasBumpEstimate": 1175849,
+                "gasPriceEstimate": "8614"
+            },
+            "secretsCount": 1
+        },
+        "medium": {
+            "auctionDuration": 360,
+            "startAuctionIn": 24,
+            "initialRateBump": 1826296,
+            "auctionStartAmount": "99239490737444279620",
+            "startAmount": "89372440568555126267",
+            "auctionEndAmount": "83914262536168788284",
+            "exclusiveResolver": null,
+            "costInDstToken": "9867057146411228060",
+            "points": [
+                {
+                    "delay": 360,
+                    "coefficient": 1175849
+                }
+            ],
+            "allowPartialFills": false,
+            "allowMultipleFills": false,
+            "gasCost": {
+                "gasBumpEstimate": 1175849,
+                "gasPriceEstimate": "8614"
+            },
+            "secretsCount": 1
+        },
+        "slow": {
+            "auctionDuration": 600,
+            "startAuctionIn": 24,
+            "initialRateBump": 1826296,
+            "auctionStartAmount": "99239490737444279620",
+            "startAmount": "89372440568555126267",
+            "auctionEndAmount": "83914262536168788284",
+            "exclusiveResolver": null,
+            "costInDstToken": "9867057146411228060",
+            "points": [
+                {
+                    "delay": 600,
+                    "coefficient": 1175849
+                }
+            ],
+            "allowPartialFills": false,
+            "allowMultipleFills": false,
+            "gasCost": {
+                "gasBumpEstimate": 1175849,
+                "gasPriceEstimate": "8614"
+            },
+            "secretsCount": 1
+        }
+    },
+    "timeLocks": {
+        "srcWithdrawal": 36,
+        "srcPublicWithdrawal": 204,
+        "srcCancellation": 360,
+        "srcPublicCancellation": 480,
+        "dstWithdrawal": 12,
+        "dstPublicWithdrawal": 168,
+        "dstCancellation": 288
+    },
+    "srcEscrowFactory": "0xa7bcb4eac8964306f9e3764f67db6a7af6ddf99a",
+    "dstEscrowFactory": "0xa7bcb4eac8964306f9e3764f67db6a7af6ddf99a",
+    "srcSafetyDeposit": "1811058409650000",
+    "dstSafetyDeposit": "1050000000000000",
+    "whitelist": ["0x33b41fe18d3a39046ad672f8a0c8c415454f629c"],
+    "recommendedPreset": "fast",
+    "prices": {
+        "usd": {
+            "srcToken": "0.9972668030771942",
+            "dstToken": "0.9997786589986694"
+        }
+    },
+    "volume": {
+        "usd": {
+            "srcToken": "99.73",
+            "dstToken": "99.22"
+        }
+    },
+    "priceImpactPercent": 0.511,
+    "autoK": 5.5,
+    "k": 5.5,
+    "mxK": 37
+}
