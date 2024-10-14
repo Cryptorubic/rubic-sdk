@@ -21,7 +21,8 @@ export class StonfiApiService {
 &units=${from.stringWeiAmount}
 &slippage_tolerance=${slippage}
 &referral_fee_bps=100
-&referral_address=${STONFI_REFERRAL_ADDRESS}`;
+&referral_address=${STONFI_REFERRAL_ADDRESS}
+&dex_v2=true`;
 
             const res = await Injector.httpClient.post<StonfiQuoteResponse>(
                 `${this.apiUrl}/swap/simulate?${queryParams}`
