@@ -43,10 +43,8 @@ export class SymbiosisApiService {
     public static async getCrossChainSwapTx(
         params: SymbiosisSwappingParams
     ): Promise<SymbiosisTradeData> {
-        const url = `${SYMBIOSIS_API_ENDPOINT}/v1/swap`;
-
         const res = await Injector.httpClient.post<SymbiosisTradeData | SymbiosisErrorResponse>(
-            url,
+            `${SYMBIOSIS_API_ENDPOINT}/v1/swap`,
             params
         );
 

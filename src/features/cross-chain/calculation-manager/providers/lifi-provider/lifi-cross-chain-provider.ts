@@ -42,7 +42,7 @@ import { LifiApiService } from './services/lifi-api-service';
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-    private readonly MIN_AMOUNT_USD = new BigNumber(30);
+    private readonly MIN_AMOUNT_USD = new BigNumber(1);
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -57,6 +57,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
+        const useProxy = options?.useProxy?.[this.type] ?? true;
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -171,7 +172,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 slippage: options.slippageTolerance
             },
             options.providerAddress,
-            await this.getRoutePath(from, to, bestRoute)
+            await this.getRoutePath(from, to, bestRoute),
+            useProxy
         );
 
         try {
