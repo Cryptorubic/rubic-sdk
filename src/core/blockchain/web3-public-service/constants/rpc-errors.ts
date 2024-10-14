@@ -7,5 +7,6 @@ export const rpcErrors = [
     'account suspended, please top up to reenable',
     'your account has been suspended',
     'too many requests, we recommend you to use free api key',
-    'origin not allowed'
+    'origin not allowed',
+    'api key disabled'
 ];

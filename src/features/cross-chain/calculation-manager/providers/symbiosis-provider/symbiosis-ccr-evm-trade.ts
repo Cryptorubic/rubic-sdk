@@ -71,7 +71,8 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
                 swapParams
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            []
+            [],
+            false
         );
         return getCrossChainGasData(trade, receiverAddress);
     }
@@ -139,9 +140,10 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
             promotions?: string[];
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

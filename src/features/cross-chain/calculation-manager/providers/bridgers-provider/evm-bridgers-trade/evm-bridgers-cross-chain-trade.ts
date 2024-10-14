@@ -43,7 +43,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 slippage: 0
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            []
+            [],
+            false
         );
 
         return getCrossChainGasData(trade, receiverAddress);
@@ -91,9 +92,10 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

@@ -176,7 +176,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         ...(rewards?.length && { promotions: this.getPromotions(rewards) })
                     },
                     options.providerAddress,
-                    await this.getRoutePath(from, to, route)
+                    await this.getRoutePath(from, to, route),
+                    useProxy
                 ),
                 tradeType: this.type
             };
@@ -350,7 +351,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     provider: CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS,
                     path: [from, to]
                 }
-            ]
+            ],
+            true
         );
     }
 }

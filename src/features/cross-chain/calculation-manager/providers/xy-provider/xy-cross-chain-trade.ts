@@ -58,7 +58,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                     bridgeType: BRIDGE_TYPE.XY
                 },
                 providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                []
+                [],
+                false
             );
 
             return getCrossChainGasData(trade);
@@ -123,9 +124,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             bridgeType: BridgeType;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
