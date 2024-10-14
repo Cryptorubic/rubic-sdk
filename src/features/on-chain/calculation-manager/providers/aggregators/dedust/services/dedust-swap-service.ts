@@ -49,21 +49,6 @@ export class DedustSwapService {
     }
 
     /**
-     *     this.httpService
-            .post(
-                '',
-                {
-                    from: 'jetton:0:b113a994b5024a16719f69139328eb759596c38a25f59028b146fecdc3621dfe',
-                    to: 'jetton:0:c95e05ef7644c21b437af9ee81d7e7e5d54d4b9cf1cc629aa2a3750403d28067',
-                    amount: '10000000'
-                },
-                'https://api.dedust.io/v2/routing/plan'
-            )
-            .pipe(delay(4000))
-            .subscribe(val => console.log('DEDUST_SUB_RESULT ===> ', val));
-     */
-
-    /**
      * @returns string wei amount
      */
     public async calcOutputAmount(from: PriceTokenAmount, to: PriceToken): Promise<string> {

@@ -21,8 +21,6 @@ export class StonfiSwapService {
 
     private readonly stonfiRouter = this.tonClient.open(new DEX.v1.Router());
 
-    constructor() {}
-
     public async getTxParams(
         from: PriceTokenAmount,
         to: PriceTokenAmount,
