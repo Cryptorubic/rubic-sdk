@@ -132,12 +132,7 @@ export class XyDexProvider extends AggregatorOnChainProvider {
 
         const routesWithoutWithholdingFee = trade.routes.filter(route => {
             const withholdingFee = new BigNumber(route.withholdingFeeAmount);
-
-            if (withholdingFee.gt(0)) {
-                return false;
-            }
-
-            return true;
+            return withholdingFee.lte(0);
         });
 
         const bestRoute = routesWithoutWithholdingFee[0];
