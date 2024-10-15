@@ -22,7 +22,7 @@ export class SymbiosisApiService {
         body: SymbiosisSwapRequestBody
     ): Promise<SymbiosisSwapResponse> {
         const res = await Injector.httpClient.post<SymbiosisSwapResponse | SymbiosisErrorResponse>(
-            `${SYMBIOSIS_API_ENDPOINT}/v1/swap`,
+            `${SYMBIOSIS_API_ENDPOINT}/v1/swap?partnerId=rubic`,
             body
         );
 
@@ -44,7 +44,7 @@ export class SymbiosisApiService {
         params: SymbiosisSwappingParams
     ): Promise<SymbiosisTradeData> {
         const res = await Injector.httpClient.post<SymbiosisTradeData | SymbiosisErrorResponse>(
-            `${SYMBIOSIS_API_ENDPOINT}/v1/swap`,
+            `${SYMBIOSIS_API_ENDPOINT}/v1/swap?partnerId=rubic`,
             params
         );
 

@@ -206,22 +206,15 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private getTokenAddress(token: PriceToken): string {
-        if (token.isNative && token.blockchain === BLOCKCHAIN_NAME.METIS) {
-            return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
-        }
-        if (token.isNative) {
-            return '';
-        }
-        return token.address;
-    }
-
     private getChainId(token: PriceToken): number {
         if (BlockchainsInfo.isTonBlockchainName(token.blockchain)) {
             return 8888888;
         }
         if (BlockchainsInfo.isTronBlockchainName(token.blockchain)) {
             return 728126428;
+        }
+        if (BlockchainsInfo.isBitcoinBlockchainName(token.blockchain)) {
+            return 3652501241;
         }
         return blockchainId[token.blockchain];
     }
@@ -354,5 +347,18 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             ],
             true
         );
+    }
+
+    private getTokenAddress(token: RubicTokenAmount | PriceToken) {
+        if (token.isNative) {
+            if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
+                return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
+            }
+            if (token.blockchain === BLOCKCHAIN_NAME.BITCOIN) {
+                return '0xc102C66D4a1e1865Ee962084626Cf4c27D5BFc74';
+            }
+            return '';
+        }
+        return token.address;
     }
 }
