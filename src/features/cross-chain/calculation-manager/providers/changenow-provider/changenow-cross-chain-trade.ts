@@ -14,6 +14,7 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { ChangenowCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 import { ChangenowCurrency } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
@@ -129,7 +130,8 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
     private readonly toCurrency: ChangenowCurrency;
 
     private get transitToken(): PriceTokenAmount {
-        return this.onChainTrade ? this.onChainTrade.toTokenAmountMin : this.from;
+        const tokenAmount = this.onChainTrade ? this.onChainTrade.toTokenAmountMin : this.from;
+        return getFromWithoutFee(tokenAmount, this.feeInfo.rubicProxy?.platformFee?.percent);
     }
 
     protected get fromContractAddress(): string {
