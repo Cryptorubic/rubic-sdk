@@ -414,7 +414,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         );
 
         const { gasLimit } = options;
-        if (this.feeInfo?.rubicProxy?.fixedFee?.amount.gt(0)) {
+        if (this.isProxyTrade) {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
                 await this.getContractParams({
                     fromAddress: options.fromAddress,

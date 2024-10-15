@@ -1,7 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { NoLinkedAccountError } from 'src/common/errors/swap/no-linked-account-erros';
-import { PriceToken, PriceTokenAmount, TokenAmount as RubicTokenAmount } from 'src/common/tokens';
+import {
+    PriceToken,
+    PriceTokenAmount,
+    TokenAmount as RubicTokenAmount,
+    TokenAmount
+} from 'src/common/tokens';
 import { TokenStruct } from 'src/common/tokens/token';
 import {
     BLOCKCHAIN_NAME,
@@ -105,28 +110,17 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            let tokenInAddress;
-
-            if (from.isNative && from.blockchain === BLOCKCHAIN_NAME.METIS) {
-                tokenInAddress = '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
-            } else if (from.isNative) {
-                tokenInAddress = '';
-            } else {
-                tokenInAddress = from.address;
-            }
-
             const tokenIn: SymbiosisToken = {
-                chainId: blockchainId[fromBlockchain],
-                address: tokenInAddress,
+                chainId: this.getChainId(fromBlockchain),
+                address: this.getTokenAddress(from),
                 decimals: from.decimals,
                 isNative: from.isNative,
                 symbol: from.symbol
             };
 
             const tokenOut: SymbiosisToken = {
-                chainId:
-                    toBlockchain !== BLOCKCHAIN_NAME.TRON ? blockchainId[toBlockchain] : 728126428,
-                address: toToken.isNative ? '' : toToken.address,
+                chainId: this.getChainId(toBlockchain),
+                address: this.getTokenAddress(toToken),
                 decimals: toToken.decimals,
                 isNative: toToken.isNative,
                 symbol: toToken.symbol
@@ -370,5 +364,28 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             ],
             true
         );
+    }
+
+    private getChainId(blockchain: SymbiosisCrossChainSupportedBlockchain): number {
+        if (blockchain === BLOCKCHAIN_NAME.TRON) {
+            return 728126428;
+        }
+        if (blockchain === BLOCKCHAIN_NAME.BITCOIN) {
+            return 3652501241;
+        }
+        return blockchainId[blockchain];
+    }
+
+    private getTokenAddress(token: TokenAmount | PriceToken) {
+        if (token.isNative) {
+            if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
+                return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
+            }
+            if (token.blockchain === BLOCKCHAIN_NAME.BITCOIN) {
+                return '0xc102C66D4a1e1865Ee962084626Cf4c27D5BFc74';
+            }
+            return '';
+        }
+        return token.address;
     }
 }
