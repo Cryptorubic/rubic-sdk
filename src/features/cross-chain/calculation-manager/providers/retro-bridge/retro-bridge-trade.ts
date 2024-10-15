@@ -8,6 +8,7 @@ import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-pu
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
@@ -219,15 +220,18 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
             this.retroBridgeId = retroBridgeOrder.transaction_id;
         }
 
-        const transferAmount = this.from.stringWeiAmount;
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
 
         let config: EvmEncodeConfig = { to: '', data: '', value: '' };
 
         if (this.isProxyTrade) {
-            config = this.createProxyEvmConfig(transferAmount);
+            config = this.createProxyEvmConfig(fromWithoutFee.stringWeiAmount);
         } else {
             config = this.createEvmConfigWithoutProxy(
-                transferAmount,
+                fromWithoutFee.stringWeiAmount,
                 retroBridgeOrder.hot_wallet_address
             );
         }
