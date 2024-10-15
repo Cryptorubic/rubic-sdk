@@ -25,7 +25,7 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
 
     public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return openoceanOnChainSupportedBlockchains.some(item => item === blockchain);
     }
 
@@ -35,10 +35,6 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            if (!this.isSupportedBlockchain(from.blockchain)) {
-                throw new RubicSdkError(`Open Ocean doesn't support ${from.blockchain} chain!`);
-            }
-
             await this.checkIsSupportedTokens(from, toToken);
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
 

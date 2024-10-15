@@ -194,5 +194,5 @@ export abstract class Web3Public {
      * Gets last block number.
      * @returns Block number.
      */
-    public abstract getBlockNumber(): Promise<number>;
+    public abstract getBlockNumber(): Promise<number | { blockNumber: number; workchain: number }>;
 }

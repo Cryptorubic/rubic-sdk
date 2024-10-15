@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
@@ -22,7 +21,7 @@ import { OdosOnChainParser } from './services/odos-on-chain-parser';
 export class OdosOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.ODOS;
 
-    protected isSupportedBlockchain(blockchainName: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchainName: BlockchainName): boolean {
         return odosSupportedBlockchains.some(chain => chain === blockchainName);
     }
 
@@ -31,10 +30,6 @@ export class OdosOnChainProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError(`Odos doesn't support ${from.blockchain} chain!`);
-        }
-
         const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
             from.blockchain
         ).address;

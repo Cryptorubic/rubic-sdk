@@ -1,20 +1,16 @@
 import BigNumber from 'bignumber.js';
-import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { MinAmountError, RubicSdkError } from 'src/common/errors';
 import { NoLinkedAccountError } from 'src/common/errors/swap/no-linked-account-erros';
-import {
-    PriceToken,
-    PriceTokenAmount,
-    TokenAmount as RubicTokenAmount,
-    TokenAmount
-} from 'src/common/tokens';
-import { TokenStruct } from 'src/common/tokens/token';
+import { PriceToken, PriceTokenAmount, TokenAmount as RubicTokenAmount } from 'src/common/tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -31,14 +27,13 @@ import {
     SymbiosisToken,
     SymbiosisTokenAmount
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
-import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/constants';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from './models/symbiosis-cross-chain-supported-blockchains';
+import { SymbiosisEvmCcrTrade } from './symbiosis-ccr-evm-trade';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
@@ -55,7 +50,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
     ): boolean {
-        if (fromBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
+        if (
+            fromBlockchain === BLOCKCHAIN_NAME.BITCOIN ||
+            fromBlockchain === BLOCKCHAIN_NAME.TON ||
+            fromBlockchain === BLOCKCHAIN_NAME.TRON
+        ) {
             return false;
         }
 
@@ -76,28 +75,14 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 ? false
                 : options?.useProxy?.[this.type] ?? true;
 
-        // @TODO remove Tron check
-        if (
-            !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
-            fromBlockchain === BLOCKCHAIN_NAME.TRON ||
-            fromBlockchain === BLOCKCHAIN_NAME.BITCOIN
-        ) {
-            return {
-                trade: null,
-                error: new NotSupportedTokensError(),
-                tradeType: this.type
-            };
-        }
-
-        let disabledTrade = {} as SymbiosisCrossChainTrade;
+        let disabledTrade = {} as SymbiosisEvmCcrTrade;
 
         try {
             const FAKE_WALLET_ADDRESS = '0xf78312D6aD7afc364422Dda14a24082104588542';
             const fromAddress =
                 options.fromAddress ||
                 this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
-                FAKE_WALLET_ADDRESS ||
-                oneinchApiParams.nativeAddress;
+                FAKE_WALLET_ADDRESS;
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -111,7 +96,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             );
 
             const tokenIn: SymbiosisToken = {
-                chainId: this.getChainId(fromBlockchain),
+                chainId: this.getChainId(from),
                 address: this.getTokenAddress(from),
                 decimals: from.decimals,
                 isNative: from.isNative,
@@ -119,7 +104,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
 
             const tokenOut: SymbiosisToken = {
-                chainId: this.getChainId(toBlockchain),
+                chainId: this.getChainId(toToken),
                 address: this.getTokenAddress(toToken),
                 decimals: toToken.decimals,
                 isNative: toToken.isNative,
@@ -161,7 +146,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainTrade.getGasData(
+                    ? await SymbiosisEvmCcrTrade.getGasData(
                           from,
                           to,
                           swapParams,
@@ -173,7 +158,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     : null;
 
             return {
-                trade: new SymbiosisCrossChainTrade(
+                trade: new SymbiosisEvmCcrTrade(
                     {
                         from,
                         to,
@@ -221,37 +206,31 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
     }
 
+    private getChainId(token: PriceToken): number {
+        if (BlockchainsInfo.isTonBlockchainName(token.blockchain)) {
+            return 8888888;
+        }
+        if (BlockchainsInfo.isTronBlockchainName(token.blockchain)) {
+            return 728126428;
+        }
+        if (BlockchainsInfo.isBitcoinBlockchainName(token.blockchain)) {
+            return 3652501241;
+        }
+        return blockchainId[token.blockchain];
+    }
+
     protected async getFeeInfo(
-        fromBlockchain: Exclude<SymbiosisCrossChainSupportedBlockchain, 'BITCOIN'>,
+        fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount,
         useProxy: boolean
     ): Promise<FeeInfo> {
         return ProxyCrossChainEvmTrade.getFeeInfo(
-            fromBlockchain,
+            fromBlockchain as Web3PublicSupportedBlockchain,
             providerAddress,
             percentFeeToken,
             useProxy
         );
-    }
-
-    private getTransferToken(
-        route: SymbiosisToken[],
-        from: PriceTokenAmount<EvmBlockchainName>
-    ): TokenStruct | undefined {
-        const fromBlockchainId = blockchainId[from.blockchain];
-        const fromRouting = route.filter(token => token.chainId === fromBlockchainId);
-
-        const token = fromRouting.at(-1)!;
-        return fromRouting.length !== 1
-            ? {
-                  address: token.address,
-                  decimals: token.decimals,
-                  name: token.name!,
-                  blockchain: from.blockchain,
-                  symbol: token.symbol!
-              }
-            : undefined;
     }
 
     protected async getRoutePath(
@@ -313,6 +292,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN && !receiverAddress) {
             return 'bc1qvyf8ufqpeyfe6vshfxdrr970rkqfphgz28ulhr';
         }
+        // @TODO add rubic-mock address
+        if (toBlockchain === BLOCKCHAIN_NAME.TON && !receiverAddress) {
+            return 'UQATSC4TXAqjgLswuSEDVTIGmPG_kNnUTDhrTiIILVmymoQA';
+        }
 
         return receiverAddress || fromAddress;
     }
@@ -321,8 +304,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         const msg = err.error?.message || '';
 
         if (msg.includes('too low')) {
-            const [, minAmount] = msg.toLowerCase().split('min amount: ') as [string, string];
-            const minAmountBN = new BigNumber(minAmount);
+            const [, minAmount] = msg.toLowerCase().split('min: ') as [string, string];
+            const minAmountBN = new BigNumber(parseFloat(minAmount));
             const isFeeInUSDC = minAmountBN.gt(0.5);
             const symbol = isFeeInUSDC ? 'USDC' : 'WETH';
 
@@ -337,8 +320,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         to: PriceTokenAmount<BlockchainName>,
         swapParams: SymbiosisSwappingParams,
         feeInfo: FeeInfo
-    ): SymbiosisCrossChainTrade {
-        return new SymbiosisCrossChainTrade(
+    ): SymbiosisEvmCcrTrade {
+        return new SymbiosisEvmCcrTrade(
             {
                 from,
                 to: to,
@@ -366,17 +349,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private getChainId(blockchain: SymbiosisCrossChainSupportedBlockchain): number {
-        if (blockchain === BLOCKCHAIN_NAME.TRON) {
-            return 728126428;
-        }
-        if (blockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            return 3652501241;
-        }
-        return blockchainId[blockchain];
-    }
-
-    private getTokenAddress(token: TokenAmount | PriceToken) {
+    private getTokenAddress(token: RubicTokenAmount | PriceToken) {
         if (token.isNative) {
             if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
                 return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
