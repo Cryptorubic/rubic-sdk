@@ -257,7 +257,9 @@ export class CrossChainStatusManager {
 
                 if (
                     dstTxStatus === SYMBIOSIS_SWAP_STATUS.SUCCESS &&
-                    targetTokenNetwork === toBlockchainId
+                    (targetTokenNetwork === toBlockchainId ||
+                        // Swap to BTC
+                        (targetTokenNetwork === 3652501241 && toBlockchainId === 5555))
                 ) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         dstTxData.status = TX_STATUS.SUCCESS;

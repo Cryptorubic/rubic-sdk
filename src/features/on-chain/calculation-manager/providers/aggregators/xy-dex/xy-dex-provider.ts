@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -37,7 +36,7 @@ export class XyDexProvider extends AggregatorOnChainProvider {
 
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.XY_DEX;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return xySupportedBlockchains.some(item => item === blockchain);
     }
 
@@ -46,9 +45,6 @@ export class XyDexProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<XyDexTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError('Blockchain is not supported');
-        }
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway

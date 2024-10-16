@@ -28,6 +28,7 @@ export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.CORE,
     BLOCKCHAIN_NAME.BAHAMUT,
+    // BLOCKCHAIN_NAME.TON,
     BLOCKCHAIN_NAME.GRAVITY,
     // Testnets
     BLOCKCHAIN_NAME.GOERLI,

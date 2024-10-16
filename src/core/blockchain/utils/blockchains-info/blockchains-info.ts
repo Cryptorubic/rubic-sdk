@@ -9,6 +9,7 @@ import {
     SolanaBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME,
     TestnetEvmBlockchain,
+    TonBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
@@ -74,5 +75,11 @@ export class BlockchainsInfo {
         blockchainName: BlockchainName
     ): blockchainName is SolanaBlockchainName {
         return blockchainName === BLOCKCHAIN_NAME.SOLANA;
+    }
+
+    public static isTonBlockchainName(
+        blockchainName: BlockchainName
+    ): blockchainName is TonBlockchainName {
+        return blockchainName === BLOCKCHAIN_NAME.TON;
     }
 }

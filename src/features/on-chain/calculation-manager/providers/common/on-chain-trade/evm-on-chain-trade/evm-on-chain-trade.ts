@@ -30,8 +30,8 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
-import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
     OptionsGasParams,
@@ -104,10 +104,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
-    protected constructor(
-        evmOnChainTradeStruct: OnChainTradeStruct<EvmBlockchainName>,
-        providerAddress: string
-    ) {
+    protected constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
         super(providerAddress);
 
         this.from = evmOnChainTradeStruct.from;
@@ -476,7 +473,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     protected abstract getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse>;
+    ): Promise<EvmEncodedConfigAndToAmount>;
 
     protected async setTransactionConfig(
         options: EncodeTransactionOptions
