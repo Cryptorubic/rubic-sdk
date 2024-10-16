@@ -33,7 +33,6 @@ export class StonfiOnChainProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            this.skipTokenHMSTR(from, toToken);
             const { amountOutWei } = await StonfiApiService.makeQuoteRequest(
                 from,
                 toToken,
