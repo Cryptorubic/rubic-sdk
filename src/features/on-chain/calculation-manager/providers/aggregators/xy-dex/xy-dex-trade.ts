@@ -71,7 +71,7 @@ export class XyDexTrade extends AggregatorEvmOnChainTrade {
         const quoteTradeParams: XyBuildTxRequest = {
             srcChainId: chainId,
             srcQuoteTokenAddress,
-            srcQuoteTokenAmount: this.from.stringWeiAmount,
+            srcQuoteTokenAmount: this.fromWithoutFee.stringWeiAmount,
             dstChainId: chainId,
             dstQuoteTokenAddress,
             slippage: this.slippageTolerance * 100,

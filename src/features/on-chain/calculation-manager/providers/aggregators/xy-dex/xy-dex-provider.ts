@@ -57,7 +57,7 @@ export class XyDexProvider extends AggregatorOnChainProvider {
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
 
         const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
-            from,
+            fromWithoutFee,
             toToken,
             fullOptions
         );
