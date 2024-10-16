@@ -36,7 +36,7 @@ export interface OneinchQuoteResponse {
     };
     prices: object;
     volumes: object;
-    recommendedPreset: 'fast' | 'slow' | 'medium' | 'custom';
+    recommendedPreset: PresetKey;
 }
 
 type PresetKey = 'fast' | 'slow' | 'medium' | 'custom';

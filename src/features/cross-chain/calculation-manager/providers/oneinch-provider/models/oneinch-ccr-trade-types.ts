@@ -4,6 +4,7 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasData } from '../../common/emv-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../../common/models/fee-info';
 import { RubicStep } from '../../common/models/rubicStep';
+import { OneinchQuoteResponse } from './oneinch-api-types';
 
 export interface OneinchCcrTradeParams {
     crossChainTrade: {
@@ -12,7 +13,7 @@ export interface OneinchCcrTradeParams {
         gasData: GasData | null;
         feeInfo: FeeInfo;
         priceImpact: number | null;
-        quoteOrder: object;
+        quote: OneinchQuoteResponse;
         slippage: number;
     };
     providerAddress: string;
@@ -24,6 +25,6 @@ export interface OneinchGetGasDataParams {
     toToken: PriceTokenAmount<EvmBlockchainName>;
     feeInfo: FeeInfo;
     providerAddress: string;
-    quoteOrder: object;
+    quote: OneinchQuoteResponse;
     slippage: number;
 }

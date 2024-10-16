@@ -46,7 +46,7 @@ export class OneinchCcrApiService {
     }
 
     // @TODO add feeReceiver
-    public static async fetchSwapOrder({
+    public static async buildSwapOrder({
         dstToken,
         srcToken,
         walletAddress,
@@ -63,7 +63,7 @@ walletAddress=${walletAddress}&
 fee=100&
 feeReceiver=${walletAddress}&
 source=rubic&
-preset=fast`;
+preset=${quote.recommendedPreset}`;
 
             const res = await Injector.httpClient.post<OneinchSwapOrderResponse>(
                 `${this.apiUrl}/quoter/v1.0/quote/build?${queryParams}`,
