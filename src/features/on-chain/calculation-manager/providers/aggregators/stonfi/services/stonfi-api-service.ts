@@ -15,14 +15,13 @@ export class StonfiApiService {
         try {
             const srcTokenAddress = from.isNative ? BOUNCEABLE_TON_NATIVE_ADDRESS : from.address;
             const dstTokenAddress = to.isNative ? BOUNCEABLE_TON_NATIVE_ADDRESS : to.address;
-
+            // @TODO Add dex_v2=true after stonfi-sdk update
             const queryParams = `offer_address=${srcTokenAddress}
 &ask_address=${dstTokenAddress}
 &units=${from.stringWeiAmount}
 &slippage_tolerance=${slippage}
 &referral_fee_bps=100
-&referral_address=${STONFI_REFERRAL_ADDRESS}
-&dex_v2=true`;
+&referral_address=${STONFI_REFERRAL_ADDRESS}`;
 
             const res = await Injector.httpClient.post<StonfiQuoteResponse>(
                 `${this.apiUrl}/swap/simulate?${queryParams}`

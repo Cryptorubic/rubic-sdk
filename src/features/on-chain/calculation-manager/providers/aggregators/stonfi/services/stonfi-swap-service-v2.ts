@@ -9,7 +9,7 @@ import { STONFI_REFERRAL_ADDRESS } from '../constants/addresses';
 import { StonfiTxParamsProvider } from '../models/stonfi-abstract';
 import { convertTxParamsToTonConfig } from '../utils/convert-params-to-ton-config';
 
-export class StonfiSwapService implements StonfiTxParamsProvider {
+export class StonfiSwapServiceV2 implements StonfiTxParamsProvider {
     private get tonClient(): TonClient {
         return (
             Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).tonClient ||
@@ -20,7 +20,9 @@ export class StonfiSwapService implements StonfiTxParamsProvider {
         );
     }
 
-    private readonly stonfiRouter = this.tonClient.open(new DEX.v1.Router());
+    private readonly stonfiRouter = this.tonClient.open(
+        DEX.v2_1.Router.create('kQALh-JBBIKK7gr0o4AVf9JZnEsFndqO0qTCyT-D-yBsWk0v')
+    );
 
     public async getTxParams(
         from: PriceTokenAmount,
@@ -28,10 +30,12 @@ export class StonfiSwapService implements StonfiTxParamsProvider {
         walletAddress: string,
         minAmountOutWei: string
     ): Promise<TonEncodedConfig> {
+        const proxyTon = pTON.v2_1.create('kQACS30DNoUQ7NfApPvzh7eBmSZ9L4ygJ-lkNWtba8TQT-Px');
+
         if (from.isNative) {
             const txParams = await this.stonfiRouter.getSwapTonToJettonTxParams({
                 userWalletAddress: walletAddress,
-                proxyTon: new pTON.v1(),
+                proxyTon,
                 offerAmount: from.stringWeiAmount,
                 askJettonAddress: to.address,
                 minAskAmount: minAmountOutWei,
@@ -46,7 +50,7 @@ export class StonfiSwapService implements StonfiTxParamsProvider {
                 userWalletAddress: walletAddress,
                 offerJettonAddress: from.address,
                 offerAmount: from.stringWeiAmount,
-                proxyTon: new pTON.v1(),
+                proxyTon,
                 minAskAmount: minAmountOutWei,
                 referralAddress: STONFI_REFERRAL_ADDRESS
             });
