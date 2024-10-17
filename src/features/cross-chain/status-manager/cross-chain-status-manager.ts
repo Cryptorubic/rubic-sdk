@@ -65,6 +65,7 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
+import { OneinchCcrApiService } from '../calculation-manager/providers/oneinch-provider/services/oneinch-ccr-api-service';
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
 import { OwlToApiService } from '../calculation-manager/providers/owl-to-bridge/services/owl-to-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
@@ -99,7 +100,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE]: this.getOwlToDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ONEINCH]: this.getOneinchDstSwapStatus
     };
 
     /**
@@ -734,6 +736,12 @@ export class CrossChainStatusManager {
 
     private async getRouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const txStatusData = await RouterApiService.getTxStatus(data);
+
+        return txStatusData;
+    }
+
+    private async getOneinchDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const txStatusData = await OneinchCcrApiService.fetchTxStatus(data);
 
         return txStatusData;
     }

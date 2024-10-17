@@ -11,16 +11,8 @@ module.exports = {
                 tsconfigRootDir: __dirname,
                 createDefaultProgram: true
             },
-            plugins: [
-                '@typescript-eslint',
-                'unused-imports',
-                'simple-import-sort'
-            ],
-            extends: [
-                'airbnb-typescript/base',
-                'plugin:prettier/recommended',
-                'prettier'
-            ],
+            plugins: ['@typescript-eslint', 'unused-imports', 'simple-import-sort'],
+            extends: ['airbnb-typescript/base', 'plugin:prettier/recommended', 'prettier'],
             rules: {
                 'import/prefer-default-export': 'off',
                 '@typescript-eslint/no-useless-constructor': 'off',
@@ -53,7 +45,7 @@ module.exports = {
                         format: ['UPPER_CASE']
                     }
                 ],
-                'no-empty': ['error', { 'allowEmptyCatch': true }],
+                'no-empty': ['error', { allowEmptyCatch: true }],
                 'no-bitwise': 'off',
                 // Styling.
                 'array-bracket-spacing': ['error', 'never'],
@@ -75,10 +67,9 @@ module.exports = {
                 'no-restricted-syntax': [
                     'error',
                     {
-                        "selector": "TSEnumDeclaration",
-                        "message": "Don't declare enums"
+                        selector: 'TSEnumDeclaration',
+                        message: "Don't declare enums"
                     },
-                    'LabeledStatement',
                     'WithStatement'
                 ],
                 'no-console': [
@@ -92,12 +83,12 @@ module.exports = {
                 '@typescript-eslint/return-await': 'off',
                 'prefer-destructuring': 'off',
                 'no-bitwise': 'off',
-                "prettier/prettier": [
-                    "error",
+                'prettier/prettier': [
+                    'error',
                     {
-                      "endOfLine": "auto"
+                        endOfLine: 'auto'
                     }
-                  ]
+                ]
             }
         },
         {
@@ -108,15 +99,8 @@ module.exports = {
                 tsconfigRootDir: __dirname,
                 createDefaultProgram: true
             },
-            plugins: [
-                '@typescript-eslint',
-                'unused-imports'
-            ],
-            extends: [
-                'airbnb-typescript/base',
-                'plugin:prettier/recommended',
-                'prettier'
-            ],
+            plugins: ['@typescript-eslint', 'unused-imports'],
+            extends: ['airbnb-typescript/base', 'plugin:prettier/recommended', 'prettier'],
             rules: {
                 'import/prefer-default-export': 'off',
                 '@typescript-eslint/no-useless-constructor': 'off',
@@ -147,7 +131,7 @@ module.exports = {
                         format: ['UPPER_CASE']
                     }
                 ],
-                'no-empty': ['error', { 'allowEmptyCatch': true }],
+                'no-empty': ['error', { allowEmptyCatch: true }],
                 // Styling.
                 'array-bracket-spacing': ['error', 'never'],
                 'object-curly-spacing': ['error', 'always'],
@@ -165,11 +149,7 @@ module.exports = {
                 radix: ['warn', 'as-needed'],
                 'no-prototype-builtins': 'off',
                 'no-return-assign': 'off',
-                'no-restricted-syntax': [
-                    'error',
-                    'LabeledStatement',
-                    'WithStatement'
-                ],
+                'no-restricted-syntax': ['error', 'LabeledStatement', 'WithStatement'],
                 'no-console': 'off',
                 'import/export': 0,
                 '@typescript-eslint/no-shadow': 'off',

@@ -131,6 +131,8 @@ export class OneinchCcrTrade extends EvmCrossChainTrade {
                 secrets
             );
 
+            OneinchCcrUtils.listenForSecretsReadiness(swapOrder.orderHash, secrets);
+
             return swapOrder.orderHash;
         } catch (err) {
             throw err;

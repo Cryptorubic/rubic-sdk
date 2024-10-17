@@ -1,10 +1,15 @@
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
+import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
+import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 
 import {
     OneinchQuoteParams,
     OneinchQuoteResponse,
+    OneinchReadySecretsResponse,
+    OneinchStatusResponse,
     OneinchSwapOrderParams,
     OneinchSwapOrderResponse
 } from '../models/oneinch-api-types';
@@ -32,7 +37,7 @@ export class OneinchCcrApiService {
                         dstTokenAddress: dstToken.address,
                         amount: srcToken.stringWeiAmount,
                         walletAddress: walletAddress || FAKE_WALLET_ADDRESS,
-                        enableEstimate: true,
+                        enableEstimate: false,
                         fee: 100,
                         source: 'rubic'
                     }
@@ -110,6 +115,19 @@ preset=${quote.recommendedPreset}`;
         }
     }
 
+    public static async fetchReadySecrets(orderHash: string): Promise<OneinchReadySecretsResponse> {
+        try {
+            const readySecrets = await Injector.httpClient.get<OneinchReadySecretsResponse>(
+                `${this.apiUrl}/orders/v1.0/order/ready-to-accept-secret-fills/${orderHash}`,
+                { headers: { apikey: this.apiKey } }
+            );
+
+            return readySecrets;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     public static async submitSecretForSwapOrder(orderHash: string, secret: string): Promise<void> {
         try {
             await Injector.httpClient.post(
@@ -125,5 +143,29 @@ preset=${quote.recommendedPreset}`;
         }
     }
 
-    public static async fetchTxStatus(): Promise<void> {}
+    public static async fetchTxStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const { status, orderHash } = await Injector.httpClient.get<OneinchStatusResponse>(
+                `${this.apiUrl}/orders/v1.0/order/status/${data.srcTxHash}`
+            );
+
+            if (status === 'cancelled' || status === 'expired') {
+                return {
+                    hash: null,
+                    status: TX_STATUS.FAIL
+                };
+            }
+
+            if (status === 'executed') {
+                return {
+                    hash: orderHash,
+                    status: TX_STATUS.SUCCESS
+                };
+            }
+
+            return { status: TX_STATUS.PENDING, hash: null };
+        } catch (err) {
+            return { status: TX_STATUS.PENDING, hash: null };
+        }
+    }
 }

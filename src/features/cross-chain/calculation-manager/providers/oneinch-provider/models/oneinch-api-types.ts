@@ -80,3 +80,14 @@ interface OneinchOrderDomain {
     chainId: number;
     verifyingContract: string;
 }
+
+export interface OneinchStatusResponse {
+    orderHash: string;
+    status: 'pending' | 'executed' | 'expired' | 'cancelled' | 'refunding' | 'refunded';
+}
+
+export type OneinchReadySecretsResponse = Array<{
+    idx: number;
+    srcEscrowDeployTxHash: string;
+    dstEscrowDeployTxHash: string;
+}>;
