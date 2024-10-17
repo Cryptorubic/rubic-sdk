@@ -1,9 +1,8 @@
 import { DEX, pTON } from '@ston-fi/sdk';
 import { TonClient } from '@ton/ton';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
-import { Injector } from 'src/core/injector/injector';
+import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
 
 import { STONFI_REFERRAL_ADDRESS } from '../constants/addresses';
 import { StonfiTxParamsProvider } from '../models/stonfi-abstract';
@@ -11,13 +10,7 @@ import { convertTxParamsToTonConfig } from '../utils/convert-params-to-ton-confi
 
 export class StonfiSwapServiceV2 implements StonfiTxParamsProvider {
     private get tonClient(): TonClient {
-        return (
-            Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).tonClient ||
-            new TonClient({
-                endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-                apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
-            })
-        );
+        return TonClientInstance.getInstance();
     }
 
     private readonly stonfiRouter = this.tonClient.open(

@@ -18,6 +18,7 @@ import { LowSlippageError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
 import { Injector } from 'src/core/injector/injector';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
@@ -39,12 +40,7 @@ export class DedustSwapService {
     }
 
     constructor() {
-        this.tonClient =
-            Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).tonClient ||
-            new TonClient({
-                endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-                apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
-            });
+        this.tonClient = TonClientInstance.getInstance();
         this.factory = this.tonClient.open(Factory.createFromAddress(this.mainnetFactoryAddress));
     }
 

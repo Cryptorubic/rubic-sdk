@@ -19,17 +19,21 @@ import {
     TonApiTxDataByBocResp
 } from '../../models/ton/tonapi-types';
 import { Web3PrimitiveType } from '../../models/web3-primitive-type';
-import { TONAPI_API_KEY, TONAPI_API_URL, TONCENTER_API_V3_URL } from '../constants/ton-constants';
+import { TONCENTER_API_V3_URL } from '../constants/ton-constants';
 
 export class TonApiService {
+    private readonly xApiUrl = 'https://x-api.rubic.exchange/tonapi';
+
+    private readonly xApiKey = 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4';
+
     /**
      *
      * @param walletAddress in any format: raw or friendly
      */
     public async fetchWalletSeqno(walletAddress: string): Promise<number> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiSeqnoResp>>(
-            `${TONAPI_API_URL}/wallet/${walletAddress}/seqno`,
-            { headers: { Authorization: TONAPI_API_KEY } }
+            `${this.xApiUrl}/v2/wallet/${walletAddress}/seqno`,
+            { headers: { apikey: this.xApiKey } }
         );
         if ('error' in res) {
             throw new RubicSdkError(`[TonApiService] Error in fetchWalletSeqno - ${res.error}`);
@@ -40,8 +44,8 @@ export class TonApiService {
 
     public async fetchTxInfo(txHash: string): Promise<TonApiTxDataByBocResp> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiTxDataByBocResp>>(
-            `${TONAPI_API_URL}/blockchain/messages/${txHash}/transaction`,
-            { headers: { Authorization: TONAPI_API_KEY } }
+            `${this.xApiUrl}/v2/blockchain/messages/${txHash}/transaction`,
+            { headers: { apikey: this.xApiKey } }
         );
         if ('error' in res) {
             throw new RubicSdkError(`[TonApiService] Error in fetchTxInfo - ${res.error}`);
@@ -53,8 +57,8 @@ export class TonApiService {
     public async checkIsTxCompleted(txHash: string): Promise<boolean> {
         try {
             const res = await Injector.httpClient.get<TonApiResp<TonApiStatusByBocResp>>(
-                `${TONAPI_API_URL}/events/${txHash}`,
-                { headers: { Authorization: TONAPI_API_KEY } }
+                `${this.xApiUrl}/v2/events/${txHash}`,
+                { headers: { apikey: this.xApiKey } }
             );
             if ('error' in res) {
                 throw new RubicSdkError(
@@ -70,8 +74,8 @@ export class TonApiService {
 
     public async healthcheck(): Promise<boolean> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiHealthcheckResp>>(
-            `${TONAPI_API_URL}/status`,
-            { headers: { Authorization: TONAPI_API_KEY } }
+            `${this.xApiUrl}/v2/status`,
+            { headers: { apikey: this.xApiKey } }
         );
         if ('error' in res || !res.rest_online) {
             return false;
@@ -113,8 +117,8 @@ export class TonApiService {
             argsParam += '?' + methodArgs.map(param => `args=${param}`).join('&');
         }
         const res = await Injector.httpClient.get<TonApiResp<TonApiCallContractCommonResp<T>>>(
-            `${TONAPI_API_URL}/blockchain/accounts/${walletAddress}/methods/${methodName}${argsParam}`,
-            { headers: { Authorization: TONAPI_API_KEY } }
+            `${this.xApiUrl}/v2/blockchain/accounts/${walletAddress}/methods/${methodName}${argsParam}`,
+            { headers: { apikey: this.xApiKey } }
         );
         if ('error' in res) {
             throw new RubicSdkError(`[TonApiService] Error in callContractMethod - ${res.error}`);
@@ -125,8 +129,8 @@ export class TonApiService {
 
     public async fetchTokenInfo(tokenAddress: string): Promise<TonApiTokenInfoResp['metadata']> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiTokenInfoResp>>(
-            `${TONAPI_API_URL}/jettons/${tokenAddress}`,
-            { headers: { Authorization: TONAPI_API_KEY } }
+            `${this.xApiUrl}/v2/jettons/${tokenAddress}`,
+            { headers: { apikey: this.xApiKey } }
         );
         if ('error' in res) {
             throw new RubicSdkError(`[TonApiService] Error in fetchTokenInfo - ${res.error}`);
@@ -145,8 +149,8 @@ export class TonApiService {
         tokenAddress: string
     ): Promise<TonApiTokenInfoForWalletResp> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiTokenInfoForWalletResp>>(
-            `${TONAPI_API_URL}/accounts/${walletAddress}/jettons/${tokenAddress}`,
-            { headers: { Authorization: TONAPI_API_KEY } }
+            `${this.xApiUrl}/v2/accounts/${walletAddress}/jettons/${tokenAddress}`,
+            { headers: { apikey: this.xApiKey } }
         );
         if ('error' in res) {
             throw new RubicSdkError(
@@ -162,8 +166,8 @@ export class TonApiService {
     ): Promise<TonApiAllNonNullableTokenInfoForWalletResp['balances']> {
         const res = await Injector.httpClient.get<
             TonApiResp<TonApiAllNonNullableTokenInfoForWalletResp>
-        >(`${TONAPI_API_URL}/accounts/${walletAddress}/jettons`, {
-            headers: { Authorization: TONAPI_API_KEY }
+        >(`${this.xApiUrl}/v2/accounts/${walletAddress}/jettons`, {
+            headers: { apikey: this.xApiKey }
         });
         if ('error' in res) {
             throw new RubicSdkError(
@@ -179,8 +183,8 @@ export class TonApiService {
      */
     public async fetchAccountInfo(walletAddress: string): Promise<TonApiAccountInfoResp> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiAccountInfoResp>>(
-            `${TONAPI_API_URL}/accounts/${walletAddress}`,
-            { headers: { Authorization: TONAPI_API_KEY } }
+            `${this.xApiUrl}/v2/accounts/${walletAddress}`,
+            { headers: { apikey: this.xApiKey } }
         );
         if ('error' in res) {
             throw new RubicSdkError(`[TonApiService] Error in fetchAccountInfo - ${res.error}`);
