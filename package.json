@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.39.2-alpha-xy-odos-fees-fix.0",
+    "version": "5.40.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -84,7 +84,7 @@
         "@solana/web3.js": "^1.89.1",
         "@solflare-wallet/utl-sdk": "^1.4.0",
         "@ston-fi/api": "^0.12.1",
-        "@ston-fi/sdk": "^1.2.0",
+        "@ston-fi/sdk": "2.0.0-rc.7",
         "@ton/core": "^0.52.0",
         "@ton/crypto": "^3.3.0",
         "@ton/ton": "^15.0.0",

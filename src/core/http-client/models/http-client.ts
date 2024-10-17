@@ -9,6 +9,7 @@ export interface HttpClient {
             headers?: {
                 [header: string]: string;
             };
+            withCredentials?: boolean;
         }
     ): Promise<ResponseBody>;
     get<ResponseBody>(
@@ -24,6 +25,7 @@ export interface HttpClient {
                     | boolean
                     | ReadonlyArray<string | number | boolean>;
             };
+            withCredentials?: boolean;
         }
     ): Promise<ResponseBody>;
 }
