@@ -40,7 +40,7 @@ export class OdosOnChainProvider extends AggregatorOnChainProvider {
             const path = this.getRoutePath(from, toToken);
 
             const bestRouteRequestBody = OdosOnChainParser.getBestRouteBody({
-                from,
+                from: fromWithoutFee,
                 toToken,
                 options,
                 swappersBlacklist: [],
