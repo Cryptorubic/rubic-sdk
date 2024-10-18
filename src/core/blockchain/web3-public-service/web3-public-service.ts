@@ -9,6 +9,7 @@ import {
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName,
     SolanaBlockchainName,
+    TonBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { rpcErrors } from 'src/core/blockchain/web3-public-service/constants/rpc-errors';
@@ -24,6 +25,8 @@ import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-pub
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 import Web3 from 'web3';
+
+import { TonWeb3Public } from './web3-public/ton-web3-public/ton-web3-public';
 
 export class Web3PublicService {
     public static isSupportedBlockchain(
@@ -49,6 +52,7 @@ export class Web3PublicService {
     public getWeb3Public(blockchainName: EvmBlockchainName): EvmWeb3Public;
     public getWeb3Public(blockchainName: TronBlockchainName): TronWeb3Public;
     public getWeb3Public(blockchainName: SolanaBlockchainName): SolanaWeb3Public;
+    public getWeb3Public(blockchainName: TonBlockchainName): TonWeb3Public;
     public getWeb3Public(blockchainName: Web3PublicSupportedBlockchain): Web3Public;
     public getWeb3Public(blockchainName: BlockchainName): never;
     public getWeb3Public(blockchainName: BlockchainName) {
@@ -80,7 +84,8 @@ export class Web3PublicService {
                 >
             ),
             [BLOCKCHAIN_NAME.TRON]: this.createTronWeb3PublicProxy.bind(this),
-            [BLOCKCHAIN_NAME.SOLANA]: this.createSolanaWeb3PublicProxy.bind(this)
+            [BLOCKCHAIN_NAME.SOLANA]: this.createSolanaWeb3PublicProxy.bind(this),
+            [BLOCKCHAIN_NAME.TON]: this.createTonWeb3PublicProxy.bind(this)
         };
     }
 
@@ -118,6 +123,13 @@ export class Web3PublicService {
         );
 
         return this.createWeb3PublicProxy(BLOCKCHAIN_NAME.SOLANA, solanaWeb3Public);
+    }
+
+    private createTonWeb3PublicProxy(): TonWeb3Public {
+        // const rpcProvider = this.rpcProvider[BLOCKCHAIN_NAME.TON]!;
+        const tonWeb3Public = new TonWeb3Public();
+
+        return this.createWeb3PublicProxy(BLOCKCHAIN_NAME.TON, tonWeb3Public);
     }
 
     private createWeb3PublicProxy<T extends Web3Public = Web3Public>(

@@ -15,7 +15,7 @@ import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-u
 import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/models/xy-dex-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 export class XyDexTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
@@ -61,7 +61,7 @@ export class XyDexTrade extends AggregatorEvmOnChainTrade {
 
     public async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const receiver = options.receiverAddress || this.walletAddress;
 
         const chainId = blockchainId[this.from.blockchain];
@@ -71,7 +71,7 @@ export class XyDexTrade extends AggregatorEvmOnChainTrade {
         const quoteTradeParams: XyBuildTxRequest = {
             srcChainId: chainId,
             srcQuoteTokenAddress,
-            srcQuoteTokenAmount: this.from.stringWeiAmount,
+            srcQuoteTokenAmount: this.fromWithoutFee.stringWeiAmount,
             dstChainId: chainId,
             dstQuoteTokenAddress,
             slippage: this.slippageTolerance * 100,
