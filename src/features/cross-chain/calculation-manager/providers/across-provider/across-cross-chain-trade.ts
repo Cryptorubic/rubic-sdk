@@ -4,6 +4,7 @@ import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/b
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
@@ -24,7 +25,6 @@ import { acrossContractAddresses } from './constants/across-contract-addresses';
 import { acrossDepositAbi } from './constants/across-deposit-abi';
 import { AcrossFeeQuoteRequestParams, AcrossFeeQuoteResponse } from './models/across-fee-quote';
 import { AcrossApiService } from './services/across-api-service';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 export class AcrossCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -128,7 +128,7 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
         this.fromWithoutFee = getFromWithoutFee(
             this.from,
             this.feeInfo.rubicProxy?.platformFee?.percent
-        )
+        );
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -215,13 +215,12 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
         toAmount: BigNumber,
         receiverAddress?: string
     ): EvmEncodeConfig {
-
         let relayer = quote.exclusiveRelayer;
         let relayerDeadLine = Number(quote.exclusivityDeadline);
 
         if (this.to.blockchain === BLOCKCHAIN_NAME.LINEA) {
             relayer = '0x54455CEaB7A7229DA56E79e8B841634C920A96Cc';
-            relayerDeadLine = Number(quote.timestamp) + 4000
+            relayerDeadLine = Number(quote.timestamp) + 4000;
         }
 
         const args = [
