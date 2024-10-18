@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -24,6 +24,7 @@ import { acrossContractAddresses } from './constants/across-contract-addresses';
 import { acrossDepositAbi } from './constants/across-deposit-abi';
 import { AcrossFeeQuoteRequestParams, AcrossFeeQuoteResponse } from './models/across-fee-quote';
 import { AcrossApiService } from './services/across-api-service';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 export class AcrossCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -83,6 +84,8 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
+    private readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
     private get fromBlockchain(): AccrossCcrSupportedChains {
         return this.from.blockchain as AccrossCcrSupportedChains;
     }
@@ -122,6 +125,10 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = ccrTrade.feeInfo;
         this.slippage = ccrTrade.slippage;
         this.acrossFeeQuoteRequestParams = ccrTrade.acrossFeeQuoteRequestParams;
+        this.fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        )
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -186,7 +193,7 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
             depositMethod: 'depositV3'
         });
 
-        const toAmount = this.from.weiAmount.minus(feeQuote.totalRelayFee.total);
+        const toAmount = this.fromWithoutFee.weiAmount.minus(feeQuote.totalRelayFee.total);
 
         const callData = this.getAcrossCallData(feeQuote, toAmount, receiverAddress);
 
@@ -208,18 +215,27 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
         toAmount: BigNumber,
         receiverAddress?: string
     ): EvmEncodeConfig {
+
+        let relayer = quote.exclusiveRelayer;
+        let relayerDeadLine = Number(quote.exclusivityDeadline);
+
+        if (this.to.blockchain === BLOCKCHAIN_NAME.LINEA) {
+            relayer = '0x54455CEaB7A7229DA56E79e8B841634C920A96Cc';
+            relayerDeadLine = Number(quote.timestamp) + 4000
+        }
+
         const args = [
             this.walletAddress,
             receiverAddress || this.walletAddress,
             this.acrossFeeQuoteRequestParams.inputToken,
             this.acrossFeeQuoteRequestParams.outputToken,
-            this.from.stringWeiAmount,
+            this.fromWithoutFee.weiAmount,
             toAmount.toFixed(),
             this.acrossFeeQuoteRequestParams.destinationChainId.toString(),
-            quote.exclusiveRelayer,
+            relayer,
             Number(quote.timestamp),
             this.getFillDeadline(),
-            Number(quote.exclusivityDeadline),
+            relayerDeadLine,
             '0x'
         ];
 
@@ -228,7 +244,7 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
             acrossDepositAbi,
             'depositV3',
             args,
-            this.from.isNative ? this.from.stringWeiAmount : '0'
+            this.from.isNative ? this.fromWithoutFee.stringWeiAmount : '0'
         );
 
         return {
