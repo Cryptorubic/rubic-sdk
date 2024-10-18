@@ -12,7 +12,7 @@ import {
     proxySupportedBlockchains
 } from 'src/features/common/constants/proxy-supported-blockchain';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import {
     OnChainPlatformFee,
     OnChainProxyFeeInfo

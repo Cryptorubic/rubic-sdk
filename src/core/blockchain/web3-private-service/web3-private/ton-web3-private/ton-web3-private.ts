@@ -1,5 +1,7 @@
+import { Address, beginCell, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import { TonConnectUI } from '@tonconnect/ui';
+import BigNumber from 'bignumber.js';
 import { RubicSdkError, UserRejectError } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
 import { waitFor } from 'src/common/utils/waitFor';
@@ -49,6 +51,37 @@ export class TonWeb3Private extends Web3Private {
             }
             throw parseError(err);
         }
+    }
+
+    public transferJetton(
+        walletAddress: string,
+        receiver: string,
+        amount: BigNumber,
+        options: TonTransactionOptions
+    ) {
+        const walletSourceAddress = Address.parse(walletAddress);
+        const walletDestAddress = Address.parse(receiver);
+        const transferAmount = amount.toFixed();
+
+        const body = beginCell()
+            // Transfer opcode
+            .storeUint(0xf8a7ea5, 32)
+            .storeUint(0, 64)
+            .storeCoins(toNano(transferAmount))
+            .storeAddress(walletSourceAddress)
+            .storeAddress(walletDestAddress)
+            .storeUint(0, 1)
+            .storeCoins(toNano('0.05'))
+            .storeUint(0, 1)
+            .endCell();
+
+        // const encodeConfig: TonEncodedConfig = {
+        //     address: txParams.to.toString(),
+        //     amount: toNano('0.025').toString(),
+        //     payload: body.toBoc().toString('base64')
+        // };
+
+        this.sendTransaction({ ...options, messages: [] });
     }
 
     private async waitForTransactionReceipt(txHash: string): Promise<boolean> {
