@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -60,12 +60,11 @@ export class XyDexProvider extends AggregatorOnChainProvider {
                 fullOptions
             );
 
-        const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
-            fromWithoutFee,
-            toToken,
-            fullOptions
-        );
-
+            const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
+                fromWithoutFee,
+                toToken,
+                fullOptions
+            );
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
