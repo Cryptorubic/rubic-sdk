@@ -14,7 +14,7 @@ import {
 import { Address, beginCell, OpenedContract, Sender, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import BigNumber from 'bignumber.js';
-import { LowSlippageError, RubicSdkError } from 'src/common/errors';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -98,7 +98,6 @@ export class DedustSwapService {
             } else if (to.isNative) {
                 await this.swapJettonToTon(from, sender, minAmountOut);
             } else {
-                if (slippage < 0.1) throw new LowSlippageError(0.1);
                 await this.swapJettonToJetton(from, sender, slippage);
             }
         } catch (err) {
