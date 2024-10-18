@@ -4,11 +4,12 @@
 export interface HttpClient {
     post<ResponseBody>(
         url: string,
-        body: Object,
+        body?: Object,
         options?: {
             headers?: {
                 [header: string]: string;
             };
+            withCredentials?: boolean;
         }
     ): Promise<ResponseBody>;
     get<ResponseBody>(
@@ -24,6 +25,7 @@ export interface HttpClient {
                     | boolean
                     | ReadonlyArray<string | number | boolean>;
             };
+            withCredentials?: boolean;
         }
     ): Promise<ResponseBody>;
 }

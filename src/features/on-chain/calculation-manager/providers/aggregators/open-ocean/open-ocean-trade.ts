@@ -13,7 +13,7 @@ import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/p
 import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { OpenOceanApiService } from './services/open-ocean-api-service';
 
 export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
@@ -48,7 +48,7 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const swapQuoteResponse = await OpenOceanApiService.fetchSwapData(
             this.fromWithoutFee as PriceTokenAmount<OpenoceanOnChainSupportedBlockchain>,
             this.to,

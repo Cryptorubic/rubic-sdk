@@ -37,7 +37,7 @@ export class XyDexProvider extends AggregatorOnChainProvider {
 
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.XY_DEX;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return xySupportedBlockchains.some(item => item === blockchain);
     }
 
@@ -46,9 +46,6 @@ export class XyDexProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<XyDexTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError('Blockchain is not supported');
-        }
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway
@@ -63,11 +60,12 @@ export class XyDexProvider extends AggregatorOnChainProvider {
                 fullOptions
             );
 
-            const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
-                from,
-                toToken,
-                fullOptions
-            );
+        const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
+            fromWithoutFee,
+            toToken,
+            fullOptions
+        );
+
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,

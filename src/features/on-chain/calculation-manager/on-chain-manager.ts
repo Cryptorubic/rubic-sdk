@@ -33,6 +33,7 @@ import {
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import { providerDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/constants/provider-default-options';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 
 import { AGGREGATORS_ON_CHAIN } from './models/on-chain-manager-aggregators-types';
@@ -292,7 +293,8 @@ export class OnChainManager {
 
             const calculationOptions: LifiCalculationOptions = {
                 ...options,
-                slippageTolerance: options?.slippageTolerance!,
+                slippageTolerance:
+                    options?.slippageTolerance || providerDefaultOptions.slippageTolerance,
                 gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
                 disabledProviders
             };
@@ -382,7 +384,10 @@ export class OnChainManager {
         const availableAggregators = Object.values(this.AGGREGATORS)
             .map(AggregatorClass => new AggregatorClass())
             .filter(aggregator => {
-                return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
+                return (
+                    !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType) &&
+                    aggregator.isSupportedBlockchain(from.blockchain)
+                );
             });
 
         return availableAggregators.map(aggregator => {
