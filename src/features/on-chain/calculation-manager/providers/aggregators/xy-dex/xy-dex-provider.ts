@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -53,36 +54,45 @@ export class XyDexProvider extends AggregatorOnChainProvider {
             ...this.defaultOptions,
             fromAddress
         });
+        try {
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
+                from,
+                fullOptions
+            );
 
-        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
+            const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
+                fromWithoutFee,
+                toToken,
+                fullOptions
+            );
 
-        const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
-            fromWithoutFee,
-            toToken,
-            fullOptions
-        );
+            const to = new PriceTokenAmount({
+                ...toToken.asStruct,
+                weiAmount: toTokenAmountInWei
+            });
 
-        const to = new PriceTokenAmount({
-            ...toToken.asStruct,
-            weiAmount: toTokenAmountInWei
-        });
+            const tradeStruct: XyDexTradeStruct = {
+                contractAddress,
+                from,
+                to,
+                slippageTolerance: fullOptions.slippageTolerance,
+                gasFeeInfo: null,
+                useProxy: fullOptions.useProxy,
+                proxyFeeInfo,
+                fromWithoutFee,
+                withDeflation: fullOptions.withDeflation,
+                usedForCrossChain: fullOptions.usedForCrossChain,
+                path: [from, to],
+                provider
+            };
 
-        const tradeStruct: XyDexTradeStruct = {
-            contractAddress,
-            from,
-            to,
-            slippageTolerance: fullOptions.slippageTolerance,
-            gasFeeInfo: null,
-            useProxy: fullOptions.useProxy,
-            proxyFeeInfo,
-            fromWithoutFee,
-            withDeflation: fullOptions.withDeflation,
-            usedForCrossChain: fullOptions.usedForCrossChain,
-            path: [from, to],
-            provider
-        };
-
-        return new XyDexTrade(tradeStruct, fullOptions.providerAddress);
+            return new XyDexTrade(tradeStruct, fullOptions.providerAddress);
+        } catch (err) {
+            return {
+                type: this.tradeType,
+                error: err
+            };
+        }
     }
 
     private async getTradeInfo(
@@ -117,7 +127,16 @@ export class XyDexProvider extends AggregatorOnChainProvider {
             xyAnalyzeStatusCode(trade.errorCode, trade.errorMsg);
         }
 
-        const bestRoute = trade.routes[0]!;
+        const routesWithoutWithholdingFee = trade.routes.filter(route => {
+            const withholdingFee = new BigNumber(route.withholdingFeeAmount);
+            return withholdingFee.lte(0);
+        });
+
+        const bestRoute = routesWithoutWithholdingFee[0];
+
+        if (!bestRoute) {
+            throw new NotSupportedTokensError();
+        }
 
         return {
             toTokenAmountInWei: new BigNumber(bestRoute.dstQuoteTokenAmount),
