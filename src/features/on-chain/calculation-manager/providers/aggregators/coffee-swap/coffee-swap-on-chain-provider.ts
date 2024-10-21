@@ -1,0 +1,117 @@
+import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    TonBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
+import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
+
+import { OnChainTradeError } from '../../../models/on-chain-trade-error';
+import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
+import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
+import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
+import { CoffeSwapTrade } from './coffe-swap-on-chain-trade';
+import { FAKE_TON_ADDRESS } from './constants/fake-ton-wallet';
+import { CoffeeRoutePath } from './models/coffe-swap-api-types';
+import { CoffeeSwapApiService } from './services/coffee-swap-api-service';
+
+export class CoffeeSwapProvider extends AggregatorOnChainProvider {
+    public tradeType = ON_CHAIN_TRADE_TYPE.COFFEE_SWAP;
+
+    public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
+        return blockchain === BLOCKCHAIN_NAME.TON;
+    }
+
+    public async calculate(
+        from: PriceTokenAmount<TonBlockchainName>,
+        toToken: PriceToken<TonBlockchainName>,
+        options: RequiredOnChainCalculationOptions
+    ): Promise<OnChainTrade | OnChainTradeError> {
+        try {
+            const quote = await CoffeeSwapApiService.fetchQuote({
+                srcToken: from,
+                dstToken: toToken,
+                walletAddress: options.fromAddress || FAKE_TON_ADDRESS
+            });
+
+            const to = new PriceTokenAmount({
+                ...toToken.asStruct,
+                tokenAmount: new BigNumber(quote.output_amount)
+            });
+
+            return new CoffeSwapTrade(
+                {
+                    from,
+                    to,
+                    gasFeeInfo: {
+                        gasPrice: new BigNumber(1),
+                        gasLimit: new BigNumber(quote.recommended_gas)
+                    },
+                    slippageTolerance: options.slippageTolerance,
+                    useProxy: false,
+                    withDeflation: options.withDeflation,
+                    usedForCrossChain: false,
+                    routingPath: await this.getRoutingPath(quote.paths),
+                    txSteps: quote.paths
+                },
+                options.providerAddress
+            );
+        } catch (err) {
+            return {
+                type: this.tradeType,
+                error: err
+            };
+        }
+    }
+
+    private async getRoutingPath(txSteps: CoffeeRoutePath[]): Promise<RubicStep[]> {
+        const promises = [] as Array<Promise<[PriceTokenAmount, PriceTokenAmount]>>;
+        const path = txSteps[0]!;
+
+        let next: undefined | CoffeeRoutePath = undefined;
+        let isFirstStep = true;
+
+        const getAddress = (addr: string): string =>
+            addr === 'native' ? TonWeb3Pure.nativeTokenAddress : addr;
+
+        while (isFirstStep || !!next) {
+            const source = isFirstStep ? path : next;
+
+            const from = PriceTokenAmount.createToken({
+                address: getAddress(source!.input_token.address.address),
+                blockchain: BLOCKCHAIN_NAME.TON,
+                tokenAmount: new BigNumber(source!.swap.input_amount)
+            });
+            const to = PriceTokenAmount.createToken({
+                address: getAddress(source!.output_token.address.address),
+                blockchain: BLOCKCHAIN_NAME.TON,
+                tokenAmount: new BigNumber(source!.swap.output_amount)
+            });
+
+            const stepPromises = Promise.all([from, to]);
+            promises.push(stepPromises);
+
+            next = isFirstStep ? path.next?.[0] : next!.next?.[0];
+            isFirstStep = false;
+        }
+
+        const resolved = await Promise.all(promises);
+
+        const steps = resolved.map(step => ({
+            type: 'on-chain',
+            provider: this.tradeType,
+            path: [step[0], step[1]]
+        })) as RubicStep[];
+
+        return steps;
+    }
+
+    protected getGasFeeInfo(): Promise<GasFeeInfo | null> {
+        throw new RubicSdkError('Method not implemented!');
+    }
+}

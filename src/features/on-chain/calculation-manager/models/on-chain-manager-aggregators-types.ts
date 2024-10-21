@@ -5,6 +5,7 @@ import { PiteasProvider } from 'src/features/on-chain/calculation-manager/provid
 import { XyDexProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-provider';
 import { ZrxProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/zrx-provider';
 
+import { CoffeeSwapProvider } from '../providers/aggregators/coffee-swap/coffee-swap-on-chain-provider';
 import { DedustOnChainProvider } from '../providers/aggregators/dedust/dedust-on-chain-provider';
 import { NativeRouterProvider } from '../providers/aggregators/native-router/native-router-provider';
 import { OdosOnChainProvider } from '../providers/aggregators/odos/odos-on-chain-provider';
@@ -30,6 +31,7 @@ export const AGGREGATORS_ON_CHAIN = {
     NATIVE_ROUTER: NativeRouterProvider,
     DEDUST: DedustOnChainProvider,
     STONFI: StonfiOnChainProvider,
+    COFFEE_SWAP: CoffeeSwapProvider,
     SQUIDROUTER: SquidRouterOnChainProvider
     // SYMBIOSIS: SymbiosisOnChainProvider
 } as const;
