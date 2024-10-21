@@ -228,7 +228,7 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
             receiverAddress || this.walletAddress,
             this.acrossFeeQuoteRequestParams.inputToken,
             this.acrossFeeQuoteRequestParams.outputToken,
-            this.fromWithoutFee.weiAmount,
+            this.fromWithoutFee.stringWeiAmount,
             toAmount.toFixed(),
             this.acrossFeeQuoteRequestParams.destinationChainId.toString(),
             relayer,
