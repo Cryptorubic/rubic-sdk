@@ -1,17 +1,19 @@
 import { Address, beginCell, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import { TonConnectUI } from '@tonconnect/ui';
-import BigNumber from 'bignumber.js';
 import { RubicSdkError, UserRejectError } from 'src/common/errors';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { parseError } from 'src/common/utils/errors';
 import { waitFor } from 'src/common/utils/waitFor';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
+import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TonWalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 
 import { Web3Private } from '../web3-private';
-import { TonTransactionOptions } from './models/ton-types';
+import { TonEncodedConfig, TonTransactionOptions } from './models/ton-types';
 
 export class TonWeb3Private extends Web3Private {
     protected readonly Web3Pure = TonWeb3Pure;
@@ -53,35 +55,71 @@ export class TonWeb3Private extends Web3Private {
         }
     }
 
-    public transferJetton(
+    /**
+     * Transfer asset from on wallet to another
+     * @param tokenAddress Token address to transfer
+     * @param walletAddress Wallet address to transfer from
+     * @param receiver Receiver wallet address
+     * @param amount Transfer amount
+     * @param options Transaction options
+     */
+    public transferAsset(
+        tokenAddress: string,
         walletAddress: string,
         receiver: string,
-        amount: BigNumber,
-        options: TonTransactionOptions
-    ) {
+        amount: string,
+        options?: BasicTransactionOptions
+    ): Promise<string> {
+        if (compareAddresses(nativeTokensList.TON.address, tokenAddress)) {
+            return this.transferNative(receiver, amount, options);
+        }
+        return this.transferJetton(tokenAddress, walletAddress, receiver, amount, options);
+    }
+
+    private transferNative(
+        receiver: string,
+        amount: string,
+        options?: BasicTransactionOptions
+    ): Promise<string> {
+        const transferAmount = BigInt(amount);
+        const encodeConfig: TonEncodedConfig = {
+            address: receiver,
+            amount: toNano(transferAmount).toString()
+        };
+
+        return this.sendTransaction({ ...options, messages: [encodeConfig] });
+    }
+
+    private transferJetton(
+        tokenAddress: string,
+        walletAddress: string,
+        receiver: string,
+        amount: string,
+        options?: BasicTransactionOptions
+    ): Promise<string> {
         const walletSourceAddress = Address.parse(walletAddress);
         const walletDestAddress = Address.parse(receiver);
-        const transferAmount = amount.toFixed();
+        const transferAmount = BigInt(amount);
 
         const body = beginCell()
             // Transfer opcode
             .storeUint(0xf8a7ea5, 32)
             .storeUint(0, 64)
-            .storeCoins(toNano(transferAmount))
-            .storeAddress(walletSourceAddress)
+            .storeCoins(transferAmount)
             .storeAddress(walletDestAddress)
+            .storeAddress(walletSourceAddress)
             .storeUint(0, 1)
             .storeCoins(toNano('0.05'))
             .storeUint(0, 1)
             .endCell();
 
-        // const encodeConfig: TonEncodedConfig = {
-        //     address: txParams.to.toString(),
-        //     amount: toNano('0.025').toString(),
-        //     payload: body.toBoc().toString('base64')
-        // };
+        const encodeConfig: TonEncodedConfig = {
+            address: tokenAddress,
+            amount: toNano('0.025').toString(),
+            payload: body.toBoc().toString('base64')
+        };
 
-        this.sendTransaction({ ...options, messages: [] });
+        return this.sendTransaction({ ...options, messages: [encodeConfig] });
     }
 
     private async waitForTransactionReceipt(txHash: string): Promise<boolean> {
@@ -109,5 +147,6 @@ export class TonWeb3Private extends Web3Private {
             endpoint: 'https://toncenter.com/api/v2/jsonRPC',
             apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
         });
+        this.tonConnectUI.account;
     }
 }

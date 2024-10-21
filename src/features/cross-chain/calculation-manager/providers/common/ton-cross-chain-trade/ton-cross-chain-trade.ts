@@ -4,8 +4,8 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
-import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
-import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
+import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
+import { TonWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/ton-web3-public/ton-web3-public';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -24,12 +24,12 @@ export abstract class TonCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
      */
     // public abstract readonly gasData: GasData;
 
-    protected get fromWeb3Public(): TronWeb3Public {
-        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
+    protected get fromWeb3Public(): TonWeb3Public {
+        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TON);
     }
 
-    protected get web3Private(): TronWeb3Private {
-        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.TRON);
+    protected get web3Private(): TonWeb3Private {
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.TON);
     }
 
     public async approve(
@@ -53,12 +53,12 @@ export abstract class TonCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
     }
 
     public async encodeApprove(
-        tokenAddress: string,
-        spenderAddress: string,
-        value: BigNumber | 'infinity',
-        options: EvmTransactionOptions = {}
+        _tokenAddress: string,
+        _spenderAddress: string,
+        _value: BigNumber | 'infinity',
+        _options: EvmTransactionOptions = {}
     ): Promise<TransactionConfig> {
-        return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
+        throw new Error('Method not implemented');
     }
 
     protected abstract getContractParams(
