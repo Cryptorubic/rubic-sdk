@@ -7,7 +7,7 @@ import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
 import { AggregatorEvmOnChainTrade } from '../../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { NativeRouterQuoteRequestParams } from './models/native-router-quote';
 import {
     NativeRouterTradeInstance,
@@ -79,7 +79,7 @@ export abstract class NativeRouterAbstractTrade extends AggregatorEvmOnChainTrad
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const account = options.receiverAddress || options.fromAddress;
         try {
             const { amountOut, txRequest } = await NativeRouterApiService.getFirmQuote({

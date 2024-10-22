@@ -16,7 +16,7 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 
 export class PiteasTrade extends AggregatorEvmOnChainTrade {
@@ -81,7 +81,7 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const account = options.receiverAddress || options.fromAddress;
         try {
             const { destAmount, gasUseEstimate, methodParameters } =

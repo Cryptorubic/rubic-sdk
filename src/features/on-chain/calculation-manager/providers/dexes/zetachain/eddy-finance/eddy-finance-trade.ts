@@ -11,7 +11,7 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { EDDY_SWAP_METHOD } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/EDDY_SWAP_METHOD';
 import { ExactInputOutputSwapMethodsList } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
 import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
@@ -38,7 +38,7 @@ export class EddyFinanceTrade extends UniswapV2AbstractTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         await this.checkFromAddress(options.fromAddress, true);
         checkUnsupportedReceiverAddress(
             options?.receiverAddress,
@@ -120,6 +120,7 @@ export class EddyFinanceTrade extends UniswapV2AbstractTrade {
         if (!availableDexs.includes(routerAddress.toLowerCase())) {
             throw new NotWhitelistedProviderError(routerAddress, undefined, 'dex');
         }
+
         await ProxyCrossChainEvmTrade.checkDexWhiteList(
             this.from.blockchain,
             routerAddress,

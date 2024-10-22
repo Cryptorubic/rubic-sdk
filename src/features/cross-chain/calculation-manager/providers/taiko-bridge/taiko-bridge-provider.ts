@@ -33,6 +33,7 @@ export class TaikoBridgeProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = fromToken.blockchain as TaikoBridgeSupportedBlockchain;
         const toBlockchain = toToken.blockchain as TaikoBridgeSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
 
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
@@ -61,7 +62,8 @@ export class TaikoBridgeProvider extends CrossChainProvider {
                         gasData
                     },
                     options.providerAddress,
-                    await this.getRoutePath(fromToken, to)
+                    await this.getRoutePath(fromToken, to),
+                    useProxy
                 ),
                 tradeType: this.type
             };

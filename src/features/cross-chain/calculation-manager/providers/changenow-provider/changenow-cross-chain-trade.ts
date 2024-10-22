@@ -67,7 +67,8 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                 await new ChangenowCrossChainTrade(
                     changenowTrade,
                     providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                    []
+                    [],
+                    false
                 ).getContractParams({ receiverAddress: receiverAddress || walletAddress }, true);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -165,8 +166,13 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         return null;
     }
 
-    constructor(crossChainTrade: ChangenowTrade, providerAddress: string, routePath: RubicStep[]) {
-        super(providerAddress, routePath);
+    constructor(
+        crossChainTrade: ChangenowTrade,
+        providerAddress: string,
+        routePath: RubicStep[],
+        useProxy: boolean
+    ) {
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from as PriceTokenAmount<EvmBlockchainName>;
         this.to = crossChainTrade.to;
@@ -408,7 +414,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         );
 
         const { gasLimit } = options;
-        if (this.feeInfo?.rubicProxy?.fixedFee?.amount.gt(0)) {
+        if (this.isProxyTrade) {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
                 await this.getContractParams({
                     fromAddress: options.fromAddress,

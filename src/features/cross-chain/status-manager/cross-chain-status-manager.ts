@@ -9,6 +9,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { RubicSdkError } from 'src/common/errors';
 import {
     BLOCKCHAIN_NAME,
+    EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -22,6 +23,7 @@ import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
+import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
@@ -43,7 +45,6 @@ import {
     LIFI_SWAP_STATUS,
     LifiSwapStatus
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
-import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
 import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
@@ -53,7 +54,6 @@ import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/mod
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
 import { RubicBackendPsStatus } from 'src/features/cross-chain/status-manager/models/rubic-backend-ps-status';
 import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
-import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
 import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
 import {
     BtcStatusResponse,
@@ -63,6 +63,8 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { acrossFundsDepositedInputs } from '../calculation-manager/providers/across-provider/constants/across-deposit-abi';
+import { AcrossApiService } from '../calculation-manager/providers/across-provider/services/across-api-service';
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { EywaApiService } from '../calculation-manager/providers/eywa-provider/services/eywa-api-service';
@@ -70,6 +72,7 @@ import { MesonCcrApiService } from '../calculation-manager/providers/meson-provi
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
 import { OwlToApiService } from '../calculation-manager/providers/owl-to-bridge/services/owl-to-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
+import { RetroBridgeApiService } from '../calculation-manager/providers/retro-bridge/services/retro-bridge-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
 /**
@@ -102,6 +105,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.EYWA_V2]: this.getEywaDstSwapStatus
     };
 
@@ -258,7 +263,9 @@ export class CrossChainStatusManager {
 
                 if (
                     dstTxStatus === SYMBIOSIS_SWAP_STATUS.SUCCESS &&
-                    targetTokenNetwork === toBlockchainId
+                    (targetTokenNetwork === toBlockchainId ||
+                        // Swap to BTC
+                        (targetTokenNetwork === 3652501241 && toBlockchainId === 5555))
                 ) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         dstTxData.status = TX_STATUS.SUCCESS;
@@ -602,11 +609,16 @@ export class CrossChainStatusManager {
     }
 
     private async getSquidrouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.squidrouterRequestId) {
+            throw new RubicSdkError('Must provide squidrouter request id');
+        }
         try {
-            const { status, toChain } = await this.httpClient.get<SquidrouterApiResponse>(
-                `${SquidrouterCrossChainProvider.apiEndpoint}status?transactionId=${data.srcTxHash}`,
-                { headers: { 'x-integrator-id': 'rubic-api' } }
-            );
+            const { status, toChain } = await SquidRouterApiService.getTxStatus({
+                transactionId: data.srcTxHash,
+                requestId: data.squidrouterRequestId,
+                fromChainId: blockchainId[data.fromBlockchain].toString(),
+                toChainId: blockchainId[data.toBlockchain].toString()
+            });
 
             if (
                 status === SQUIDROUTER_TRANSFER_STATUS.DEST_EXECUTED ||
@@ -734,6 +746,21 @@ export class CrossChainStatusManager {
         const txStatusData = await RouterApiService.getTxStatus(data);
 
         return txStatusData;
+    }
+
+    private async getRetroBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.retroBridgeId) {
+            throw new RubicSdkError('Must provide Retro bridge transaction ID');
+        }
+        return await RetroBridgeApiService.getTxStatus(data.retroBridgeId);
+    }
+
+    private async getAcrossDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const depositId = await Injector.web3PublicService
+            .getWeb3Public(data.fromBlockchain as EvmBlockchainName)
+            .getTxDecodedLogData(data.srcTxHash, acrossFundsDepositedInputs, 'depositId');
+        const srcChainId = blockchainId[data.fromBlockchain];
+        return AcrossApiService.getTxStatus(srcChainId, Number(depositId));
     }
 
     private async getEywaDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {

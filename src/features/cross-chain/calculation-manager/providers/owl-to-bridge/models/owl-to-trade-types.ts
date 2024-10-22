@@ -27,4 +27,5 @@ export interface OwlToTradeParams {
     };
     providerAddress: string;
     routePath: RubicStep[];
+    useProxy: boolean;
 }

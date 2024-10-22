@@ -35,6 +35,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     CRO_DEX: 'CRO_DEX',
     CURVE: 'CURVE',
 
+    DEDUST: 'DEDUST',
     DEFI_PLAZA: 'DEFI_PLAZA',
     DEFI_SWAP: 'DEFI_SWAP',
     DFYN: 'DFYN',
@@ -126,12 +127,14 @@ export const ON_CHAIN_TRADE_TYPE = {
     SPOOKY_SWAP: 'SPOOKY_SWAP',
     SOUL_SWAP: 'SOUL_SWAP',
     STELLA_SWAP: 'STELLA_SWAP',
+    STONFI: 'STONFI',
     SUN_SWAP: 'SUN_SWAP',
     SURFDEX: 'SURFDEX',
     SUSHI_SWAP: 'SUSHI_SWAP',
     SYNAPSE: 'SYNAPSE',
     SYNC_SWAP: 'SYNC_SWAP',
     SILK_SWAP: 'SILK_SWAP',
+    SQUIDROUTER: 'SQUIDROUTER',
 
     SYMBIOSIS_SWAP: 'SYMBIOSIS_SWAP', // Fake to show swap via unknown symbiosis dex
 

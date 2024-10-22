@@ -1,8 +1,16 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    EvmBlockchainName,
+    TronBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -14,6 +22,7 @@ import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation
 import { getProxyMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-proxy-method-arguments-and-transaction-data';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -21,6 +30,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { MarkRequired } from 'ts-essentials';
 
@@ -43,10 +53,15 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 slippage: 0
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            []
+            [],
+            false
         );
 
         return getCrossChainGasData(trade, receiverAddress);
+    }
+
+    private get tronWeb3Public(): TronWeb3Public {
+        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
     }
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -78,7 +93,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get methodName(): string {
-        return '';
+        return 'startBridgeTokensViaGenericCrossChain';
     }
 
     constructor(
@@ -91,9 +106,10 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -162,32 +178,68 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     protected async getContractParams(
         options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
     ): Promise<ContractParams> {
-        const fromWithoutFee = getFromWithoutFee(
-            this.from,
-            this.feeInfo.rubicProxy?.platformFee?.percent
+        const {
+            data,
+            value: providerValue,
+            to
+        } = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress
         );
-        const { methodArguments, transactionData } =
-            await getProxyMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(
-                this.from,
-                fromWithoutFee,
-                this.to,
-                this.toTokenAmountMin,
-                this.walletAddress,
-                this.providerAddress,
-                options,
-                this.checkAmountChange
-            );
 
-        const encodedData = transactionData.data;
-        methodArguments.push(encodedData);
+        const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
+        let receiverAddress = isEvmDestination
+            ? options.receiverAddress || this.walletAddress
+            : options.receiverAddress;
+        let toAddress = this.to.address;
 
-        const value = this.getSwapValue(transactionData.value);
+        if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
+            receiverAddress = TronWeb3Pure.addressToHex(receiverAddress);
+            toAddress = TronWeb3Pure.addressToHex(toAddress);
+        }
+
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
+            { ...options, receiverAddress },
+            {
+                walletAddress: this.walletAddress,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.to,
+                toAddress,
+                srcChainTrade: null,
+                providerAddress: this.providerAddress,
+                type: `native:${this.type}`,
+                fromAddress: this.walletAddress
+            }
+        );
+
+        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+            to!,
+            data! as string,
+            this.from.blockchain as EvmBlockchainName,
+            to,
+            '0'
+        );
+
+        const methodArguments = [bridgeData, providerData];
+
+        const value = this.getSwapValue(providerValue);
+
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
+            methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
 
         return {
-            contractAddress: this.fromContractAddress,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName: this.methodName,
-            methodArguments,
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
     }

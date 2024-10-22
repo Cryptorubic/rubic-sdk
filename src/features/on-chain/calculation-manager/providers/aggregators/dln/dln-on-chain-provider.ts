@@ -7,6 +7,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { DlnUtils } from 'src/features/common/providers/dln/dln-utils';
+import { deBridgeReferralCode } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-code';
 import {
     DlnOnChainSupportedBlockchain,
     dlnOnChainSupportedBlockchains
@@ -33,7 +34,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
         gasCalculation: 'calculate'
     };
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return dlnOnChainSupportedBlockchains.some(
             supportedNetwork => supportedNetwork === blockchain
         );
@@ -44,10 +45,6 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<DlnOnChainSupportedBlockchain>,
         options: DlnOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError('Blockchain is not supported');
-        }
-
         if (options.withDeflation.from.isDeflation || options.withDeflation.to.isDeflation) {
             throw new RubicSdkError('[RUBIC_SDK] DLN does not work if source token is deflation.');
         }
@@ -70,7 +67,8 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
             tokenInAmount: fromWithoutFee.stringWeiAmount,
             slippage,
             tokenOut: DlnUtils.getSupportedAddress(toToken),
-            tokenOutRecipient: fakeReceiver
+            tokenOutRecipient: fakeReceiver,
+            referralCode: deBridgeReferralCode
         };
 
         const debridgeResponse = await DlnApiService.fetchOnChainSwapData(requestParams);

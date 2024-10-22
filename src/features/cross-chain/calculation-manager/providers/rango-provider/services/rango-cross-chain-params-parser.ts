@@ -1,3 +1,4 @@
+import { CROSS_CHAIN_TRADE_TYPE } from '../../../models/cross-chain-trade-type';
 import {
     GetCrossChainTradeConstructorParamsType,
     RangoCrossChainTradeConstructorParams
@@ -16,6 +17,7 @@ export class RangoCrossChainParser {
         bridgeSubtype,
         receiverAddress
     }: GetCrossChainTradeConstructorParamsType): Promise<RangoCrossChainTradeConstructorParams> {
+        const useProxy = options.useProxy?.[CROSS_CHAIN_TRADE_TYPE.RANGO] ?? true;
         const gasData =
             options.gasCalculation === 'enabled'
                 ? await RangoCrossChainTrade.getGasData({
@@ -48,7 +50,8 @@ export class RangoCrossChainParser {
         return {
             crossChainTrade,
             providerAddress,
-            routePath
+            routePath,
+            useProxy
         };
     }
 }

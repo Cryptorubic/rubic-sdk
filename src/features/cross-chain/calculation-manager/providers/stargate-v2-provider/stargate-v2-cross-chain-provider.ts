@@ -186,7 +186,8 @@ export class StargateV2CrossChainProvider extends CrossChainProvider {
                         )
                     },
                     options.providerAddress,
-                    routePath
+                    routePath,
+                    useProxy
                 ),
                 tradeType: this.type
             };

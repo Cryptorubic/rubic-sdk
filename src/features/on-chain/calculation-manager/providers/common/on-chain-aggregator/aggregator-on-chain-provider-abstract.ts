@@ -25,7 +25,7 @@ export abstract class AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError>;
 
-    protected abstract isSupportedBlockchain(blockchain: BlockchainName): boolean;
+    public abstract isSupportedBlockchain(blockchain: BlockchainName): boolean;
 
     protected getWalletAddress(blockchain: Web3PrivateSupportedBlockchain): string {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(blockchain).address;

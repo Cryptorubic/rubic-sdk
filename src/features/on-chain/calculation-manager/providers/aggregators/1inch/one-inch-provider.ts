@@ -47,7 +47,7 @@ export class OneInchProvider extends AggregatorOnChainProvider {
 
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.ONE_INCH;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return oneInchSupportedBlockchains.some(item => item === blockchain);
     }
 
@@ -56,10 +56,6 @@ export class OneInchProvider extends AggregatorOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new RubicSdkError('Blockchain is not supported');
-        }
-
         const fromBlockchain = from.blockchain as OneInchSupportedBlockchains;
 
         const fromAddress =
