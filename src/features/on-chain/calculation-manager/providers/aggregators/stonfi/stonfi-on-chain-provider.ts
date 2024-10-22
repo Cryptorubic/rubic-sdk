@@ -1,7 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -59,7 +57,8 @@ export class StonfiOnChainProvider extends AggregatorOnChainProvider {
                 useProxy: false,
                 withDeflation: options.withDeflation,
                 usedForCrossChain: false,
-                routingPath
+                routingPath,
+                isChangedSlippage: false
             } as TonOnChainTradeStruct;
             tradeStruct.gasFeeInfo = await this.getGasFeeInfo(tradeStruct);
 
@@ -69,16 +68,6 @@ export class StonfiOnChainProvider extends AggregatorOnChainProvider {
                 type: this.tradeType,
                 error: err
             };
-        }
-    }
-
-    private skipTokenHMSTR(from: PriceTokenAmount, to: PriceToken): void {
-        const addressHMSTR = 'EQAJ8uWd7EBqsmpSWaRdf_I-8R8-XHwh3gsNKhy-UrdrPcUo';
-        if (
-            compareAddresses(from.address, addressHMSTR) ||
-            compareAddresses(to.address, addressHMSTR)
-        ) {
-            throw new NotSupportedTokensError();
         }
     }
 

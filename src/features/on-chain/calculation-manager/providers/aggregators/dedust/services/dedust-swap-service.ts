@@ -111,18 +111,18 @@ export class DedustSwapService {
 
     public async getRoutePath(): Promise<RubicStep[]> {
         const promises = this.txSteps.map(async step => {
-            const srcToken = await Token.createToken({
+            const srcToken = Token.createToken({
                 address: step.srcTokenAddress,
                 blockchain: BLOCKCHAIN_NAME.TON
             });
-            const dstToken = await Token.createToken({
+            const dstToken = Token.createToken({
                 address: step.dstTokenAddress,
                 blockchain: BLOCKCHAIN_NAME.TON
             });
             return {
                 provider: ON_CHAIN_TRADE_TYPE.DEDUST,
                 type: 'on-chain',
-                path: [srcToken, dstToken]
+                path: await Promise.all([srcToken, dstToken])
             };
         });
 
