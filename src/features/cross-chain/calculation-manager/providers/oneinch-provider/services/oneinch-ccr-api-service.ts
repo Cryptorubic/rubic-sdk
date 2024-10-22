@@ -6,8 +6,8 @@ import { TxStatusData } from 'src/features/common/status-manager/models/tx-statu
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 
 import {
+    OneinchCcrQuoteResponse,
     OneinchQuoteParams,
-    OneinchQuoteResponse,
     OneinchReadySecretsResponse,
     OneinchStatusResponse,
     OneinchSwapOrderParams,
@@ -24,9 +24,9 @@ export class OneinchCcrApiService {
         srcToken,
         dstToken,
         walletAddress
-    }: OneinchQuoteParams): Promise<OneinchQuoteResponse> {
+    }: OneinchQuoteParams): Promise<OneinchCcrQuoteResponse> {
         try {
-            const res = await Injector.httpClient.get<OneinchQuoteResponse>(
+            const res = await Injector.httpClient.get<OneinchCcrQuoteResponse>(
                 `${this.apiUrl}/quoter/v1.0/quote/receive`,
                 {
                     headers: { apikey: this.apiKey },
@@ -83,7 +83,7 @@ preset=${quote.recommendedPreset}`;
     }
 
     public static async submitSwapOrder(
-        quoteResp: OneinchQuoteResponse,
+        quoteResp: OneinchCcrQuoteResponse,
         swapResp: OneinchSwapOrderResponse,
         walletAddress: string,
         secretHashes: string[]

@@ -15,23 +15,20 @@ export class OneinchCcrUtils {
         const deadlineMS = Date.now() + 1_000 * 900; // 15 minutes
 
         (async () => {
-            External: while (true) {
+            while (true) {
                 await waitFor(30_000);
 
                 const isAllSecretsSubmitted = secrets.every(
-                    (hash, ind) => submittedSecrets[ind] && submittedSecrets[ind] === hash
+                    (hash, ind) => submittedSecrets[ind] === hash
                 );
                 if (isAllSecretsSubmitted || Date.now() > deadlineMS) break;
 
                 const readySecrets = await OneinchCcrApiService.fetchReadySecrets(orderHash).catch(
                     () => null
                 );
-                if (!readySecrets) continue;
+                if (!readySecrets || !readySecrets.fills.length) continue;
 
-                Internal: for (const secret of readySecrets) {
-                    const isAlreadySubmitted = !!submittedSecrets[secret.idx];
-                    if (isAlreadySubmitted) continue Internal;
-
+                for (const secret of readySecrets.fills) {
                     submittedSecrets[secret.idx] = secrets[secret.idx] as string;
                 }
             }

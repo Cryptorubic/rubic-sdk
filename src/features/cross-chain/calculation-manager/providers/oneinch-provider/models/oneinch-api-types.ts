@@ -8,11 +8,11 @@ export interface OneinchQuoteParams {
 }
 
 export interface OneinchSwapOrderParams extends OneinchQuoteParams {
-    quote: OneinchQuoteResponse;
+    quote: OneinchCcrQuoteResponse;
     secretHashes: string[];
 }
 
-export interface OneinchQuoteResponse {
+export interface OneinchCcrQuoteResponse {
     presets: {
         [key in PresetKey]: Preset;
     };
@@ -86,8 +86,10 @@ export interface OneinchStatusResponse {
     status: 'pending' | 'executed' | 'expired' | 'cancelled' | 'refunding' | 'refunded';
 }
 
-export type OneinchReadySecretsResponse = Array<{
-    idx: number;
-    srcEscrowDeployTxHash: string;
-    dstEscrowDeployTxHash: string;
-}>;
+export interface OneinchReadySecretsResponse {
+    fills: Array<{
+        idx: number;
+        srcEscrowDeployTxHash: string;
+        dstEscrowDeployTxHash: string;
+    }>;
+}

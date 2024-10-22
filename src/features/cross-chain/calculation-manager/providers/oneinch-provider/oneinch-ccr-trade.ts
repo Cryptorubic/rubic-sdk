@@ -17,7 +17,7 @@ import { FeeInfo } from '../common/models/fee-info';
 import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
-import { OneinchQuoteResponse } from './models/oneinch-api-types';
+import { OneinchCcrQuoteResponse } from './models/oneinch-api-types';
 import { OneinchCcrTradeParams, OneinchGetGasDataParams } from './models/oneinch-ccr-trade-types';
 import { OneinchCcrApiService } from './services/oneinch-ccr-api-service';
 import { OneinchCcrUtils } from './services/oneinch-ccr-utils';
@@ -43,7 +43,8 @@ export class OneinchCcrTrade extends EvmCrossChainTrade {
                     slippage
                 },
                 providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                routePath: []
+                routePath: [],
+                useProxy: false
             });
 
             return getCrossChainGasData(trade);
@@ -74,7 +75,7 @@ export class OneinchCcrTrade extends EvmCrossChainTrade {
 
     private readonly slippage: number;
 
-    private readonly quote: OneinchQuoteResponse;
+    private readonly quote: OneinchCcrQuoteResponse;
 
     private get fromWithoutFee(): PriceTokenAmount<EvmBlockchainName> {
         return getFromWithoutFee(this.from, this.feeInfo.rubicProxy?.platformFee?.percent);
@@ -94,7 +95,7 @@ export class OneinchCcrTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: OneinchCcrTradeParams) {
-        super(params.providerAddress, params.routePath);
+        super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.feeInfo = params.crossChainTrade.feeInfo;

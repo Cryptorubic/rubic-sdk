@@ -79,7 +79,8 @@ export class OneinchCcrProvider extends CrossChainProvider {
                         quote
                     },
                     providerAddress: options.providerAddress,
-                    routePath: await this.getRoutePath(from, to)
+                    routePath: await this.getRoutePath(from, to),
+                    useProxy
                 }),
                 tradeType: this.type
             };
