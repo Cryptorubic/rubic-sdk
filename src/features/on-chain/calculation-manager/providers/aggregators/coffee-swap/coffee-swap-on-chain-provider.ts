@@ -15,6 +15,7 @@ import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
+import { getMultistepData } from '../common/utils/get-ton-multistep-data';
 import { CoffeSwapTrade } from './coffe-swap-on-chain-trade';
 import { FAKE_TON_ADDRESS } from './constants/fake-ton-wallet';
 import { CoffeeRoutePath } from './models/coffe-swap-api-types';
@@ -43,6 +44,11 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
                 ...toToken.asStruct,
                 tokenAmount: new BigNumber(quote.output_amount)
             });
+            const routingPath = await this.getRoutingPath(quote.paths);
+            const { changedSlippage, slippage } = getMultistepData(
+                routingPath,
+                options.slippageTolerance
+            );
 
             return new CoffeSwapTrade(
                 {
@@ -52,12 +58,13 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
                         gasPrice: new BigNumber(1),
                         gasLimit: new BigNumber(quote.recommended_gas)
                     },
-                    slippageTolerance: options.slippageTolerance,
+                    slippageTolerance: slippage,
                     useProxy: false,
                     withDeflation: options.withDeflation,
                     usedForCrossChain: false,
-                    routingPath: await this.getRoutingPath(quote.paths),
-                    txSteps: quote.paths
+                    routingPath,
+                    txSteps: quote.paths,
+                    changedSlippage
                 },
                 options.providerAddress
             );

@@ -15,7 +15,7 @@ import { TransactionConfig } from 'web3-core';
 
 import { GasFeeInfo } from '../evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../on-chain-trade';
-import { TonOnChainTradeStruct } from './models/ton-on-chian-trade-types';
+import { TonOnChainTradeStruct, TonTradeAdditionalInfo } from './models/ton-on-chian-trade-types';
 
 export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
     public readonly from: PriceTokenAmount;
@@ -34,9 +34,7 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
 
     protected skipAmountCheck: boolean = false;
 
-    public get isMultistepSwap(): boolean {
-        return this.routingPath.length > 1;
-    }
+    public readonly additionalInfo: TonTradeAdditionalInfo;
 
     protected get spenderAddress(): string {
         throw new RubicSdkError('No spender address!');
@@ -57,6 +55,10 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.routingPath = tradeStruct.routingPath;
+        this.additionalInfo = {
+            isMultistep: this.routingPath.length > 1,
+            changedSlippage: tradeStruct.changedSlippage
+        };
     }
 
     public override async needApprove(): Promise<boolean> {

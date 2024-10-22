@@ -11,7 +11,7 @@ import {
 } from '../models/coffe-swap-api-types';
 
 export class CoffeeSwapApiService {
-    private static readonly apiUrl = 'https://backend.swap.coffee/v1';
+    private static readonly apiUrl = 'https://backend.swap.coffee';
 
     public static async fetchQuote(params: CofeeQuoteParams): Promise<CoffeeQuoteResponse> {
         try {
@@ -19,7 +19,7 @@ export class CoffeeSwapApiService {
             const output_token = this.getCoffeeToken(params.dstToken);
 
             const res = await Injector.httpClient.post<CoffeeQuoteResponse>(
-                `${this.apiUrl}/route`,
+                `${this.apiUrl}/v1/route`,
                 {
                     input_token,
                     output_token,
@@ -44,6 +44,7 @@ export class CoffeeSwapApiService {
         }
     }
 
+    // @TODO set referral_name
     public static async fetchTonEncodedConfigs(
         walletAddress: string,
         slippage: number,
@@ -51,11 +52,11 @@ export class CoffeeSwapApiService {
     ): Promise<TonEncodedConfig[]> {
         try {
             const res = await Injector.httpClient.post<CoffeeSwapDataResponse>(
-                `${this.apiUrl}/route/transactions`,
+                `${this.apiUrl}/v2/route/transactions`,
                 {
                     sender_address: walletAddress,
                     slippage,
-                    referral_name: 'rubic',
+                    // referral_name: 'rubic',
                     paths
                 }
             );

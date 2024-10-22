@@ -12,6 +12,7 @@ import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
+import { getMultistepData } from '../common/utils/get-ton-multistep-data';
 import { DEDUST_GAS } from './constants/dedust-gas';
 import { DedustOnChainTrade } from './dedust-on-chain-trade';
 import { DedustSwapService } from './services/dedust-swap-service';
@@ -37,9 +38,11 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
                 weiAmount: new BigNumber(toStringWeiAmount)
             });
 
-            const slippage = dedustSwapService.isMultistepSwap() ? 0.1 : options.slippageTolerance;
-
             const routingPath = await dedustSwapService.getRoutePath();
+            const { changedSlippage, slippage } = getMultistepData(
+                routingPath,
+                options.slippageTolerance
+            );
 
             return new DedustOnChainTrade(
                 {
@@ -50,7 +53,8 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
                     useProxy: false,
                     withDeflation: options.withDeflation,
                     routingPath,
-                    usedForCrossChain: false
+                    usedForCrossChain: false,
+                    changedSlippage
                 },
                 options.providerAddress
             );
