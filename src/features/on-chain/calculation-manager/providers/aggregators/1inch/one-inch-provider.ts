@@ -20,7 +20,6 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/one-inch-supported-blockchains';
 import { OneinchCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-calculation-options';
 import { OneinchQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-quote-request';
-import { OneinchQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-quote-response';
 import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-swap-request';
 import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-swap-response';
 import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-trade-struct';
@@ -37,6 +36,7 @@ import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/provi
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { OneinchQuoteResponse } from './models/oneinch-quote-response';
 
 export class OneInchProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {

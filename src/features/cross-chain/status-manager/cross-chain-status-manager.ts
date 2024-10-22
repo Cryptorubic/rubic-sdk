@@ -68,6 +68,7 @@ import { AcrossApiService } from '../calculation-manager/providers/across-provid
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
+import { OneinchCcrApiService } from '../calculation-manager/providers/oneinch-provider/services/oneinch-ccr-api-service';
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
 import { OwlToApiService } from '../calculation-manager/providers/owl-to-bridge/services/owl-to-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
@@ -104,6 +105,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ONEINCH]: this.getOneinchDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus
     };
@@ -718,39 +720,35 @@ export class CrossChainStatusManager {
         return { hash, status };
     }
 
-    private async getOrbiterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await OrbiterApiService.getTxStatus(data.srcTxHash);
-
-        return txStatusData;
+    private getOrbiterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return OrbiterApiService.getTxStatus(data.srcTxHash);
     }
 
-    private async getMesonDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    private getMesonDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         return MesonCcrApiService.fetchTxStatus(data.srcTxHash);
     }
 
-    private async getOwlToDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await OwlToApiService.getTxStatus(data.srcTxHash);
-
-        return txStatusData;
+    private getOwlToDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return OwlToApiService.getTxStatus(data.srcTxHash);
     }
 
-    private async getEddyBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await getEddyBridgeDstSwapStatus(data);
-
-        return txStatusData;
+    private getEddyBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return getEddyBridgeDstSwapStatus(data);
     }
 
-    private async getRouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await RouterApiService.getTxStatus(data);
-
-        return txStatusData;
+    private getRouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return RouterApiService.getTxStatus(data);
     }
 
-    private async getRetroBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    private getOneinchDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return OneinchCcrApiService.fetchTxStatus(data);
+    }
+
+    private getRetroBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         if (!data.retroBridgeId) {
             throw new RubicSdkError('Must provide Retro bridge transaction ID');
         }
-        return await RetroBridgeApiService.getTxStatus(data.retroBridgeId);
+        return RetroBridgeApiService.getTxStatus(data.retroBridgeId);
     }
 
     private async getAcrossDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {

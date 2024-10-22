@@ -70,7 +70,6 @@ module.exports = {
                         selector: 'TSEnumDeclaration',
                         message: "Don't declare enums"
                     },
-                    'LabeledStatement',
                     'WithStatement'
                 ],
                 'no-console': [
