@@ -40,6 +40,7 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
                 walletAddress: options.fromAddress || FAKE_TON_ADDRESS
             });
 
+            // @TODO remove
             if (quote.paths.length === 1) {
                 console.log(`%cNOT SPLITTED LIQUIDITY`, 'color: yellowgreen; font-size: 26px;');
             } else {
