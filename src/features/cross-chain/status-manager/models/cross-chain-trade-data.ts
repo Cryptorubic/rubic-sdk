@@ -69,4 +69,9 @@ export interface CrossChainTradeData {
      * Retro bridge transaction id.
      */
     retroBridgeId?: string;
+
+    /**
+     * SimpleSwap trade id.
+     */
+    simpleSwapId?: string;
 }

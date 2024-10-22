@@ -69,6 +69,7 @@ import { OrbiterApiService } from '../calculation-manager/providers/orbiter-brid
 import { OwlToApiService } from '../calculation-manager/providers/owl-to-bridge/services/owl-to-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { RetroBridgeApiService } from '../calculation-manager/providers/retro-bridge/services/retro-bridge-api-service';
+import { SimpleSwapApiService } from '../calculation-manager/providers/simple-swap-provider/services/simple-swap-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
 /**
@@ -101,7 +102,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE]: this.getEddyBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus
     };
 
     /**
@@ -519,7 +521,7 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must provide changenow trade id');
         }
         try {
-            const { status, payoutHash } = await ChangeNowCrossChainApiService.getTxStatus(
+            const { status, dstHash } = await ChangeNowCrossChainApiService.getTxStatus(
                 data.changenowId
             );
 
@@ -527,7 +529,7 @@ export class CrossChainStatusManager {
                 status === CHANGENOW_API_STATUS.FINISHED ||
                 status === CHANGENOW_API_STATUS.REFUNDED
             ) {
-                return { status: TX_STATUS.SUCCESS, hash: payoutHash };
+                return { status: TX_STATUS.SUCCESS, hash: dstHash };
             }
             if (status === CHANGENOW_API_STATUS.FAILED) {
                 return { status: TX_STATUS.FAIL, hash: null };
@@ -747,5 +749,27 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must provide Retro bridge transaction ID');
         }
         return await RetroBridgeApiService.getTxStatus(data.retroBridgeId);
+    }
+
+    private async getSimpleSwapDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.simpleSwapId) {
+            throw new RubicSdkError('Must provide SimpleSwap trade ID');
+        }
+
+        try {
+            const { status, dstHash } = await SimpleSwapApiService.getTxStatus(data.simpleSwapId);
+            if (
+                status === CHANGENOW_API_STATUS.FINISHED ||
+                status === CHANGENOW_API_STATUS.REFUNDED
+            ) {
+                return { status: TX_STATUS.SUCCESS, hash: dstHash };
+            }
+            if (status === CHANGENOW_API_STATUS.FAILED) {
+                return { status: TX_STATUS.FAIL, hash: null };
+            }
+            return { status: TX_STATUS.PENDING, hash: null };
+        } catch {
+            return { status: TX_STATUS.PENDING, hash: null };
+        }
     }
 }
