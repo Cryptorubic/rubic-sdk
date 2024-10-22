@@ -76,7 +76,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-        let weiAmountWithoutFee = from.stringWeiAmount;
+        let fromWithoutFee = from;
 
         if (fullOptions.useProxy) {
             const proxyContractInfo = await this.handleProxyContract(
@@ -87,7 +87,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
                 fullOptions
             );
             proxyFeeInfo = proxyContractInfo.proxyFeeInfo;
-            weiAmountWithoutFee = proxyContractInfo.fromWithoutFee.stringWeiAmount;
+            fromWithoutFee = proxyContractInfo.fromWithoutFee;
         }
 
         const chainId = blockchainId[from.blockchain];
@@ -134,7 +134,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
             supportFeeContractNumbers: this.config.supportedFees,
             support001Pools: [],
             direction: SwapDirection.ExactIn,
-            amount: weiAmountWithoutFee,
+            amount: fromWithoutFee.stringWeiAmount,
             shortBatchSize: this.blockchain === BLOCKCHAIN_NAME.MERLIN ? 5 : 20
         } as SearchPathQueryParams;
 
@@ -170,7 +170,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
             gasFeeInfo: null,
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,
-            fromWithoutFee: from,
+            fromWithoutFee,
             withDeflation: fullOptions.withDeflation,
             usedForCrossChain: fullOptions.usedForCrossChain,
             dexContractAddress: this.dexAddress,
