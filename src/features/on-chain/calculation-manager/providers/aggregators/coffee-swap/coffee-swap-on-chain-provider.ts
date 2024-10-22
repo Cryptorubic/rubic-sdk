@@ -56,7 +56,7 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
                 tokenAmount: new BigNumber(quote.output_amount)
             });
             const routingPath = await this.getRoutingPath(quote.paths);
-            const { changedSlippage, slippage } = getMultistepData(
+            const { isChangedSlippage, slippage } = getMultistepData(
                 routingPath,
                 options.slippageTolerance
             );
@@ -75,7 +75,7 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
                     usedForCrossChain: false,
                     routingPath,
                     txSteps: quote.paths,
-                    changedSlippage
+                    isChangedSlippage
                 },
                 options.providerAddress
             );

@@ -11,9 +11,9 @@ export interface TonEncodedConfigAndToAmount<T> {
 export type TonOnChainTradeStruct = Omit<
     OnChainTradeStruct<TonBlockchainName>,
     'fromWithoutFee' | 'proxyFeeInfo' | 'path'
-> & { routingPath: RubicStep[]; changedSlippage: boolean };
+> & { routingPath: RubicStep[]; isChangedSlippage: boolean };
 
 export interface TonTradeAdditionalInfo {
     isMultistep: boolean;
-    changedSlippage: boolean;
+    isChangedSlippage: boolean;
 }

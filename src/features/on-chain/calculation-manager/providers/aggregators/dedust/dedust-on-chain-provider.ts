@@ -39,7 +39,7 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
             });
 
             const routingPath = await dedustSwapService.getRoutePath();
-            const { changedSlippage, slippage } = getMultistepData(
+            const { isChangedSlippage, slippage } = getMultistepData(
                 routingPath,
                 options.slippageTolerance
             );
@@ -54,7 +54,7 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
                     withDeflation: options.withDeflation,
                     routingPath,
                     usedForCrossChain: false,
-                    changedSlippage
+                    isChangedSlippage
                 },
                 options.providerAddress
             );

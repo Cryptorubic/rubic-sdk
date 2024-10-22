@@ -57,7 +57,7 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
         this.routingPath = tradeStruct.routingPath;
         this.additionalInfo = {
             isMultistep: this.routingPath.length > 1,
-            changedSlippage: tradeStruct.changedSlippage
+            isChangedSlippage: tradeStruct.isChangedSlippage
         };
     }
 

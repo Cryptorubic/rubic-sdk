@@ -3,16 +3,16 @@ import { RubicStep } from 'src/features/cross-chain/calculation-manager/provider
 export function getMultistepData(
     routingPath: RubicStep[],
     slippage: number
-): { slippage: number; changedSlippage: boolean } {
+): { slippage: number; isChangedSlippage: boolean } {
     if (routingPath.length > 1 && slippage < 0.1) {
         return {
-            changedSlippage: true,
+            isChangedSlippage: true,
             slippage: 0.1
         };
     }
 
     return {
-        changedSlippage: false,
+        isChangedSlippage: false,
         slippage
     };
 }
