@@ -48,7 +48,8 @@ export class EywaCrossChainTrade extends EvmCrossChainTrade {
                 eywaRoute
             },
             providerAddress,
-            []
+            [],
+            false
         );
 
         return getCrossChainGasData(trade);
@@ -104,9 +105,10 @@ export class EywaCrossChainTrade extends EvmCrossChainTrade {
             eywaRoute: EywaRoutingResponse;
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.to = crossChainTrade.to;
         this.from = crossChainTrade.from;

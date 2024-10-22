@@ -43,7 +43,7 @@ export class EywaCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as EywaCcrSupportedChains;
         const toBlockchain = toToken.blockchain as EywaCcrSupportedChains;
 
-        const useProxy = false;
+        const useProxy = true;
         try {
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -126,7 +126,8 @@ export class EywaCrossChainProvider extends CrossChainProvider {
                     eywaRoute: bestQuote
                 },
                 options.providerAddress,
-                await this.getRoutePath(bestQuote.route)
+                await this.getRoutePath(bestQuote.route),
+                useProxy
             );
 
             const minAmountError = this.checkMinError(from);
