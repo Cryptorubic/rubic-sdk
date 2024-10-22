@@ -83,6 +83,7 @@ module.exports = {
                 '@typescript-eslint/return-await': 'off',
                 'prefer-destructuring': 'off',
                 'no-bitwise': 'off',
+                curly: ['error', 'multi-line'],
                 'prettier/prettier': [
                     'error',
                     {

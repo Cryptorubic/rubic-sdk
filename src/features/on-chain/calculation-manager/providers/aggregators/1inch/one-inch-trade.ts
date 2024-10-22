@@ -20,7 +20,7 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 export class OneInchTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
@@ -122,7 +122,7 @@ export class OneInchTrade extends AggregatorEvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const fromTokenAddress = this.nativeSupportedFromWithoutFee.address;
         const toTokenAddress = this.nativeSupportedTo.address;
         const swapRequest: OneinchSwapRequest = {

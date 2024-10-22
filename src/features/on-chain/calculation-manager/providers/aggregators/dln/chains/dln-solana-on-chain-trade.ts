@@ -7,7 +7,6 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import {
     DlnEvmOnChainSupportedBlockchain,
     DlnOnChainSupportedBlockchain
@@ -16,7 +15,7 @@ import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager
 import { DlnTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorSolanaOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-solana-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
     private readonly transactionRequest: DlnOnChainSwapRequest;
@@ -32,12 +31,6 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
     public readonly type: OnChainTradeType;
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
-
-    protected get spenderAddress(): string {
-        return this.useProxy
-            ? rubicProxyContractAddress[this.from.blockchain].gateway
-            : this.providerGateway;
-    }
 
     public get dexContractAddress(): string {
         throw new RubicSdkError('Dex address is unknown before swap is started');
@@ -95,7 +88,7 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
     protected async getToAmountAndTxData(
         receiverAddress?: string,
         _fromAddress?: string
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const params: DlnOnChainSwapRequest = {
             ...this.transactionRequest,
             tokenOutRecipient: receiverAddress || this.web3Private.address

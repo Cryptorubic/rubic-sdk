@@ -25,7 +25,7 @@ export class SquidRouterOnChainProvider extends AggregatorOnChainProvider {
 
     private readonly nativeAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return squidrouterCrossChainSupportedBlockchains.some(item => item === blockchain);
     }
 
