@@ -28,6 +28,7 @@ export class CoffeeSwapApiService {
                     max_length: 3,
                     pool_selector: {
                         blockchains: ['ton'],
+                        dexes: ['stonfi', 'dedust'],
                         // restricts that liquidity wasn't changed more than 30%(with max_volatility 0.3) in last 15 minutes
                         max_volatility: 0.3
                     },
