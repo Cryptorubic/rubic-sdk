@@ -40,6 +40,16 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
                 walletAddress: options.fromAddress || FAKE_TON_ADDRESS
             });
 
+            if (quote.paths.length === 1) {
+                console.log(`%cNOT SPLITTED LIQUIDITY`, 'color: yellowgreen; font-size: 26px;');
+            } else {
+                console.log(
+                    `%cSPLITTED LIQUIDITY`,
+                    'color: #59dedc; font-size: 26px;',
+                    quote.paths
+                );
+            }
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: new BigNumber(quote.output_amount)

@@ -59,7 +59,8 @@ export class StonfiOnChainProvider extends AggregatorOnChainProvider {
                 useProxy: false,
                 withDeflation: options.withDeflation,
                 usedForCrossChain: false,
-                routingPath
+                routingPath,
+                changedSlippage: false
             } as TonOnChainTradeStruct;
             tradeStruct.gasFeeInfo = await this.getGasFeeInfo(tradeStruct);
 
