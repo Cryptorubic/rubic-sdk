@@ -1,25 +1,25 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { ChangenowCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 import { ChangenowCurrency } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
 import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-trade';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { CrossChainTransferTrade } from '../common/cross-chain-transfer-trade/cross-chain-transfer-trade';
-import { CrossChainTransferData } from '../common/cross-chain-transfer-trade/models/cross-chain-payment-info';
+import {
+    CrossChainPaymentInfo,
+    CrossChainTransferData
+} from '../common/cross-chain-transfer-trade/models/cross-chain-payment-info';
 import { TradeInfo } from '../common/models/trade-info';
 import { ChangenowSwapRequestBody } from './models/changenow-swap.api';
 import { ChangeNowCrossChainApiService } from './services/changenow-cross-chain-api-service';
@@ -82,31 +82,11 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
         }
     }
 
-    protected get methodName(): string {
-        return this.onChainTrade
-            ? 'swapAndStartBridgeTokensViaTransfer'
-            : 'startBridgeTokensViaTransfer';
-    }
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CHANGENOW;
-
-    public readonly isAggregator = false;
-
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
-
-    public readonly to: PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>;
-
-    public readonly toTokenAmountMin: BigNumber;
-
-    public readonly gasData: GasData;
-
-    public readonly feeInfo: FeeInfo;
 
     public readonly onChainSubtype;
 
     public readonly bridgeType = BRIDGE_TYPE.CHANGENOW;
-
-    public readonly priceImpact: number | null;
 
     private readonly fromCurrency: ChangenowCurrency;
 
@@ -149,20 +129,20 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
         routePath: RubicStep[],
         useProxy: boolean
     ) {
-        super(providerAddress, routePath, useProxy, crossChainTrade.onChainTrade);
-
-        this.from = crossChainTrade.from as PriceTokenAmount<EvmBlockchainName>;
-        this.to = crossChainTrade.to;
-        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-
+        super(
+            providerAddress,
+            routePath,
+            useProxy,
+            crossChainTrade.onChainTrade,
+            crossChainTrade.from,
+            crossChainTrade.to,
+            crossChainTrade.toTokenAmountMin,
+            crossChainTrade.gasData,
+            crossChainTrade.feeInfo,
+            crossChainTrade.from.calculatePriceImpactPercent(crossChainTrade.to)
+        );
         this.fromCurrency = crossChainTrade.fromCurrency;
         this.toCurrency = crossChainTrade.toCurrency;
-
-        this.feeInfo = crossChainTrade.feeInfo;
-        this.gasData = crossChainTrade.gasData;
-
-        this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
-
         this.onChainSubtype = crossChainTrade.onChainTrade
             ? { from: crossChainTrade.onChainTrade.type, to: undefined }
             : { from: undefined, to: undefined };
@@ -204,5 +184,12 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
                 : 0,
             routePath: this.routePath
         };
+    }
+
+    /**
+     * @deprecated Use getTransferTrade instead
+     */
+    public getChangenowPostTrade(receiverAddress: string): Promise<CrossChainPaymentInfo> {
+        return super.getTransferTrade(receiverAddress);
     }
 }

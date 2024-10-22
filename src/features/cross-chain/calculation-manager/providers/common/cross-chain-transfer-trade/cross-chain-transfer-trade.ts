@@ -1,5 +1,8 @@
+import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
+import { PriceTokenAmount } from 'src/common/tokens';
 import { getGasOptions } from 'src/common/utils/options';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -19,6 +22,8 @@ import { rubicProxyContractAddress } from '../constants/rubic-proxy-contract-add
 import { evmCommonCrossChainAbi } from '../emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from '../emv-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from '../emv-cross-chain-trade/models/gas-data';
+import { FeeInfo } from '../models/fee-info';
 import { GetContractParamsOptions } from '../models/get-contract-params-options';
 import { RubicStep } from '../models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
@@ -28,6 +33,26 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     protected paymentInfo: CrossChainTransferData | null = null;
 
     public readonly onChainTrade: EvmOnChainTrade | null;
+
+    protected get methodName(): string {
+        return this.onChainTrade
+            ? 'swapAndStartBridgeTokensViaTransfer'
+            : 'startBridgeTokensViaTransfer';
+    }
+
+    public readonly isAggregator = false;
+
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
+
+    public readonly to: PriceTokenAmount<BlockchainName>;
+
+    public readonly toTokenAmountMin: BigNumber;
+
+    public readonly gasData: GasData;
+
+    public readonly feeInfo: FeeInfo;
+
+    public readonly priceImpact: number | null;
 
     protected get web3Private(): EvmWeb3Private {
         if (!BlockchainsInfo.isEvmBlockchainName(this.from.blockchain)) {
@@ -40,10 +65,22 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         providerAddress: string,
         routePath: RubicStep[],
         useProxy: boolean,
-        onChainTrade: EvmOnChainTrade | null
+        onChainTrade: EvmOnChainTrade | null,
+        from: PriceTokenAmount<BlockchainName>,
+        to: PriceTokenAmount<BlockchainName>,
+        toTokenAmountMin: BigNumber,
+        gasData: GasData,
+        feeInfo: FeeInfo,
+        priceImpact: number | null
     ) {
         super(providerAddress, routePath, useProxy);
         this.onChainTrade = onChainTrade;
+        this.from = from as PriceTokenAmount<EvmBlockchainName>;
+        this.to = to;
+        this.toTokenAmountMin = toTokenAmountMin;
+        this.gasData = gasData;
+        this.feeInfo = feeInfo;
+        this.priceImpact = priceImpact;
     }
 
     public async getTransferTrade(receiverAddress: string): Promise<CrossChainPaymentInfo> {

@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -92,23 +91,9 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP;
 
-    public readonly isAggregator = false;
-
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
-
-    public readonly to: PriceTokenAmount<SimpleSwapCcrSupportedChain>;
-
-    public readonly toTokenAmountMin: BigNumber;
-
-    public readonly gasData: GasData | null;
-
-    public readonly feeInfo: FeeInfo;
-
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
     public readonly bridgeType = BRIDGE_TYPE.SIMPLE_SWAP;
-
-    public readonly priceImpact: number | null;
 
     private readonly fromCurrency: SimpleSwapCurrency;
 
@@ -119,10 +104,6 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
             return rubicProxyContractAddress[this.from.blockchain].gateway;
         }
         throw new RubicSdkError('No contract address for simple swap provider');
-    }
-
-    protected get methodName(): string {
-        return 'startBridgeTokensViaTransfer';
     }
 
     constructor(
@@ -139,15 +120,21 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
         routePath: RubicStep[],
         useProxy: boolean
     ) {
-        super(providerAddress, routePath, useProxy, null);
-        this.from = crossChainTrade.from;
-        this.to = crossChainTrade.to;
-        this.priceImpact = crossChainTrade.priceImpact;
-        this.gasData = crossChainTrade.gasData;
-        this.feeInfo = crossChainTrade.feeInfo;
+        super(
+            providerAddress,
+            routePath,
+            useProxy,
+            null,
+            crossChainTrade.from,
+            crossChainTrade.to,
+            crossChainTrade.to.tokenAmount,
+            crossChainTrade.gasData,
+            crossChainTrade.feeInfo,
+            crossChainTrade.priceImpact
+        );
+
         this.fromCurrency = crossChainTrade.fromCurrency;
         this.toCurrency = crossChainTrade.toCurrency;
-        this.toTokenAmountMin = this.to.tokenAmount;
     }
 
     protected async getPaymentInfo(receiverAddress: string): Promise<CrossChainTransferData> {
