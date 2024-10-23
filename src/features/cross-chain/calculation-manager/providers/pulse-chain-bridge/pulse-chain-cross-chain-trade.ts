@@ -6,6 +6,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -286,7 +287,11 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         amount: string;
     }> {
         const toToken = this.to;
-        const fromToken = this.onChainTrade ? this.onChainTrade.to : this.from;
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
+        const fromToken = this.onChainTrade ? this.onChainTrade.to : fromWithoutFee;
         const sourceBridgeManager = BridgeManager.createBridge(
             fromToken as Token<PulseChainCrossChainSupportedBlockchain>,
             toToken as Token<PulseChainCrossChainSupportedBlockchain>
