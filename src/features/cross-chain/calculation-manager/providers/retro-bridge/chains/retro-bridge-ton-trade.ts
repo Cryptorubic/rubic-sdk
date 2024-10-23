@@ -1,10 +1,11 @@
 import BigNumber from 'bignumber.js';
-import { WrongReceiverAddressError } from 'src/common/errors';
+import { RubicSdkError, WrongReceiverAddressError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -30,9 +31,10 @@ import {
     RetroBridgeQuoteSendParams,
     RetroBridgeTxResponse
 } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-quote-send-params';
+import { RetroBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-trade';
 import { RetroBridgeApiService } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/services/retro-bridge-api-service';
 
-export class RetroBridgeTonTrade extends TonCrossChainTrade {
+export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBridgeTrade {
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE;
 
     public readonly isAggregator = false;
@@ -120,6 +122,11 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade {
             throw new WrongReceiverAddressError();
         }
 
+        const needAuthWallet = await this.needAuthWallet();
+        if (needAuthWallet) {
+            throw new RubicSdkError('Need to authorize the wallet via authWallet method');
+        }
+
         let retroBridgeOrder: RetroBridgeTxResponse = {
             hot_wallet_address: this.hotWalletAddress,
             transaction_id: ''
@@ -157,5 +164,20 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade {
         _skipAmountChangeCheck?: boolean
     ): Promise<ContractParams> {
         throw new Error('Not implemented');
+    }
+
+    public async needAuthWallet(): Promise<boolean> {
+        try {
+            const addresses = await TonWeb3Pure.getAllFormatsOfAddress(this.walletAddress);
+            const msg = await RetroBridgeApiService.checkWallet(addresses.raw_form, this.chainType);
+
+            return msg.toLowerCase() !== 'success';
+        } catch {
+            return true;
+        }
+    }
+
+    public async authWallet(): Promise<never | void> {
+        console.error('Wallet should be authenticated on connection stage');
     }
 }

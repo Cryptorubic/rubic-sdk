@@ -1,6 +1,6 @@
 import { Address, beginCell, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
-import { TonConnectUI } from '@tonconnect/ui';
+import { TonConnectUI, Wallet } from '@tonconnect/ui';
 import { RubicSdkError, UserRejectError } from 'src/common/errors';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -30,6 +30,10 @@ export class TonWeb3Private extends Web3Private {
 
     public getBlockchainName(): Promise<BlockchainName> {
         return Promise.resolve(BLOCKCHAIN_NAME.TON);
+    }
+
+    private get wallet(): Wallet | null {
+        return this.tonConnectUI.connector.wallet;
     }
 
     public async sendTransaction(options: TonTransactionOptions): Promise<string> {
@@ -84,38 +88,45 @@ export class TonWeb3Private extends Web3Private {
         const transferAmount = BigInt(amount);
         const encodeConfig: TonEncodedConfig = {
             address: receiver,
-            amount: toNano(transferAmount).toString()
+            amount: transferAmount.toString()
         };
 
         return this.sendTransaction({ ...options, messages: [encodeConfig] });
     }
 
-    private transferJetton(
+    private async transferJetton(
         tokenAddress: string,
         walletAddress: string,
         receiver: string,
         amount: string,
         options?: BasicTransactionOptions
     ): Promise<string> {
-        const walletSourceAddress = Address.parse(walletAddress);
-        const walletDestAddress = Address.parse(receiver);
+        const fromAddress = Address.parse(walletAddress);
+        const receiverAddress = Address.parse(receiver);
+        const contractAddress = Address.parse(tokenAddress);
         const transferAmount = BigInt(amount);
 
         const body = beginCell()
-            // Transfer opcode
             .storeUint(0xf8a7ea5, 32)
             .storeUint(0, 64)
             .storeCoins(transferAmount)
-            .storeAddress(walletDestAddress)
-            .storeAddress(walletSourceAddress)
+            .storeAddress(receiverAddress)
+            .storeAddress(fromAddress)
             .storeUint(0, 1)
             .storeCoins(toNano('0.05'))
             .storeUint(0, 1)
             .endCell();
 
+        const walletAddressResult = await this.tonClient.runMethod(
+            contractAddress,
+            'get_wallet_address',
+            [{ type: 'slice', cell: beginCell().storeAddress(fromAddress).endCell() }]
+        );
+        const jettonWalletAddress = walletAddressResult.stack.readAddress();
+
         const encodeConfig: TonEncodedConfig = {
-            address: tokenAddress,
-            amount: toNano('0.025').toString(),
+            address: jettonWalletAddress.toRawString(),
+            amount: toNano('0.05').toString(),
             payload: body.toBoc().toString('base64')
         };
 

@@ -36,11 +36,11 @@ import {
     RetroBridgeQuoteSendParams,
     RetroBridgeTxResponse
 } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-quote-send-params';
-import { RetroBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/retro-bridge-trade';
+import { RetroBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-trade';
 import { RetroBridgeApiService } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/services/retro-bridge-api-service';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
-export class RetroBridgeEvmTrade extends EvmCrossChainTrade {
+export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBridgeTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -51,7 +51,7 @@ export class RetroBridgeEvmTrade extends EvmCrossChainTrade {
         quoteSendParams: RetroBridgeQuoteSendParams,
         hotWalletAddress: string
     ): Promise<GasData | null> {
-        const trade = new RetroBridgeTrade(
+        const trade = new RetroBridgeEvmTrade(
             {
                 from,
                 to,

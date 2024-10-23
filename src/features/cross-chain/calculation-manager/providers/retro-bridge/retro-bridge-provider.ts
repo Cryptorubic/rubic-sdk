@@ -23,7 +23,6 @@ import {
     retroBridgeSupportedBlockchain
 } from './constants/retro-bridge-supported-blockchain';
 import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
-import { RetroBridgeTrade } from './retro-bridge-trade';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
 
 export class RetroBridgeProvider extends CrossChainProvider {
@@ -100,9 +99,10 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 ...toToken.asStruct,
                 tokenAmount: new BigNumber(retroBridgeQuoteConfig.amount_out)
             });
+
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await RetroBridgeTrade.getGasData(
+                    ? await RetroBridgeFactory.getGasData(
                           from,
                           to,
                           feeInfo,
@@ -239,7 +239,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
             tokenAmount: new BigNumber(0)
         });
 
-        const trade = new RetroBridgeTrade(
+        const trade = RetroBridgeFactory.createTrade(
+            from.blockchain,
             {
                 from,
                 feeInfo,
