@@ -110,7 +110,7 @@ export class OneinchCcrTrade extends EvmCrossChainTrade {
         if (!options?.testMode) {
             await this.checkTradeErrors();
         }
-        checkUnsupportedReceiverAddress(this.walletAddress, options.receiverAddress);
+        checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
 
         try {
             const secretsCount = this.quote.presets[this.quote.recommendedPreset].secretsCount;

@@ -7,7 +7,9 @@ import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { CrossChainProvider } from '../common/cross-chain-provider';
 import { CalculationResult } from '../common/models/calculation-result';
+import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
+import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     OneinchCcrSupportedChain,
     oneinchCcrSupportedChains
@@ -93,6 +95,20 @@ export class OneinchCcrProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         }
+    }
+
+    protected async getFeeInfo(
+        fromBlockchain: OneinchCcrSupportedChain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
+    ): Promise<FeeInfo> {
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 
     protected async getRoutePath(

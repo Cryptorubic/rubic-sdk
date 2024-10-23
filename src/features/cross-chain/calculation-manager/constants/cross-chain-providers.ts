@@ -15,6 +15,7 @@ import { AcrossCrossChainProvider } from '../providers/across-provider/across-cr
 import { EddyBridgeProvider } from '../providers/eddy-bridge/eddy-bridge-provider';
 import { LayerZeroBridgeProvider } from '../providers/layerzero-bridge/layerzero-bridge-provider';
 import { MesonCrossChainProvider } from '../providers/meson-provider/meson-cross-chain-provider';
+import { OneinchCcrProvider } from '../providers/oneinch-provider/oneinch-ccr-provider';
 import { OrbiterBridgeProvider } from '../providers/orbiter-bridge/orbiter-bridge-provider';
 import { OwlToBridgeProvider } from '../providers/owl-to-bridge/owl-to-bridge-provider';
 import { RangoCrossChainProvider } from '../providers/rango-provider/rango-cross-chain-provider';
@@ -40,7 +41,8 @@ const proxyProviders = [
     EddyBridgeProvider,
     RouterCrossChainProvider,
     RetroBridgeProvider,
-    AcrossCrossChainProvider
+    AcrossCrossChainProvider,
+    OneinchCcrProvider
 ] as const;
 
 const nonProxyProviders = [
