@@ -1,4 +1,3 @@
-import { NotSupportedBlockchain } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
@@ -13,7 +12,7 @@ import { ZetaSwapTrade } from './zetaswap-trade';
 export class ZetaSwapProvider extends NativeRouterAbstractProvider<ZetaSwapTrade> {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.ZETA_SWAP;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return zetaswapOnChainSupportedBlockchains.some(chain => chain === blockchain);
     }
 
@@ -28,9 +27,6 @@ export class ZetaSwapProvider extends NativeRouterAbstractProvider<ZetaSwapTrade
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<ZetaSwapTrade | OnChainTradeError> {
-        if (!this.isSupportedBlockchain(from.blockchain)) {
-            throw new NotSupportedBlockchain();
-        }
         return super.calculate(from, toToken, options);
     }
 }

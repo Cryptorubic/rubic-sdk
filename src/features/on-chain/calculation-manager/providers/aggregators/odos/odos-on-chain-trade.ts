@@ -7,7 +7,7 @@ import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-man
 import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
-import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { OdosBestRouteRequestBody } from './models/odos-api-best-route-types';
 import { OdosOnChainTradeStruct } from './models/odos-on-chain-trade-types';
 import { OdosOnChainApiService } from './services/odos-on-chain-api-service';
@@ -55,7 +55,7 @@ export class OdosOnChainTrade extends AggregatorEvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const { pathId } = await OdosOnChainApiService.getBestRoute(this.bestRouteRequestBody);
 
         const { transaction, outputTokens } = await OdosOnChainApiService.getSwapTx({

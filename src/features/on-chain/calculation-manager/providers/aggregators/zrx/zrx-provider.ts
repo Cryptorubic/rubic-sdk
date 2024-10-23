@@ -29,7 +29,7 @@ import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
 export class ZrxProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions: RequiredOnChainCalculationOptions = evmProviderDefaultOptions;
 
-    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+    public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return zeroXSupportedBlockchains.some(item => item === blockchain);
     }
 

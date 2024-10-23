@@ -182,7 +182,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 slippage: options.slippageTolerance
             },
             options.providerAddress,
-            await this.getRoutePath(from, to, bestRoute)
+            await this.getRoutePath(from, to, bestRoute),
+            useProxy
         );
 
         try {

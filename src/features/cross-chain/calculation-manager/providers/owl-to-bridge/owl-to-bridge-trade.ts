@@ -45,7 +45,8 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
                 approveAddress
             },
             providerAddress,
-            routePath: []
+            routePath: [],
+            useProxy: false
         });
         return getCrossChainGasData(trade);
     }
@@ -90,8 +91,8 @@ export class OwlToBridgeTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
-    constructor({ crossChainTrade, providerAddress, routePath }: OwlToTradeParams) {
-        super(providerAddress, routePath);
+    constructor({ crossChainTrade, providerAddress, routePath, useProxy }: OwlToTradeParams) {
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

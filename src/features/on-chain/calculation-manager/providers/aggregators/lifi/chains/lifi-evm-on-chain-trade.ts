@@ -79,7 +79,7 @@ export class LifiEvmOnChainTrade extends AggregatorEvmOnChainTrade {
 
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,

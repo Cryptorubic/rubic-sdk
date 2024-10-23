@@ -9,13 +9,10 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
     to: PriceTokenAmount<T>;
 
     slippageTolerance: number;
-    path: ReadonlyArray<Token>;
 
     gasFeeInfo: GasFeeInfo | null;
 
     useProxy: boolean;
-    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    fromWithoutFee: PriceTokenAmount<T>;
 
     withDeflation: {
         from: IsDeflationToken;
@@ -23,8 +20,11 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
     };
 
     usedForCrossChain?: boolean;
-
-    permit2ApproveAddress?: string;
 }
 
-export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainName> {}
+export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainName> {
+    permit2ApproveAddress?: string;
+    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+    path: ReadonlyArray<Token>;
+}

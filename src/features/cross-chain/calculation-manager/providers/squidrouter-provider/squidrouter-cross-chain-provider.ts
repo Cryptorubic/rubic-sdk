@@ -1,11 +1,14 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { SquidrouterEstimation } from 'src/features/common/providers/squidrouter/models/estimation-response';
+import { SquidrouterTransactionRequest } from 'src/features/common/providers/squidrouter/models/transaction-request';
+import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -19,15 +22,10 @@ import {
     SquidrouterCrossChainSupportedBlockchain,
     squidrouterCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
-import { SquidrouterEstimation } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/estimation-response';
-import { SquidrouterTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-request';
 import { SquidrouterCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-trade';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export class SquidrouterCrossChainProvider extends CrossChainProvider {
-    public static readonly apiEndpoint = 'https://api.0xsquid.com/v1/';
-
-    private readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+    private readonly nativeAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER;
 
@@ -69,22 +67,25 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
             );
 
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
-            const receiver =
-                options?.receiverAddress || this.getWalletAddress(fromBlockchain) || fakeAddress;
+
+            const fromAddress = options?.fromAddress || fakeAddress;
+
+            const receiver = options?.receiverAddress || fromAddress;
+
             const requestParams: SquidrouterTransactionRequest = {
-                fromChain: blockchainId[fromBlockchain],
+                fromAddress,
+                fromChain: blockchainId[fromBlockchain].toString(),
                 fromToken: from.isNative ? this.nativeAddress : from.address,
                 fromAmount: fromWithoutFee.stringWeiAmount,
-                toChain: blockchainId[toBlockchain],
+                toChain: blockchainId[toBlockchain].toString(),
                 toToken: toToken.isNative ? this.nativeAddress : toToken.address,
                 toAddress: receiver,
                 slippage: Number(options.slippageTolerance * 100)
             };
+
             const {
                 route: { transactionRequest, estimate }
-            } = await SquidrouterCrossChainTrade.getResponseFromApiToTransactionRequest(
-                requestParams
-            );
+            } = await SquidRouterApiService.getRoute(requestParams);
 
             const squidGasData: GasData = {
                 gasLimit: new BigNumber(transactionRequest.gasLimit).plus(useProxy ? 120000 : 0),
@@ -118,14 +119,6 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 ...nativeToken,
                 weiAmount: new BigNumber(feeAmount)
             });
-
-            const transitRoute = estimate.route.toChain.at(-1)!;
-
-            const transitUSDAmount =
-                'toAmount' in transitRoute
-                    ? Web3Pure.fromWei(transitRoute.toAmount, transitRoute.toToken.decimals)
-                    : new BigNumber(estimate.toAmountUSD);
-
             return {
                 trade: new SquidrouterCrossChainTrade(
                     {
@@ -133,7 +126,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                         to,
                         gasData: gasData || squidGasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
-                        allowanceTarget: transactionRequest.targetAddress,
+                        allowanceTarget: transactionRequest.target,
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
@@ -144,14 +137,14 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                                 }
                             }
                         },
-                        transitUSDAmount,
                         cryptoFeeToken,
                         onChainTrade: null,
                         onChainSubtype: { from: undefined, to: undefined },
                         transactionRequest: requestParams
                     },
                     options.providerAddress,
-                    await this.getRoutePath(estimate, from, to)
+                    await this.getRoutePath(estimate, from, to),
+                    useProxy
                 ),
                 tradeType: this.type
             };
@@ -185,66 +178,60 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
     }
 
     protected async getRoutePath(
-        estimation: SquidrouterEstimation,
-        from: PriceTokenAmount,
+        _estimation: SquidrouterEstimation,
+        fromToken: PriceTokenAmount,
         to: PriceTokenAmount
     ): Promise<RubicStep[]> {
-        const transitFrom = estimation.route.fromChain.map(el => ({
-            address: el.toToken.address,
-            amount: new BigNumber(el.toAmount)
-        }));
+        // const routePath: RubicStep[] = [];
 
-        const transitTo = (
-            estimation.route.toChain
-                // @ts-ignore
-                .filter(el => 'dex' in el) as SquidrouterEstimation['route']['fromChain']
-        ).map(el => ({
-            amount: new BigNumber(el.fromAmount),
-            address: el.fromToken.address
-        }));
+        // for (const action of estimation.actions) {
+        //     const fromTokenAddress =
+        //         this.checkIsNativeToken(action.fromToken.address) ?
+        //             EvmWeb3Pure.nativeTokenAddress : action.fromToken.address;
+        //     const toTokenAddress = this.checkIsNativeToken(action.toToken.address) ?
+        //         EvmWeb3Pure.nativeTokenAddress : action.toToken.address;
 
-        const fromTransitTokens = await Token.createTokens(
-            transitFrom.map(el => el.address),
-            from.blockchain
-        );
+        //     if (action.fromChain === action.toChain) {
+        //         const tokens = await Token.createTokens(
+        //             [fromTokenAddress, toTokenAddress],
+        //             BlockchainsInfo.getBlockchainNameById(action.fromChain)!
+        //         )
+        //         routePath.push({
+        //             path: tokens,
+        //             type: 'on-chain',
+        //             provider: action.provider as OnChainTradeType
+        //         })
+        //     } else {
+        //         const fromTransitToken = await PriceTokenAmount.createToken({
+        //             address: fromTokenAddress,
+        //             blockchain: BlockchainsInfo.getBlockchainNameById(action.fromToken.chainId)!,
+        //             weiAmount: new BigNumber(action.fromAmount)
+        //         });
 
-        const toTransitTokens = await Token.createTokens(
-            transitTo.map(el => el.address),
-            to.blockchain
-        );
+        //         const toTransitToken = await PriceTokenAmount.createToken({
+        //             address: toTokenAddress,
+        //             blockchain: BlockchainsInfo.getBlockchainNameById(action.toToken.chainId)!,
+        //             weiAmount: new BigNumber(action.toAmount)
+        //         })
 
-        const fromTokenAmount = fromTransitTokens.map(
-            (token, index) => new TokenAmount({ ...token, weiAmount: transitFrom[index]!.amount })
-        );
+        //         routePath.push({
+        //             path: [fromTransitToken, toTransitToken],
+        //             type: 'cross-chain',
+        //             provider: action.provider as CrossChainTradeType
+        //         })
+        //     }
+        // }
 
-        const toTokenAmount = toTransitTokens.map(
-            (token, index) => new TokenAmount({ ...token, weiAmount: transitTo[index]!.amount })
-        );
+        return [
+            {
+                path: [fromToken, to],
+                provider: CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER,
+                type: 'cross-chain'
+            }
+        ];
+    }
 
-        const routePath: RubicStep[] = [];
-        if (fromTokenAmount.length) {
-            routePath.push({
-                type: 'on-chain',
-                // @TODO Add generic provider
-                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-                path: [from, ...fromTokenAmount]
-            });
-        }
-        routePath.push({
-            type: 'cross-chain',
-            // @TODO Add generic provider
-            provider: CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER,
-            path: [fromTokenAmount.at(-1) || from, toTokenAmount.at(0) || to]
-        });
-        if (toTokenAmount.length) {
-            routePath.push({
-                type: 'on-chain',
-                // @TODO Add generic provider
-                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-                path: [...toTokenAmount, to]
-            });
-        }
-
-        return routePath;
+    private checkIsNativeToken(address: string): boolean {
+        return address.includes(this.nativeAddress);
     }
 }

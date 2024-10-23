@@ -7,7 +7,6 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -42,7 +41,7 @@ import { SymbiosisCrossChainSupportedBlockchain } from './models/symbiosis-cross
 /**
  * Calculated Symbiosis cross-chain trade.
  */
-export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
+export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
     private readonly swappingParams: SymbiosisSwappingParams;
 
     /** @internal */
@@ -55,7 +54,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
-        const trade = new SymbiosisCrossChainTrade(
+        const trade = new SymbiosisEvmCcrTrade(
             {
                 from,
                 to: toToken,
@@ -72,7 +71,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 swapParams
             },
             providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            []
+            [],
+            false
         );
         return getCrossChainGasData(trade, receiverAddress);
     }
@@ -125,10 +125,6 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
     }
 
-    protected get evmWeb3Private(): EvmWeb3Private {
-        return Injector.web3PrivateService.getWeb3Private('EVM');
-    }
-
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -144,9 +140,10 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             promotions?: string[];
         },
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -157,12 +154,12 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
-        this.onChainSubtype = SymbiosisCrossChainTrade.getSubtype(
+        this.onChainSubtype = SymbiosisEvmCcrTrade.getSubtype(
             crossChainTrade.tradeType,
             crossChainTrade.to.blockchain
         );
         this.contractAddresses = crossChainTrade.contractAddresses;
-        this.promotions = crossChainTrade?.promotions || super.promotions;
+        this.promotions = crossChainTrade?.promotions || [];
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -176,8 +173,12 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             options?.receiverAddress
         );
 
-        let receiverAddress = options.receiverAddress;
+        const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
+        let receiverAddress = isEvmDestination
+            ? options.receiverAddress || this.walletAddress
+            : options.receiverAddress;
         let toAddress = '';
+
         if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
             const tronHexReceiverAddress = await this.tronWeb3Public.convertTronAddressToHex(
                 options.receiverAddress!
@@ -267,7 +268,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 options?.receiverAddress
             );
 
-            await this.evmWeb3Private.trySendTransaction(to, {
+            await this.web3Private.trySendTransaction(to, {
                 data,
                 value,
                 onTransactionHash,
@@ -326,8 +327,9 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const walletAddress = this.walletAddress;
         if (this.from.blockchain === 'BAHAMUT' || this.to.blockchain === 'BAHAMUT') {
-            await checkUnsupportedReceiverAddress(receiverAddress, this.walletAddress);
+            checkUnsupportedReceiverAddress(receiverAddress, this.walletAddress);
         }
+
         const params: SymbiosisSwappingParams = {
             ...this.swappingParams,
             from: walletAddress,

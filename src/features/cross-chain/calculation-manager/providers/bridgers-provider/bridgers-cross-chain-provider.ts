@@ -6,13 +6,13 @@ import {
     NotSupportedTokensError
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -22,6 +22,7 @@ import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -33,14 +34,12 @@ import {
 import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
 import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
-import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
-import { AbiItem } from 'web3-utils';
 
 import { CrossChainTrade } from '../common/cross-chain-trade';
+import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 
 export class BridgersCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -79,25 +78,21 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const contractAbi = BlockchainsInfo.isTronBlockchainName(fromBlockchain)
-                ? tronCommonCrossChainAbi
-                : evmCommonCrossChainAbi;
+            const useProxy = options?.useProxy?.[this.type] ?? true;
 
             let feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
                 from,
-                false,
-                contractAbi
+                useProxy
             );
-            // const fromWithoutFee = getFromWithoutFee(
-            //     from,
-            //     feeInfo.rubicProxy?.platformFee?.percent
-            // );
-            const fromWithoutFee = from;
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const fromTokenAddress = createTokenNativeAddressProxy(
-                from,
+                fromWithoutFee,
                 bridgersNativeAddress,
                 false
             ).address;
@@ -179,7 +174,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance
                     },
                     options.providerAddress,
-                    await this.getRoutePath(from, to)
+                    await this.getRoutePath(from, to),
+                    useProxy
                 );
 
                 return this.getCalculationResponse(from, transactionData, evmTrade);
@@ -235,21 +231,17 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
     }
 
     protected override async getFeeInfo(
-        fromBlockchain: BridgersCrossChainSupportedBlockchain,
-        _providerAddress: string,
-        _percentFeeToken: PriceTokenAmount,
-        _useProxy: boolean,
-        _contractAbi: AbiItem[]
+        fromBlockchain: Web3PublicSupportedBlockchain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
-        return {
-            rubicProxy: {
-                fixedFee: {
-                    amount: new BigNumber(0),
-                    token: nativeToken
-                }
-            }
-        };
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 
     protected async getRoutePath(

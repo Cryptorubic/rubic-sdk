@@ -176,11 +176,18 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         const { data, value, to } = await this.encode({ ...options, fromAddress });
 
         try {
-            const gasfullOptions = await this.web3Private.simulateTransaction(to, {
-                data,
-                value
-            });
-            return gasfullOptions;
+            if (!options?.testMode) {
+                const gasfullOptions = await this.web3Private.simulateTransaction(
+                    to,
+                    {
+                        data,
+                        value
+                    },
+                    this.from.blockchain
+                );
+                return gasfullOptions;
+            }
+            return { data, value, to };
         } catch (err) {
             throw err;
         }
@@ -298,7 +305,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );
 
-        if (this.feeInfo?.rubicProxy?.fixedFee?.amount.gt(0)) {
+        if (this.isProxyTrade) {
             return this.encodeProxy(options);
         }
         return this.setTransactionConfig(

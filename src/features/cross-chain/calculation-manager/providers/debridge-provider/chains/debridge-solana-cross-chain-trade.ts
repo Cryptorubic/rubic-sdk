@@ -21,6 +21,8 @@ import { TransactionRequest } from 'src/features/cross-chain/calculation-manager
 import { DlnSolanaTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
+import { deBridgeReferralCode } from '../constants/debridge-code';
+
 /**
  * Calculated DeBridge cross-chain trade.
  */
@@ -77,7 +79,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
         providerAddress: string,
         routePath: RubicStep[]
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, false);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -151,7 +153,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
             srcChainOrderAuthorityAddress: sameChain
                 ? receiverAddress || walletAddress
                 : walletAddress,
-            referralCode: '4350'
+            referralCode: deBridgeReferralCode
         };
 
         const {

@@ -11,7 +11,11 @@ import {
 } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
 import { getGasOptions } from 'src/common/utils/options';
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
@@ -19,6 +23,7 @@ import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-priva
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { UNI_V3_PERMIT_2_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/uni-v3-permit2-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { proxyHashErrors } from 'src/features/cross-chain/calculation-manager/providers/common/constants/proxy-hash-errors';
 import Web3 from 'web3';
@@ -460,9 +465,12 @@ export class EvmWeb3Private extends Web3Private {
 
     public async simulateTransaction(
         toAddress: string,
-        options: EvmTransactionOptions
+        options: EvmTransactionOptions,
+        blockchain: EvmBlockchainName
     ): Promise<EvmTransactionOptions> {
         try {
+            const web3 =
+                this.web3 ?? Injector.web3PublicService.getWeb3Public(blockchain).web3Provider;
             const gaslessParams = {
                 from: this.address,
                 to: toAddress,
@@ -471,7 +479,7 @@ export class EvmWeb3Private extends Web3Private {
                 ...(options?.chainId && { chainId: options.chainId })
             };
 
-            const gas = await this.web3.eth.estimateGas(gaslessParams as TransactionConfig);
+            const gas = await web3.eth.estimateGas(gaslessParams as TransactionConfig);
 
             const gasfulParams = {
                 ...gaslessParams,
@@ -480,7 +488,7 @@ export class EvmWeb3Private extends Web3Private {
             };
 
             try {
-                await this.web3.eth.estimateGas(gasfulParams as TransactionConfig);
+                await web3.eth.estimateGas(gasfulParams as TransactionConfig);
 
                 return gasfulParams;
             } catch {
@@ -490,5 +498,10 @@ export class EvmWeb3Private extends Web3Private {
             console.debug('Call tokens transfer error', err);
             throw EvmWeb3Private.parseError(err as Web3Error);
         }
+    }
+
+    public async signMessage(message: string): Promise<string> {
+        const signature = this.web3.eth.personal.sign(message, this.address, '');
+        return signature;
     }
 }
