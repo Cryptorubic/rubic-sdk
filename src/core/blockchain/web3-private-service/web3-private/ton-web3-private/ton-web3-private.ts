@@ -102,27 +102,23 @@ export class TonWeb3Private extends Web3Private {
         options?: BasicTransactionOptions
     ): Promise<string> {
         const fromAddress = Address.parse(walletAddress);
-        const receiverAddress = Address.parse(receiver);
         const contractAddress = Address.parse(tokenAddress);
         const transferAmount = BigInt(amount);
+        const receiverAddress = Address.parse(receiver);
+
+        const receiverWalletAddress = await this.getWalletAddress(receiverAddress, contractAddress);
+        const jettonWalletAddress = await this.getWalletAddress(fromAddress, contractAddress);
 
         const body = beginCell()
             .storeUint(0xf8a7ea5, 32)
             .storeUint(0, 64)
             .storeCoins(transferAmount)
-            .storeAddress(receiverAddress)
+            .storeAddress(receiverWalletAddress)
             .storeAddress(fromAddress)
-            .storeUint(0, 1)
-            .storeCoins(toNano('0.05'))
-            .storeUint(0, 1)
+            .storeBit(0)
+            .storeCoins(toNano('0.02'))
+            .storeBit(0)
             .endCell();
-
-        const walletAddressResult = await this.tonClient.runMethod(
-            contractAddress,
-            'get_wallet_address',
-            [{ type: 'slice', cell: beginCell().storeAddress(fromAddress).endCell() }]
-        );
-        const jettonWalletAddress = walletAddressResult.stack.readAddress();
 
         const encodeConfig: TonEncodedConfig = {
             address: jettonWalletAddress.toRawString(),
@@ -151,6 +147,15 @@ export class TonWeb3Private extends Web3Private {
         }
     }
 
+    public async getWalletAddress(address: Address, contractAddress: Address): Promise<Address> {
+        const addressResult = await this.tonClient.runMethod(
+            contractAddress,
+            'get_wallet_address',
+            [{ type: 'slice', cell: beginCell().storeAddress(address).endCell() }]
+        );
+        return addressResult.stack.readAddress();
+    }
+
     constructor(tonProviderCore: TonWalletProviderCore) {
         super(tonProviderCore.address);
         this.tonConnectUI = tonProviderCore.core;
@@ -158,6 +163,5 @@ export class TonWeb3Private extends Web3Private {
             endpoint: 'https://toncenter.com/api/v2/jsonRPC',
             apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
         });
-        this.tonConnectUI.account;
     }
 }
