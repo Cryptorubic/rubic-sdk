@@ -91,7 +91,7 @@ export class SyncSwapAbstractTrade extends EvmOnChainTrade {
 
         const params = this.getCallParameters(options?.receiverAddress);
         const gasParams = this.getGasParams(options);
-        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const value = this.from.isNative ? this.fromWithoutFee.stringWeiAmount : '0';
 
         const config = EvmWeb3Pure.encodeMethodCall(
             this.dexContractAddress,

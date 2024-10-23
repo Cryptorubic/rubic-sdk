@@ -66,7 +66,7 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 outTokenAddress: toToken.address,
                 isExactIn: true,
                 slippage: fullOptions.slippageTolerance * 10_000,
-                inTokenAmount: from.tokenAmount.toString()
+                inTokenAmount: fromWithoutFee.tokenAmount.toFixed()
             } as OkuQuoteRequestBody;
 
             const { subProvider, swapReqBody, toAmount, gas } = await this.getBestRoute(

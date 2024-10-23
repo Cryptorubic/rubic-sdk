@@ -71,7 +71,7 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
     protected async getTransactionConfigAndAmount(
         options: EncodeTransactionOptions
     ): Promise<EvmEncodedConfigAndToAmount> {
-        const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
+        const params = await RangoCommonParser.getSwapQueryParams(this.fromWithoutFee, this.to, {
             slippageTolerance: this.slippageTolerance,
             receiverAddress: options.receiverAddress || this.walletAddress,
             swapperGroups: RANGO_ON_CHAIN_DISABLED_PROVIDERS,

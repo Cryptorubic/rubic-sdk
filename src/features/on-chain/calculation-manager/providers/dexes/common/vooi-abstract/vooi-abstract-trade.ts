@@ -49,7 +49,7 @@ export abstract class VooiAbstractTrade extends EvmOnChainTrade {
             [
                 this.fromPoolId,
                 this.toPoolId,
-                this.from.stringWeiAmount,
+                this.fromWithoutFee.stringWeiAmount,
                 this.toTokenAmountMin.stringWeiAmount,
                 receiver,
                 deadlineMinutesTimestamp(this.deadlineInMinutes)

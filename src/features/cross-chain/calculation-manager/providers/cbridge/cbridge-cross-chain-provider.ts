@@ -246,7 +246,6 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         const supportedFromToken = config.chain_token?.[fromChainId]?.token.find(el =>
             compareAddresses(el.token.address, fromToken.address)
         );
-
         const supportedToToken = config.chain_token?.[toChainId]?.token.find(el =>
             compareAddresses(el.token.address, toToken.address)
         );
