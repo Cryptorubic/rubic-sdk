@@ -4,6 +4,7 @@ import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/b
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -246,9 +247,15 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
             this.from.isNative ? this.fromWithoutFee.stringWeiAmount : '0'
         );
 
+        return evmConfig;
+    }
+
+    public override async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+        const evmEncodeConfig = await super.encode(options);
+
         return {
-            ...evmConfig,
-            data: evmConfig.data + this.uniqCodeWithSeparator
+            ...evmEncodeConfig,
+            data: evmEncodeConfig.data + this.uniqCodeWithSeparator
         };
     }
 
