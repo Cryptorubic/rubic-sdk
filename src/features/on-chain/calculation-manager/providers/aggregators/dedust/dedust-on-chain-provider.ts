@@ -13,7 +13,7 @@ import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggr
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getMultistepData } from '../common/utils/get-ton-multistep-data';
-import { DEDUST_GAS } from './constants/dedust-gas';
+import { DEDUST_GAS } from './constants/dedust-consts';
 import { DedustOnChainTrade } from './dedust-on-chain-trade';
 import { DedustSwapService } from './services/dedust-swap-service';
 

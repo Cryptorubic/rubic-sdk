@@ -23,7 +23,7 @@ import { Injector } from 'src/core/injector/injector';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type';
-import { DEDUST_GAS } from '../constants/dedust-gas';
+import { DEDUST_GAS, RUBIC_REF_NAME_FOR_DEDUST } from '../constants/dedust-consts';
 import { DedustTxStep } from '../models/dedust-api-types';
 import { DedustApiService } from './dedust-api-service';
 import { DedustTxSender } from './dedust-sender-class';
@@ -215,7 +215,8 @@ export class DedustSwapService {
             poolAddress,
             amount: fromAmount,
             limit: minAmountOut,
-            gasAmount: toNano(DEDUST_GAS)
+            gasAmount: toNano(DEDUST_GAS),
+            queryId: RUBIC_REF_NAME_FOR_DEDUST
         });
     }
 
@@ -241,6 +242,7 @@ export class DedustSwapService {
             destination: jettonVault.address,
             responseAddress: sender.address,
             forwardAmount: toNano(0.15),
+            queryId: RUBIC_REF_NAME_FOR_DEDUST,
             forwardPayload: VaultJetton.createSwapPayload({
                 poolAddress,
                 limit: minAmountOut
@@ -275,6 +277,7 @@ export class DedustSwapService {
             amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
+            queryId: RUBIC_REF_NAME_FOR_DEDUST,
             forwardAmount: toNano(0.15),
             forwardPayload: VaultJetton.createSwapPayload(swapPayloadParams)
         });
