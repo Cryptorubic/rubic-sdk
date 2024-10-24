@@ -3,8 +3,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
-import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
-import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
+import { LifiEvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { zrxApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/constants';
 import {
     ZeroXSupportedBlockchains,
@@ -24,6 +23,8 @@ import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
+
+import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
 
 export class ZrxProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions: RequiredOnChainCalculationOptions = evmProviderDefaultOptions;
@@ -94,10 +95,12 @@ export class ZrxProvider extends AggregatorOnChainProvider {
      * Fetches zrx data from api.
      */
 
-    protected async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
+    protected async getGasFeeInfo(
+        lifiTradeStruct: LifiEvmOnChainTradeStruct
+    ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-            const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
+            const gasLimit = await LifiEvmOnChainTrade.getGasLimit(lifiTradeStruct);
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;

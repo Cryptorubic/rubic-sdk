@@ -20,6 +20,7 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
+import { LifiUtilsService } from 'src/features/common/providers/lifi/lifi-utils-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
@@ -295,10 +296,12 @@ export class CrossChainStatusManager {
      */
     private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
+            const fromChain = LifiUtilsService.getLifiChainId(data.fromBlockchain);
+            const toChain = LifiUtilsService.getLifiChainId(data.toBlockchain);
             const params = {
                 ...(data.lifiBridgeType && { bridge: data.lifiBridgeType }),
-                fromChain: blockchainId[data.fromBlockchain],
-                toChain: blockchainId[data.toBlockchain],
+                fromChain,
+                toChain,
                 txHash: data.srcTxHash
             };
             const { status, receiving } = await Injector.httpClient.get<{
