@@ -1,4 +1,3 @@
-import { RubicSdkError } from 'src/common/errors';
 import { PriceToken } from 'src/common/tokens';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
@@ -11,7 +10,6 @@ import {
     OneinchCcrQuoteResponse,
     OneinchQuoteParams,
     OneinchReadySecretsResponse,
-    OneinchResp,
     OneinchStatusResponse,
     OneinchSwapOrderParams,
     OneinchSwapOrderResponse
@@ -25,29 +23,29 @@ export class OneinchCcrApiService {
 
     private static readonly apiKey = 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4';
 
+    /**
+     * @TODO add fee and source
+     */
     public static async fetchQuote({
         srcToken,
         dstToken,
         walletAddress
     }: OneinchQuoteParams): Promise<OneinchCcrQuoteResponse> {
         try {
-            const res = await this.catchApiError(
-                Injector.httpClient.get<OneinchResp<OneinchCcrQuoteResponse>>(
-                    `${this.xApiUrl}/quoter/v1.0/quote/receive`,
-                    {
-                        headers: { apikey: this.apiKey },
-                        params: {
-                            srcChain: blockchainId[srcToken.blockchain],
-                            dstChain: blockchainId[dstToken.blockchain],
-                            srcTokenAddress: this.getApiTokenAddress(srcToken),
-                            dstTokenAddress: this.getApiTokenAddress(dstToken),
-                            amount: srcToken.stringWeiAmount,
-                            walletAddress: walletAddress || FAKE_WALLET_ADDRESS,
-                            enableEstimate: true,
-                            fee: 100
-                        }
+            const res = await Injector.httpClient.get<OneinchCcrQuoteResponse>(
+                `${this.xApiUrl}/quoter/v1.0/quote/receive`,
+                {
+                    headers: { apikey: this.apiKey },
+                    params: {
+                        srcChain: blockchainId[srcToken.blockchain],
+                        dstChain: blockchainId[dstToken.blockchain],
+                        srcTokenAddress: this.getApiTokenAddress(srcToken),
+                        dstTokenAddress: this.getApiTokenAddress(dstToken),
+                        amount: srcToken.stringWeiAmount,
+                        walletAddress: walletAddress || FAKE_WALLET_ADDRESS,
+                        enableEstimate: true
                     }
-                )
+                }
             );
 
             return res;
@@ -77,12 +75,10 @@ amount=${srcToken.stringWeiAmount}&
 walletAddress=${walletAddress}&
 preset=${quote.recommendedPreset}`;
 
-            const res = await this.catchApiError(
-                Injector.httpClient.post<OneinchSwapOrderResponse>(
-                    `${this.xApiUrl}/quoter/v1.0/quote/build?${queryParams}`,
-                    { quote: quote, secretsHashList: secretHashes },
-                    { headers: { apikey: this.apiKey } }
-                )
+            const res = await Injector.httpClient.post<OneinchSwapOrderResponse>(
+                `${this.xApiUrl}/quoter/v1.0/quote/build?${queryParams}`,
+                { quote: quote, secretsHashList: secretHashes },
+                { headers: { apikey: this.apiKey } }
             );
 
             return res;
@@ -102,19 +98,17 @@ preset=${quote.recommendedPreset}`;
                 swapResp.typedData,
                 walletAddress
             );
-            await this.catchApiError(
-                Injector.httpClient.post(
-                    `${this.xApiUrl}/relayer/v1.0/submit`,
-                    {
-                        signature,
-                        order: swapResp.typedData.message,
-                        srcChainId: swapResp.typedData.domain.chainId,
-                        extension: swapResp.extension,
-                        quoteId: quoteResp.quoteId,
-                        ...(secretHashes.length > 1 && { secretHashes })
-                    },
-                    { headers: { apikey: this.apiKey } }
-                )
+            await Injector.httpClient.post(
+                `${this.xApiUrl}/relayer/v1.0/submit`,
+                {
+                    signature,
+                    order: swapResp.typedData.message,
+                    srcChainId: swapResp.typedData.domain.chainId,
+                    extension: swapResp.extension,
+                    quoteId: quoteResp.quoteId,
+                    ...(secretHashes.length > 1 && { secretHashes })
+                },
+                { headers: { apikey: this.apiKey } }
             );
         } catch (err) {
             throw err;
@@ -123,11 +117,9 @@ preset=${quote.recommendedPreset}`;
 
     public static async fetchReadySecrets(orderHash: string): Promise<OneinchReadySecretsResponse> {
         try {
-            const readySecrets = await this.catchApiError(
-                Injector.httpClient.get<OneinchReadySecretsResponse>(
-                    `${this.xApiUrl}/orders/v1.0/order/ready-to-accept-secret-fills/${orderHash}`,
-                    { headers: { apikey: this.apiKey } }
-                )
+            const readySecrets = await Injector.httpClient.get<OneinchReadySecretsResponse>(
+                `${this.xApiUrl}/orders/v1.0/order/ready-to-accept-secret-fills/${orderHash}`,
+                { headers: { apikey: this.apiKey } }
             );
 
             return readySecrets;
@@ -138,15 +130,13 @@ preset=${quote.recommendedPreset}`;
 
     public static async submitSecretForSwapOrder(orderHash: string, secret: string): Promise<void> {
         try {
-            await this.catchApiError(
-                Injector.httpClient.post(
-                    `${this.xApiUrl}/relayer/v1.0/submit/secret`,
-                    {
-                        secret,
-                        orderHash
-                    },
-                    { headers: { apikey: this.apiKey } }
-                )
+            await Injector.httpClient.post(
+                `${this.xApiUrl}/relayer/v1.0/submit/secret`,
+                {
+                    secret,
+                    orderHash
+                },
+                { headers: { apikey: this.apiKey } }
             );
         } catch (err) {
             throw err;
@@ -155,10 +145,8 @@ preset=${quote.recommendedPreset}`;
 
     public static async fetchTxStatus(orderHash: string): Promise<TxStatusData> {
         try {
-            const { status, fills } = await this.catchApiError(
-                Injector.httpClient.get<OneinchStatusResponse>(
-                    `${this.xApiUrl}/orders/v1.0/order/status/${orderHash}`
-                )
+            const { status, fills } = await Injector.httpClient.get<OneinchStatusResponse>(
+                `${this.xApiUrl}/orders/v1.0/order/status/${orderHash}`
             );
 
             if (status === 'cancelled' || status === 'expired') {
@@ -188,10 +176,8 @@ preset=${quote.recommendedPreset}`;
 
     public static async fetchSrcTxHash(orderHash: string): Promise<string | null> {
         try {
-            const { fills } = await this.catchApiError(
-                Injector.httpClient.get<OneinchStatusResponse>(
-                    `${this.xApiUrl}/orders/v1.0/order/status/${orderHash}`
-                )
+            const { fills } = await Injector.httpClient.get<OneinchStatusResponse>(
+                `${this.xApiUrl}/orders/v1.0/order/status/${orderHash}`
             );
             const srcEscrowFirstEvent = fills[0]?.escrowEvents.find(
                 e => e.side === 'src' && e.action === 'src_escrow_created'
@@ -201,13 +187,6 @@ preset=${quote.recommendedPreset}`;
         } catch (err) {
             throw err;
         }
-    }
-
-    private static async catchApiError<T extends object>(req: Promise<OneinchResp<T>>): Promise<T> {
-        const res = await req;
-        if ('error' in res) throw new RubicSdkError(res.description);
-
-        return res;
     }
 
     private static getApiTokenAddress(token: PriceToken): string {

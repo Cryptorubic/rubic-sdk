@@ -55,7 +55,7 @@ export class OneinchCcrUtils {
         const deadlineMS = Date.now() + 1_000 * 600; // 10 minutes
         let srcTxHash: string | null = null;
 
-        while (Date.now() < deadlineMS || srcTxHash) {
+        while (Date.now() < deadlineMS && !srcTxHash) {
             await waitFor(10_000);
             srcTxHash = await OneinchCcrApiService.fetchSrcTxHash(orderHash);
         }

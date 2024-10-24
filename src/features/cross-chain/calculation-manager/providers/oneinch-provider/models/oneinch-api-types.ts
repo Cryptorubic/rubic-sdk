@@ -1,7 +1,6 @@
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
-export type OneinchResp<T> = T | { description: string; error: string; statusCode: number };
 export interface OneinchQuoteParams {
     srcToken: PriceTokenAmount<EvmBlockchainName>;
     dstToken: PriceToken<EvmBlockchainName>;
