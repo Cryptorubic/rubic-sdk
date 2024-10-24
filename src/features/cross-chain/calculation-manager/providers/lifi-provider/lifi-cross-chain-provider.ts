@@ -12,6 +12,7 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/bloc
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
@@ -66,6 +67,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult<EvmEncodeConfig | { data: string }>> {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
                 trade: null,
@@ -102,9 +104,16 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             fromBlockchain,
             options.providerAddress,
             from,
-            options?.useProxy?.[this.type] ?? true
+            useProxy
         );
-        const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
+        const rubicPercentFeeForSolana = getSolanaFee(from) * 100;
+
+        const feePercent =
+            from.blockchain === BLOCKCHAIN_NAME.SOLANA
+                ? rubicPercentFeeForSolana
+                : feeInfo.rubicProxy?.platformFee?.percent;
+
+        const fromWithoutFee = getFromWithoutFee(from, feePercent);
 
         const fromAddress = this.getWalletAddress(fromBlockchain);
         const toAddress = LifiUtilsService.getLifiReceiverAddress(

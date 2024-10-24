@@ -3,8 +3,10 @@ import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { LifiUtilsService } from 'src/features/common/providers/lifi/lifi-utils-service';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import {
     RouteOptions,
     RoutesRequest
@@ -21,7 +23,10 @@ import {
     LifiCalculationOptions,
     RequiredLifiCalculationOptions
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
-import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
+import {
+    LifiEvmOnChainTradeStruct,
+    LifiSolanaOnChainTradeStruct
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
@@ -60,7 +65,16 @@ export class LifiProvider extends AggregatorOnChainProvider {
             disabledProviders: [...options.disabledProviders, ON_CHAIN_TRADE_TYPE.DODO]
         });
 
-        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
+        const { fromWithoutFee: fromWithoutEvmFee, proxyFeeInfo } = await this.handleProxyContract(
+            from,
+            fullOptions
+        );
+
+        const feeSolanaPercent = getSolanaFee(from) * 100;
+        const fromWithoutSolanaFee = getFromWithoutFee(from, feeSolanaPercent);
+
+        const fromWithoutFee =
+            from.blockchain === BLOCKCHAIN_NAME.SOLANA ? fromWithoutSolanaFee : fromWithoutEvmFee;
 
         const fromChainId = LifiUtilsService.getLifiChainId(fromBlockchain);
         const toChainId = LifiUtilsService.getLifiChainId(fromBlockchain);
@@ -120,10 +134,10 @@ export class LifiProvider extends AggregatorOnChainProvider {
                     });
                     const path = this.getRoutePath(from, to);
 
-                    let lifiTradeStruct: LifiTradeStruct<BlockchainName> = {
+                    let lifiTradeStruct = {
                         from,
                         to,
-                        gasFeeInfo: null,
+                        gasFeeInfo: null as GasFeeInfo | null,
                         slippageTolerance: fullOptions.slippageTolerance!,
                         type,
                         path,
@@ -139,7 +153,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
                         fullOptions.gasCalculation === 'disabled'
                             ? null
                             : await this.getGasFeeInfo(
-                                  lifiTradeStruct as LifiTradeStruct<EvmBlockchainName>
+                                  lifiTradeStruct as LifiEvmOnChainTradeStruct
                               );
                     lifiTradeStruct = {
                         ...lifiTradeStruct,
@@ -148,7 +162,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
 
                     return LifiOnChainFactory.createTrade(
                         fromBlockchain,
-                        lifiTradeStruct,
+                        lifiTradeStruct as LifiEvmOnChainTradeStruct | LifiSolanaOnChainTradeStruct,
                         fullOptions.providerAddress
                     );
                 })
@@ -171,7 +185,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
     }
 
     protected async getGasFeeInfo(
-        lifiTradeStruct: LifiTradeStruct<EvmBlockchainName>
+        lifiTradeStruct: LifiEvmOnChainTradeStruct
     ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);

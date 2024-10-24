@@ -2,22 +2,22 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { Route } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-route';
 
 import { OnChainTradeType } from '../../../common/models/on-chain-trade-type';
 import { AggregatorSolanaOnChainTrade } from '../../../common/on-chain-aggregator/aggregator-solana-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { LifiOnChainTransactionRequest } from '../models/lifi-on-chain-transaction-request';
-import { LifiTradeStruct } from '../models/lifi-trade-struct';
+import { LifiSolanaOnChainTradeStruct } from '../models/lifi-trade-struct';
 import { LifiOnChainApiService } from '../services/lifi-on-chain-api-service';
 
 export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
     public static async getGasLimit(
-        _lifiTradeStruct: LifiTradeStruct<SolanaBlockchainName>
+        _lifiTradeStruct: LifiSolanaOnChainTradeStruct
     ): Promise<BigNumber | null> {
         return null;
     }
@@ -44,7 +44,7 @@ export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
         return this._toTokenAmountMin;
     }
 
-    constructor(tradeStruct: LifiTradeStruct<SolanaBlockchainName>, providerAddress: string) {
+    constructor(tradeStruct: LifiSolanaOnChainTradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);
 
         this._toTokenAmountMin = new PriceTokenAmount({
@@ -85,7 +85,7 @@ export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
     protected async getToAmountAndTxData(
         receiverAddress?: string | undefined,
         fromAddress?: string | undefined
-    ): Promise<GetToAmountAndTxDataResponse> {
+    ): Promise<EvmEncodedConfigAndToAmount> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -108,6 +108,7 @@ export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
         };
 
         try {
+            const rubicFee = getSolanaFee(this.from);
             const swapResponse: {
                 transactionRequest: LifiOnChainTransactionRequest;
                 estimate: Route;
@@ -116,9 +117,10 @@ export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
                 step.action.toChainId,
                 step.action.fromToken.symbol,
                 step.action.toToken.symbol,
-                step.action.fromAmount,
+                this.from.stringWeiAmount,
                 step.action.fromAddress,
-                step.action.slippage
+                step.action.slippage,
+                rubicFee ? rubicFee : undefined
             );
 
             const {

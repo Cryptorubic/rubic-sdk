@@ -16,13 +16,15 @@ export class LifiCrossChainFactory {
         fromBlockchain: BlockchainName,
         constructorParams: LifiCrossChainTradeConstructor<BlockchainName>,
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ): CrossChainTrade<EvmEncodeConfig | { data: string }> {
         if (BlockchainsInfo.isSolanaBlockchainName(fromBlockchain)) {
             return new LifiSolanaCrossChainTrade(
                 constructorParams as LifiCrossChainTradeConstructor<SolanaBlockchainName>,
                 providerAddress,
-                routePath
+                routePath,
+                useProxy
             );
         }
 
@@ -30,7 +32,8 @@ export class LifiCrossChainFactory {
             return new LifiEvmCrossChainTrade(
                 constructorParams as LifiEvmCrossChainTradeConstructor,
                 providerAddress,
-                routePath
+                routePath,
+                useProxy
             );
         }
         throw new Error('Can not create trade instance');

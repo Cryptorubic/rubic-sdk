@@ -10,6 +10,7 @@ import { BlockchainName, SolanaBlockchainName } from 'src/core/blockchain/models
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../../models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from '../../common/constants/rubic-proxy-contract-address';
@@ -75,9 +76,10 @@ export class LifiSolanaCrossChainTrade extends SolanaCrossChainTrade {
     constructor(
         crossChainTrade: LifiCrossChainTradeConstructor<SolanaBlockchainName>,
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        useProxy: boolean
     ) {
-        super(providerAddress, routePath);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -159,16 +161,19 @@ export class LifiSolanaCrossChainTrade extends SolanaCrossChainTrade {
         };
 
         try {
+            const rubicFee = getSolanaFee(this.from);
+
             const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
                 await LifiApiService.getQuote(
                     step.action.fromChainId,
                     step.action.toChainId,
                     step.action.fromToken.symbol,
                     step.action.toToken.symbol,
-                    step.action.fromAmount,
+                    this.from.stringWeiAmount,
                     step.action.fromAddress,
                     step.action.toAddress,
-                    step.action.slippage
+                    step.action.slippage,
+                    rubicFee ? rubicFee : undefined
                 );
             return {
                 config: swapResponse.transactionRequest,

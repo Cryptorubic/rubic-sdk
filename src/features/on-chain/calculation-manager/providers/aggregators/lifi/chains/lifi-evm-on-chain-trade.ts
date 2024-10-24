@@ -7,24 +7,23 @@ import {
 } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { Route } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-route';
-import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
+import { LifiEvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { AggregatorEvmOnChainTrade } from '../../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { GetToAmountAndTxDataResponse } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { EvmEncodedConfigAndToAmount } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { LifiOnChainTransactionRequest } from '../models/lifi-on-chain-transaction-request';
 import { LifiOnChainApiService } from '../services/lifi-on-chain-api-service';
 
 export class LifiEvmOnChainTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(
-        lifiTradeStruct: LifiTradeStruct<EvmBlockchainName>
+        lifiTradeStruct: LifiEvmOnChainTradeStruct
     ): Promise<BigNumber | null> {
         const lifiTrade = new LifiEvmOnChainTrade(lifiTradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
         return getOnChainGasData(lifiTrade);
@@ -52,7 +51,7 @@ export class LifiEvmOnChainTrade extends AggregatorEvmOnChainTrade {
         return this._toTokenAmountMin;
     }
 
-    constructor(tradeStruct: LifiTradeStruct<EvmBlockchainName>, providerAddress: string) {
+    constructor(tradeStruct: LifiEvmOnChainTradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);
 
         this._toTokenAmountMin = new PriceTokenAmount({
