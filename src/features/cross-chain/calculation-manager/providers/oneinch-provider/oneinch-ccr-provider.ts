@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -6,6 +7,7 @@ import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fe
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { CrossChainProvider } from '../common/cross-chain-provider';
+import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
 import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
@@ -35,6 +37,8 @@ export class OneinchCcrProvider extends CrossChainProvider {
         const walletAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
 
         try {
+            if (from.isNative) throw new NotSupportedTokensError();
+
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
@@ -57,16 +61,14 @@ export class OneinchCcrProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(quote.dstTokenAmount)
             });
 
+            const gasInfo = quote.presets[quote.recommendedPreset].gasCost;
+
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await OneinchCcrTrade.getGasData({
-                          from: fromWithoutFee,
-                          feeInfo,
-                          toToken: to,
-                          providerAddress: options.providerAddress,
-                          quote,
-                          slippage: options.slippageTolerance
-                      })
+                    ? ({
+                          gasPrice: new BigNumber(gasInfo.gasPriceEstimate),
+                          gasLimit: new BigNumber(gasInfo.gasBumpEstimate)
+                      } as GasData)
                     : null;
 
             return {

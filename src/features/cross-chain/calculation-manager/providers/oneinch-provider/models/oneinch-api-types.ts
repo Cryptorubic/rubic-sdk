@@ -85,6 +85,21 @@ interface OneinchOrderDomain {
 export interface OneinchStatusResponse {
     orderHash: string;
     status: 'pending' | 'executed' | 'expired' | 'cancelled' | 'refunding' | 'refunded';
+    fills: Array<{
+        status: string;
+        txHash: string;
+        escrowEvents: Array<{
+            transactionHash: string;
+            side: 'src' | 'dst';
+            action:
+                | 'src_escrow_created'
+                | 'dst_escrow_created'
+                | 'withdrawn'
+                | 'funds_rescued'
+                | 'escrow_cancelled';
+            blockTimestamp: number;
+        }>;
+    }>;
 }
 
 export interface OneinchReadySecretsResponse {
@@ -93,4 +108,9 @@ export interface OneinchReadySecretsResponse {
         srcEscrowDeployTxHash: string;
         dstEscrowDeployTxHash: string;
     }>;
+}
+
+export interface OneinchSecret {
+    secret: string;
+    hashedSecret: string;
 }

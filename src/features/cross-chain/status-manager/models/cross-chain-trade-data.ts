@@ -69,4 +69,9 @@ export interface CrossChainTradeData {
      * Retro bridge transaction id.
      */
     retroBridgeId?: string;
+
+    /**
+     * Oneinch Fusion+ orderHash to check dst tx status
+     */
+    oneinchOrderHash?: string;
 }

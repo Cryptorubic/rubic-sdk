@@ -20,12 +20,3 @@ export interface OneinchCcrTradeParams {
     routePath: RubicStep[];
     useProxy: boolean;
 }
-
-export interface OneinchGetGasDataParams {
-    from: PriceTokenAmount<EvmBlockchainName>;
-    toToken: PriceTokenAmount<EvmBlockchainName>;
-    feeInfo: FeeInfo;
-    providerAddress: string;
-    quote: OneinchCcrQuoteResponse;
-    slippage: number;
-}

@@ -5,7 +5,6 @@ import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/m
 import { Injector } from 'src/core/injector/injector';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
-import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 
 import { ONEINCH_NATIVE_ADDRESS } from '../constants/oneinch-ccr-native-address';
 import {
@@ -44,9 +43,8 @@ export class OneinchCcrApiService {
                             dstTokenAddress: this.getApiTokenAddress(dstToken),
                             amount: srcToken.stringWeiAmount,
                             walletAddress: walletAddress || FAKE_WALLET_ADDRESS,
-                            enableEstimate: false
-                            // fee: 100
-                            // source: 'rubic'
+                            enableEstimate: true,
+                            fee: 100
                         }
                     }
                 )
@@ -58,7 +56,11 @@ export class OneinchCcrApiService {
         }
     }
 
-    // @TODO add feeReceiver
+    /**
+     * @TODO add fee=100&
+feeReceiver=${address}&
+source=rubic&
+     *  */
     public static async buildSwapOrder({
         dstToken,
         srcToken,
@@ -73,9 +75,6 @@ srcTokenAddress=${this.getApiTokenAddress(srcToken)}&
 dstTokenAddress=${this.getApiTokenAddress(dstToken)}&
 amount=${srcToken.stringWeiAmount}&
 walletAddress=${walletAddress}&
-fee=100&
-feeReceiver=${walletAddress}&
-source=rubic&
 preset=${quote.recommendedPreset}`;
 
             const res = await this.catchApiError(
@@ -103,7 +102,7 @@ preset=${quote.recommendedPreset}`;
                 swapResp.typedData,
                 walletAddress
             );
-            const res = await this.catchApiError(
+            await this.catchApiError(
                 Injector.httpClient.post(
                     `${this.xApiUrl}/relayer/v1.0/submit`,
                     {
@@ -112,15 +111,10 @@ preset=${quote.recommendedPreset}`;
                         srcChainId: swapResp.typedData.domain.chainId,
                         extension: swapResp.extension,
                         quoteId: quoteResp.quoteId,
-                        secretHashes
+                        ...(secretHashes.length > 1 && { secretHashes })
                     },
                     { headers: { apikey: this.apiKey } }
                 )
-            );
-
-            console.log(
-                `[OneinchCcrApiService_submitSwapOrder] %cResponse is ${res}`,
-                'color: green; font-size: 24px;'
             );
         } catch (err) {
             throw err;
@@ -159,11 +153,11 @@ preset=${quote.recommendedPreset}`;
         }
     }
 
-    public static async fetchTxStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    public static async fetchTxStatus(orderHash: string): Promise<TxStatusData> {
         try {
-            const { status, orderHash } = await this.catchApiError(
+            const { status, fills } = await this.catchApiError(
                 Injector.httpClient.get<OneinchStatusResponse>(
-                    `${this.xApiUrl}/orders/v1.0/order/status/${data.srcTxHash}`
+                    `${this.xApiUrl}/orders/v1.0/order/status/${orderHash}`
                 )
             );
 
@@ -175,8 +169,13 @@ preset=${quote.recommendedPreset}`;
             }
 
             if (status === 'executed') {
+                const dstWithdrawnEvent = fills
+                    .at(-1)
+                    ?.escrowEvents.find(e => e.action === 'withdrawn' && e.side === 'dst');
+                const dstTxHash = dstWithdrawnEvent?.transactionHash;
+
                 return {
-                    hash: orderHash,
+                    hash: dstTxHash || null,
                     status: TX_STATUS.SUCCESS
                 };
             }
@@ -184,6 +183,23 @@ preset=${quote.recommendedPreset}`;
             return { status: TX_STATUS.PENDING, hash: null };
         } catch (err) {
             return { status: TX_STATUS.PENDING, hash: null };
+        }
+    }
+
+    public static async fetchSrcTxHash(orderHash: string): Promise<string | null> {
+        try {
+            const { fills } = await this.catchApiError(
+                Injector.httpClient.get<OneinchStatusResponse>(
+                    `${this.xApiUrl}/orders/v1.0/order/status/${orderHash}`
+                )
+            );
+            const srcEscrowFirstEvent = fills[0]?.escrowEvents.find(
+                e => e.side === 'src' && e.action === 'src_escrow_created'
+            );
+
+            return srcEscrowFirstEvent?.transactionHash || null;
+        } catch (err) {
+            throw err;
         }
     }
 

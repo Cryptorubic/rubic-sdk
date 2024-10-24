@@ -741,7 +741,8 @@ export class CrossChainStatusManager {
     }
 
     private getOneinchDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        return OneinchCcrApiService.fetchTxStatus(data);
+        if (!data.oneinchOrderHash) throw new RubicSdkError('oneinchOrderHash is required!');
+        return OneinchCcrApiService.fetchTxStatus(data.oneinchOrderHash);
     }
 
     private getRetroBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
