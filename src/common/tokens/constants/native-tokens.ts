@@ -510,5 +510,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Gravity',
         symbol: 'G',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.COSMOS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.COSMOS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Cosmos',
+        symbol: 'ATOM',
+        decimals: 18
     })
 };
