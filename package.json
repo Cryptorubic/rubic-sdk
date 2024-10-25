@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.33.0-alpha-lifi-solana.4",
+    "version": "5.33.0-alpha-lifi-solana.9",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",

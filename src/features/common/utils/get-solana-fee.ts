@@ -1,10 +1,16 @@
 import { PriceTokenAmount } from 'src/common/tokens';
 
+const DEFAULT_FEE_PERCENT = 0.02;
+
 export function getSolanaFee(from: PriceTokenAmount): number {
+    if (!from.price) {
+        return DEFAULT_FEE_PERCENT;
+    }
+
     const usdTokenAmount = from.tokenAmount.multipliedBy(from.price);
 
     if (usdTokenAmount.gt(2)) {
-        return 0.02;
+        return DEFAULT_FEE_PERCENT;
     }
 
     return 0;
