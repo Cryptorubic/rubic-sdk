@@ -172,7 +172,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         const priceImpact = from.calculatePriceImpactPercent(to);
 
-        const gasData = await this.getGasData(options, from, to, bestRoute, feeInfo);
+        const gasData = null;
 
         const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute.steps);
 
