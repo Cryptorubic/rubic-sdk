@@ -282,7 +282,7 @@ Steps 1. and 2. are the same. You can use single sdk instance for on-chain trade
             console.log(`to amount: ${trade.to.tokenAmount.toFormat(3)}`);
    
             // explore trades info
-            if (trade instanceof EvmCrossChainTrade) {
+            if (trade instanceof TonCrossChainTrade) {
                 console.log(trade.gasData)
             }
             ...
