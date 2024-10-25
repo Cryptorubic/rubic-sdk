@@ -15,6 +15,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { DlnUtils } from 'src/features/common/providers/dln/dln-utils';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
@@ -37,7 +38,6 @@ import {
     TransactionErrorResponse
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
-import { DlnOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/constants/dln-on-chain-supported-blockchains';
 import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-swap-request';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
@@ -86,7 +86,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             );
 
             const requestParams: TransactionRequest = {
-                ...this.getAffiliateFee(fromBlockchain),
+                ...this.getAffiliateFee(from),
                 srcChainId: blockchainId[fromBlockchain],
                 srcChainTokenIn: DlnUtils.getSupportedAddress(from),
                 srcChainTokenInAmount: fromWithoutFee.stringWeiAmount,
@@ -312,13 +312,16 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
     }
 
     private getAffiliateFee(
-        fromBlockchain: DlnOnChainSupportedBlockchain
+        from: PriceTokenAmount
     ): Partial<Pick<DlnOnChainSwapRequest, 'affiliateFeePercent' | 'affiliateFeeRecipient'>> {
-        if (fromBlockchain === BLOCKCHAIN_NAME.SOLANA) {
-            return {
-                affiliateFeeRecipient: '4juPxgyQapaKdgxuCS7N8pRxjttXGRZsS5WTVZ42rNjn',
-                affiliateFeePercent: 0.1
-            };
+        if (from.blockchain === BLOCKCHAIN_NAME.SOLANA) {
+            const feePercent = getSolanaFee(from);
+            if (feePercent) {
+                return {
+                    affiliateFeeRecipient: '4juPxgyQapaKdgxuCS7N8pRxjttXGRZsS5WTVZ42rNjn',
+                    affiliateFeePercent: feePercent * 100
+                };
+            }
         }
         return {};
     }

@@ -7,6 +7,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { DlnUtils } from 'src/features/common/providers/dln/dln-utils';
+import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { deBridgeReferralCode } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-code';
 import {
     DlnOnChainSupportedBlockchain,
@@ -61,7 +62,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
 
         const slippage = new BigNumber(options.slippageTolerance).multipliedBy(100).toNumber();
         const requestParams: DlnOnChainSwapRequest = {
-            ...this.getAffiliateFee(from.blockchain),
+            ...this.getAffiliateFee(from),
             chainId: fromChainId,
             tokenIn: DlnUtils.getSupportedAddress(from),
             tokenInAmount: fromWithoutFee.stringWeiAmount,
@@ -118,13 +119,16 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
     }
 
     private getAffiliateFee(
-        fromBlockchain: DlnOnChainSupportedBlockchain
+        from: PriceTokenAmount
     ): Partial<Pick<DlnOnChainSwapRequest, 'affiliateFeePercent' | 'affiliateFeeRecipient'>> {
-        if (fromBlockchain === BLOCKCHAIN_NAME.SOLANA) {
-            return {
-                affiliateFeeRecipient: '6pvJfh73w1HT3b9eKRMX3EfrKH5AihVqRhasyhN5qtfP',
-                affiliateFeePercent: 0.1
-            };
+        if (from.blockchain === BLOCKCHAIN_NAME.SOLANA) {
+            const feePercent = getSolanaFee(from);
+            if (feePercent) {
+                return {
+                    affiliateFeeRecipient: '6pvJfh73w1HT3b9eKRMX3EfrKH5AihVqRhasyhN5qtfP',
+                    affiliateFeePercent: feePercent * 100
+                };
+            }
         }
         return {};
     }
