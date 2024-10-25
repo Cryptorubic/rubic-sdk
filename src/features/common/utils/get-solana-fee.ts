@@ -9,7 +9,7 @@ export function getSolanaFee(from: PriceTokenAmount): number {
 
     const usdTokenAmount = from.tokenAmount.multipliedBy(from.price);
 
-    if (usdTokenAmount.gt(2)) {
+    if (usdTokenAmount.gt(100)) {
         return DEFAULT_FEE_PERCENT;
     }
 

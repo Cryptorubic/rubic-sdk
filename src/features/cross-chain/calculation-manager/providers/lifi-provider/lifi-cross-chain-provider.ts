@@ -196,7 +196,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         );
 
         try {
-            const minAmountUSD = this.getMinAmountUSD(fromBlockchain, toBlockchain);
+            const minAmountUSD = this.getMinAmountUSD();
             this.checkMinError(from, minAmountUSD);
         } catch (err) {
             return {
@@ -372,16 +372,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         return routePath;
     }
 
-    private getMinAmountUSD(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName
-    ): BigNumber {
-        if (
-            fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM ||
-            toBlockchain === BLOCKCHAIN_NAME.ETHEREUM
-        ) {
-            return new BigNumber(2);
-        }
+    private getMinAmountUSD(): BigNumber {
         return new BigNumber(1);
     }
 
