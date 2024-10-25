@@ -1,5 +1,6 @@
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { isChangenowReceiverAddressCorrect } from 'src/core/blockchain/utils/changenow-receiver-address-validator';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
 import { changenowApiBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
@@ -23,7 +24,7 @@ export class SolanaWeb3Pure {
     public static async isAddressCorrect(address: string): Promise<boolean> {
         return isChangenowReceiverAddressCorrect(
             address,
-            changenowApiBlockchain.SOLANA,
+            BLOCKCHAIN_NAME.SOLANA,
             /^[1-9A-HJ-NP-Za-km-z]{32,44}$/
         );
     }
