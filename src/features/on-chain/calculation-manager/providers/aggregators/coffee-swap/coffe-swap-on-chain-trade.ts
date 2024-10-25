@@ -8,7 +8,6 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { TonOnChainTrade } from '../../common/on-chain-trade/ton-on-chain-trade/ton-on-chain-trade';
-import { FAKE_TON_ADDRESS } from './constants/fake-ton-wallet';
 import { CoffeeRoutePath } from './models/coffe-swap-api-types';
 import { CoffeeSwapTradeStruct } from './models/coffee-swap-trade-types';
 import { CoffeeSwapApiService } from './services/coffee-swap-api-service';
@@ -67,7 +66,7 @@ export class CoffeSwapTrade extends TonOnChainTrade<TonEncodedConfig> {
         const newQuote = await CoffeeSwapApiService.fetchQuote({
             srcToken: this.from as PriceTokenAmount<TonBlockchainName>,
             dstToken: this.to as PriceTokenAmount<TonBlockchainName>,
-            walletAddress: options.fromAddress || FAKE_TON_ADDRESS
+            walletAddress: options.fromAddress
         });
 
         return Web3Pure.toWei(newQuote.output_amount, this.to.decimals);
