@@ -84,7 +84,7 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.RAVENCOIN]: 'rvn',
     [BLOCKCHAIN_NAME.SIA]: 'sc',
     [BLOCKCHAIN_NAME.SECRET]: 'scrt',
-    [BLOCKCHAIN_NAME.SOLANA]: 'sol',
+    // [BLOCKCHAIN_NAME.SOLANA]: 'sol',
     [BLOCKCHAIN_NAME.STEEM]: 'steem',
     [BLOCKCHAIN_NAME.STRATIS]: 'strax',
     [BLOCKCHAIN_NAME.STACKS]: 'stx',
