@@ -106,15 +106,14 @@ export class TonWeb3Private extends Web3Private {
         const transferAmount = BigInt(amount);
         const receiverAddress = Address.parse(receiver);
 
-        const receiverWalletAddress = await this.getWalletAddress(receiverAddress, contractAddress);
         const jettonWalletAddress = await this.getWalletAddress(fromAddress, contractAddress);
 
         const body = beginCell()
             .storeUint(0xf8a7ea5, 32)
             .storeUint(0, 64)
             .storeCoins(transferAmount)
-            .storeAddress(receiverWalletAddress)
-            .storeAddress(fromAddress)
+            .storeAddress(receiverAddress)
+            .storeAddress(receiverAddress)
             .storeBit(0)
             .storeCoins(toNano('0.02'))
             .storeBit(0)
