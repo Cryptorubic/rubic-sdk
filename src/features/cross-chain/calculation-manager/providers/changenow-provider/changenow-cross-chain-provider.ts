@@ -176,10 +176,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 options.gasCalculation === 'enabled'
                     ? await CrossChainTransferTrade.getGasData(from)
                     : null;
-            console.log('GAS LIMIT:', gasData?.gasLimit?.toFixed());
-            console.log('GAS PRICE', gasData?.gasPrice?.toFixed());
-            console.log('GAS BASE FEE', gasData?.baseFee?.toFixed());
-            console.log('GAS max fee per', gasData?.maxFeePerGas?.toFixed());
+
             const trade = new ChangenowCrossChainTrade(
                 { ...changenowTrade, gasData },
                 options.providerAddress,
