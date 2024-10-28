@@ -1,4 +1,5 @@
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { SendTransactionRequest } from '@tonconnect/sdk';
 
 export type SymbiosisTradeType = 'dex' | '1inch' | 'open-ocean' | 'wrap' | 'izumi';
 
@@ -19,7 +20,7 @@ export interface SymbiosisTradeData {
     fee: SymbiosisTokenAmount;
     priceImpact: string;
     tokenAmountOut: SymbiosisTokenAmount;
-    tx: TransactionRequest;
+    tx: SendTransactionRequest | TransactionRequest;
     amountInUsd: SymbiosisTokenAmount;
     approveTo: string;
     route: SymbiosisToken[];

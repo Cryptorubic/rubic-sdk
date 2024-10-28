@@ -1,3 +1,4 @@
+import { TransactionRequest } from '@ethersproject/abstract-provider';
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -28,6 +29,8 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-supported-blockchains';
+import { SymbiosisEvmCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import { SymbiosisTradeType } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
@@ -35,8 +38,6 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-
-import { SymbiosisCrossChainSupportedBlockchain } from './models/symbiosis-cross-chain-supported-blockchains';
 
 /**
  * Calculated Symbiosis cross-chain trade.
@@ -126,19 +127,7 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
     }
 
     constructor(
-        crossChainTrade: {
-            from: PriceTokenAmount<EvmBlockchainName>;
-            to: PriceTokenAmount;
-            gasData: GasData | null;
-            priceImpact: number | null;
-            slippage: number;
-            feeInfo: FeeInfo;
-            transitAmount: BigNumber;
-            tradeType: { in?: SymbiosisTradeType; out?: SymbiosisTradeType };
-            contractAddresses: { providerRouter: string; providerGateway: string };
-            swapParams: SymbiosisSwappingParams;
-            promotions?: string[];
-        },
+        crossChainTrade: SymbiosisEvmCrossChainTradeConstructor,
         providerAddress: string,
         routePath: RubicStep[],
         useProxy: boolean
@@ -342,11 +331,12 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
         };
 
         const tradeData = await SymbiosisApiService.getCrossChainSwapTx(params);
+        const tx = tradeData.tx as TransactionRequest;
 
         const config = {
-            data: tradeData.tx.data!.toString(),
-            value: tradeData.tx.value?.toString() || '0',
-            to: tradeData.tx.to!
+            data: tx.data!.toString(),
+            value: tx.value?.toString() || '0',
+            to: tx.to!
         };
 
         return { config, amount: tradeData.tokenAmountOut.amount };

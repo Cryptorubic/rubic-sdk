@@ -4,7 +4,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -103,7 +103,7 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
 
     protected async getTransactionConfigAndAmount(
         _receiverAddress?: string
-    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+    ): Promise<{ config: TonEncodedConfig; amount: string }> {
         throw new Error('Method is not implemented');
     }
 

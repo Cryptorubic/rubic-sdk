@@ -4,6 +4,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
+import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
 import { TonWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/ton-web3-public/ton-web3-public';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -16,7 +17,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
-export abstract class TonCrossChainTrade extends CrossChainTrade<EvmEncodeConfig> {
+export abstract class TonCrossChainTrade extends CrossChainTrade<TonEncodedConfig> {
     public abstract readonly from: PriceTokenAmount<TonBlockchainName>;
 
     /**

@@ -2,6 +2,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
@@ -23,7 +24,7 @@ export class RetroBridgeFactory {
         providerAddress: string,
         routePath: RubicStep[],
         useProxy: boolean
-    ): CrossChainTrade<EvmEncodeConfig | { data: string }> {
+    ): CrossChainTrade<EvmEncodeConfig | { data: string } | TonEncodedConfig> {
         if (BlockchainsInfo.isTonBlockchainName(fromBlockchain)) {
             return new RetroBridgeTonTrade(
                 constructorParams as RetroBridgeTonConstructorParams,

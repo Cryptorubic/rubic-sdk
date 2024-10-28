@@ -16,6 +16,7 @@ import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import {
     BRIDGE_TYPE,
     bridges,
@@ -43,7 +44,6 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import { LifiUtilsService } from '../../../../common/providers/lifi/lifi-utils-service';
-import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
 import { LifiEvmCrossChainTrade } from './chains/lifi-evm-cross-chain-trade';
 import { LifiCrossChainFactory } from './lifi-cross-chain-factory';
 import { FeeCost, LifiStep } from './models/lifi-fee-cost';
