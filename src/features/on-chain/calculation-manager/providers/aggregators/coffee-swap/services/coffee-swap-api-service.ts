@@ -45,7 +45,6 @@ export class CoffeeSwapApiService {
         }
     }
 
-    // @TODO set referral_name
     public static async fetchTonEncodedConfigs(
         walletAddress: string,
         slippage: number,
@@ -57,7 +56,7 @@ export class CoffeeSwapApiService {
                 {
                     sender_address: walletAddress,
                     slippage,
-                    // referral_name: 'rubic',
+                    referral_name: 'rubic',
                     paths
                 }
             );
