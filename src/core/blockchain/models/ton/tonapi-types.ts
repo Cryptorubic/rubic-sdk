@@ -10,13 +10,14 @@ export interface TonApiSeqnoResp {
 }
 
 export interface TonApiTxDataByBocResp {
+    hash: string;
     lt: number;
     success: boolean;
     aborted: boolean;
     destroyed: boolean;
     total_fees: number;
     in_msg: object;
-    out_msgs: object[];
+    out_msgs: { hash: string }[];
 }
 
 export interface TonApiStatusByBocResp {

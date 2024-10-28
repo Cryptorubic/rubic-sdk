@@ -33,6 +33,7 @@ import {
     SymbiosisTokenAmount
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { SymbiosisCrossChainFactory } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-factory';
+import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import {
@@ -96,7 +97,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             );
 
             const tokenIn: SymbiosisToken = {
-                chainId: this.getChainId(from),
+                chainId: SymbiosisUtils.getChainId(from),
                 address: this.getTokenAddress(from),
                 decimals: from.decimals,
                 isNative: from.isNative,
@@ -104,7 +105,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
 
             const tokenOut: SymbiosisToken = {
-                chainId: this.getChainId(toToken),
+                chainId: SymbiosisUtils.getChainId(toToken),
                 address: this.getTokenAddress(toToken),
                 decimals: toToken.decimals,
                 isNative: toToken.isNative,
@@ -205,19 +206,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         return rewards.map(
             promo => `${promo.symbol}_${Web3Pure.fromWei(promo.amount, promo.decimals).toFixed()}`
         );
-    }
-
-    private getChainId(token: PriceToken): number {
-        if (BlockchainsInfo.isTonBlockchainName(token.blockchain)) {
-            return 85918;
-        }
-        if (BlockchainsInfo.isTronBlockchainName(token.blockchain)) {
-            return 728126428;
-        }
-        if (BlockchainsInfo.isBitcoinBlockchainName(token.blockchain)) {
-            return 3652501241;
-        }
-        return blockchainId[token.blockchain];
     }
 
     protected async getFeeInfo(

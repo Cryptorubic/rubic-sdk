@@ -2,11 +2,7 @@ import { TransactionRequest } from '@ethersproject/abstract-provider';
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -32,12 +28,8 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-supported-blockchains';
 import { SymbiosisEvmCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
-import { SymbiosisTradeType } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
+import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 /**
  * Calculated Symbiosis cross-chain trade.
@@ -143,7 +135,7 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
-        this.onChainSubtype = SymbiosisEvmCcrTrade.getSubtype(
+        this.onChainSubtype = SymbiosisUtils.getSubtype(
             crossChainTrade.tradeType,
             crossChainTrade.to.blockchain
         );
@@ -287,30 +279,6 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
         };
     }
 
-    private static getSubtype(
-        tradeType: {
-            in?: SymbiosisTradeType;
-            out?: SymbiosisTradeType;
-        },
-        toBlockchain: BlockchainName
-    ): OnChainSubtype {
-        const mapping: Record<SymbiosisTradeType | 'default', OnChainTradeType | undefined> = {
-            dex: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
-            '1inch': ON_CHAIN_TRADE_TYPE.ONE_INCH,
-            'open-ocean': ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
-            wrap: ON_CHAIN_TRADE_TYPE.WRAPPED,
-            izumi: ON_CHAIN_TRADE_TYPE.IZUMI,
-            default: undefined
-        };
-        return {
-            from: mapping?.[tradeType?.in || 'default'],
-            to:
-                toBlockchain === BLOCKCHAIN_NAME.BITCOIN
-                    ? ON_CHAIN_TRADE_TYPE.REN_BTC
-                    : mapping?.[tradeType?.out || 'default']
-        };
-    }
-
     protected async getTransactionConfigAndAmount(
         receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
@@ -323,7 +291,7 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
             ...this.swappingParams,
             from: walletAddress,
             to: receiverAddress || walletAddress,
-            revertableAddress: this.getRevertableAddress(
+            revertableAddress: SymbiosisUtils.getRevertableAddress(
                 receiverAddress,
                 walletAddress,
                 this.to.blockchain
@@ -340,17 +308,5 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
         };
 
         return { config, amount: tradeData.tokenAmountOut.amount };
-    }
-
-    private getRevertableAddress(
-        receiverAddress: string | undefined,
-        walletAddress: string,
-        toBlockchain: BlockchainName
-    ): string {
-        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            return walletAddress;
-        }
-
-        return receiverAddress || walletAddress;
     }
 }

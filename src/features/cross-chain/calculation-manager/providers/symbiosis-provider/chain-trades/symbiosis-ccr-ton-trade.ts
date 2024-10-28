@@ -2,11 +2,7 @@ import { SendTransactionRequest } from '@tonconnect/sdk';
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    TonBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -23,11 +19,7 @@ import { TonCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-supported-blockchains';
 import { SymbiosisTonCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
-import { SymbiosisTradeType } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
 
 /**
  * Calculated Symbiosis cross-chain trade.
@@ -94,7 +86,7 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
-        this.onChainSubtype = SymbiosisCcrTonTrade.getSubtype(
+        this.onChainSubtype = SymbiosisUtils.getSubtype(
             crossChainTrade.tradeType,
             crossChainTrade.to.blockchain
         );
@@ -120,30 +112,6 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
         };
     }
 
-    private static getSubtype(
-        tradeType: {
-            in?: SymbiosisTradeType;
-            out?: SymbiosisTradeType;
-        },
-        toBlockchain: BlockchainName
-    ): OnChainSubtype {
-        const mapping: Record<SymbiosisTradeType | 'default', OnChainTradeType | undefined> = {
-            dex: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
-            '1inch': ON_CHAIN_TRADE_TYPE.ONE_INCH,
-            'open-ocean': ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
-            wrap: ON_CHAIN_TRADE_TYPE.WRAPPED,
-            izumi: ON_CHAIN_TRADE_TYPE.IZUMI,
-            default: undefined
-        };
-        return {
-            from: mapping?.[tradeType?.in || 'default'],
-            to:
-                toBlockchain === BLOCKCHAIN_NAME.BITCOIN
-                    ? ON_CHAIN_TRADE_TYPE.REN_BTC
-                    : mapping?.[tradeType?.out || 'default']
-        };
-    }
-
     protected async getTransactionConfigAndAmount(
         receiverAddress?: string
     ): Promise<{ config: TonEncodedConfig; amount: string }> {
@@ -153,7 +121,7 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
             ...this.swappingParams,
             from: walletAddress,
             to: receiverAddress || walletAddress,
-            revertableAddress: this.getRevertableAddress(
+            revertableAddress: SymbiosisUtils.getRevertableAddress(
                 receiverAddress,
                 walletAddress,
                 this.to.blockchain
@@ -174,18 +142,6 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
         };
 
         return { config, amount: tradeData.tokenAmountOut.amount };
-    }
-
-    private getRevertableAddress(
-        receiverAddress: string | undefined,
-        walletAddress: string,
-        toBlockchain: BlockchainName
-    ): string {
-        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            return walletAddress;
-        }
-
-        return receiverAddress || walletAddress;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
