@@ -44,6 +44,7 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
+import { CrossChainTransferTrade } from '../common/cross-chain-transfer-trade/cross-chain-transfer-trade';
 import { ChangeNowCrossChainApiService } from './services/changenow-cross-chain-api-service';
 
 export class ChangenowCrossChainProvider extends CrossChainProvider {
@@ -173,12 +174,12 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             };
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await ChangenowCrossChainTrade.getGasData(
-                          changenowTrade,
-                          options.providerAddress,
-                          options.receiverAddress
-                      )
+                    ? await CrossChainTransferTrade.getGasData(from)
                     : null;
+            console.log('GAS LIMIT:', gasData?.gasLimit?.toFixed());
+            console.log('GAS PRICE', gasData?.gasPrice?.toFixed());
+            console.log('GAS BASE FEE', gasData?.baseFee?.toFixed());
+            console.log('GAS max fee per', gasData?.maxFeePerGas?.toFixed());
             const trade = new ChangenowCrossChainTrade(
                 { ...changenowTrade, gasData },
                 options.providerAddress,

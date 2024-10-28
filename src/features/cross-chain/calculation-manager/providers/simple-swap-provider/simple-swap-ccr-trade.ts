@@ -2,12 +2,10 @@ import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { CrossChainTransferTrade } from '../common/cross-chain-transfer-trade/cross-chain-transfer-trade';
 import { CrossChainTransferData } from '../common/cross-chain-transfer-trade/models/cross-chain-payment-info';
@@ -23,68 +21,6 @@ import { SimpleSwapExchangeRequest } from './models/simple-swap-requests';
 import { SimpleSwapApiService } from './services/simple-swap-api-service';
 
 export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<SimpleSwapCcrSupportedChain>,
-        feeInfo: FeeInfo,
-        fromCurrency: SimpleSwapCurrency,
-        toCurrency: SimpleSwapCurrency,
-        providerAddress: string,
-        receiverAddress?: string
-    ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as EvmBlockchainName;
-        const walletAddress =
-            BlockchainsInfo.isEvmBlockchainName(fromBlockchain) &&
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
-        try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new SimpleSwapCcrTrade(
-                    {
-                        from,
-                        to,
-                        gasData: null,
-                        feeInfo,
-                        priceImpact: null,
-                        fromCurrency,
-                        toCurrency
-                    },
-                    providerAddress,
-                    [],
-                    false
-                ).getContractParams({ receiverAddress: receiverAddress || walletAddress }, true);
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
-                    value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
-            ]);
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-            return {
-                gasLimit: increasedGasLimit,
-                ...gasDetails
-            };
-        } catch (_err) {
-            return null;
-        }
-    }
-
     public get simpleSwapId(): string {
         return this.paymentInfo ? this.paymentInfo.id : '';
     }
@@ -160,11 +96,13 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
 
         const exchnage = await SimpleSwapApiService.createExchange(exchangeParams);
 
-        const extraInfo = exchnage.extra_id_from && this.fromCurrency.has_extra_id ?
-            {
-                depositExtraId: exchnage.extra_id_from,
-                depositExtraIdName: this.fromCurrency.extra_id
-            } : undefined;
+        const extraInfo =
+            exchnage.extra_id_from && this.fromCurrency.has_extra_id
+                ? {
+                      depositExtraId: exchnage.extra_id_from,
+                      depositExtraIdName: this.fromCurrency.extra_id
+                  }
+                : undefined;
 
         return {
             id: exchnage.id,

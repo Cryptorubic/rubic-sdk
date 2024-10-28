@@ -1,20 +1,15 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { ChangenowCurrency } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
 import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-trade';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { CrossChainTransferTrade } from '../common/cross-chain-transfer-trade/cross-chain-transfer-trade';
 import {
     CrossChainPaymentInfo,
@@ -30,56 +25,6 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
      */
     public get changenowId(): string {
         return this.paymentInfo ? this.paymentInfo.id : '';
-    }
-
-    /** @internal */
-    public static async getGasData(
-        changenowTrade: ChangenowTrade,
-        providerAddress: string,
-        receiverAddress?: string
-    ): Promise<GasData | null> {
-        const fromBlockchain = changenowTrade.from.blockchain;
-        const walletAddress =
-            BlockchainsInfo.isEvmBlockchainName(fromBlockchain) &&
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
-        try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new ChangenowCrossChainTrade(
-                    changenowTrade,
-                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                    [],
-                    false
-                ).getContractParams({ receiverAddress: receiverAddress || walletAddress }, true);
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
-                    value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
-            ]);
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-            return {
-                gasLimit: increasedGasLimit,
-                ...gasDetails
-            };
-        } catch (_err) {
-            return null;
-        }
     }
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CHANGENOW;

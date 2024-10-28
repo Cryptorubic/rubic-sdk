@@ -18,6 +18,7 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
 
+import { convertGasDataToBN } from '../../../utils/convert-gas-price';
 import { rubicProxyContractAddress } from '../constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -27,9 +28,38 @@ import { FeeInfo } from '../models/fee-info';
 import { GetContractParamsOptions } from '../models/get-contract-params-options';
 import { RubicStep } from '../models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { transferGasLimit } from './constans/gas-limit-estimation';
 import { CrossChainPaymentInfo, CrossChainTransferData } from './models/cross-chain-payment-info';
 
 export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
+    public static async getGasData(from: PriceTokenAmount): Promise<GasData | null> {
+        const fromBlockchain = from.blockchain;
+
+        if (!BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
+            return null;
+        }
+
+        try {
+            let gasLimit = 0;
+            if (from.isNative) {
+                gasLimit = transferGasLimit.NATIVE_TRANSFER_GAS_LIMIT;
+            } else {
+                gasLimit = transferGasLimit.TOKEN_TRANSFER_GAS_LIMIT;
+            }
+
+            const gasDetails = convertGasDataToBN(
+                await Injector.gasPriceApi.getGasPrice(fromBlockchain)
+            );
+            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
+            return {
+                gasLimit: increasedGasLimit,
+                ...gasDetails
+            };
+        } catch {
+            return null;
+        }
+    }
+
     protected paymentInfo: CrossChainTransferData | null = null;
 
     public readonly onChainTrade: EvmOnChainTrade | null;

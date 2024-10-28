@@ -27,8 +27,6 @@ export const simpleSwapCcrProxySupportedChains = [
     BLOCKCHAIN_NAME.KLAYTN,
     BLOCKCHAIN_NAME.VELAS,
     BLOCKCHAIN_NAME.SYSCOIN,
-    // BLOCKCHAIN_NAME.FLARE,
-    // BLOCKCHAIN_NAME.THETA,
     BLOCKCHAIN_NAME.IOTEX,
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.MANTLE,
@@ -37,7 +35,8 @@ export const simpleSwapCcrProxySupportedChains = [
     BLOCKCHAIN_NAME.SEI,
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.CORE,
-    BLOCKCHAIN_NAME.GRAVITY
+    BLOCKCHAIN_NAME.ZK_LINK,
+    BLOCKCHAIN_NAME.ZK_SYNC
 ];
 
 export type SimpleSwapCcrProxySupportedChains = (typeof simpleSwapCcrProxySupportedChains)[number];

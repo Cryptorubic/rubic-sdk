@@ -10,6 +10,7 @@ import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fe
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { CrossChainProvider } from '../common/cross-chain-provider';
+import { CrossChainTransferTrade } from '../common/cross-chain-transfer-trade/cross-chain-transfer-trade';
 import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
@@ -107,17 +108,8 @@ export class SimpleSwapCcrProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SimpleSwapCcrTrade.getGasData(
-                          from as PriceTokenAmount<EvmBlockchainName>,
-                          to as PriceTokenAmount<SimpleSwapCcrSupportedChain>,
-                          feeInfo,
-                          fromCurrency,
-                          toCurrency,
-                          options.providerAddress,
-                          options?.receiverAddress
-                      )
+                    ? await CrossChainTransferTrade.getGasData(from)
                     : null;
-
             const trade = new SimpleSwapCcrTrade(
                 {
                     from: from as PriceTokenAmount<EvmBlockchainName>,

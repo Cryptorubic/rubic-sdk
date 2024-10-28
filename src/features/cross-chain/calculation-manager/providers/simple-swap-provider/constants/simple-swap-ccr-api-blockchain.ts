@@ -4,16 +4,16 @@ export const simpleSwapEvmSupportedChains = {
     [BLOCKCHAIN_NAME.ETHEREUM]: 'eth',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'bsc',
     [BLOCKCHAIN_NAME.POLYGON]: 'matic',
-    [BLOCKCHAIN_NAME.AVALANCHE]: 'avax-x',
+    [BLOCKCHAIN_NAME.AVALANCHE]: 'avax-c',
     [BLOCKCHAIN_NAME.MOONRIVER]: 'movr',
     [BLOCKCHAIN_NAME.FANTOM]: 'ftm',
     [BLOCKCHAIN_NAME.HARMONY]: 'one',
     [BLOCKCHAIN_NAME.ARBITRUM]: 'arbitrum',
     [BLOCKCHAIN_NAME.OPTIMISM]: 'optimism',
     [BLOCKCHAIN_NAME.TELOS]: 'tlos', // tlosevm ?
-    [BLOCKCHAIN_NAME.CRONOS]: 'cronos',
+    [BLOCKCHAIN_NAME.CRONOS]: 'cronos', // croevm ?
     [BLOCKCHAIN_NAME.MOONBEAM]: 'glmr',
-    [BLOCKCHAIN_NAME.KAVA]: 'kava', // kavaevm ?
+    [BLOCKCHAIN_NAME.KAVA]: 'kavaevm',
     [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn', // klay
     [BLOCKCHAIN_NAME.VELAS]: 'vlx',
     [BLOCKCHAIN_NAME.SYSCOIN]: 'sysnevm',
@@ -26,11 +26,12 @@ export const simpleSwapEvmSupportedChains = {
     [BLOCKCHAIN_NAME.BLAST]: 'blast',
     [BLOCKCHAIN_NAME.MODE]: 'mode',
     [BLOCKCHAIN_NAME.TAIKO]: 'taiko',
-    [BLOCKCHAIN_NAME.SEI]: 'sei', // seievm ?
+    [BLOCKCHAIN_NAME.SEI]: 'seievm', // sei ?
     [BLOCKCHAIN_NAME.CORE]: 'core',
-    [BLOCKCHAIN_NAME.GRAVITY]: '',
     [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta',
-    [BLOCKCHAIN_NAME.CELO]: 'celo'
+    [BLOCKCHAIN_NAME.CELO]: 'celo',
+    [BLOCKCHAIN_NAME.ZK_LINK]: 'zklnova',
+    [BLOCKCHAIN_NAME.ZK_SYNC]: 'zkSync'
 };
 
 export const simpleSwapApiChain = {
@@ -54,11 +55,11 @@ export const simpleSwapApiChain = {
     [BLOCKCHAIN_NAME.BSV]: 'bsv',
     [BLOCKCHAIN_NAME.CASPER]: 'cspr',
     [BLOCKCHAIN_NAME.DASH]: 'dash',
-    [BLOCKCHAIN_NAME.DOGECOIN]: 'doge',
+    [BLOCKCHAIN_NAME.DOGECOIN]: 'dogechain',
     [BLOCKCHAIN_NAME.POLKADOT]: 'dot',
     [BLOCKCHAIN_NAME.FLOW]: 'flow',
     [BLOCKCHAIN_NAME.IOTA]: 'iota',
-    [BLOCKCHAIN_NAME.KUSAMA]: 'kusama', // ksm
+    [BLOCKCHAIN_NAME.KUSAMA]: 'ksm', // kusama
     [BLOCKCHAIN_NAME.LITECOIN]: 'ltc',
     [BLOCKCHAIN_NAME.NEO]: 'neo',
     [BLOCKCHAIN_NAME.OSMOSIS]: 'osmo',
@@ -69,7 +70,7 @@ export const simpleSwapApiChain = {
     [BLOCKCHAIN_NAME.STELLAR]: 'xlm',
     [BLOCKCHAIN_NAME.MONERO]: 'xmr',
     [BLOCKCHAIN_NAME.TEZOS]: 'xtz',
-    [BLOCKCHAIN_NAME.HORIZEN]: 'zen',
+    [BLOCKCHAIN_NAME.HORIZEN]: 'zen', // horizen eon ?
     [BLOCKCHAIN_NAME.FILECOIN]: 'fil',
     [BLOCKCHAIN_NAME.EOS]: 'eos',
     [BLOCKCHAIN_NAME.ONTOLOGY]: 'ont',
