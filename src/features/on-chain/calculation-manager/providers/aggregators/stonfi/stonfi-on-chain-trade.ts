@@ -5,13 +5,14 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { TonOnChainTrade } from '../../common/on-chain-trade/ton-on-chain-trade/ton-on-chain-trade';
+import { StonfiTxParamsProvider } from './models/stonfi-abstract';
 import { StonfiApiService } from './services/stonfi-api-service';
 import { StonfiSwapService } from './services/stonfi-swap-service';
 
 export class StonfiOnChainTrade extends TonOnChainTrade<TonEncodedConfig> {
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.STONFI;
 
-    private readonly stonfiSwapService = new StonfiSwapService();
+    private readonly stonfiSwapService: StonfiTxParamsProvider = new StonfiSwapService();
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string> {
         let transactionHash: string;

@@ -23,6 +23,7 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     EDDY_BRIDGE: 'eddy_bridge',
     ROUTER: 'router',
     RETRO_BRIDGE: 'retro_bridge',
+    ACROSS: 'across',
     SIMPLE_SWAP: 'simple_swap'
 } as const;
 

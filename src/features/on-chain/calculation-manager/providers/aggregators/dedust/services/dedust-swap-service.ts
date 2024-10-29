@@ -14,15 +14,16 @@ import {
 import { Address, beginCell, OpenedContract, Sender, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import BigNumber from 'bignumber.js';
-import { LowSlippageError, RubicSdkError } from 'src/common/errors';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
 import { Injector } from 'src/core/injector/injector';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type';
-import { DEDUST_GAS } from '../constants/dedust-gas';
+import { DEDUST_GAS, RUBIC_REF_NAME_FOR_DEDUST } from '../constants/dedust-consts';
 import { DedustTxStep } from '../models/dedust-api-types';
 import { DedustApiService } from './dedust-api-service';
 import { DedustTxSender } from './dedust-sender-class';
@@ -39,12 +40,7 @@ export class DedustSwapService {
     }
 
     constructor() {
-        this.tonClient =
-            Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TON).tonClient ||
-            new TonClient({
-                endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-                apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
-            });
+        this.tonClient = TonClientInstance.getInstance();
         this.factory = this.tonClient.open(Factory.createFromAddress(this.mainnetFactoryAddress));
     }
 
@@ -102,7 +98,6 @@ export class DedustSwapService {
             } else if (to.isNative) {
                 await this.swapJettonToTon(from, sender, minAmountOut);
             } else {
-                if (slippage < 0.1) throw new LowSlippageError(0.1);
                 await this.swapJettonToJetton(from, sender, slippage);
             }
         } catch (err) {
@@ -116,18 +111,18 @@ export class DedustSwapService {
 
     public async getRoutePath(): Promise<RubicStep[]> {
         const promises = this.txSteps.map(async step => {
-            const srcToken = await Token.createToken({
+            const srcToken = Token.createToken({
                 address: step.srcTokenAddress,
                 blockchain: BLOCKCHAIN_NAME.TON
             });
-            const dstToken = await Token.createToken({
+            const dstToken = Token.createToken({
                 address: step.dstTokenAddress,
                 blockchain: BLOCKCHAIN_NAME.TON
             });
             return {
                 provider: ON_CHAIN_TRADE_TYPE.DEDUST,
                 type: 'on-chain',
-                path: [srcToken, dstToken]
+                path: await Promise.all([srcToken, dstToken])
             };
         });
 
@@ -220,7 +215,8 @@ export class DedustSwapService {
             poolAddress,
             amount: fromAmount,
             limit: minAmountOut,
-            gasAmount: toNano(DEDUST_GAS)
+            gasAmount: toNano(DEDUST_GAS),
+            queryId: RUBIC_REF_NAME_FOR_DEDUST
         });
     }
 
@@ -246,6 +242,7 @@ export class DedustSwapService {
             destination: jettonVault.address,
             responseAddress: sender.address,
             forwardAmount: toNano(0.15),
+            queryId: RUBIC_REF_NAME_FOR_DEDUST,
             forwardPayload: VaultJetton.createSwapPayload({
                 poolAddress,
                 limit: minAmountOut
@@ -281,6 +278,7 @@ export class DedustSwapService {
             destination: jettonVault.address,
             responseAddress: sender.address,
             forwardAmount: toNano(0.15),
+            queryId: RUBIC_REF_NAME_FOR_DEDUST,
             forwardPayload: VaultJetton.createSwapPayload(swapPayloadParams)
         });
     }

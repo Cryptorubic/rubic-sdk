@@ -9,6 +9,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { RubicSdkError } from 'src/common/errors';
 import {
     BLOCKCHAIN_NAME,
+    EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -19,6 +20,7 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
+import { LifiUtilsService } from 'src/features/common/providers/lifi/lifi-utils-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
@@ -62,6 +64,8 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { acrossFundsDepositedInputs } from '../calculation-manager/providers/across-provider/constants/across-deposit-abi';
+import { AcrossApiService } from '../calculation-manager/providers/across-provider/services/across-api-service';
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
@@ -103,6 +107,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.STARGATE_V2]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus
     };
 
@@ -293,10 +298,12 @@ export class CrossChainStatusManager {
      */
     private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
+            const fromChain = LifiUtilsService.getLifiChainId(data.fromBlockchain);
+            const toChain = LifiUtilsService.getLifiChainId(data.toBlockchain);
             const params = {
                 ...(data.lifiBridgeType && { bridge: data.lifiBridgeType }),
-                fromChain: blockchainId[data.fromBlockchain],
-                toChain: blockchainId[data.toBlockchain],
+                fromChain,
+                toChain,
                 txHash: data.srcTxHash
             };
             const { status, receiving } = await Injector.httpClient.get<{
@@ -749,6 +756,14 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must provide Retro bridge transaction ID');
         }
         return await RetroBridgeApiService.getTxStatus(data.retroBridgeId);
+    }
+
+    private async getAcrossDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const depositId = await Injector.web3PublicService
+            .getWeb3Public(data.fromBlockchain as EvmBlockchainName)
+            .getTxDecodedLogData(data.srcTxHash, acrossFundsDepositedInputs, 'depositId');
+        const srcChainId = blockchainId[data.fromBlockchain];
+        return AcrossApiService.getTxStatus(srcChainId, Number(depositId));
     }
 
     private async getSimpleSwapDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
