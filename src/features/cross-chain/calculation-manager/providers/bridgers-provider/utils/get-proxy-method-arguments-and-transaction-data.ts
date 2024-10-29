@@ -46,12 +46,12 @@ export async function getProxyMethodArgumentsAndTransactionData<
     const fromTokenAddress = createTokenNativeAddressProxy(
         fromWithoutFee,
         bridgersNativeAddress,
-        !(from.blockchain === BLOCKCHAIN_NAME.TRON)
+        from.blockchain !== BLOCKCHAIN_NAME.TRON
     ).address;
     const toTokenAddress = createTokenNativeAddressProxy(
         to,
         bridgersNativeAddress,
-        !(to.blockchain === BLOCKCHAIN_NAME.TRON)
+        to.blockchain !== BLOCKCHAIN_NAME.TRON
     ).address;
     const fromAddress = options.fromAddress || walletAddress;
     const swapRequest: BridgersSwapRequest = {
