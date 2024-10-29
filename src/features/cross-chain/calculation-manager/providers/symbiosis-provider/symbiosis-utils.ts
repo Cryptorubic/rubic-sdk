@@ -1,7 +1,8 @@
-import { PriceToken } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { Injector } from 'src/core/injector/injector';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { SymbiosisTradeType } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import {
@@ -60,5 +61,31 @@ export class SymbiosisUtils {
                     ? ON_CHAIN_TRADE_TYPE.REN_BTC
                     : mapping?.[tradeType?.out || 'default']
         };
+    }
+
+    public static async getReceiver(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        wallet: string,
+        receiver?: string
+    ): Promise<{ receiverAddress: string; toAddress: string }> {
+        const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(to.blockchain);
+        let receiverAddress = isEvmDestination ? receiver || wallet : receiver;
+        let toAddress = isEvmDestination ? to.address : from.address;
+
+        if (to.blockchain === BLOCKCHAIN_NAME.TRON) {
+            const adapter = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
+            const tronHexReceiverAddress = await adapter.convertTronAddressToHex(receiver!);
+            receiverAddress = `0x${tronHexReceiverAddress.slice(2)}`;
+
+            const toTokenTronAddress = await adapter.convertTronAddressToHex(to.address);
+            toAddress = `0x${toTokenTronAddress.slice(2)}`;
+        }
+
+        if (from.isNative && from.blockchain === BLOCKCHAIN_NAME.METIS) {
+            toAddress = '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
+        }
+
+        return { receiverAddress: receiverAddress!, toAddress };
     }
 }

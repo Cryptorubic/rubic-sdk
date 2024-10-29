@@ -154,27 +154,12 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
             options?.receiverAddress
         );
 
-        const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
-        let receiverAddress = isEvmDestination
-            ? options.receiverAddress || this.walletAddress
-            : options.receiverAddress;
-        let toAddress = '';
-
-        if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
-            const tronHexReceiverAddress = await this.tronWeb3Public.convertTronAddressToHex(
-                options.receiverAddress!
-            );
-            receiverAddress = `0x${tronHexReceiverAddress.slice(2)}`;
-
-            const toTokenTronAddress = await this.tronWeb3Public.convertTronAddressToHex(
-                this.to.address
-            );
-            toAddress = `0x${toTokenTronAddress.slice(2)}`;
-        }
-
-        if (this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS) {
-            toAddress = '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
-        }
+        const { receiverAddress, toAddress } = await SymbiosisUtils.getReceiver(
+            this.from,
+            this.to,
+            this.walletAddress,
+            options?.receiverAddress
+        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
             { ...options, receiverAddress },
