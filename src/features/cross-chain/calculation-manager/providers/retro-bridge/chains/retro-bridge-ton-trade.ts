@@ -13,6 +13,7 @@ import {
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTradeType
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import {
     BRIDGE_TYPE,
     BridgeType
@@ -49,7 +50,7 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
 
     public readonly bridgeType: BridgeType = BRIDGE_TYPE.RETRO_BRIDGE;
 
-    public readonly gasData: null;
+    public readonly gasData: GasData | null;
 
     public readonly priceImpact: number | null;
 
