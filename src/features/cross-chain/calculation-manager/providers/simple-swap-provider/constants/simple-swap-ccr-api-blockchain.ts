@@ -4,14 +4,14 @@ export const simpleSwapEvmSupportedChains = {
     [BLOCKCHAIN_NAME.ETHEREUM]: 'eth',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'bsc',
     [BLOCKCHAIN_NAME.POLYGON]: 'matic',
-    [BLOCKCHAIN_NAME.AVALANCHE]: 'avax-c',
+    [BLOCKCHAIN_NAME.AVALANCHE]: 'avaxc',
     [BLOCKCHAIN_NAME.MOONRIVER]: 'movr',
     [BLOCKCHAIN_NAME.FANTOM]: 'ftm',
     [BLOCKCHAIN_NAME.HARMONY]: 'one',
     [BLOCKCHAIN_NAME.ARBITRUM]: 'arbitrum',
     [BLOCKCHAIN_NAME.OPTIMISM]: 'optimism',
     [BLOCKCHAIN_NAME.TELOS]: 'tlos', // tlosevm ?
-    [BLOCKCHAIN_NAME.CRONOS]: 'cronos', // croevm ?
+    [BLOCKCHAIN_NAME.CRONOS]: 'croevm', // cronos ?
     [BLOCKCHAIN_NAME.MOONBEAM]: 'glmr',
     [BLOCKCHAIN_NAME.KAVA]: 'kavaevm',
     [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn', // klay
@@ -21,7 +21,7 @@ export const simpleSwapEvmSupportedChains = {
     [BLOCKCHAIN_NAME.LINEA]: 'linea',
     [BLOCKCHAIN_NAME.BASE]: 'base',
     [BLOCKCHAIN_NAME.MANTLE]: 'mnt',
-    [BLOCKCHAIN_NAME.SCROLL]: 'scr',
+    [BLOCKCHAIN_NAME.SCROLL]: 'scroll',
     [BLOCKCHAIN_NAME.ZETACHAIN]: 'zeta',
     [BLOCKCHAIN_NAME.BLAST]: 'blast',
     [BLOCKCHAIN_NAME.MODE]: 'mode',
@@ -31,7 +31,8 @@ export const simpleSwapEvmSupportedChains = {
     [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta',
     [BLOCKCHAIN_NAME.CELO]: 'celo',
     [BLOCKCHAIN_NAME.ZK_LINK]: 'zklnova',
-    [BLOCKCHAIN_NAME.ZK_SYNC]: 'zkSync'
+    [BLOCKCHAIN_NAME.ZK_SYNC]: 'zkSync',
+    [BLOCKCHAIN_NAME.OASIS]: 'rose'
 };
 
 export const simpleSwapApiChain = {
@@ -40,7 +41,7 @@ export const simpleSwapApiChain = {
     // NON-EVM
     [BLOCKCHAIN_NAME.FLARE]: 'flr',
     [BLOCKCHAIN_NAME.THETA]: 'theta',
-    [BLOCKCHAIN_NAME.SOLANA]: 'solana', // sol
+    [BLOCKCHAIN_NAME.SOLANA]: 'sol', // solana
     [BLOCKCHAIN_NAME.NEAR]: 'near',
     [BLOCKCHAIN_NAME.BITCOIN]: 'btc',
     [BLOCKCHAIN_NAME.TRON]: 'trx',
@@ -74,7 +75,9 @@ export const simpleSwapApiChain = {
     [BLOCKCHAIN_NAME.FILECOIN]: 'fil',
     [BLOCKCHAIN_NAME.EOS]: 'eos',
     [BLOCKCHAIN_NAME.ONTOLOGY]: 'ont',
-    [BLOCKCHAIN_NAME.XDC]: 'xdc'
+    [BLOCKCHAIN_NAME.XDC]: 'xdc',
+    [BLOCKCHAIN_NAME.ZILLIQA]: 'zil',
+    [BLOCKCHAIN_NAME.KAVA_COSMOS]: 'kava'
 };
 
 export type SimpleSwapCcrSupportedChain = keyof typeof simpleSwapApiChain;

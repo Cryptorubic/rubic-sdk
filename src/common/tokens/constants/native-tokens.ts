@@ -517,5 +517,19 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Cosmos',
         symbol: 'ATOM',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ALGORAND]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ALGORAND,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Algorand',
+        symbol: 'ALGO',
+        decimals: 6
+    }),
+    [BLOCKCHAIN_NAME.NEAR]: new Token({
+        blockchain: BLOCKCHAIN_NAME.NEAR,
+        address: 'near',
+        name: 'NEAR Protocol',
+        symbol: 'NEAR',
+        decimals: 18
     })
 };
