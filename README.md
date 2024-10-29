@@ -258,7 +258,7 @@ Steps 1. and 2. are the same. You can use single sdk instance for on-chain trade
 3. Use sdk instance for trade calculation
     ```typescript
     import { BLOCKCHAIN_NAME } from 'rubic-sdk'; 
-import {EvmCrossChainTrade} from "./evm-cross-chain-trade";
+    import { EvmCrossChainTrade } from "./evm-cross-chain-trade";
     
     const fromBlockchain = BLOCKCHAIN_NAME.ETHEREUM;
     const fromTokenAddress = '0x0000000000000000000000000000000000000000'; // ETH
