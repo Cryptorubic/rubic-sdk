@@ -14,7 +14,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-bridge-params';
@@ -382,7 +382,8 @@ export class ProxyCrossChainEvmTrade {
     ): string {
         if (
             toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN] ||
-            toChainId === blockchainId[BLOCKCHAIN_NAME.SOLANA]
+            toChainId === blockchainId[BLOCKCHAIN_NAME.SOLANA] ||
+            toChainId === blockchainId[BLOCKCHAIN_NAME.TON]
         ) {
             return walletAddress;
         }
