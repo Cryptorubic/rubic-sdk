@@ -23,7 +23,7 @@ import { Injector } from 'src/core/injector/injector';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type';
-import { DEDUST_GAS, RUBIC_REF_NAME_FOR_DEDUST } from '../constants/dedust-gas';
+import { DEDUST_GAS, RUBIC_REF_NAME_FOR_DEDUST } from '../constants/dedust-consts';
 import { DedustTxStep } from '../models/dedust-api-types';
 import { DedustApiService } from './dedust-api-service';
 import { DedustTxSender } from './dedust-sender-class';
