@@ -57,6 +57,8 @@ export class SimpleSwapCcrProvider extends CrossChainProvider {
                 };
             }
 
+            const toBlockchain = toToken.blockchain as SimpleSwapCcrSupportedChain;
+
             const feeInfo = await this.getFeeInfo(
                 from.blockchain as Web3PublicSupportedBlockchain,
                 options.providerAddress,
@@ -66,8 +68,9 @@ export class SimpleSwapCcrProvider extends CrossChainProvider {
 
             const minMaxError = await this.checkMinMaxErrors(
                 from,
-                fromCurrency.symbol,
-                toCurrency.symbol
+                toBlockchain,
+                fromCurrency.ticker,
+                toCurrency.ticker
             );
 
             if (minMaxError) {
@@ -93,8 +96,10 @@ export class SimpleSwapCcrProvider extends CrossChainProvider {
             );
 
             const toAmount = await SimpleSwapApiService.getEstimation({
-                currency_from: fromCurrency.symbol,
-                currency_to: toCurrency.symbol,
+                tickerFrom: fromCurrency.ticker,
+                tickerTo: toCurrency.ticker,
+                networkFrom: fromCurrency.network,
+                networkTo: toCurrency.network,
                 fixed: false,
                 amount: fromWithoutFee.tokenAmount.toFixed()
             });
@@ -183,7 +188,7 @@ export class SimpleSwapCcrProvider extends CrossChainProvider {
         fromToken: PriceToken,
         toToken: PriceToken
     ): Promise<{ fromCurrency?: SimpleSwapCurrency; toCurrency?: SimpleSwapCurrency }> {
-        const currencies = await SimpleSwapApiService.getAllCurrencies();
+        const { result: currencies } = await SimpleSwapApiService.getAllCurrencies();
 
         return {
             fromCurrency: this.getCurrency(
@@ -206,21 +211,26 @@ export class SimpleSwapCcrProvider extends CrossChainProvider {
         return currencies.find(
             currency =>
                 currency.network === apiChain &&
-                ((currency.contract_address &&
-                    compareAddresses(currency.contract_address, token.address)) ||
-                    (token.isNative && !currency.contract_address))
+                ((currency.contractAddress &&
+                    compareAddresses(currency.contractAddress, token.address)) ||
+                    (token.isNative && !currency.contractAddress))
         );
     }
 
     private async checkMinMaxErrors(
         fromToken: PriceTokenAmount,
+        toBlockchain: SimpleSwapCcrSupportedChain,
         fromCurrency: string,
         toCurrency: string
     ): Promise<MinAmountError | MaxAmountError | null> {
+        const fromBlockchain = fromToken.blockchain as SimpleSwapCcrSupportedChain;
+
         const { min, max } = await SimpleSwapApiService.getRanges({
             fixed: false,
-            currency_from: fromCurrency,
-            currency_to: toCurrency
+            tickerFrom: fromCurrency,
+            tickerTo: toCurrency,
+            networkFrom: simpleSwapApiChain[fromBlockchain],
+            networkTo: simpleSwapApiChain[toBlockchain]
         });
 
         const minAmount = new BigNumber(min);

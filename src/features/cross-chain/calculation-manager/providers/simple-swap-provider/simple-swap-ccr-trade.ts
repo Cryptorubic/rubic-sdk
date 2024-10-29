@@ -85,29 +85,33 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
 
         const exchangeParams: SimpleSwapExchangeRequest = {
             amount: fromWithoutFee.tokenAmount.toFixed(),
-            currency_from: this.fromCurrency.symbol,
-            currency_to: this.toCurrency.symbol,
+            tickerFrom: this.fromCurrency.ticker,
+            tickerTo: this.toCurrency.ticker,
+            networkFrom: this.fromCurrency.network,
+            networkTo: this.toCurrency.network,
             fixed: false,
-            address_to: receiverAddress,
-            extra_id_to: '',
-            user_refund_address: walletAddress || '',
-            user_refund_extra_id: ''
+            addressTo: receiverAddress,
+            rateId: null,
+            customFee: null,
+            extraIdTo: '',
+            userRefundAddress: walletAddress || '',
+            userRefundExtraId: ''
         };
 
-        const exchnage = await SimpleSwapApiService.createExchange(exchangeParams);
+        const { result: exchnage } = await SimpleSwapApiService.createExchange(exchangeParams);
 
         const extraInfo =
-            exchnage.extra_id_from && this.fromCurrency.has_extra_id
+            exchnage.extraIdFrom && this.fromCurrency.hasExtraId
                 ? {
-                      depositExtraId: exchnage.extra_id_from,
-                      depositExtraIdName: this.fromCurrency.extra_id
+                      depositExtraId: exchnage.extraIdFrom,
+                      depositExtraIdName: this.fromCurrency.extraId
                   }
                 : undefined;
 
         return {
             id: exchnage.id,
-            toAmount: exchnage.amount_to,
-            depositAddress: exchnage.address_from,
+            toAmount: exchnage.addressTo,
+            depositAddress: exchnage.addressFrom,
             ...(extraInfo && { ...extraInfo })
         };
     }
