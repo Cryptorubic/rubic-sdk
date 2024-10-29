@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 
-import { GasData } from '../../common/emv-cross-chain-trade/models/gas-data';
 import { BridgeType } from '../../common/models/bridge-type';
 import { FeeInfo } from '../../common/models/fee-info';
 import { OnChainSubtype } from '../../common/models/on-chain-subtype';
