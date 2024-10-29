@@ -3,15 +3,15 @@ import { RubicSdkError } from 'src/common/errors';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
 import { TonApiParseAddressResp, TonApiResp } from 'src/core/blockchain/models/ton/tonapi-types';
-import {
-    TONAPI_API_KEY,
-    TONAPI_API_URL
-} from 'src/core/blockchain/services/constants/ton-constants';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
 @staticImplements<TypedWeb3Pure>()
 export class TonWeb3Pure {
+    private static readonly xApiUrl = 'https://x-api.rubic.exchange/tonapi';
+
+    private static readonly xApiKey = 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4';
+
     public static readonly EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
     public static get nativeTokenAddress(): string {
@@ -51,10 +51,10 @@ export class TonWeb3Pure {
         walletAddress: string
     ): Promise<TonApiParseAddressResp> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiParseAddressResp>>(
-            `${TONAPI_API_URL}/address/${walletAddress}/parse`,
+            `${this.xApiUrl}/v2/address/${walletAddress}/parse`,
             {
                 headers: {
-                    Authorization: TONAPI_API_KEY
+                    apikey: this.xApiKey
                 }
             }
         );

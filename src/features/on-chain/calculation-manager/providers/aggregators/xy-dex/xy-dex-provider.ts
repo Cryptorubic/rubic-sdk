@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -14,8 +15,7 @@ import { XyQuoteResponse } from 'src/features/common/providers/xy/models/xy-quot
 import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { xySupportedBlockchains } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
-import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
+import { LifiEvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/models/xy-dex-trade-struct';
 import { XyDexTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-trade';
 import {
@@ -30,6 +30,7 @@ import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/provi
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
+import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
 
 export class XyDexProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions = evmProviderDefaultOptions;
@@ -53,36 +54,45 @@ export class XyDexProvider extends AggregatorOnChainProvider {
             ...this.defaultOptions,
             fromAddress
         });
+        try {
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
+                from,
+                fullOptions
+            );
 
-        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
+            const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
+                fromWithoutFee,
+                toToken,
+                fullOptions
+            );
 
-        const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
-            fromWithoutFee,
-            toToken,
-            fullOptions
-        );
+            const to = new PriceTokenAmount({
+                ...toToken.asStruct,
+                weiAmount: toTokenAmountInWei
+            });
 
-        const to = new PriceTokenAmount({
-            ...toToken.asStruct,
-            weiAmount: toTokenAmountInWei
-        });
+            const tradeStruct: XyDexTradeStruct = {
+                contractAddress,
+                from,
+                to,
+                slippageTolerance: fullOptions.slippageTolerance,
+                gasFeeInfo: null,
+                useProxy: fullOptions.useProxy,
+                proxyFeeInfo,
+                fromWithoutFee,
+                withDeflation: fullOptions.withDeflation,
+                usedForCrossChain: fullOptions.usedForCrossChain,
+                path: [from, to],
+                provider
+            };
 
-        const tradeStruct: XyDexTradeStruct = {
-            contractAddress,
-            from,
-            to,
-            slippageTolerance: fullOptions.slippageTolerance,
-            gasFeeInfo: null,
-            useProxy: fullOptions.useProxy,
-            proxyFeeInfo,
-            fromWithoutFee,
-            withDeflation: fullOptions.withDeflation,
-            usedForCrossChain: fullOptions.usedForCrossChain,
-            path: [from, to],
-            provider
-        };
-
-        return new XyDexTrade(tradeStruct, fullOptions.providerAddress);
+            return new XyDexTrade(tradeStruct, fullOptions.providerAddress);
+        } catch (err) {
+            return {
+                type: this.tradeType,
+                error: err
+            };
+        }
     }
 
     private async getTradeInfo(
@@ -117,7 +127,16 @@ export class XyDexProvider extends AggregatorOnChainProvider {
             xyAnalyzeStatusCode(trade.errorCode, trade.errorMsg);
         }
 
-        const bestRoute = trade.routes[0]!;
+        const routesWithoutWithholdingFee = trade.routes.filter(route => {
+            const withholdingFee = new BigNumber(route.withholdingFeeAmount);
+            return withholdingFee.lte(0);
+        });
+
+        const bestRoute = routesWithoutWithholdingFee[0];
+
+        if (!bestRoute) {
+            throw new NotSupportedTokensError();
+        }
 
         return {
             toTokenAmountInWei: new BigNumber(bestRoute.dstQuoteTokenAmount),
@@ -127,10 +146,12 @@ export class XyDexProvider extends AggregatorOnChainProvider {
         };
     }
 
-    protected async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
+    protected async getGasFeeInfo(
+        lifiTradeStruct: LifiEvmOnChainTradeStruct
+    ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-            const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
+            const gasLimit = await LifiEvmOnChainTrade.getGasLimit(lifiTradeStruct);
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;

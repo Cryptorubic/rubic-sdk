@@ -12,6 +12,7 @@ import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-a
 import { XyBuildTxRequest } from 'src/features/common/providers/xy/models/xy-build-tx-request';
 import { XyBuildTxResponse } from 'src/features/common/providers/xy/models/xy-build-tx-response';
 import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -159,12 +160,20 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
+        const extraNativeFee = this.from.isNative
+            ? new BigNumber(providerValue).minus(fromWithoutFee.stringWeiAmount).toFixed()
+            : new BigNumber(providerValue).toFixed();
+
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data!,
             this.fromBlockchain,
             providerRouter,
-            '0'
+            extraNativeFee
         );
 
         const methodArguments = [bridgeData, providerData];

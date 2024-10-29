@@ -65,7 +65,8 @@ module.exports = function(env, argv) {
                 "stream": require.resolve("stream-browserify"),
                 "crypto": require.resolve("crypto-browserify"),
                 "querystring": require.resolve('querystring-es3'),
-                "zlib": require.resolve('browserify-zlib')
+                "zlib": require.resolve('browserify-zlib'),
+                "vm": require.resolve('vm-browserify')
             }
         },
         output: {
