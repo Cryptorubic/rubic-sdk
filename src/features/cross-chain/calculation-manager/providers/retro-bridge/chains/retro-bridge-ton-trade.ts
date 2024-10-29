@@ -13,7 +13,6 @@ import {
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTradeType
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import {
     BRIDGE_TYPE,
     BridgeType
@@ -24,7 +23,6 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { TonCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/ton-cross-chain-trade/ton-cross-chain-trade';
-import { retroBridgeContractAddresses } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/constants/retro-bridge-contract-address';
 import { RetroBridgeSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/constants/retro-bridge-supported-blockchain';
 import { RetroBridgeTonConstructorParams } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-constructor-params';
 import {
@@ -70,13 +68,11 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade
-            ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : retroBridgeContractAddresses[this.fromBlockchain];
+        throw new Error('Not implemented');
     }
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain';
+        throw new Error('Not implemented');
     }
 
     private get chainType(): ChainType {
