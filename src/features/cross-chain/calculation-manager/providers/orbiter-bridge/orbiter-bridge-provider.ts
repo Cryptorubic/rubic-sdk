@@ -63,11 +63,20 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
             const minAmountBN = new BigNumber(quoteConfig.minAmt);
             const maxAmountBN = new BigNumber(quoteConfig.maxAmt);
 
-            if (from.tokenAmount.gt(maxAmountBN)) {
-                throw new MaxAmountError(maxAmountBN, from.symbol);
-            }
-            if (from.tokenAmount.lt(minAmountBN)) {
-                throw new MinAmountError(minAmountBN, from.symbol);
+            try {
+                this.checkAmountLimits(from, maxAmountBN, minAmountBN);
+            } catch (error) {
+                return {
+                    tradeType: this.type,
+                    error,
+                    trade: this.getEmptyTrade(
+                        from,
+                        toToken,
+                        feeInfo,
+                        quoteConfig,
+                        options.providerAddress
+                    )
+                };
             }
 
             const toAmount = await OrbiterApiService.getReceiveAmount({
@@ -125,6 +134,19 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
         return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
     }
 
+    private checkAmountLimits(
+        from: PriceTokenAmount,
+        maxAmountBN: BigNumber,
+        minAmountBN: BigNumber
+    ): void | never {
+        if (from.tokenAmount.gt(maxAmountBN)) {
+            throw new MaxAmountError(maxAmountBN, from.symbol);
+        }
+        if (from.tokenAmount.lt(minAmountBN)) {
+            throw new MinAmountError(minAmountBN, from.symbol);
+        }
+    }
+
     protected async getFeeInfo(
         fromBlockchain: OrbiterSupportedBlockchain,
         providerAddress: string,
@@ -137,5 +159,33 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
             percentFeeToken,
             useProxy
         );
+    }
+
+    private getEmptyTrade(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
+        feeInfo: FeeInfo,
+        quoteConfig: OrbiterQuoteConfig,
+        providerAddress: string
+    ): OrbiterBridgeTrade {
+        const to = new PriceTokenAmount({
+            ...toToken.asStruct,
+            tokenAmount: new BigNumber(0)
+        });
+        const trade = new OrbiterBridgeTrade({
+            crossChainTrade: {
+                from,
+                gasData: null,
+                feeInfo,
+                to,
+                priceImpact: 0,
+                quoteConfig
+            },
+            providerAddress,
+            useProxy: false,
+            routePath: []
+        });
+
+        return trade;
     }
 }
