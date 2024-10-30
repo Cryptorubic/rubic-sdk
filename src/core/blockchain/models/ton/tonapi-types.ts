@@ -18,6 +18,9 @@ export interface TonApiTxDataByBocResp {
     total_fees: number;
     in_msg: object;
     out_msgs: { hash: string }[];
+    account: {
+        address: string;
+    };
 }
 
 export interface TonApiStatusByBocResp {

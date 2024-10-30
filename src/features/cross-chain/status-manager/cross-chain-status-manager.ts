@@ -7,11 +7,13 @@ import {
 } from '@arbitrum/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { RubicSdkError } from 'src/common/errors';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
     EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
+import { TonApiTxDataByBocResp } from 'src/core/blockchain/models/ton/tonapi-types';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import {
@@ -236,14 +238,29 @@ export class CrossChainStatusManager {
                     const hexHash = Buffer.from(txHash, 'base64').toString('hex');
                     const adapter = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TON);
                     const sourceTransaction = await adapter.getBlockchainTransaction(hexHash);
-                    const messageHash = sourceTransaction.out_msgs?.[0]?.hash;
-                    if (!messageHash) {
-                        throw Error('Can not find symbiosis transaction');
-                    }
-                    const outTransaction = await adapter.getBlockchainTransactionByMessageHash(
-                        messageHash
-                    );
-                    txHash = outTransaction.hash;
+                    const symbiosisPortalAddress =
+                        '0:e9507855979949e98e3b0c27744d675707f91df94f8de8ac8010b78f3637e3d7';
+
+                    const getSymbiosisHash = async (
+                        transaction: TonApiTxDataByBocResp
+                    ): Promise<TonApiTxDataByBocResp> => {
+                        const messageHash = transaction.out_msgs?.[0]?.hash;
+                        if (!messageHash) {
+                            throw Error('Can not find symbiosis transaction');
+                        }
+                        const outTransaction = await adapter.getBlockchainTransactionByMessageHash(
+                            messageHash
+                        );
+                        return compareAddresses(
+                            symbiosisPortalAddress,
+                            outTransaction.account.address
+                        )
+                            ? outTransaction
+                            : getSymbiosisHash(outTransaction);
+                    };
+
+                    const symbiosisTx = await getSymbiosisHash(sourceTransaction);
+                    txHash = symbiosisTx.hash;
                 }
 
                 const chainId = SymbiosisUtils.getChainId(data.fromBlockchain);
@@ -283,7 +300,6 @@ export class CrossChainStatusManager {
                         // Swap to BTC
                         (targetTokenNetwork === 3652501241 && toBlockchainId === 5555) ||
                         // Swap to TON
-                        (targetTokenNetwork === 56288 && toBlockchainId === 9999) ||
                         (targetTokenNetwork === 85918 && toBlockchainId === 9999))
                 ) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
