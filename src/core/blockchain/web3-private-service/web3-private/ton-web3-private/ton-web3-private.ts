@@ -1,5 +1,5 @@
 import { Address, beginCell, toNano } from '@ton/core';
-import { TonConnectUI, Wallet } from '@tonconnect/ui';
+import { TonConnectUI } from '@tonconnect/ui';
 import { RubicSdkError, UserRejectError } from 'src/common/errors';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -24,10 +24,6 @@ export class TonWeb3Private extends Web3Private {
 
     public getBlockchainName(): Promise<BlockchainName> {
         return Promise.resolve(BLOCKCHAIN_NAME.TON);
-    }
-
-    private get wallet(): Wallet | null {
-        return this.tonConnectUI.connector.wallet;
     }
 
     public async sendTransaction(options: TonTransactionOptions): Promise<string> {
