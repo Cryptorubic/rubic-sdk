@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { RubicSdkError } from 'src/common/errors';
 import { Any } from 'src/common/utils/types';
 import { waitFor } from 'src/common/utils/waitFor';
 
@@ -60,7 +61,9 @@ export class OneinchCcrUtils {
             srcTxHash = await OneinchCcrApiService.fetchSrcTxHash(orderHash);
         }
 
-        return srcTxHash!;
+        if (!srcTxHash) throw new RubicSdkError('[listenForSrcTxCompleted] Deadline expired.');
+
+        return srcTxHash;
     }
 
     /**
