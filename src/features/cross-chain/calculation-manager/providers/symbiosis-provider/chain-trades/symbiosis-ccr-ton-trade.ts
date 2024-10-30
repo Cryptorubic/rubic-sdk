@@ -149,7 +149,6 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
             await this.checkTradeErrors();
         }
         await this.checkReceiverAddress(options.receiverAddress, true);
-        const fromAddress = this.walletAddress;
 
         const config = await this.setTransactionConfig(
             false,
@@ -157,7 +156,7 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
             options?.receiverAddress || this.walletAddress
         );
 
-        const { onConfirm, gasPriceOptions } = options;
+        const { onConfirm } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {

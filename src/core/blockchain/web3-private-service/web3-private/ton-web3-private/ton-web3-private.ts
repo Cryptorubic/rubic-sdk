@@ -1,5 +1,5 @@
 import { Address, beginCell, toNano } from '@ton/core';
-import { TonConnectUI, Wallet } from '@tonconnect/ui';
+import { TonConnectUI } from '@tonconnect/ui';
 import { RubicSdkError, UserRejectError } from 'src/common/errors';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
