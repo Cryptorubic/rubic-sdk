@@ -59,6 +59,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
             );
             const minAmountBN = new BigNumber(pairInfo.min_value.ui_value);
             const maxAmountBN = new BigNumber(pairInfo.max_value.ui_value);
+
             const swapParams = {
                 amount: fromWithoutFee.tokenAmount.toFixed(),
                 dstChainName: pairInfo.to_chain_name,
@@ -67,6 +68,21 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 tokenSymbol: pairInfo.token_name,
                 walletAddress
             } as OwlTopSwapRequest;
+
+            if (fromWithoutFee.tokenAmount.lt(minAmountBN)) {
+                return {
+                    trade: this.getEmptyTrade(fromWithoutFee, toToken, feeInfo, swapParams),
+                    error: new MinAmountError(minAmountBN, from.symbol),
+                    tradeType: this.type
+                };
+            }
+            if (fromWithoutFee.tokenAmount.gt(maxAmountBN)) {
+                return {
+                    trade: this.getEmptyTrade(fromWithoutFee, toToken, feeInfo, swapParams),
+                    error: new MaxAmountError(maxAmountBN, from.symbol),
+                    tradeType: this.type
+                };
+            }
 
             const { receive_value, txs } = await OwlToApiService.getSwapInfo(swapParams);
 
@@ -102,21 +118,6 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 useProxy
             });
 
-            if (fromWithoutFee.tokenAmount.lt(minAmountBN)) {
-                return {
-                    trade,
-                    error: new MinAmountError(minAmountBN, from.symbol),
-                    tradeType: this.type
-                };
-            }
-            if (fromWithoutFee.tokenAmount.gt(maxAmountBN)) {
-                return {
-                    trade,
-                    error: new MaxAmountError(maxAmountBN, from.symbol),
-                    tradeType: this.type
-                };
-            }
-
             return { trade, tradeType: this.type };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
@@ -148,5 +149,33 @@ export class OwlToBridgeProvider extends CrossChainProvider {
         toToken: PriceTokenAmount<EvmBlockchainName>
     ): Promise<RubicStep[]> {
         return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
+    }
+
+    private getEmptyTrade(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
+        feeInfo: FeeInfo,
+        swapParams: OwlTopSwapRequest
+    ): OwlToBridgeTrade {
+        const to = new PriceTokenAmount({
+            ...toToken.asStruct,
+            tokenAmount: new BigNumber(0)
+        });
+        const trade = new OwlToBridgeTrade({
+            crossChainTrade: {
+                from,
+                feeInfo,
+                to,
+                gasData: null,
+                priceImpact: 0,
+                swapParams,
+                approveAddress: ''
+            },
+            providerAddress: '',
+            routePath: [],
+            useProxy: false
+        });
+
+        return trade;
     }
 }

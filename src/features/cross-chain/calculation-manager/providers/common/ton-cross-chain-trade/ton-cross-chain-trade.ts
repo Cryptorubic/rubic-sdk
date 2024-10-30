@@ -23,8 +23,6 @@ export abstract class TonCrossChainTrade extends CrossChainTrade<TonEncodedConfi
     /**
      * Gas fee info in source blockchain.
      */
-    // public abstract readonly gasData: GasData;
-
     protected get fromWeb3Public(): TonWeb3Public {
         return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TON);
     }

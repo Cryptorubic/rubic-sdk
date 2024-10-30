@@ -23,7 +23,7 @@ import { Injector } from 'src/core/injector/injector';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type';
-import { DEDUST_GAS } from '../constants/dedust-gas';
+import { DEDUST_GAS, RUBIC_REF_NAME_FOR_DEDUST } from '../constants/dedust-consts';
 import { DedustTxStep } from '../models/dedust-api-types';
 import { DedustApiService } from './dedust-api-service';
 import { DedustTxSender } from './dedust-sender-class';
@@ -111,18 +111,18 @@ export class DedustSwapService {
 
     public async getRoutePath(): Promise<RubicStep[]> {
         const promises = this.txSteps.map(async step => {
-            const srcToken = await Token.createToken({
+            const srcToken = Token.createToken({
                 address: step.srcTokenAddress,
                 blockchain: BLOCKCHAIN_NAME.TON
             });
-            const dstToken = await Token.createToken({
+            const dstToken = Token.createToken({
                 address: step.dstTokenAddress,
                 blockchain: BLOCKCHAIN_NAME.TON
             });
             return {
                 provider: ON_CHAIN_TRADE_TYPE.DEDUST,
                 type: 'on-chain',
-                path: [srcToken, dstToken]
+                path: await Promise.all([srcToken, dstToken])
             };
         });
 
@@ -215,7 +215,8 @@ export class DedustSwapService {
             poolAddress,
             amount: fromAmount,
             limit: minAmountOut,
-            gasAmount: toNano(DEDUST_GAS)
+            gasAmount: toNano(DEDUST_GAS),
+            queryId: RUBIC_REF_NAME_FOR_DEDUST
         });
     }
 
@@ -241,6 +242,7 @@ export class DedustSwapService {
             destination: jettonVault.address,
             responseAddress: sender.address,
             forwardAmount: toNano(0.15),
+            queryId: RUBIC_REF_NAME_FOR_DEDUST,
             forwardPayload: VaultJetton.createSwapPayload({
                 poolAddress,
                 limit: minAmountOut
@@ -276,6 +278,7 @@ export class DedustSwapService {
             destination: jettonVault.address,
             responseAddress: sender.address,
             forwardAmount: toNano(0.15),
+            queryId: RUBIC_REF_NAME_FOR_DEDUST,
             forwardPayload: VaultJetton.createSwapPayload(swapPayloadParams)
         });
     }

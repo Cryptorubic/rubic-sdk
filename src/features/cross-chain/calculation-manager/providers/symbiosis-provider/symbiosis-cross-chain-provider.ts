@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { MinAmountError, RubicSdkError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { NoLinkedAccountError } from 'src/common/errors/swap/no-linked-account-erros';
 import { PriceToken, PriceTokenAmount, TokenAmount as RubicTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -136,6 +136,18 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
 
             disabledTrade = this.getEmptyTrade(from, mockTo, swapParams, feeInfo);
+
+            try {
+                await this.checkTokenLimits(tokenIn, from);
+            } catch (err) {
+                if (err instanceof MinAmountError || err instanceof MaxAmountError) {
+                    return {
+                        error: err,
+                        trade: disabledTrade,
+                        tradeType: this.type
+                    };
+                }
+            }
 
             const { rewards, tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
                 await SymbiosisApiService.getCrossChainSwapTx(swapParams);
@@ -366,6 +378,32 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             return '0x9328Eb759596C38a25f59028B146Fecdc3621Dfe';
         }
         return token.address;
+    }
+
+    private async checkTokenLimits(
+        tokenIn: SymbiosisToken,
+        from: PriceTokenAmount
+    ): Promise<void | never> {
+        const tokenLimits = await SymbiosisApiService.getTokenLimits();
+
+        const token = tokenLimits.find(
+            token =>
+                compareAddresses(token.address, tokenIn.address) &&
+                token.chainId === tokenIn.chainId
+        );
+
+        if (token) {
+            const minAmountBN = Web3Pure.fromWei(token.min, from.decimals);
+            const maxAmountBN = Web3Pure.fromWei(token.max, from.decimals);
+
+            if (from.tokenAmount.lt(minAmountBN)) {
+                throw new MinAmountError(minAmountBN, from.symbol);
+            }
+
+            if (from.tokenAmount.gt(maxAmountBN)) {
+                throw new MaxAmountError(maxAmountBN, from.symbol);
+            }
+        }
     }
 
     private getFakeAddress(fromBlockchain: BlockchainName): string {

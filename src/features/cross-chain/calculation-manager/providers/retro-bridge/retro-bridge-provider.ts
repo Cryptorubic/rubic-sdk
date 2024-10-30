@@ -121,7 +121,7 @@ export class RetroBridgeProvider extends CrossChainProvider {
                     feeInfo,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: options.slippageTolerance,
-                    gasData: null,
+                    gasData,
                     quoteSendParams,
                     hotWalletAddress: retroBridgeQuoteConfig.hot_wallet_address
                 },

@@ -149,15 +149,15 @@ export class LifiProvider extends AggregatorOnChainProvider {
                         withDeflation: fullOptions.withDeflation!
                     };
 
-                    const gasFeeInfo =
-                        fullOptions.gasCalculation === 'disabled'
-                            ? null
-                            : await this.getGasFeeInfo(
-                                  lifiTradeStruct as LifiEvmOnChainTradeStruct
-                              );
+                    // const gasFeeInfo =
+                    //     fullOptions.gasCalculation === 'disabled'
+                    //         ? null
+                    //         : await this.getGasFeeInfo(
+                    //               lifiTradeStruct as LifiEvmOnChainTradeStruct
+                    //           );
                     lifiTradeStruct = {
                         ...lifiTradeStruct,
-                        gasFeeInfo
+                        gasFeeInfo: null
                     };
 
                     return LifiOnChainFactory.createTrade(
