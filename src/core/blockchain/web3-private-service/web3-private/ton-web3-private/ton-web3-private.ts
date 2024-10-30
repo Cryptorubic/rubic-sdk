@@ -22,18 +22,8 @@ export class TonWeb3Private extends Web3Private {
 
     private readonly tonConnectUI: TonConnectUI;
 
-    private readonly _tonClient: TonClient;
-
-    public get tonClient(): TonClient {
-        return this._tonClient;
-    }
-
     public getBlockchainName(): Promise<BlockchainName> {
         return Promise.resolve(BLOCKCHAIN_NAME.TON);
-    }
-
-    private get wallet(): Wallet | null {
-        return this.tonConnectUI.connector.wallet;
     }
 
     public async sendTransaction(options: TonTransactionOptions): Promise<string> {
@@ -158,9 +148,5 @@ export class TonWeb3Private extends Web3Private {
     constructor(tonProviderCore: TonWalletProviderCore) {
         super(tonProviderCore.address);
         this.tonConnectUI = tonProviderCore.core;
-        this._tonClient = new TonClient({
-            endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-            apiKey: '44176ed3735504c6fb1ed3b91715ba5272cdd2bbb304f78d1ae6de6aed47d284'
-        });
     }
 }
