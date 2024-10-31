@@ -117,7 +117,7 @@ export abstract class CrossChainTrade<T = unknown> {
     protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.5;
+        const changePercent = 0.001;
         const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
@@ -219,11 +219,7 @@ export abstract class CrossChainTrade<T = unknown> {
 
     protected async checkTradeErrors(): Promise<void | never> {
         this.checkWalletConnected();
-        await Promise.all([
-            this.checkBlockchainCorrect(),
-            this.checkUserBalance(),
-            this.checkBlockchainRequirements()
-        ]);
+        await Promise.all([this.checkBlockchainCorrect(), this.checkUserBalance()]);
     }
 
     protected checkWalletConnected(): never | void {

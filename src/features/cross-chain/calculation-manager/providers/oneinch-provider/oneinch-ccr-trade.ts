@@ -90,41 +90,39 @@ export class OneinchCcrTrade extends EvmCrossChainTrade {
         if (!options?.testMode) {
             await this.checkTradeErrors();
         }
+
         checkUnsupportedReceiverAddress(options.receiverAddress, this.walletAddress);
+        await this.checkRateUpdated();
 
-        try {
-            const secretsCount = this.quote.presets[this.quote.recommendedPreset].secretsCount;
-            const secretsData = OneinchCcrUtils.createSecretHashes(secretsCount);
+        const secretsCount = this.quote.presets[this.quote.recommendedPreset].secretsCount;
+        const secretsData = OneinchCcrUtils.createSecretHashes(secretsCount);
 
-            const secretHashes = secretsData.map(el => el.hashedSecret);
-            const secrets = secretsData.map(el => el.secret);
+        const secretHashes = secretsData.map(el => el.hashedSecret);
+        const secrets = secretsData.map(el => el.secret);
 
-            const swapOrder = await OneinchCcrApiService.buildSwapOrder({
-                srcToken: this.fromWithoutFee,
-                dstToken: this.to,
-                walletAddress: this.walletAddress,
-                quote: this.quote,
-                secretHashes: secretHashes
-            });
+        const swapOrder = await OneinchCcrApiService.buildSwapOrder({
+            srcToken: this.fromWithoutFee,
+            dstToken: this.to,
+            walletAddress: this.walletAddress,
+            quote: this.quote,
+            secretHashes: secretHashes
+        });
 
-            this.oneinchOrderHash = swapOrder.orderHash;
+        this.oneinchOrderHash = swapOrder.orderHash;
 
-            await OneinchCcrApiService.submitSwapOrder(
-                this.quote,
-                swapOrder,
-                this.walletAddress,
-                secretHashes
-            );
+        await OneinchCcrApiService.submitSwapOrder(
+            this.quote,
+            swapOrder,
+            this.walletAddress,
+            secretHashes
+        );
 
-            const txHash = await OneinchCcrUtils.listenForSrcTxCompleted(swapOrder.orderHash);
-            options.onConfirm?.(txHash);
+        const txHash = await OneinchCcrUtils.listenForSrcTxCompleted(swapOrder.orderHash);
+        options.onConfirm?.(txHash);
 
-            OneinchCcrUtils.listenForSecretsReadiness(swapOrder.orderHash, secrets);
+        OneinchCcrUtils.listenForSecretsReadiness(swapOrder.orderHash, secrets);
 
-            return txHash;
-        } catch (err) {
-            throw err;
-        }
+        return txHash;
     }
 
     protected async getContractParams(
@@ -134,6 +132,11 @@ export class OneinchCcrTrade extends EvmCrossChainTrade {
         throw new Error(
             '[OneinchCcrTrade_getContractParams] Fee is taken in order params `fee` and `feeReceiver`.'
         );
+    }
+
+    private async checkRateUpdated(): Promise<void> {
+        const { amount } = await this.getTransactionConfigAndAmount();
+        this.checkAmountChange(amount, this.to.stringWeiAmount);
     }
 
     protected async getTransactionConfigAndAmount(

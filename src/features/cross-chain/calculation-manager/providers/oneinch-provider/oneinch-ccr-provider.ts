@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError } from 'src/common/errors';
+import { MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -71,23 +71,34 @@ export class OneinchCcrProvider extends CrossChainProvider {
                       } as GasData)
                     : null;
 
-            return {
-                trade: new OneinchCcrTrade({
-                    crossChainTrade: {
-                        feeInfo,
-                        from,
-                        to,
-                        gasData,
-                        priceImpact: from.calculatePriceImpactPercent(to),
-                        slippage: options.slippageTolerance,
-                        quote
-                    },
-                    providerAddress: options.providerAddress,
-                    routePath: await this.getRoutePath(from, to),
-                    useProxy
-                }),
-                tradeType: this.type
-            };
+            const trade = new OneinchCcrTrade({
+                crossChainTrade: {
+                    feeInfo,
+                    from,
+                    to,
+                    gasData,
+                    priceImpact: from.calculatePriceImpactPercent(to),
+                    slippage: options.slippageTolerance,
+                    quote
+                },
+                providerAddress: options.providerAddress,
+                routePath: await this.getRoutePath(from, to),
+                useProxy
+            });
+
+            const minUsdPrice = new BigNumber(3);
+            const totalPrice = from.price.multipliedBy(from.tokenAmount);
+            const minTokenAmount = minUsdPrice.dividedBy(from.price);
+
+            if (totalPrice.lt(minUsdPrice)) {
+                return {
+                    tradeType: this.type,
+                    trade,
+                    error: new MinAmountError(minTokenAmount, from.symbol)
+                };
+            }
+
+            return { trade, tradeType: this.type };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 
