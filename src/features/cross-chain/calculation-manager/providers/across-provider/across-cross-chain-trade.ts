@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -216,14 +216,6 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
         toAmount: BigNumber,
         receiverAddress?: string
     ): EvmEncodeConfig {
-        let relayer = quote.exclusiveRelayer;
-        let relayerDeadLine = Number(quote.exclusivityDeadline);
-
-        if (this.to.blockchain === BLOCKCHAIN_NAME.LINEA) {
-            relayer = '0x54455CEaB7A7229DA56E79e8B841634C920A96Cc';
-            relayerDeadLine = Number(quote.timestamp) + 4000;
-        }
-
         const args = [
             this.walletAddress,
             receiverAddress || this.walletAddress,
@@ -232,10 +224,10 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
             this.fromWithoutFee.stringWeiAmount,
             toAmount.toFixed(),
             this.acrossFeeQuoteRequestParams.destinationChainId.toString(),
-            relayer,
+            quote.exclusiveRelayer,
             Number(quote.timestamp),
             this.getFillDeadline(),
-            relayerDeadLine,
+            Number(quote.exclusivityDeadline),
             '0x'
         ];
 
