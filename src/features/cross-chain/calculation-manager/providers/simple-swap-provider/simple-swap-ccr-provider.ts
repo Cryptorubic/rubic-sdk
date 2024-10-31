@@ -20,6 +20,7 @@ import {
     SimpleSwapCcrSupportedChain
 } from './constants/simple-swap-ccr-api-blockchain';
 import { simpleSwapCcrProxySupportedChains } from './constants/simple-swap-ccr-supported-chains';
+import { simpleSwapNativeTokenTickers } from './constants/simple-swap-native-tokens';
 import { SimpleSwapCurrency } from './models/simple-swap-currency';
 import { SimpleSwapApiService } from './services/simple-swap-api-service';
 import { SimpleSwapCcrTrade } from './simple-swap-ccr-trade';
@@ -213,7 +214,20 @@ export class SimpleSwapCcrProvider extends CrossChainProvider {
                 currency.network === apiChain &&
                 ((currency.contractAddress &&
                     compareAddresses(currency.contractAddress, token.address)) ||
-                    (token.isNative && !currency.contractAddress))
+                    (token.isNative && this.isNativeCurrency(currency, token)))
+        );
+    }
+
+    private isNativeCurrency(
+        currency: SimpleSwapCurrency,
+        token: PriceToken<SimpleSwapCcrSupportedChain>
+    ): boolean {
+        const nativeTokenTicker = simpleSwapNativeTokenTickers[token.blockchain];
+
+        return (
+            !currency.contractAddress &&
+            !!nativeTokenTicker &&
+            currency.ticker === nativeTokenTicker
         );
     }
 
