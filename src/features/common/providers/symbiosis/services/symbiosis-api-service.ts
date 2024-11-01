@@ -5,7 +5,7 @@ import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-ma
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 
 import { SYMBIOSIS_API_ENDPOINT } from '../constants/symbiosis-api-common';
-import { SymbiosisErrorResponse } from '../models/symbiosis-api-common-types';
+import { SymbiosisErrorResponse, SymbiosisTokenLimit } from '../models/symbiosis-api-common-types';
 import {
     SymbiosisSwapRequestBody,
     SymbiosisSwapResponse
@@ -53,5 +53,12 @@ export class SymbiosisApiService {
         }
 
         return res;
+    }
+
+    @Cache({
+        maxAge: 15_000
+    })
+    public static async getTokenLimits(): Promise<SymbiosisTokenLimit[]> {
+        return Injector.httpClient.get(`${SYMBIOSIS_API_ENDPOINT}/v1/swap-limits?partnerId=rubic`);
     }
 }

@@ -129,11 +129,13 @@ export class BridgersTrade extends TronOnChainTrade {
     }): Promise<TronBridgersTransactionData> {
         const fromTokenAddress = createTokenNativeAddressProxy(
             this.from,
-            bridgersNativeAddress
+            bridgersNativeAddress,
+            false
         ).address;
         const toTokenAddress = createTokenNativeAddressProxy(
             this.to,
-            bridgersNativeAddress
+            bridgersNativeAddress,
+            false
         ).address;
         const fromAddress = options.fromAddress || this.walletAddress;
         const toAddress = options.receiverAddress || fromAddress;

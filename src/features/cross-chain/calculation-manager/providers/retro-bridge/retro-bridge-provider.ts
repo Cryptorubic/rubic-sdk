@@ -4,8 +4,11 @@ import { MaxDecimalsError } from 'src/common/errors/swap/max-decimals.error';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { RetroBridgeFactory } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/retro-bridge-factory';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -20,7 +23,6 @@ import {
     retroBridgeSupportedBlockchain
 } from './constants/retro-bridge-supported-blockchain';
 import { RetroBridgeQuoteSendParams } from './models/retro-bridge-quote-send-params';
-import { RetroBridgeTrade } from './retro-bridge-trade';
 import { RetroBridgeApiService } from './services/retro-bridge-api-service';
 
 export class RetroBridgeProvider extends CrossChainProvider {
@@ -37,8 +39,12 @@ export class RetroBridgeProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const useProxy = options?.useProxy?.[this.type] ?? true;
         const fromBlockchain = from.blockchain as RetroBridgeSupportedBlockchain;
+        let useProxy = options?.useProxy?.[this.type] ?? true;
+        if (BlockchainsInfo.getChainType(fromBlockchain) !== CHAIN_TYPE.EVM) {
+            useProxy = false;
+        }
+
         try {
             this.checkFromAmountDecimals(from);
             const feeInfo = await this.getFeeInfo(
@@ -93,9 +99,10 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 ...toToken.asStruct,
                 tokenAmount: new BigNumber(retroBridgeQuoteConfig.amount_out)
             });
+
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await RetroBridgeTrade.getGasData(
+                    ? await RetroBridgeFactory.getGasData(
                           from,
                           to,
                           feeInfo,
@@ -106,7 +113,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
                       )
                     : null;
             const routePath = await this.getRoutePath(from, to);
-            const trade = new RetroBridgeTrade(
+            const trade = RetroBridgeFactory.createTrade(
+                fromBlockchain,
                 {
                     from,
                     to,
@@ -231,7 +239,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
             tokenAmount: new BigNumber(0)
         });
 
-        const trade = new RetroBridgeTrade(
+        const trade = RetroBridgeFactory.createTrade(
+            from.blockchain,
             {
                 from,
                 feeInfo,

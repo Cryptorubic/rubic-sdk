@@ -12,3 +12,5 @@ export interface SymbiosisTokenInfo {
 export interface SymbiosisTokenInfoWithAmount extends SymbiosisTokenInfo {
     amount: string;
 }
+
+export type SymbiosisTokenLimit = { min: string; max: string } & SymbiosisTokenInfo;

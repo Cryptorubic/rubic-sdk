@@ -2,7 +2,8 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -11,10 +12,10 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import {
     BRIDGE_TYPE,
     BridgeType
@@ -29,14 +30,15 @@ import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calc
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
-import { Estimate } from './models/lifi-fee-cost';
-import { Route } from './models/lifi-route';
-import { LifiApiService } from './services/lifi-api-service';
+import { LifiEvmCrossChainTradeConstructor } from '../models/lifi-cross-chain-trade-constructor';
+import { Estimate } from '../models/lifi-fee-cost';
+import { Route } from '../models/lifi-route';
+import { LifiApiService } from '../services/lifi-api-service';
 
 /**
  * Calculated Celer cross-chain trade.
  */
-export class LifiCrossChainTrade extends EvmCrossChainTrade {
+export class LifiEvmCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -47,7 +49,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
-        const trade = new LifiCrossChainTrade(
+        const trade = new LifiEvmCrossChainTrade(
             {
                 from,
                 to: toToken,
@@ -77,7 +79,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
+    public readonly to: PriceTokenAmount<BlockchainName>;
 
     public readonly toTokenAmountMin: BigNumber;
 
@@ -116,18 +118,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     constructor(
-        crossChainTrade: {
-            from: PriceTokenAmount<EvmBlockchainName>;
-            to: PriceTokenAmount<EvmBlockchainName>;
-            route: Route;
-            gasData: GasData | null;
-            toTokenAmountMin: BigNumber;
-            feeInfo: FeeInfo;
-            priceImpact: number | null;
-            onChainSubtype: OnChainSubtype;
-            bridgeType: BridgeType;
-            slippage: number;
-        },
+        crossChainTrade: LifiEvmCrossChainTradeConstructor,
         providerAddress: string,
         routePath: RubicStep[],
         useProxy: boolean
@@ -204,6 +195,9 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             options?.receiverAddress
         );
 
+        const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
+        const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
+
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
             fromTokenAmount: this.from,
@@ -211,7 +205,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             srcChainTrade: null,
             providerAddress: this.providerAddress,
             type: `lifi:${this.bridgeType}`,
-            fromAddress: this.walletAddress
+            fromAddress: this.walletAddress,
+            toAddress: receivingAsset
         });
 
         const fromWithoutFee = getFromWithoutFee(
@@ -225,7 +220,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data!,
-            this.fromBlockchain,
+            this.fromBlockchain as EvmBlockchainName,
             providerRouter,
             extraNativeFee
         );
@@ -286,6 +281,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     step.action.toToken.symbol,
                     step.action.fromAmount,
                     step.action.fromAddress,
+                    step.action.toAddress,
                     step.action.slippage
                 );
             return {

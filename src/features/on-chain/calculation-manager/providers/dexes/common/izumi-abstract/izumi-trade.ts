@@ -78,7 +78,7 @@ export class IzumiTrade extends EvmOnChainTrade {
                 address: token,
                 chainId: tokenChain
             })) as unknown as TokenInfoFormatted[],
-            inputAmount: this.from.stringWeiAmount,
+            inputAmount: this.fromWithoutFee.stringWeiAmount,
             minOutputAmount: this.toTokenAmountMin.stringWeiAmount,
             recipient: options?.receiverAddress || this.walletAddress,
             strictERC20Token: this.strictERC20Token

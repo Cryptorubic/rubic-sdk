@@ -7,11 +7,13 @@ import {
 } from '@arbitrum/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { RubicSdkError } from 'src/common/errors';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
     EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
+import { TonApiTxDataByBocResp } from 'src/core/blockchain/models/ton/tonapi-types';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import {
@@ -20,6 +22,7 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
+import { LifiUtilsService } from 'src/features/common/providers/lifi/lifi-utils-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
@@ -46,6 +49,7 @@ import {
     LifiSwapStatus
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
+import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 import { CHANGENOW_API_STATUS } from 'src/features/cross-chain/status-manager/models/changenow-api-response';
@@ -223,18 +227,49 @@ export class CrossChainStatusManager {
         const symbiosisTxIndexingTimeSpent = Date.now() > data.txTimestamp + 30000;
         const symbiosisApi = Object.keys(TEST_EVM_BLOCKCHAIN_NAME).includes(data.fromBlockchain)
             ? 'api.testnet'
-            : 'api-v2';
+            : 'api';
 
         if (symbiosisTxIndexingTimeSpent) {
             try {
-                const srcChainId = blockchainId[data.fromBlockchain];
                 const toBlockchainId = blockchainId[data.toBlockchain];
+                let txHash = data.srcTxHash;
+
+                if (data.fromBlockchain === BLOCKCHAIN_NAME.TON) {
+                    const hexHash = Buffer.from(txHash, 'base64').toString('hex');
+                    const adapter = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TON);
+                    const sourceTransaction = await adapter.getBlockchainTransaction(hexHash);
+                    const symbiosisPortalAddress =
+                        '0:e9507855979949e98e3b0c27744d675707f91df94f8de8ac8010b78f3637e3d7';
+
+                    const getSymbiosisHash = async (
+                        transaction: TonApiTxDataByBocResp
+                    ): Promise<TonApiTxDataByBocResp> => {
+                        const messageHash = transaction.out_msgs?.[0]?.hash;
+                        if (!messageHash) {
+                            throw Error('Can not find symbiosis transaction');
+                        }
+                        const outTransaction = await adapter.getBlockchainTransactionByMessageHash(
+                            messageHash
+                        );
+                        return compareAddresses(
+                            symbiosisPortalAddress,
+                            outTransaction.account.address
+                        )
+                            ? outTransaction
+                            : getSymbiosisHash(outTransaction);
+                    };
+
+                    const symbiosisTx = await getSymbiosisHash(sourceTransaction);
+                    txHash = symbiosisTx.hash;
+                }
+
+                const chainId = SymbiosisUtils.getChainId(data.fromBlockchain);
                 const {
                     status: { text: dstTxStatus },
                     tx,
                     transitTokenSent
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
-                    `https://${symbiosisApi}.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
+                    `https://${symbiosisApi}.symbiosis.finance/crosschain/v1/tx/${chainId}/${txHash}`
                 );
 
                 let dstTxData: TxStatusData = {
@@ -263,7 +298,9 @@ export class CrossChainStatusManager {
                     dstTxStatus === SYMBIOSIS_SWAP_STATUS.SUCCESS &&
                     (targetTokenNetwork === toBlockchainId ||
                         // Swap to BTC
-                        (targetTokenNetwork === 3652501241 && toBlockchainId === 5555))
+                        (targetTokenNetwork === 3652501241 && toBlockchainId === 5555) ||
+                        // Swap to TON
+                        (targetTokenNetwork === 85918 && toBlockchainId === 9999))
                 ) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         dstTxData.status = TX_STATUS.SUCCESS;
@@ -295,10 +332,12 @@ export class CrossChainStatusManager {
      */
     private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
+            const fromChain = LifiUtilsService.getLifiChainId(data.fromBlockchain);
+            const toChain = LifiUtilsService.getLifiChainId(data.toBlockchain);
             const params = {
                 ...(data.lifiBridgeType && { bridge: data.lifiBridgeType }),
-                fromChain: blockchainId[data.fromBlockchain],
-                toChain: blockchainId[data.toBlockchain],
+                fromChain,
+                toChain,
                 txHash: data.srcTxHash
             };
             const { status, receiving } = await Injector.httpClient.get<{

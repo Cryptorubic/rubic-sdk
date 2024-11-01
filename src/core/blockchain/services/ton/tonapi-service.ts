@@ -44,11 +44,25 @@ export class TonApiService {
 
     public async fetchTxInfo(txHash: string): Promise<TonApiTxDataByBocResp> {
         const res = await Injector.httpClient.get<TonApiResp<TonApiTxDataByBocResp>>(
-            `${this.xApiUrl}/v2/blockchain/messages/${txHash}/transaction`,
+            `${this.xApiUrl}/v2/blockchain/transactions/${txHash}`,
             { headers: { apikey: this.xApiKey } }
         );
         if ('error' in res) {
             throw new RubicSdkError(`[TonApiService] Error in fetchTxInfo - ${res.error}`);
+        }
+
+        return res;
+    }
+
+    public async fetchTxInfoByMessageHash(txHash: string): Promise<TonApiTxDataByBocResp> {
+        const res = await Injector.httpClient.get<TonApiResp<TonApiTxDataByBocResp>>(
+            `${this.xApiUrl}/v2/blockchain/messages/${txHash}/transaction`,
+            { headers: { apikey: this.xApiKey } }
+        );
+        if ('error' in res) {
+            throw new RubicSdkError(
+                `[TonApiService] Error in fetchTxInfoByMessageHash - ${res.error}`
+            );
         }
 
         return res;
