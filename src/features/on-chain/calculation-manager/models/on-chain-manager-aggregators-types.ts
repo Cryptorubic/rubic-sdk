@@ -14,6 +14,7 @@ import { OpenOceanProvider } from '../providers/aggregators/open-ocean/open-ocea
 import { RangoOnChainProvider } from '../providers/aggregators/rango/rango-on-chain-provider';
 import { SquidRouterOnChainProvider } from '../providers/aggregators/squidrouter/squidrouter-on-chain-provider';
 import { StonfiOnChainProvider } from '../providers/aggregators/stonfi/stonfi-on-chain-provider';
+import { UniZenOnChainProvider } from '../providers/aggregators/unizen/unizen-on-chain-provider';
 import { ZetaSwapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
@@ -32,6 +33,7 @@ export const AGGREGATORS_ON_CHAIN = {
     DEDUST: DedustOnChainProvider,
     STONFI: StonfiOnChainProvider,
     COFFEE_SWAP: CoffeeSwapProvider,
-    SQUIDROUTER: SquidRouterOnChainProvider
+    SQUIDROUTER: SquidRouterOnChainProvider,
+    UNIZEN: UniZenOnChainProvider
     // SYMBIOSIS: SymbiosisOnChainProvider
 } as const;
