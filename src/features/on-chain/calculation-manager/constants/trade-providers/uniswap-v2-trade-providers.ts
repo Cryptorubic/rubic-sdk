@@ -62,6 +62,9 @@ import { MuteSwapProvider } from 'src/features/on-chain/calculation-manager/prov
 import { KujataBahamutProvider } from '../../providers/dexes/bahamut/kujata-bahamut/kujata-bahamut-provider';
 import { SilkSwapBahamutProvider } from '../../providers/dexes/bahamut/silk-swap-bahamut/silk-swap-bahamut-provider';
 import { SushiSwapZetachainProvider } from '../../providers/dexes/zetachain/sushi-swap-zetachain/sushi-swap-zetachain-provider';
+import { BlazeSwapFlareProvider } from '../../providers/dexes/flare/blaze-swap-flare/blaze-swap-flare-provider';
+import { SparkDexFlareProvider } from '../../providers/dexes/flare/spark-dex-flare/spark-dex-flare-provider';
+import { EnosysFlareProvider } from '../../providers/dexes/flare/enosys-flare/enosys-flare-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -162,5 +165,9 @@ export const UniswapV2TradeProviders = [
     SilkSwapBahamutProvider,
     KujataBahamutProvider,
     // Bitlayer
-    MacaronProvider
+    MacaronProvider,
+    // Flare
+    BlazeSwapFlareProvider,
+    SparkDexFlareProvider,
+    EnosysFlareProvider
 ] as const;

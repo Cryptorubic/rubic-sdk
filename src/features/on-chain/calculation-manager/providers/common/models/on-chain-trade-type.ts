@@ -23,6 +23,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     BEAM_SWAP: 'BEAM_SWAP',
     BI_SWAP: 'BI_SWAP',
     BRIDGERS: 'BRIDGERS',
+    BLAZE_SWAP: 'BLAZE_SWAP',
 
     CAMELOT: 'CAMELOT',
     CHERRY_SWAP: 'CHERRY_SWAP',
@@ -48,6 +49,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     ECHO_DEX: 'ECHO_DEX',
     EDDY_FINANCE: 'EDDY_FINANCE',
     ELK: 'ELK',
+    ENOSYS: 'ENOSYS',
 
     FENIX_V2: 'FENIX_V2',
     FENIX_V3: 'FENIX_V3',
@@ -135,6 +137,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     SYNC_SWAP: 'SYNC_SWAP',
     SILK_SWAP: 'SILK_SWAP',
     SQUIDROUTER: 'SQUIDROUTER',
+    SPARK_DEX: 'SPARK_DEX',
 
     SYMBIOSIS_SWAP: 'SYMBIOSIS_SWAP', // Fake to show swap via unknown symbiosis dex
 
