@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -49,7 +50,7 @@ export class UniZenCcrProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const useProxy = false;
+        const useProxy = options?.useProxy?.[this.type] ?? true;;
 
         const fromBlockchain = from.blockchain as UniZenCcrSupportedChain;
         const toBlockchain = toToken.blockchain as UniZenCcrSupportedChain;
@@ -96,13 +97,17 @@ export class UniZenCcrProvider extends CrossChainProvider {
             const contractAddress = uniZenContractAddresses[contractVersion]?.[fromBlockchain]!;
 
             if (!contractAddress) {
-                //  throw new RubicSdkError(`There is no contract of ${quoteInfo.contractVersion} version`)
+                throw new RubicSdkError(
+                    `There is no contract of ${quoteInfo.contractVersion} version`
+                );
             }
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 weiAmount: new BigNumber(quoteInfo.transactionData.params.actualQuote)
             });
+
+            const toTokenAmountMin = Web3Pure.fromWei(quoteInfo.transactionData.params.minQuote);
 
             const routePath = await this.getRoutePath(
                 from,
@@ -144,7 +149,8 @@ export class UniZenCcrProvider extends CrossChainProvider {
                     slippage: options.slippageTolerance,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     gasData,
-                    contractAddress
+                    contractAddress,
+                    toTokenAmountMin
                 },
                 options.providerAddress,
                 routePath,

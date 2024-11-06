@@ -47,7 +47,8 @@ export class UniZenCcrTrade extends EvmCrossChainTrade {
                     gasData: null,
                     slippage: 0,
                     priceImpact: null,
-                    contractAddress: unizenContractAddress
+                    contractAddress: unizenContractAddress,
+                    toTokenAmountMin: new BigNumber(0)
                 },
                 providerAddress,
                 [],
@@ -97,6 +98,7 @@ export class UniZenCcrTrade extends EvmCrossChainTrade {
             slippage: number;
             priceImpact: number | null;
             contractAddress: string;
+            toTokenAmountMin: BigNumber;
         },
         providerAddress: string,
         routePath: RubicStep[],
@@ -109,7 +111,7 @@ export class UniZenCcrTrade extends EvmCrossChainTrade {
         this.feeInfo = ccrTrade.feeInfo;
         this.gasData = ccrTrade.gasData;
         this.slippageTolerance = ccrTrade.slippage;
-        this.toTokenAmountMin = this.to.tokenAmount;
+        this.toTokenAmountMin = ccrTrade.toTokenAmountMin;
         this.priceImpact = ccrTrade.priceImpact;
         this.contractAddress = ccrTrade.contractAddress;
     }
