@@ -203,7 +203,7 @@ export class RouterCrossChainTrade extends EvmCrossChainTrade {
             };
         } catch (err) {
             console.log(err?.message);
-            throw new RubicSdkError(err?.message);
+            throw err;
         }
     }
 

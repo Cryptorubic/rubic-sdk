@@ -210,7 +210,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
             };
         } catch (err) {
             console.log(err?.message);
-            throw new RubicSdkError(err?.message);
+            throw err;
         }
     }
 
