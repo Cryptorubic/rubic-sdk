@@ -9,7 +9,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { CrossChainTransferTrade } from '../common/cross-chain-transfer-trade/cross-chain-transfer-trade';
 import { CrossChainTransferData } from '../common/cross-chain-transfer-trade/models/cross-chain-payment-info';
-import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
+import { GasData } from '../common/evm-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from '../common/models/bridge-type';
 import { FeeInfo } from '../common/models/fee-info';
 import { OnChainSubtype } from '../common/models/on-chain-subtype';

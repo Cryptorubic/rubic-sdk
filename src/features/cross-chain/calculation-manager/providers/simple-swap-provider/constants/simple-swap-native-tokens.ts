@@ -67,5 +67,5 @@ export const simpleSwapNativeTokenTickers: Partial<Record<SimpleSwapCcrSupported
     [BLOCKCHAIN_NAME.ZILLIQA]: 'zil',
     [BLOCKCHAIN_NAME.KAVA_COSMOS]: 'kava',
     [BLOCKCHAIN_NAME.MINA_PROTOCOL]: 'mina',
-    [BLOCKCHAIN_NAME.SIA]: 'sc',
+    [BLOCKCHAIN_NAME.SIA]: 'sc'
 };

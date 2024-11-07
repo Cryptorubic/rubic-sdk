@@ -20,10 +20,10 @@ import { TransactionConfig } from 'web3-core';
 
 import { convertGasDataToBN } from '../../../utils/convert-gas-price';
 import { rubicProxyContractAddress } from '../constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from '../emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from '../emv-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from '../emv-cross-chain-trade/models/gas-data';
+import { evmCommonCrossChainAbi } from '../evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from '../evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from '../evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from '../evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../models/fee-info';
 import { GetContractParamsOptions } from '../models/get-contract-params-options';
 import { RubicStep } from '../models/rubicStep';
