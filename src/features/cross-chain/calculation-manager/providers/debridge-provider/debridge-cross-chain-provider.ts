@@ -19,7 +19,7 @@ import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
@@ -41,8 +41,12 @@ import { DeflationTokenManager } from 'src/features/deflation-token-manager/defl
 import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-swap-request';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
+import { CrossChainTrade } from '../common/cross-chain-trade';
+
 export class DebridgeCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
+
+    private disabledTrade: CrossChainTrade<EvmEncodeConfig | { data: string }> | null = null;
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -95,6 +99,14 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 dstChainTokenOutRecipient: this.getWalletAddress(fromBlockchain) || fakeAddress,
                 prependOperatingExpenses: false
             };
+
+            this.disabledTrade = this.getEmptyTrade(
+                from,
+                toToken,
+                requestParams,
+                feeInfo,
+                options.providerAddress
+            );
 
             const debridgeResponse = await DlnApiService.fetchCrossChainQuote<
                 DlnEvmTransactionResponse | DlnSolanaTransactionResponse
@@ -183,7 +195,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             const debridgeApiError = this.parseDebridgeApiError(err);
 
             return {
-                trade: null,
+                trade: debridgeApiError instanceof TooLowAmountError ? this.disabledTrade : null,
                 error: debridgeApiError || rubicSdkError,
                 tradeType: this.type
             };
@@ -272,6 +284,41 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 }
             ];
         }
+    }
+
+    private getEmptyTrade(
+        from: PriceTokenAmount,
+        toToken: PriceToken,
+        requestParams: TransactionRequest,
+        feeInfo: FeeInfo,
+        providerAddress: string
+    ): CrossChainTrade<EvmEncodeConfig | { data: string }> {
+        const to = new PriceTokenAmount({
+            ...toToken.asStruct,
+            tokenAmount: new BigNumber(0)
+        });
+
+        const trade = DebridgeCrossChainFactory.createTrade(
+            from.blockchain,
+            {
+                from,
+                to,
+                transactionRequest: requestParams,
+                priceImpact: null,
+                allowanceTarget: undefined,
+                slippage: 0,
+                feeInfo,
+                transitAmount: new BigNumber(0),
+                toTokenAmountMin: to.tokenAmount,
+                onChainTrade: null,
+                cryptoFeeToken: to
+            },
+            providerAddress,
+            [],
+            false
+        );
+
+        return trade;
     }
 
     private async getGasData(

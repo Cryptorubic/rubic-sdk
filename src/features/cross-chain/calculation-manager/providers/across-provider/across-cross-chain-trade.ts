@@ -1,19 +1,19 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from '../common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from '../common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from '../common/models/bridge-type';
 import { FeeInfo } from '../common/models/fee-info';
 import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
@@ -216,14 +216,6 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
         toAmount: BigNumber,
         receiverAddress?: string
     ): EvmEncodeConfig {
-        let relayer = quote.exclusiveRelayer;
-        let relayerDeadLine = Number(quote.exclusivityDeadline);
-
-        if (this.to.blockchain === BLOCKCHAIN_NAME.LINEA) {
-            relayer = '0x54455CEaB7A7229DA56E79e8B841634C920A96Cc';
-            relayerDeadLine = Number(quote.timestamp) + 4000;
-        }
-
         const args = [
             this.walletAddress,
             receiverAddress || this.walletAddress,
@@ -232,10 +224,10 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
             this.fromWithoutFee.stringWeiAmount,
             toAmount.toFixed(),
             this.acrossFeeQuoteRequestParams.destinationChainId.toString(),
-            relayer,
+            quote.exclusiveRelayer,
             Number(quote.timestamp),
             this.getFillDeadline(),
-            relayerDeadLine,
+            Number(quote.exclusivityDeadline),
             '0x'
         ];
 

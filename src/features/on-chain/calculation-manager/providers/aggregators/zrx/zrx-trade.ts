@@ -70,7 +70,7 @@ export class ZrxTrade extends AggregatorEvmOnChainTrade {
             params: {
                 sellToken: this.from.address,
                 buyToken: this.to.address,
-                sellAmount: this.from.stringWeiAmount,
+                sellAmount: this.fromWithoutFee.stringWeiAmount,
                 slippagePercentage: this.slippageTolerance.toString(),
                 ...(this.affiliateAddress && { affiliateAddress: this.affiliateAddress })
             }

@@ -1,14 +1,19 @@
+import { Address, beginCell, toNano } from '@ton/core';
 import { TonConnectUI } from '@tonconnect/ui';
 import { RubicSdkError, UserRejectError } from 'src/common/errors';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { parseError } from 'src/common/utils/errors';
 import { waitFor } from 'src/common/utils/waitFor';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
+import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
+import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TonWalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 
 import { Web3Private } from '../web3-private';
-import { TonTransactionOptions } from './models/ton-types';
+import { TonEncodedConfig, TonTransactionOptions } from './models/ton-types';
 
 export class TonWeb3Private extends Web3Private {
     protected readonly Web3Pure = TonWeb3Pure;
@@ -44,6 +49,75 @@ export class TonWeb3Private extends Web3Private {
         }
     }
 
+    /**
+     * Transfer asset from on wallet to another
+     * @param tokenAddress Token address to transfer
+     * @param walletAddress Wallet address to transfer from
+     * @param receiver Receiver wallet address
+     * @param amount Transfer amount
+     * @param options Transaction options
+     */
+    public transferAsset(
+        tokenAddress: string,
+        walletAddress: string,
+        receiver: string,
+        amount: string,
+        options?: BasicTransactionOptions
+    ): Promise<string> {
+        if (compareAddresses(nativeTokensList.TON.address, tokenAddress)) {
+            return this.transferNative(receiver, amount, options);
+        }
+        return this.transferJetton(tokenAddress, walletAddress, receiver, amount, options);
+    }
+
+    private transferNative(
+        receiver: string,
+        amount: string,
+        options?: BasicTransactionOptions
+    ): Promise<string> {
+        const transferAmount = BigInt(amount);
+        const encodeConfig: TonEncodedConfig = {
+            address: receiver,
+            amount: transferAmount.toString()
+        };
+
+        return this.sendTransaction({ ...options, messages: [encodeConfig] });
+    }
+
+    private async transferJetton(
+        tokenAddress: string,
+        walletAddress: string,
+        receiver: string,
+        amount: string,
+        options?: BasicTransactionOptions
+    ): Promise<string> {
+        const fromAddress = Address.parse(walletAddress);
+        const contractAddress = Address.parse(tokenAddress);
+        const transferAmount = BigInt(amount);
+        const receiverAddress = Address.parse(receiver);
+
+        const jettonWalletAddress = await this.getWalletAddress(fromAddress, contractAddress);
+
+        const body = beginCell()
+            .storeUint(0xf8a7ea5, 32)
+            .storeUint(0, 64)
+            .storeCoins(transferAmount)
+            .storeAddress(receiverAddress)
+            .storeAddress(receiverAddress)
+            .storeBit(0)
+            .storeCoins(toNano('0.02'))
+            .storeBit(0)
+            .endCell();
+
+        const encodeConfig: TonEncodedConfig = {
+            address: jettonWalletAddress.toRawString(),
+            amount: toNano('0.05').toString(),
+            payload: body.toBoc().toString('base64')
+        };
+
+        return this.sendTransaction({ ...options, messages: [encodeConfig] });
+    }
+
     private async waitForTransactionReceipt(txHash: string): Promise<boolean> {
         let isCompleted = false;
         const startTimeMS = Date.now();
@@ -60,6 +134,15 @@ export class TonWeb3Private extends Web3Private {
             await waitFor(30_000);
             isCompleted = await this.tonApi.checkIsTxCompleted(txHash);
         }
+    }
+
+    public async getWalletAddress(address: Address, contractAddress: Address): Promise<Address> {
+        const addressResult = await TonClientInstance.getInstance().runMethod(
+            contractAddress,
+            'get_wallet_address',
+            [{ type: 'slice', cell: beginCell().storeAddress(address).endCell() }]
+        );
+        return addressResult.stack.readAddress();
     }
 
     constructor(tonProviderCore: TonWalletProviderCore) {

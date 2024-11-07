@@ -7,6 +7,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { ArchonContractService } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/archon-contract-service';
 import { archonBridgeAbi } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/constants/archon-bridge-abi';
@@ -14,10 +15,10 @@ import { ArchonBridgeSupportedBlockchain } from 'src/features/cross-chain/calcul
 import { archonWrapBridgeAbi } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/constants/archon-wrap-bridge-abi';
 import { layerZeroIds } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/constants/layer-zero-ids';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
@@ -199,7 +200,12 @@ export class ArchonBridgeTrade extends EvmCrossChainTrade {
         const { contract } = ArchonContractService.getWeb3AndAddress(this.from, this.to);
         const providerFee = this.feeInfo.provider?.cryptoFee?.amount || new BigNumber(0);
         const nativeToken = nativeTokensList[this.fromBlockchain];
-        const fromValueAmount = this.from.isNative ? this.from.tokenAmount : new BigNumber(0);
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
+
+        const fromValueAmount = this.from.isNative ? fromWithoutFee.tokenAmount : new BigNumber(0);
         const value = Web3Pure.toWei(fromValueAmount.plus(providerFee), nativeToken.decimals);
         const methodArguments = [];
         let config: EvmEncodeConfig | null = null;
@@ -209,7 +215,7 @@ export class ArchonBridgeTrade extends EvmCrossChainTrade {
                 methodArguments.push(this.from.address);
             }
             methodArguments.push(
-                this.from.stringWeiAmount,
+                fromWithoutFee.stringWeiAmount,
                 receiverAddress || this.walletAddress,
                 [this.walletAddress, '0x0000000000000000000000000000000000000000'],
                 '0x'
@@ -226,7 +232,7 @@ export class ArchonBridgeTrade extends EvmCrossChainTrade {
             methodArguments.push(
                 this.from.address,
                 layerZeroIds[this.to.blockchain as ArchonBridgeSupportedBlockchain],
-                this.from.stringWeiAmount,
+                fromWithoutFee.stringWeiAmount,
                 receiverAddress || this.walletAddress,
                 true,
                 [this.walletAddress, '0x0000000000000000000000000000000000000000'],

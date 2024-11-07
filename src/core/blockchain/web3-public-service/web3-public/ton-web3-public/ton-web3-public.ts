@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { TonApiTxDataByBocResp } from 'src/core/blockchain/models/ton/tonapi-types';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
@@ -25,6 +26,14 @@ export class TonWeb3Public extends Web3Public {
             return TX_STATUS.SUCCESS;
         }
         return TX_STATUS.PENDING;
+    }
+
+    public async getBlockchainTransaction(hash: string): Promise<TonApiTxDataByBocResp> {
+        return this.tonApi.fetchTxInfo(hash);
+    }
+
+    public getBlockchainTransactionByMessageHash(hash: string): Promise<TonApiTxDataByBocResp> {
+        return this.tonApi.fetchTxInfoByMessageHash(hash);
     }
 
     public async healthCheck(timeoutMs: number): Promise<boolean> {

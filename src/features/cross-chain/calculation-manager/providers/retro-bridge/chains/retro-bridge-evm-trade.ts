@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -9,30 +9,38 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
-import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from '../common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from '../common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
-import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
-import { FeeInfo } from '../common/models/fee-info';
-import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
-import { OnChainSubtype } from '../common/models/on-chain-subtype';
-import { RubicStep } from '../common/models/rubicStep';
-import { TradeInfo } from '../common/models/trade-info';
-import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { retroBridgeContractAddresses } from './constants/retro-bridge-contract-address';
-import { RetroBridgeSupportedBlockchain } from './constants/retro-bridge-supported-blockchain';
-import { retroBridgeSwapAbi } from './constants/retro-bridge-swap-abi';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
+import {
+    BRIDGE_TYPE,
+    BridgeType
+} from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { retroBridgeContractAddresses } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/constants/retro-bridge-contract-address';
+import { RetroBridgeSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/constants/retro-bridge-supported-blockchain';
+import { retroBridgeSwapAbi } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/constants/retro-bridge-swap-abi';
+import { RetroBridgeEvmConstructorParams } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-constructor-params';
 import {
     RetroBridgeQuoteSendParams,
     RetroBridgeTxResponse
-} from './models/retro-bridge-quote-send-params';
-import { RetroBridgeApiService } from './services/retro-bridge-api-service';
-export class RetroBridgeTrade extends EvmCrossChainTrade {
+} from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-quote-send-params';
+import { RetroBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-trade';
+import { RetroBridgeApiService } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/services/retro-bridge-api-service';
+import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
+
+export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBridgeTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -43,7 +51,7 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
         quoteSendParams: RetroBridgeQuoteSendParams,
         hotWalletAddress: string
     ): Promise<GasData | null> {
-        const trade = new RetroBridgeTrade(
+        const trade = new RetroBridgeEvmTrade(
             {
                 from,
                 to,
@@ -66,7 +74,7 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
 
     public readonly isAggregator = false;
 
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
+    public readonly to: PriceTokenAmount<BlockchainName>;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -111,17 +119,7 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
     }
 
     constructor(
-        crossChainTrade: {
-            from: PriceTokenAmount<EvmBlockchainName>;
-            to: PriceTokenAmount<EvmBlockchainName>;
-            feeInfo: FeeInfo;
-            priceImpact: number | null;
-            slippage: number;
-            gasData: GasData | null;
-            quoteSendParams: RetroBridgeQuoteSendParams;
-            hotWalletAddress: string;
-            isSimulation?: boolean;
-        },
+        crossChainTrade: RetroBridgeEvmConstructorParams,
         providerAddress: string,
         routePath: RubicStep[],
         useProxy: boolean
@@ -150,6 +148,9 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
             options?.receiverAddress
         );
         try {
+            const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
+            const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
+
             const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
                 walletAddress: this.walletAddress,
                 fromTokenAmount: this.from,
@@ -157,7 +158,8 @@ export class RetroBridgeTrade extends EvmCrossChainTrade {
                 srcChainTrade: null,
                 providerAddress: this.providerAddress,
                 type: `native:${this.bridgeType}`,
-                fromAddress: this.walletAddress
+                fromAddress: this.walletAddress,
+                toAddress: receivingAsset
             });
             const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
                 to,

@@ -356,9 +356,16 @@ export class EvmWeb3Private extends Web3Private {
             gas: Web3Private.stringifyAmount(gas, 1)
         };
 
-        await contract.methods
-            .approve(spenderAddress, rawValue.toFixed(0))
-            .estimateGas(gasfullParams);
+        try {
+            await contract.methods
+                .approve(spenderAddress, rawValue.toFixed(0))
+                .estimateGas(gasfullParams);
+        } catch (err) {
+            if (err?.message?.includes('gas required exceeds allowance')) {
+                throw err;
+            }
+            console.error(err);
+        }
 
         return new Promise((resolve, reject) => {
             contract.methods

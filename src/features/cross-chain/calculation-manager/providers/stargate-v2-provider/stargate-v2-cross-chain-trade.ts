@@ -13,10 +13,10 @@ import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fe
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from '../common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from '../common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
+import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from '../common/evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from '../common/evm-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from '../common/models/bridge-type';
 import { FeeInfo } from '../common/models/fee-info';
 import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
@@ -104,6 +104,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     private readonly fromTokenAddress: string;
 
+    private readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
     public get fromBlockchain(): StargateV2SupportedBlockchains {
         return this.from.blockchain as StargateV2SupportedBlockchains;
     }
@@ -146,6 +148,10 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.fromTokenAddress = this.from.address.toLowerCase();
+        this.fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -173,12 +179,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
                 }
             );
 
-            const fromWithoutFee = getFromWithoutFee(
-                this.from,
-                this.feeInfo.rubicProxy?.platformFee?.percent
-            );
             const extraNativeFee = this.from.isNative
-                ? new BigNumber(providerValue).minus(fromWithoutFee.stringWeiAmount).toFixed()
+                ? new BigNumber(providerValue).minus(this.fromWithoutFee.stringWeiAmount).toFixed()
                 : new BigNumber(providerValue).toFixed();
 
             const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
@@ -228,7 +230,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         const nativeFee = new BigNumber(this.messagingFee.nativeFee);
 
         const value = this.from.isNative
-            ? new BigNumber(this.from.stringWeiAmount).plus(nativeFee).toFixed()
+            ? new BigNumber(this.fromWithoutFee.stringWeiAmount).plus(nativeFee).toFixed()
             : this.messagingFee.nativeFee;
         const calldata = await EvmWeb3Pure.encodeMethodCall(
             contractAddress,

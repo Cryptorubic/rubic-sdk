@@ -23,7 +23,8 @@ export const retroBridgeSupportedBlockchain = [
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.XLAYER,
-    BLOCKCHAIN_NAME.GRAVITY
+    BLOCKCHAIN_NAME.GRAVITY,
+    BLOCKCHAIN_NAME.TON
 ];
 
 export type RetroBridgeSupportedBlockchain = (typeof retroBridgeSupportedBlockchain)[number];
