@@ -2,7 +2,6 @@ import { SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -13,7 +12,7 @@ import {
     BridgersSwapResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
-import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
+import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/tron-bridgers-transaction-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainPlatformFee } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import {
@@ -87,7 +86,7 @@ export class BridgersTrade extends TronOnChainTrade {
         try {
             const transactionData = await this.getTransactionData(options);
 
-            return await this.web3Private.triggerContract(
+            return await this.web3Private.sendTransaction(
                 this.contractAddress,
                 transactionData.functionName,
                 transactionData.parameter,
@@ -104,16 +103,13 @@ export class BridgersTrade extends TronOnChainTrade {
     public async encode(options: EncodeTransactionOptions): Promise<TronTransactionConfig> {
         try {
             const transactionData = await this.getTransactionData(options);
-            const encodedData = TronWeb3Pure.encodeMethodSignature(
-                transactionData.functionName,
-                transactionData.parameter
-            );
 
             return {
                 to: this.contractAddress,
-                data: encodedData,
-                callValue: transactionData.options.callValue,
-                feeLimit: options.feeLimit || transactionData.options.feeLimit
+                signature: transactionData.functionName,
+                arguments: transactionData.parameter,
+                feeLimit: options.feeLimit || transactionData.options.feeLimit,
+                callValue: transactionData.options.callValue
             };
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {
