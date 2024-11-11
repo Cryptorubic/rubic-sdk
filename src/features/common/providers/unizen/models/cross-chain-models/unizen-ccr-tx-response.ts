@@ -3,5 +3,5 @@ export interface UniZenCcrTxResponse {
     dstTxHash: string;
     srcChainId: number;
     dstChainId: number;
-    status: 'DELIVERED' | 'PENDING';
+    status: 'DELIVERED' | 'INFLIGHT' | 'FAILED';
 }

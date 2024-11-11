@@ -40,13 +40,25 @@ export class UniZenApiService {
 
     public static async getTxStatus(srcTxHash: string): Promise<TxStatusData> {
         const res = await Injector.httpClient.get<UniZenCcrTxResponse>(
-            `${UniZenApiService.apiEndpoint}/info/tx/${srcTxHash}`
+            `${UniZenApiService.apiEndpoint}/info/tx/${srcTxHash}`,
+            {
+                headers: { apiKey: RUBIC_X_API_OKU_APIKEY }
+            }
         );
 
-        if (res.status === 'DELIVERED') {
+        const txStatus = res.status.toLowerCase();
+
+        if (txStatus === 'delivered') {
             return {
                 hash: res.dstTxHash,
                 status: TX_STATUS.SUCCESS
+            };
+        }
+
+        if (txStatus === 'failed') {
+            return {
+                hash: null,
+                status: TX_STATUS.FAIL
             };
         }
 
