@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.42.7-alpha-tron-providers.5",
+    "version": "5.42.7-alpha-tron-providers.7",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",

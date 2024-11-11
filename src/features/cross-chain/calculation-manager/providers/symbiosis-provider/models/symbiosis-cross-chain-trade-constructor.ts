@@ -3,7 +3,8 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import {
     BlockchainName,
     EvmBlockchainName,
-    TonBlockchainName
+    TonBlockchainName,
+    TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
@@ -30,3 +31,6 @@ export type SymbiosisEvmCrossChainTradeConstructor =
 
 export type SymbiosisTonCrossChainTradeConstructor =
     SymbiosisCrossChainTradeConstructor<TonBlockchainName>;
+
+export type SymbiosisTronCrossChainTradeConstructor =
+    SymbiosisCrossChainTradeConstructor<TronBlockchainName>;

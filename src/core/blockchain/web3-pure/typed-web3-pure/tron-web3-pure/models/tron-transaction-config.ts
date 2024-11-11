@@ -7,4 +7,6 @@ export interface TronTransactionConfig {
 
     feeLimit?: number;
     callValue?: string;
+
+    rawParameter?: string;
 }
