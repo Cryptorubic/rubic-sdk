@@ -36,6 +36,7 @@ export class UniZenCcrTrade extends EvmCrossChainTrade {
         to: PriceTokenAmount<EvmBlockchainName>,
         feeInfo: FeeInfo,
         providerAddress: string,
+        slippage: number,
         unizenContractAddress: string
     ): Promise<GasData | null> {
         try {
@@ -45,7 +46,7 @@ export class UniZenCcrTrade extends EvmCrossChainTrade {
                     to,
                     feeInfo,
                     gasData: null,
-                    slippage: 0,
+                    slippage,
                     priceImpact: null,
                     contractAddress: unizenContractAddress,
                     toTokenAmountMin: new BigNumber(0)

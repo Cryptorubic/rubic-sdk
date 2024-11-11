@@ -50,7 +50,7 @@ export class UniZenCcrProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const useProxy = options?.useProxy?.[this.type] ?? true;;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
 
         const fromBlockchain = from.blockchain as UniZenCcrSupportedChain;
         const toBlockchain = toToken.blockchain as UniZenCcrSupportedChain;
@@ -124,6 +124,7 @@ export class UniZenCcrProvider extends CrossChainProvider {
                           to,
                           feeInfo,
                           options.providerAddress,
+                          options.slippageTolerance,
                           contractAddress
                       )
                     : null;
