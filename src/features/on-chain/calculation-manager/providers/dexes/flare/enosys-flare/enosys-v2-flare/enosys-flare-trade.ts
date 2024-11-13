@@ -6,9 +6,12 @@ import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 
-import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../../common/models/on-chain-trade-type';
-import { EvmEncodedConfigAndToAmount } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
-import { UniswapV2AbstractTrade } from '../../common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from '../../../../common/models/on-chain-trade-type';
+import { EvmEncodedConfigAndToAmount } from '../../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { UniswapV2AbstractTrade } from '../../../common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { ENOSYS_FLARE_CONTRACT_ADDRESS } from './constants';
 import { ENOSYS_FLARE_ABI } from './enosys-flare-abi';
 import { ENOSYS_METHOD } from './enosys-swap-methods';

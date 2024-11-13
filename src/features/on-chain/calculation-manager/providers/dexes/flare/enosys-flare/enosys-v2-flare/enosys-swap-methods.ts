@@ -4,7 +4,7 @@ import {
     ExactInputOutputSwapMethodsList,
     RegularSwapMethodsList,
     SwapMethodsList
-} from '../../common/uniswap-v2-abstract/constants/SWAP_METHOD';
+} from '../../../common/uniswap-v2-abstract/constants/SWAP_METHOD';
 
 export const ENOSYS_EXACT_INPUT_REGULAR_SWAP_METHOD: RegularSwapMethodsList = {
     TOKENS_TO_TOKENS: 'swapExactTokensForTokens',
