@@ -104,6 +104,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
 
     private readonly fromTokenAddress: string;
 
+    private readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
     public get fromBlockchain(): StargateV2SupportedBlockchains {
         return this.from.blockchain as StargateV2SupportedBlockchains;
     }
@@ -146,6 +148,10 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.fromTokenAddress = this.from.address.toLowerCase();
+        this.fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -173,12 +179,8 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
                 }
             );
 
-            const fromWithoutFee = getFromWithoutFee(
-                this.from,
-                this.feeInfo.rubicProxy?.platformFee?.percent
-            );
             const extraNativeFee = this.from.isNative
-                ? new BigNumber(providerValue).minus(fromWithoutFee.stringWeiAmount).toFixed()
+                ? new BigNumber(providerValue).minus(this.fromWithoutFee.stringWeiAmount).toFixed()
                 : new BigNumber(providerValue).toFixed();
 
             const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
@@ -228,7 +230,7 @@ export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
         const nativeFee = new BigNumber(this.messagingFee.nativeFee);
 
         const value = this.from.isNative
-            ? new BigNumber(this.from.stringWeiAmount).plus(nativeFee).toFixed()
+            ? new BigNumber(this.fromWithoutFee.stringWeiAmount).plus(nativeFee).toFixed()
             : this.messagingFee.nativeFee;
         const calldata = await EvmWeb3Pure.encodeMethodCall(
             contractAddress,
