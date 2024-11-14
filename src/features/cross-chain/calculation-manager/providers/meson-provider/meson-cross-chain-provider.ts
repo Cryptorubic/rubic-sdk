@@ -8,10 +8,14 @@ import {
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-import Web3 from 'web3';
+import { MesonCrossChainFactory } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/meson-cross-chain-factory';
+import { MesonCrossChainUtils } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/services/meson-cross-chain-utils';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CrossChainProvider } from '../common/cross-chain-provider';
@@ -24,7 +28,6 @@ import {
     mesonCrossChainSupportedChains,
     MesonSupportedBlockchain
 } from './constants/meson-cross-chain-supported-chains';
-import { MesonCrossChainTrade } from './meson-cross-chain-trade';
 import { MesonLimitsChain, MesonLimitsToken, SrcDstChainsIds } from './models/meson-api-types';
 import { FetchedMesonTradeInfo } from './models/meson-provider-types';
 import { MesonCcrApiService } from './services/meson-cross-chain-api-service';
@@ -44,7 +47,10 @@ export class MesonCrossChainProvider extends CrossChainProvider {
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as MesonSupportedBlockchain;
-        const useProxy = options?.useProxy?.[this.type] ?? true;
+        let useProxy = options?.useProxy?.[this.type] ?? true;
+        if (fromBlockchain === BLOCKCHAIN_NAME.TRON) {
+            useProxy = false;
+        }
 
         try {
             if (!useProxy) {
@@ -74,19 +80,19 @@ export class MesonCrossChainProvider extends CrossChainProvider {
                 tokenAmount: toAmount
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await MesonCrossChainTrade.getGasData({
-                          from: fromWith6Decimals,
-                          feeInfo,
-                          toToken: to,
-                          providerAddress: options.providerAddress,
-                          sourceAssetString,
-                          targetAssetString
-                      })
-                    : null;
+            const gasData = await MesonCrossChainFactory.getGasData(
+                options?.gasCalculation === 'enabled',
+                {
+                    from: fromWith6Decimals,
+                    feeInfo,
+                    toToken: to,
+                    providerAddress: options.providerAddress,
+                    sourceAssetString,
+                    targetAssetString
+                }
+            );
 
-            const trade = new MesonCrossChainTrade({
+            const trade = MesonCrossChainFactory.createTrade({
                 crossChainTrade: {
                     feeInfo,
                     from: fromWith6Decimals,
@@ -157,12 +163,11 @@ export class MesonCrossChainProvider extends CrossChainProvider {
     }
 
     private getApiTokenInfo(
-        token: PriceToken<EvmBlockchainName>,
+        token: PriceToken<BlockchainName>,
         apiChains: MesonLimitsChain[]
     ): MesonLimitsToken {
-        const chainId = blockchainId[token.blockchain];
-        const hexChainId = Web3.utils.toHex(chainId);
-        const foundChain = apiChains.find(chain => compareAddresses(chain.chainId, hexChainId));
+        const searchebleId = MesonCrossChainUtils.getSearchebleId(token.blockchain);
+        const foundChain = apiChains.find(chain => compareAddresses(chain.chainId, searchebleId));
 
         if (!foundChain) {
             throw new NotSupportedBlockchain();
@@ -186,8 +191,8 @@ export class MesonCrossChainProvider extends CrossChainProvider {
         targetToken: PriceToken<EvmBlockchainName>,
         apiChains: MesonLimitsChain[]
     ): SrcDstChainsIds {
-        const sourceChainIdHex = Web3.utils.toHex(blockchainId[sourceToken.blockchain]);
-        const targetChainIdHex = Web3.utils.toHex(blockchainId[targetToken.blockchain]);
+        const sourceChainIdHex = MesonCrossChainUtils.getSearchebleId(sourceToken.blockchain);
+        const targetChainIdHex = MesonCrossChainUtils.getSearchebleId(targetToken.blockchain);
         const ids = ['', ''] as SrcDstChainsIds;
 
         for (const chain of apiChains) {

@@ -14,7 +14,10 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
+import {
+    FAKE_TRON_WALLET_ADDRESS,
+    FAKE_WALLET_ADDRESS
+} from 'src/features/common/constants/fake-wallet-address';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -26,6 +29,7 @@ import { RubicStep } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { SymbiosisEvmCcrTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-evm-trade';
 import { SymbiosisCcrTonTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-ton-trade';
+import { SymbiosisTronCcrTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-tron-trade';
 import { SymbiosisError } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-error';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import {
@@ -56,7 +60,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
     ): boolean {
-        if (fromBlockchain === BLOCKCHAIN_NAME.BITCOIN || fromBlockchain === BLOCKCHAIN_NAME.TRON) {
+        if (fromBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
             return false;
         }
 
@@ -77,7 +81,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 ? false
                 : options?.useProxy?.[this.type] ?? true;
 
-        let disabledTrade = {} as SymbiosisCcrTonTrade | SymbiosisEvmCcrTrade;
+        let disabledTrade = {} as
+            | SymbiosisCcrTonTrade
+            | SymbiosisEvmCcrTrade
+            | SymbiosisTronCcrTrade;
 
         try {
             const fromAddress =
@@ -326,7 +333,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         to: PriceTokenAmount<BlockchainName>,
         swapParams: SymbiosisSwappingParams,
         feeInfo: FeeInfo
-    ): SymbiosisEvmCcrTrade | SymbiosisCcrTonTrade {
+    ): SymbiosisEvmCcrTrade | SymbiosisCcrTonTrade | SymbiosisTronCcrTrade {
         return SymbiosisCrossChainFactory.createTrade(
             from.blockchain,
             {
@@ -413,6 +420,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
         if (chainType === CHAIN_TYPE.TON) {
             return 'UQATSC4TXAqjgLswuSEDVTIGmPG_kNnUTDhrTiIILVmymoQA';
+        }
+        if (chainType === CHAIN_TYPE.TRON) {
+            return FAKE_TRON_WALLET_ADDRESS;
         }
         throw new Error('Blockchain not supported');
     }
