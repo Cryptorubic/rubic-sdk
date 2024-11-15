@@ -4,4 +4,6 @@ export interface TronTransactionOptions extends BasicTransactionOptions {
     feeLimit?: number;
 
     callValue?: number | string;
+
+    rawParameter?: string;
 }

@@ -4,30 +4,37 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
+import {
+    BRIDGE_TYPE,
+    BridgeType
+} from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { ORBITER_ROUTER_V3_ABI } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/constants/orbiter-router-v3-abi';
+import { OrbiterQuoteConfig } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-api-quote-types';
+import {
+    OrbiterEvmTradeParams,
+    OrbiterGetGasDataParams
+} from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-bridge-trade-types';
+import { orbiterContractAddresses } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-contract-addresses';
+import { OrbiterSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-supported-blockchains';
+import { OrbiterUtils } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/services/orbiter-utils';
+import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
 import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from '../common/evm-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from '../common/evm-cross-chain-trade/models/gas-data';
-import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
-import { FeeInfo } from '../common/models/fee-info';
-import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
-import { OnChainSubtype } from '../common/models/on-chain-subtype';
-import { TradeInfo } from '../common/models/trade-info';
-import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { ORBITER_ROUTER_V3_ABI } from './constants/orbiter-router-v3-abi';
-import { OrbiterQuoteConfig } from './models/orbiter-api-quote-types';
-import { OrbiterGetGasDataParams, OrbiterTradeParams } from './models/orbiter-bridge-trade-types';
-import { orbiterContractAddresses } from './models/orbiter-contract-addresses';
-import { OrbiterSupportedBlockchain } from './models/orbiter-supported-blockchains';
-import { OrbiterUtils } from './services/orbiter-utils';
-
-export class OrbiterBridgeTrade extends EvmCrossChainTrade {
+export class OrbiterEvmBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData({
         fromToken,
@@ -35,9 +42,9 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         feeInfo,
         providerAddress,
         quoteConfig
-    }: OrbiterGetGasDataParams): Promise<GasData | null> {
+    }: OrbiterGetGasDataParams<EvmBlockchainName>): Promise<GasData | null> {
         try {
-            const trade = new OrbiterBridgeTrade({
+            const trade = new OrbiterEvmBridgeTrade({
                 crossChainTrade: {
                     from: fromToken,
                     to: toToken,
@@ -62,7 +69,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
     public readonly isAggregator: boolean = false;
 
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
+    public readonly to: PriceTokenAmount;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -96,7 +103,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
-    constructor(params: OrbiterTradeParams) {
+    constructor(params: OrbiterEvmTradeParams) {
         super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
@@ -105,39 +112,6 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         this.gasData = params.crossChainTrade.gasData;
         this.priceImpact = params.crossChainTrade.priceImpact;
         this.quoteConfig = params.crossChainTrade.quoteConfig;
-    }
-
-    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkTradeErrors();
-        await this.checkAllowanceAndApprove(options);
-
-        const { onConfirm, gasPriceOptions } = options;
-        let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
-
-        try {
-            const { data, to, value } = await this.setTransactionConfig(
-                false,
-                options?.useCacheData || false,
-                options?.receiverAddress || this.walletAddress
-            );
-
-            await this.web3Private.trySendTransaction(to, {
-                data,
-                value,
-                onTransactionHash,
-                gasPriceOptions
-            });
-
-            return transactionHash!;
-        } catch (err) {
-            throw err;
-        }
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -152,8 +126,17 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             options?.receiverAddress || this.walletAddress
         );
 
+        const { receiverAddress: proxyReceiver, toAddress } = await SymbiosisUtils.getReceiver(
+            this.from,
+            this.to,
+            this.walletAddress,
+            options?.receiverAddress
+        );
+
         const percentFee = (this.feeInfo.rubicProxy?.platformFee?.percent || 0) / 100;
-        const fromWeiAmountWithHiddenCode = new BigNumber(this.getFromAmountWithoutFeeWithCode())
+        const fromWeiAmountWithHiddenCode = new BigNumber(
+            OrbiterUtils.getFromAmountWithoutFeeWithCode(this.from, this.feeInfo, this.quoteConfig)
+        )
             .dividedBy(1 - percentFee)
             .decimalPlaces(0, 1);
         const fromWithCode = new PriceTokenAmount({
@@ -161,15 +144,19 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             weiAmount: fromWeiAmountWithHiddenCode
         });
 
-        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-            walletAddress: receiverAddress,
-            fromTokenAmount: fromWithCode,
-            toTokenAmount: this.to,
-            srcChainTrade: null,
-            providerAddress: this.providerAddress,
-            type: `native:${this.bridgeType}`,
-            fromAddress: this.walletAddress
-        });
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
+            { ...options, receiverAddress: proxyReceiver },
+            {
+                walletAddress: receiverAddress,
+                fromTokenAmount: fromWithCode,
+                toTokenAmount: this.to,
+                srcChainTrade: null,
+                providerAddress: this.providerAddress,
+                type: `native:${this.bridgeType}`,
+                fromAddress: this.walletAddress,
+                toAddress
+            }
+        );
 
         const extraNativeFee = '0';
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
@@ -210,7 +197,12 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         const orbiterTokensDispenser = this.quoteConfig.endpoint;
 
         // const transferAmount = this.from.stringWeiAmount;
-        const transferAmount = this.getFromAmountWithoutFeeWithCode();
+
+        const transferAmount = OrbiterUtils.getFromAmountWithoutFeeWithCode(
+            this.from,
+            this.feeInfo,
+            this.quoteConfig
+        );
 
         const encodedReceiverAndCode = OrbiterUtils.getHexDataArg(
             this.quoteConfig.vc,
@@ -235,25 +227,6 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             config,
             amount: this.to.stringWeiAmount
         };
-    }
-
-    /**
-     *  @example for native transfer
-     *   1000000 - 2%(rubicPercentFee) -> convertToCode -> 998015
-     *   amountJore -  998015 + 2%
-     *   When Jora subtracts amountJore - 2%, he will get value with orbiter-vc-code
-     */
-    private getFromAmountWithoutFeeWithCode(): string {
-        const fromWithoutFee = getFromWithoutFee(
-            this.from,
-            this.feeInfo.rubicProxy?.platformFee?.percent
-        );
-        const transferAmount = OrbiterUtils.getAmountWithVcCode(
-            fromWithoutFee.stringWeiAmount,
-            this.quoteConfig
-        );
-
-        return transferAmount;
     }
 
     public getTradeInfo(): TradeInfo {

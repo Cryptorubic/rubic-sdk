@@ -6,30 +6,36 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
-import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from '../common/evm-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from '../common/evm-cross-chain-trade/models/gas-data';
-import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
-import { FeeInfo } from '../common/models/fee-info';
-import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
-import { OnChainSubtype } from '../common/models/on-chain-subtype';
-import { TradeInfo } from '../common/models/trade-info';
-import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { MESON_ABI } from './constants/meson-abi';
-import { mesonContractAddresses } from './constants/meson-contract-addresses';
-import { MesonSupportedBlockchain } from './constants/meson-cross-chain-supported-chains';
 import {
-    MesonCrossChainTradeConstructorParams,
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
+import {
+    BRIDGE_TYPE,
+    BridgeType
+} from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { MESON_ABI } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/constants/meson-abi';
+import { mesonContractAddresses } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/constants/meson-contract-addresses';
+import { MesonSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/constants/meson-cross-chain-supported-chains';
+import {
+    MesonCrossChainEvmTradeConstructorParams,
     MesonGetGasDataParams
-} from './models/meson-trade-types';
-import { MesonCcrApiService } from './services/meson-cross-chain-api-service';
+} from 'src/features/cross-chain/calculation-manager/providers/meson-provider/models/meson-trade-types';
+import { MesonCcrApiService } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
+import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
+import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
-export class MesonCrossChainTrade extends EvmCrossChainTrade {
+export class MesonCrossChainEvmTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData({
         feeInfo,
@@ -38,9 +44,9 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
         sourceAssetString,
         targetAssetString,
         toToken
-    }: MesonGetGasDataParams): Promise<GasData | null> {
+    }: MesonGetGasDataParams<EvmBlockchainName>): Promise<GasData | null> {
         try {
-            const trade = new MesonCrossChainTrade({
+            const trade = new MesonCrossChainEvmTrade({
                 crossChainTrade: {
                     from,
                     to: toToken,
@@ -66,7 +72,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly isAggregator: boolean = false;
 
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
+    public readonly to: PriceTokenAmount;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>; // 0.0011
 
@@ -102,7 +108,7 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
-    constructor(params: MesonCrossChainTradeConstructorParams) {
+    constructor(params: MesonCrossChainEvmTradeConstructorParams) {
         super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
@@ -125,16 +131,26 @@ export class MesonCrossChainTrade extends EvmCrossChainTrade {
             options?.useCacheData || false,
             options?.receiverAddress || this.walletAddress
         );
+        const { receiverAddress: proxyReceiver, toAddress } = await SymbiosisUtils.getReceiver(
+            this.from,
+            this.to,
+            this.walletAddress,
+            options?.receiverAddress
+        );
 
-        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-            walletAddress: receiverAddress,
-            fromTokenAmount: this.from, // 0.0011
-            toTokenAmount: this.to,
-            srcChainTrade: null,
-            providerAddress: this.providerAddress,
-            type: `native:${this.bridgeType}`,
-            fromAddress: this.walletAddress
-        });
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
+            { ...options, receiverAddress: proxyReceiver },
+            {
+                walletAddress: receiverAddress,
+                fromTokenAmount: this.from, // 0.0011
+                toTokenAmount: this.to,
+                srcChainTrade: null,
+                providerAddress: this.providerAddress,
+                type: `native:${this.bridgeType}`,
+                fromAddress: this.walletAddress,
+                toAddress
+            }
+        );
 
         const extraNativeFee = '0';
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(

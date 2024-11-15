@@ -13,7 +13,6 @@ import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tr
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
-import { AbiItem } from 'web3-utils';
 
 export class TronWeb3Private extends Web3Private {
     /**
@@ -91,42 +90,16 @@ export class TronWeb3Private extends Web3Private {
             tokenAddress,
             TRC20_CONTRACT_ABI,
             'approve',
-            [spenderAddress, rawValue.toFixed(0)],
+            [
+                { type: 'address', value: spenderAddress },
+                { type: 'uint256', value: rawValue.toFixed(0) }
+            ],
             '0',
             options.feeLimit
         );
     }
 
-    public async executeContractMethod(
-        contractAddress: string,
-        contractAbi: AbiItem[],
-        methodName: string,
-        methodArguments: unknown[],
-        options: TronTransactionOptions = {}
-    ): Promise<string> {
-        try {
-            const contract = await this.tronWeb.contract(contractAbi, contractAddress);
-
-            const transactionHash = await contract[methodName](...methodArguments).send({
-                from: this.address,
-                ...(options.callValue && {
-                    callValue: Web3Private.stringifyAmount(options.callValue)
-                }),
-                ...(options.feeLimit && {
-                    feeLimit: Web3Private.stringifyAmount(options.feeLimit)
-                })
-            });
-            if (options.onTransactionHash) {
-                options.onTransactionHash(transactionHash);
-            }
-            return transactionHash;
-        } catch (err) {
-            console.error('Method execution error: ', err);
-            throw TronWeb3Private.parseError(err);
-        }
-    }
-
-    public async triggerContract(
+    public async sendTransaction(
         contractAddress: string,
         methodSignature: string,
         parameters: TronParameters,
@@ -153,5 +126,28 @@ export class TronWeb3Private extends Web3Private {
             console.error('Method execution error: ', err);
             throw TronWeb3Private.parseError(err);
         }
+    }
+
+    public async trySendTransaction(
+        contractAddress: string,
+        methodSignature: string,
+        parameters: TronParameters,
+        options: TronTransactionOptions = {}
+    ): Promise<string> {
+        try {
+            await this.tronWeb.transactionBuilder.estimateEnergy(
+                contractAddress,
+                methodSignature,
+                {},
+                parameters,
+                this.address
+            );
+        } catch (err) {
+            if (err !== 'this node does not support estimate energy') {
+                throw new Error('Tron transaction simulation error');
+            }
+        }
+
+        return this.sendTransaction(contractAddress, methodSignature, parameters, options);
     }
 }
