@@ -107,7 +107,10 @@ export class UniZenCcrProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(quoteInfo.transactionData.params.actualQuote)
             });
 
-            const toTokenAmountMin = Web3Pure.fromWei(quoteInfo.transactionData.params.minQuote);
+            const toTokenAmountMin = Web3Pure.fromWei(
+                quoteInfo.transactionData.params.minQuote,
+                to.decimals
+            );
 
             const routePath = await this.getRoutePath(
                 from,
