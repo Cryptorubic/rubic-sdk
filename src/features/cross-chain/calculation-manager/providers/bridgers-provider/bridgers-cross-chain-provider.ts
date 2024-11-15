@@ -9,9 +9,9 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
+    EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
@@ -26,13 +26,11 @@ import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fe
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { BridgersCrossChainProviderFactory } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/bridgers-cross-chain-provider-factory';
 import {
     BridgersCrossChainSupportedBlockchain,
-    bridgersCrossChainSupportedBlockchains,
-    BridgersEvmCrossChainSupportedBlockchain
+    bridgersCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
-import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
-import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
@@ -152,49 +150,34 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 toToken.decimals
             );
 
-            if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
-                const gasData =
-                    options.gasCalculation === 'enabled' && options.receiverAddress
-                        ? await EvmBridgersCrossChainTrade.getGasData(
-                              from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
-                              to as PriceTokenAmount<TronBlockchainName>,
-                              options.receiverAddress,
-                              options.providerAddress,
-                              feeInfo
-                          )
-                        : null;
-
-                const evmTrade = new EvmBridgersCrossChainTrade(
-                    {
-                        from: from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
-                        to: to as PriceTokenAmount<TronBlockchainName>,
-                        toTokenAmountMin,
-                        feeInfo,
-                        gasData,
-                        slippage: options.slippageTolerance
-                    },
-                    options.providerAddress,
-                    await this.getRoutePath(from, to),
-                    useProxy
-                );
-
-                return this.getCalculationResponse(from, transactionData, evmTrade);
-            }
-
-            const tronTrade = new TronBridgersCrossChainTrade(
+            const gasData = await BridgersCrossChainProviderFactory.getGasData(
+                options.gasCalculation === 'enabled' && Boolean(options.receiverAddress),
                 {
-                    from: from as PriceTokenAmount<TronBlockchainName>,
-                    to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
-                    toTokenAmountMin,
-                    feeInfo,
-                    slippage: options.slippageTolerance,
-                    contractAddress: transactionData.contractAddress
-                },
-                options.providerAddress,
-                await this.getRoutePath(from, to)
+                    from,
+                    to,
+                    receiverAddress: options.receiverAddress!,
+                    providerAddress: options.providerAddress,
+                    feeInfo
+                }
             );
 
-            return this.getCalculationResponse(from, transactionData, tronTrade);
+            const trade = BridgersCrossChainProviderFactory.createTrade({
+                crossChainTrade: {
+                    from: from as
+                        | PriceTokenAmount<EvmBlockchainName>
+                        | PriceTokenAmount<TronBlockchainName>,
+                    to,
+                    toTokenAmountMin,
+                    feeInfo,
+                    gasData,
+                    slippage: options.slippageTolerance
+                },
+                providerAddress: options.providerAddress,
+                routePath: await this.getRoutePath(from, to),
+                useProxy
+            });
+
+            return this.getCalculationResponse(from, transactionData, trade);
         } catch (err: unknown) {
             return {
                 trade: null,

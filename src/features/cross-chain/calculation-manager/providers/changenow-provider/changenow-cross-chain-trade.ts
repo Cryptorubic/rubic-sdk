@@ -194,7 +194,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
     public async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         if (!BlockchainsInfo.isEvmBlockchainName(this.from.blockchain)) {
-            throw new RubicSdkError("For non-evm chains use 'getChangenowPostTrade' method");
+            throw new RubicSdkError("For non-evm networks use 'getChangenowPostTrade' method");
         }
 
         await this.checkTradeErrors();
