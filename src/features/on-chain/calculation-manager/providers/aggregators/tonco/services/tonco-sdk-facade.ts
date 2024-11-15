@@ -9,9 +9,11 @@ import {
 } from '@toncodex/sdk';
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
 import { convertTxParamsToTonConfig } from '../../stonfi/utils/convert-params-to-ton-config';
@@ -65,8 +67,8 @@ export class ToncoSdkFacade {
                 params.jettonWallets.srcUserJettonWallet,
                 params.jettonWallets.dstRouterJettonWallet,
                 parsedWalletAddress,
-                BigInt(fromAmountWei.toFixed()),
-                BigInt(toMinAmountWei.toFixed()),
+                BigInt(fromAmountWei.toFixed(0)),
+                BigInt(toMinAmountWei.toFixed(0)),
                 priceLimitSqrt,
                 params.swapType
             );
@@ -94,13 +96,16 @@ export class ToncoSdkFacade {
             params.jettonWallets.srcUserJettonWallet,
             params.jettonWallets.dstRouterJettonWallet,
             parsedWalletAddress,
-            BigInt(fromAmountWei.toFixed()),
-            BigInt(toMinAmountWei.toFixed()),
+            BigInt(fromAmountWei.toFixed(0)),
+            BigInt(toMinAmountWei.toFixed(0)),
             priceLimitSqrt,
             params.swapType
         );
 
-        return new BigNumber(emulation.gasLimit.toString());
+        const nativeTon = nativeTokensList[BLOCKCHAIN_NAME.TON];
+        const gasLimit = Web3Pure.fromWei(emulation.gasLimit.toString(), nativeTon.decimals);
+
+        return gasLimit;
     }
 
     public static async fetchCommonParams(
@@ -123,6 +128,22 @@ export class ToncoSdkFacade {
             ]);
 
         const poolAddress = computePoolAddress(srcRouterJettonWallet, dstRouterJettonWallet);
+
+        console.log('%c walletAddresses', 'color: pink; font-size: 24px;', {
+            srcRouterJettonWallet: {
+                rawString: srcRouterJettonWallet.toRawString(),
+                string: srcRouterJettonWallet.toString()
+            },
+            dstRouterJettonWallet: {
+                rawString: dstRouterJettonWallet.toRawString(),
+                string: dstRouterJettonWallet.toString()
+            },
+            srcUserJettonWallet: {
+                rawString: srcUserJettonWallet.toRawString(),
+                string: srcUserJettonWallet.toString()
+            }
+        });
+
         const poolV3Contract = TonClientInstance.getInstance().open(
             new PoolV3Contract(poolAddress)
         );
@@ -135,7 +156,7 @@ export class ToncoSdkFacade {
             jettonWallets: { srcRouterJettonWallet, dstRouterJettonWallet, srcUserJettonWallet },
             zeroToOne,
             swapType,
-            poolAddress
+            poolAddress: poolAddress
         };
     }
 
