@@ -39,32 +39,39 @@ export class UniZenApiService {
     }
 
     public static async getTxStatus(srcTxHash: string): Promise<TxStatusData> {
-        const res = await Injector.httpClient.get<UniZenCcrTxResponse>(
-            `${UniZenApiService.apiEndpoint}/info/tx/${srcTxHash}`,
-            {
-                headers: { apiKey: RUBIC_X_API_OKU_APIKEY }
+        try {
+            const res = await Injector.httpClient.get<UniZenCcrTxResponse>(
+                `${UniZenApiService.apiEndpoint}/info/tx/${srcTxHash}`,
+                {
+                    headers: { apiKey: RUBIC_X_API_OKU_APIKEY }
+                }
+            );
+
+            const txStatus = res.status.toLowerCase();
+
+            if (txStatus === 'delivered') {
+                return {
+                    hash: res.dstTxHash,
+                    status: TX_STATUS.SUCCESS
+                };
             }
-        );
 
-        const txStatus = res.status.toLowerCase();
+            if (txStatus === 'failed') {
+                return {
+                    hash: null,
+                    status: TX_STATUS.FAIL
+                };
+            }
 
-        if (txStatus === 'delivered') {
-            return {
-                hash: res.dstTxHash,
-                status: TX_STATUS.SUCCESS
-            };
-        }
-
-        if (txStatus === 'failed') {
             return {
                 hash: null,
-                status: TX_STATUS.FAIL
+                status: TX_STATUS.PENDING
+            };
+        } catch {
+            return {
+                hash: null,
+                status: TX_STATUS.PENDING
             };
         }
-
-        return {
-            hash: null,
-            status: TX_STATUS.PENDING
-        };
     }
 }

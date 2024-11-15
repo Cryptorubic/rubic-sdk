@@ -5,10 +5,6 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { UniZenOnChainQuoteParams } from 'src/features/common/providers/unizen/models/unizen-quote-params';
 import {
-    UniZenCcrSupportedChain,
-    uniZenCcrSupportedChains
-} from 'src/features/cross-chain/calculation-manager/providers/unizen-provider/constants/unizen-ccr-supported-chains';
-import {
     uniZenContractAddresses,
     UniZenContractVersion
 } from 'src/features/cross-chain/calculation-manager/providers/unizen-provider/constants/unizen-contract-addresses';
@@ -21,6 +17,10 @@ import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/model
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
+import {
+    UnizenOnChainSupportedChains,
+    unizenOnChainSupportedChains
+} from './constants/unizen-on-chain-supported-chains';
 import { UniZenOnChainTradeStruct } from './models/unizen-on-chain-trade-struct';
 import { UniZenOnChainTrade } from './unizen-on-chain-trade';
 import { UniZenOnChainUtilsService } from './utils/unizen-on-chain-utils-service';
@@ -29,7 +29,7 @@ export class UniZenOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.UNIZEN;
 
     public isSupportedBlockchain(blockchainName: BlockchainName): boolean {
-        return uniZenCcrSupportedChains.some(chain => chain === blockchainName);
+        return unizenOnChainSupportedChains.some(chain => chain === blockchainName);
     }
 
     public async calculate(
@@ -38,7 +38,7 @@ export class UniZenOnChainProvider extends AggregatorOnChainProvider {
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            const fromBlockchain = from.blockchain as UniZenCcrSupportedChain;
+            const fromBlockchain = from.blockchain as UnizenOnChainSupportedChains;
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
 
             const walletAddress = options.fromAddress || FAKE_WALLET_ADDRESS;
