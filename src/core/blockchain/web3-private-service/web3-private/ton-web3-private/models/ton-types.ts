@@ -6,7 +6,7 @@ export interface TonTransactionOptions extends BasicTransactionOptions {
 
 export interface TonEncodedConfig {
     /**
-     * In default transfer - it's a receiverWalletAddress to send funds in  format "0:41241077...."
+     * In default transfer - it's a receiverWalletAddress to send funds
      * In tx using contracts - it's a jettonWalletAddress (like ERC-20, but in TON)
      */
     address: string;

@@ -10,9 +10,11 @@ import {
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
 import { Injector } from 'src/core/injector/injector';
 
+import { convertTxParamsToTonConfig } from '../../stonfi/utils/convert-params-to-ton-config';
 import { ToncoCommonParams } from '../models/tonco-facade-types';
 
 export class ToncoSdkFacade {
@@ -45,7 +47,35 @@ export class ToncoSdkFacade {
         }
     }
 
-    public static async createTxParams(): Promise<void> {}
+    public static async createTonConfig(
+        params: ToncoCommonParams,
+        fromAmountWei: BigNumber,
+        toMinAmountWei: BigNumber
+    ): Promise<TonEncodedConfig> {
+        try {
+            const web3Private = Injector.web3PrivateService.getWeb3Private(BLOCKCHAIN_NAME.TON);
+            const walletAddress = web3Private.address;
+            const parsedWalletAddress = Address.parse(walletAddress);
+
+            const priceLimitSqrt = params.zeroToOne
+                ? BigInt(TickMath.MIN_SQRT_RATIO.toString()) + 1n
+                : BigInt(TickMath.MAX_SQRT_RATIO.toString()) - 1n;
+
+            const txParams = await PoolMessageManager.createSwapExactInMessage(
+                params.jettonWallets.srcUserJettonWallet,
+                params.jettonWallets.dstRouterJettonWallet,
+                parsedWalletAddress,
+                BigInt(fromAmountWei.toFixed()),
+                BigInt(toMinAmountWei.toFixed()),
+                priceLimitSqrt,
+                params.swapType
+            );
+
+            return convertTxParamsToTonConfig(txParams);
+        } catch (err) {
+            throw err;
+        }
+    }
 
     public static async estimateGas(
         params: ToncoCommonParams,

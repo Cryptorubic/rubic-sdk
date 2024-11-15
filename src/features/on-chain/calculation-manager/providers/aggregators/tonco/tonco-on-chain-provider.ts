@@ -48,7 +48,6 @@ export class ToncoOnChainProvider extends AggregatorOnChainProvider {
                 }
             ] as RubicStep[];
 
-            // @TODO fix gasLimit
             const tradeStruct = {
                 from,
                 to,

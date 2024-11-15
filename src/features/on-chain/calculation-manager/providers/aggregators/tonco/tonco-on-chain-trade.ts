@@ -1,3 +1,4 @@
+import { parseError } from 'src/common/utils/errors';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
@@ -17,8 +18,39 @@ export class ToncoOnChainTrade extends TonOnChainTrade {
         this.params = tradeStruct.params;
     }
 
-    public swap(_options: SwapTransactionOptions = {}): Promise<string | never> {
-        throw new Error('Method not implemented.');
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (options.onConfirm) {
+                options.onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        await this.checkWalletState(options?.testMode);
+        await this.makePreSwapChecks({
+            fromAddress: this.walletAddress,
+            receiverAddress: options.receiverAddress,
+            skipAmountCheck: this.skipAmountCheck,
+            ...(options?.referrer && { referrer: options?.referrer })
+        });
+
+        const tonEncodedConfig = await ToncoSdkFacade.createTonConfig(
+            this.params,
+            this.from.weiAmount,
+            this.to.weiAmountMinusSlippage(this.slippageTolerance)
+        );
+
+        try {
+            await this.web3Private.sendTransaction({
+                onTransactionHash,
+                messages: [tonEncodedConfig]
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            throw parseError(err);
+        }
     }
 
     protected async calculateOutputAmount(_options: EncodeTransactionOptions): Promise<string> {

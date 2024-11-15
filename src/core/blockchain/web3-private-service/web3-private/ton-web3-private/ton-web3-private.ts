@@ -38,13 +38,14 @@ export class TonWeb3Private extends Web3Private {
             if (!isCompleted) {
                 throw new RubicSdkError('[TonWeb3Private] TON transaction timeout expired!');
             }
+
             return boc;
         } catch (err) {
             console.error(`Send transaction error. ${err}`);
-
             if (err.message.includes('Reject request')) {
                 throw new UserRejectError();
             }
+
             throw parseError(err);
         }
     }
