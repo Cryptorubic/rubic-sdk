@@ -20,6 +20,10 @@ import { ToncoOnChainTrade } from './tonco-on-chain-trade';
 export class ToncoOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.TONCO_DEX;
 
+    public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
+        return blockchain === BLOCKCHAIN_NAME.TON;
+    }
+
     public async calculate(
         from: PriceTokenAmount<TonBlockchainName>,
         toToken: PriceToken<TonBlockchainName>,
@@ -71,10 +75,6 @@ export class ToncoOnChainProvider extends AggregatorOnChainProvider {
                 error: err
             };
         }
-    }
-
-    public isSupportedBlockchain(blockchain: BlockchainName): blockchain is TonBlockchainName {
-        return blockchain === BLOCKCHAIN_NAME.TON;
     }
 
     protected getGasFeeInfo(): Promise<GasFeeInfo | null> {

@@ -3,6 +3,7 @@ import {
     computePoolAddress,
     PoolMessageManager,
     PoolV3Contract,
+    pTON_ROUTER_WALLET,
     ROUTER,
     SwapType,
     TickMath
@@ -16,6 +17,8 @@ import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
+import { FAKE_TON_ADDRESS } from '../../coffee-swap/constants/fake-ton-wallet';
+import { STONFI_REFERRAL_ADDRESS } from '../../stonfi/constants/addresses';
 import { convertTxParamsToTonConfig } from '../../stonfi/utils/convert-params-to-ton-config';
 import { ToncoCommonParams } from '../models/tonco-facade-types';
 
@@ -79,13 +82,16 @@ export class ToncoSdkFacade {
         }
     }
 
+    /**
+     * @returns gasLimit non wei
+     */
     public static async estimateGas(
         params: ToncoCommonParams,
         fromAmountWei: BigNumber,
         toMinAmountWei: BigNumber
     ): Promise<BigNumber> {
         const web3Private = Injector.web3PrivateService.getWeb3Private(BLOCKCHAIN_NAME.TON);
-        const walletAddress = web3Private.address;
+        const walletAddress = web3Private.address ?? FAKE_TON_ADDRESS;
         const parsedWalletAddress = Address.parse(walletAddress);
 
         const priceLimitSqrt = params.zeroToOne
@@ -113,19 +119,48 @@ export class ToncoSdkFacade {
         dstToken: PriceToken
     ): Promise<ToncoCommonParams> {
         const web3Private = Injector.web3PrivateService.getWeb3Private(BLOCKCHAIN_NAME.TON);
-        const walletAddress = web3Private.address;
+        const walletAddress = web3Private.address ?? FAKE_TON_ADDRESS;
 
         const parsedRouterAddress = Address.parse(ROUTER);
         const parsedWalletAddress = Address.parse(walletAddress);
-        const parsedSrcAddress = Address.parse(srcToken.address);
-        const parsedDstAddress = Address.parse(dstToken.address);
 
-        const [srcRouterJettonWallet, dstRouterJettonWallet, srcUserJettonWallet] =
-            await Promise.all([
-                web3Private.getWalletAddress(parsedRouterAddress, parsedSrcAddress),
-                web3Private.getWalletAddress(parsedRouterAddress, parsedDstAddress),
-                web3Private.getWalletAddress(parsedWalletAddress, parsedSrcAddress)
-            ]);
+        let srcRouterJettonWallet: Address;
+        let dstRouterJettonWallet: Address;
+        let srcUserJettonWallet: Address;
+
+        if (srcToken.isNative) {
+            const parsedDstAddress = Address.parse(dstToken.address);
+
+            [srcRouterJettonWallet, dstRouterJettonWallet, srcUserJettonWallet] = await Promise.all(
+                [
+                    Promise.resolve(Address.parse(pTON_ROUTER_WALLET)),
+                    web3Private.getWalletAddress(parsedRouterAddress, parsedDstAddress),
+                    // tonco-sdk internally echanges userJettonWallet if src token is native
+                    Promise.resolve(Address.parse(STONFI_REFERRAL_ADDRESS))
+                ]
+            );
+        } else if (dstToken.isNative) {
+            const parsedSrcAddress = Address.parse(srcToken.address);
+
+            [srcRouterJettonWallet, dstRouterJettonWallet, srcUserJettonWallet] = await Promise.all(
+                [
+                    web3Private.getWalletAddress(parsedRouterAddress, parsedSrcAddress),
+                    Promise.resolve(Address.parse(pTON_ROUTER_WALLET)),
+                    web3Private.getWalletAddress(parsedWalletAddress, parsedSrcAddress)
+                ]
+            );
+        } else {
+            const parsedSrcAddress = Address.parse(srcToken.address);
+            const parsedDstAddress = Address.parse(dstToken.address);
+
+            [srcRouterJettonWallet, dstRouterJettonWallet, srcUserJettonWallet] = await Promise.all(
+                [
+                    web3Private.getWalletAddress(parsedRouterAddress, parsedSrcAddress),
+                    web3Private.getWalletAddress(parsedRouterAddress, parsedDstAddress),
+                    web3Private.getWalletAddress(parsedWalletAddress, parsedSrcAddress)
+                ]
+            );
+        }
 
         const poolAddress = computePoolAddress(srcRouterJettonWallet, dstRouterJettonWallet);
 
@@ -149,7 +184,11 @@ export class ToncoSdkFacade {
         );
 
         const { jetton0_minter } = await poolV3Contract.getPoolStateAndConfiguration();
-        const zeroToOne = Address.parse(srcToken.address).equals(jetton0_minter);
+
+        // @TODO zeroToOne for scrToken native
+        const zeroToOne = srcToken.isNative
+            ? Address.parse(pTON_ROUTER_WALLET).equals(jetton0_minter)
+            : Address.parse(srcToken.address).equals(jetton0_minter);
         const swapType = this.getSwapType(srcToken, dstToken);
 
         return {
