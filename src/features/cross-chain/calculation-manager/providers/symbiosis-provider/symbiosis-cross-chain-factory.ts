@@ -6,10 +6,12 @@ import { GasData } from 'src/features/cross-chain/calculation-manager/providers/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { SymbiosisEvmCcrTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-evm-trade';
 import { SymbiosisCcrTonTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-ton-trade';
+import { SymbiosisTronCcrTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-tron-trade';
 import {
     SymbiosisCrossChainTradeConstructor,
     SymbiosisEvmCrossChainTradeConstructor,
-    SymbiosisTonCrossChainTradeConstructor
+    SymbiosisTonCrossChainTradeConstructor,
+    SymbiosisTronCrossChainTradeConstructor
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 
@@ -22,7 +24,7 @@ export class SymbiosisCrossChainFactory {
         providerAddress: string,
         routePath: RubicStep[],
         useProxy: boolean
-    ): SymbiosisCcrTonTrade | SymbiosisEvmCcrTrade {
+    ): SymbiosisCcrTonTrade | SymbiosisEvmCcrTrade | SymbiosisTronCcrTrade {
         if (BlockchainsInfo.isTonBlockchainName(fromBlockchain)) {
             return new SymbiosisCcrTonTrade(
                 constructorParams as SymbiosisTonCrossChainTradeConstructor,
@@ -35,6 +37,15 @@ export class SymbiosisCrossChainFactory {
         if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
             return new SymbiosisEvmCcrTrade(
                 constructorParams as SymbiosisEvmCrossChainTradeConstructor,
+                providerAddress,
+                routePath,
+                useProxy
+            );
+        }
+
+        if (BlockchainsInfo.isTronBlockchainName(fromBlockchain)) {
+            return new SymbiosisTronCcrTrade(
+                constructorParams as SymbiosisTronCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
                 useProxy
@@ -53,7 +64,7 @@ export class SymbiosisCrossChainFactory {
         receiverAddress?: string
     ): Promise<GasData | null> {
         const type = BlockchainsInfo.getChainType(from.blockchain);
-        if (type === CHAIN_TYPE.TON) {
+        if (type === CHAIN_TYPE.TON || CHAIN_TYPE.TRON) {
             return null;
         }
         if (type === CHAIN_TYPE.EVM) {

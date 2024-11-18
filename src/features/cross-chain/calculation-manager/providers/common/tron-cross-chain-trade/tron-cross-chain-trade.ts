@@ -9,13 +9,10 @@ import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
-import { TronContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-contract-params';
-import { TronGetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
 import { MarkRequired } from 'ts-essentials';
 
 export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactionConfig> {
@@ -70,10 +67,11 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
     public async swap(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
-        await this.checkTradeErrors();
+        if (!options?.testMode) {
+            await this.checkTradeErrors();
+        }
         await this.checkReceiverAddress(options.receiverAddress, true);
-
-        await this.checkAllowanceAndApprove(options);
+        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
 
         const { onConfirm } = options;
         let transactionHash: string;
@@ -84,19 +82,18 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
             transactionHash = hash;
         };
 
-        const { contractAddress, contractAbi, methodName, methodArguments, value, feeLimit } =
-            await this.getContractParams(options);
+        const fromAddress = this.walletAddress;
+        const transactionConfig = await this.encode({ ...options, fromAddress });
 
         try {
-            await this.web3Private.executeContractMethod(
-                contractAddress,
-                contractAbi,
-                methodName,
-                methodArguments,
+            await this.web3Private[method](
+                transactionConfig.to,
+                transactionConfig.signature,
+                transactionConfig.arguments,
                 {
                     onTransactionHash,
-                    callValue: value,
-                    feeLimit: options.feeLimit || feeLimit
+                    ...(transactionConfig?.feeLimit && { feeLimit: transactionConfig.feeLimit }),
+                    ...(transactionConfig.callValue && { callValue: transactionConfig.callValue })
                 }
             );
 
@@ -105,7 +102,6 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }
-
             throw err;
         }
     }
@@ -116,19 +112,10 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress, true);
 
-        const { contractAddress, contractAbi, methodName, methodArguments, value, feeLimit } =
-            await this.getContractParams({
-                fromAddress: options.fromAddress,
-                receiverAddress: options.receiverAddress
-            });
-
-        return TronWeb3Pure.encodeMethodCall(
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value,
-            options.feeLimit || feeLimit
+        return this.setTransactionConfig(
+            options?.skipAmountCheck || false,
+            options?.useCacheData || false,
+            options?.receiverAddress || this.walletAddress
         );
     }
 
@@ -140,10 +127,6 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
     ): Promise<TronTransactionConfig> {
         return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
     }
-
-    protected abstract getContractParams(
-        options: TronGetContractParamsOptions
-    ): Promise<TronContractParams>;
 
     public getUsdPrice(): BigNumber {
         let feeSum = new BigNumber(0);

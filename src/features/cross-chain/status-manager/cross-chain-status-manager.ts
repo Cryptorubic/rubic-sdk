@@ -27,6 +27,7 @@ import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/ra
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
 import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
+import { UniZenApiService } from 'src/features/common/providers/unizen/services/unizen-api-service';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
@@ -111,6 +112,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ROUTER]: this.getRouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.UNIZEN]: this.getUniZenDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus
     };
 
@@ -800,6 +802,10 @@ export class CrossChainStatusManager {
             .getTxDecodedLogData(data.srcTxHash, acrossFundsDepositedInputs, 'depositId');
         const srcChainId = blockchainId[data.fromBlockchain];
         return AcrossApiService.getTxStatus(srcChainId, Number(depositId));
+    }
+
+    private getUniZenDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return UniZenApiService.getTxStatus(data.srcTxHash);
     }
 
     private async getSimpleSwapDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {

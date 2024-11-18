@@ -43,16 +43,25 @@ export class TronWeb3Pure {
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
-        methodArguments: unknown[] = [],
+        methodArguments: TronParameters,
         callValue?: string,
         feeLimit?: number
     ): TronTransactionConfig {
-        const data = this.encodeFunctionCall(contractAbi, methodName, methodArguments);
+        const methodAbi = contractAbi.find(abiItem => abiItem.name === methodName);
+        if (!methodAbi) {
+            throw new Error('Encode fail. No method in ABI');
+        }
+
+        const signature = `${methodAbi.name!}(${this.flattenTypesToString(methodAbi.inputs!).join(
+            ','
+        )})`;
+
         return {
             to: contractAddress,
-            data,
-            callValue,
-            feeLimit
+            arguments: methodArguments,
+            signature,
+            ...(callValue && { callValue }),
+            ...(feeLimit && { feeLimit })
         };
     }
 
