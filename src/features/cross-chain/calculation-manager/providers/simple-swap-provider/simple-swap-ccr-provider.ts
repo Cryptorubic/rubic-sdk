@@ -101,7 +101,7 @@ export class SimpleSwapCcrProvider extends CrossChainProvider {
                 tickerTo: toCurrency.ticker,
                 networkFrom: fromCurrency.network,
                 networkTo: toCurrency.network,
-                fixed: false,
+                fixed: true,
                 amount: fromWithoutFee.tokenAmount.toFixed()
             });
 

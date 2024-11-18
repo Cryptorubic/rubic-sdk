@@ -89,7 +89,7 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
             tickerTo: this.toCurrency.ticker,
             networkFrom: this.fromCurrency.network,
             networkTo: this.toCurrency.network,
-            fixed: false,
+            fixed: true,
             addressTo: receiverAddress,
             rateId: null,
             customFee: null,
@@ -110,7 +110,7 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
 
         return {
             id: exchnage.id,
-            toAmount: exchnage.addressTo,
+            toAmount: exchnage.amountTo,
             depositAddress: exchnage.addressFrom,
             ...(extraInfo && { ...extraInfo })
         };
