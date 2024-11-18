@@ -8,6 +8,8 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import Web3 from 'web3';
 
 import { ORBITER_FEE_DIVIDER } from '../constants/orbiter-api';
@@ -18,6 +20,9 @@ export class OrbiterUtils {
     public static compareChainId(orbiterChainId: string, blockchainName: BlockchainName): boolean {
         if (blockchainName === BLOCKCHAIN_NAME.STARKNET) {
             return orbiterChainId === 'SN_MAIN';
+        }
+        if (blockchainName === BLOCKCHAIN_NAME.TRON) {
+            return orbiterChainId === '728126428';
         }
 
         return orbiterChainId === blockchainId[blockchainName].toString();
@@ -75,5 +80,25 @@ export class OrbiterUtils {
         const total = fromWeiAmount.replace(regex, config.vc);
 
         return total;
+    }
+
+    /**
+     *  @example for native transfer
+     *   1000000 - 2%(rubicPercentFee) -> convertToCode -> 998015
+     *   amountJore -  998015 + 2%
+     *   When Jora subtracts amountJore - 2%, he will get value with orbiter-vc-code
+     */
+    public static getFromAmountWithoutFeeWithCode(
+        from: PriceTokenAmount,
+        feeInfo: FeeInfo,
+        quoteConfig: OrbiterQuoteConfig
+    ): string {
+        const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
+        const transferAmount = OrbiterUtils.getAmountWithVcCode(
+            fromWithoutFee.stringWeiAmount,
+            quoteConfig
+        );
+
+        return transferAmount;
     }
 }

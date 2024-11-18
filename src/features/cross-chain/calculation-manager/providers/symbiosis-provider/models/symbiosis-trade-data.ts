@@ -16,11 +16,20 @@ export interface SymbiosisTokenAmount extends SymbiosisToken {
     amount: string;
 }
 
+export interface TronTx {
+    data: string;
+    feeLimit: number;
+    from: string;
+    functionSelector: string;
+    to: string;
+    value: string;
+}
+
 export interface SymbiosisTradeData {
     fee: SymbiosisTokenAmount;
     priceImpact: string;
     tokenAmountOut: SymbiosisTokenAmount;
-    tx: SendTransactionRequest | TransactionRequest;
+    tx: SendTransactionRequest | TransactionRequest | TronTx;
     amountInUsd: SymbiosisTokenAmount;
     approveTo: string;
     route: SymbiosisToken[];

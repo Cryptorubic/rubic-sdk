@@ -241,63 +241,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         }
     }
 
-    private async swapWithParams(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkTradeErrors();
-        await this.checkReceiverAddress(
-            options.receiverAddress,
-            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
-        );
-
-        await this.checkAllowanceAndApprove(options);
-
-        const { onConfirm, gasPriceOptions } = options;
-        let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options, false);
-
-        try {
-            let method: 'tryExecuteContractMethod' | 'executeContractMethod' =
-                'tryExecuteContractMethod';
-            if (options?.testMode) {
-                console.info(
-                    contractAddress,
-                    contractAbi,
-                    methodName,
-                    methodName,
-                    value,
-                    gasPriceOptions
-                );
-                method = 'executeContractMethod';
-            }
-
-            await this.web3Private[method](
-                contractAddress,
-                contractAbi,
-                methodName,
-                methodArguments,
-                {
-                    value,
-                    onTransactionHash,
-                    gasPriceOptions
-                }
-            );
-
-            return transactionHash!;
-        } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
-            }
-            throw err;
-        }
-    }
-
     public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(

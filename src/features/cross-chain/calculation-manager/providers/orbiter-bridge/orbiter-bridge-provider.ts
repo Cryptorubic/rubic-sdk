@@ -1,9 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { OrbiterEvmBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/networks/orbiter-evm-bridge-trade';
+import { OrbiterTronBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/networks/orbiter-tron-bridge-trade';
+import { OrbiterBridgeFactory } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/orbiter-bridge-factory';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -17,7 +20,6 @@ import {
     OrbiterSupportedBlockchain,
     orbiterSupportedBlockchains
 } from './models/orbiter-supported-blockchains';
-import { OrbiterBridgeTrade } from './orbiter-bridge-trade';
 import { OrbiterApiService } from './services/orbiter-api-service';
 import { OrbiterUtils } from './services/orbiter-utils';
 
@@ -38,7 +40,10 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as OrbiterSupportedBlockchain;
-        const useProxy = options?.useProxy?.[this.type] ?? true;
+        let useProxy = options?.useProxy?.[this.type] ?? true;
+        if (fromBlockchain === BLOCKCHAIN_NAME.TRON) {
+            useProxy = false;
+        }
 
         try {
             this.orbiterQuoteConfigs = await OrbiterApiService.getQuoteConfigs();
@@ -89,19 +94,16 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(toAmount, toToken.decimals)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await OrbiterBridgeTrade.getGasData({
-                          feeInfo,
-                          fromToken: from,
-                          toToken: to,
-                          receiverAddress: options.receiverAddress,
-                          providerAddress: options.providerAddress,
-                          quoteConfig
-                      })
-                    : null;
+            const gasData = await OrbiterBridgeFactory.getGasData(Boolean(options.gasCalculation), {
+                feeInfo,
+                fromToken: from,
+                toToken: to,
+                receiverAddress: options.receiverAddress,
+                providerAddress: options.providerAddress,
+                quoteConfig
+            });
 
-            const trade = new OrbiterBridgeTrade({
+            const trade = OrbiterBridgeFactory.createTrade({
                 crossChainTrade: {
                     feeInfo,
                     from,
@@ -167,12 +169,12 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
         feeInfo: FeeInfo,
         quoteConfig: OrbiterQuoteConfig,
         providerAddress: string
-    ): OrbiterBridgeTrade {
+    ): OrbiterEvmBridgeTrade | OrbiterTronBridgeTrade {
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
             tokenAmount: new BigNumber(0)
         });
-        const trade = new OrbiterBridgeTrade({
+        const trade = OrbiterBridgeFactory.createTrade({
             crossChainTrade: {
                 from,
                 gasData: null,
