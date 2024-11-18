@@ -109,7 +109,8 @@ export class ToncoSdkFacade {
         );
 
         const nativeTon = nativeTokensList[BLOCKCHAIN_NAME.TON];
-        const gasLimit = Web3Pure.fromWei(emulation.gasLimit.toString(), nativeTon.decimals);
+        // forwardGas is a part of gasLimit(gasLimit = forwardGas + txFee), used for boost tonco in calculation
+        const gasLimit = Web3Pure.fromWei(emulation.forwardGas.toString(), nativeTon.decimals);
 
         return gasLimit;
     }
