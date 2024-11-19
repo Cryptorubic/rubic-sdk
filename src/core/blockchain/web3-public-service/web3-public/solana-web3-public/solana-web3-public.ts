@@ -13,6 +13,7 @@ import { NATIVE_SOLANA_MINT_ADDRESS } from 'src/core/blockchain/constants/solana
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { ReturnValue } from 'src/core/blockchain/models/solana-web3-types';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { SupportedTokenField } from 'src/core/blockchain/web3-public-service/web3-public/models/supported-token-field';
@@ -77,7 +78,15 @@ export class SolanaWeb3Public extends Web3Public {
         );
 
         const mints = filteredTokenAddresses.map(address => new PublicKey(address));
-        const tokenSdk = new TokenSdk();
+        const tokenSdk = new TokenSdk({
+            chainId: 101,
+            connection: this.connection,
+            apiUrl: 'https://token-list-api.solana.cloud',
+            cdnUrl: 'https://cdn.jsdelivr.net/gh/solflare-wallet/token-list/solana-tokenlist.json',
+            metaplexTimeout: 5000,
+            timeout: 5000
+        });
+
         const tokensMint = await tokenSdk.fetchMints(mints);
 
         const tokens = tokensMint.map(token => {
