@@ -3,6 +3,7 @@ import {
     OnChainTradeType
 } from '../../../../common/models/on-chain-trade-type';
 import { UniswapV3AbstractTrade } from '../../../common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { UnwrapWethMethodName } from '../../../common/uniswap-v3-algebra-abstract/models/unwrapWethMethodName';
 import {
     ENOSYS_V3_SWAP_ROUTER_CONTRACT_ABI,
     ENOSYS_V3_SWAP_ROUTER_CONTRACT_ADDRESS
@@ -16,4 +17,6 @@ export class EnosysV3FlareTrade extends UniswapV3AbstractTrade {
     public readonly dexContractAddress = ENOSYS_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
 
     protected readonly contractAbi = ENOSYS_V3_SWAP_ROUTER_CONTRACT_ABI;
+
+    protected readonly unwrapWethMethodName: UnwrapWethMethodName = 'unwrapWNat';
 }
