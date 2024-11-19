@@ -4,6 +4,7 @@ import { DeflationTokenError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { Cache } from 'src/common/utils/decorators';
 import { notNull } from 'src/common/utils/object';
 import {
@@ -80,7 +81,12 @@ export class DeflationTokenManager {
 
         const deflationTokenList = customDeflationTokeList[evmToken.blockchain];
 
-        if (deflationTokenList && deflationTokenList.includes(evmToken.address)) {
+        if (
+            deflationTokenList &&
+            deflationTokenList.some(tokenAddress =>
+                compareAddresses(tokenAddress, evmToken.address)
+            )
+        ) {
             return { isDeflation: true, isWhitelisted: true, percent: new BigNumber(0) };
         }
 
