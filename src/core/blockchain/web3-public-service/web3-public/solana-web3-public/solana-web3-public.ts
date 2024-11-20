@@ -4,16 +4,16 @@ import {
     TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
 import { BlockhashWithExpiryBlockHeight, Connection, PublicKey } from '@solana/web3.js';
-import { Client as TokenSdk } from '@solflare-wallet/utl-sdk';
+import { Client as TokenSdk, UtlConfig } from '@solflare-wallet/utl-sdk';
 import BigNumber from 'bignumber.js';
 import { catchError, firstValueFrom, from, map, of, timeout } from 'rxjs';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { Cache } from 'src/common/utils/decorators';
 import { NATIVE_SOLANA_MINT_ADDRESS } from 'src/core/blockchain/constants/solana/native-solana-mint-address';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { ReturnValue } from 'src/core/blockchain/models/solana-web3-types';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { SupportedTokenField } from 'src/core/blockchain/web3-public-service/web3-public/models/supported-token-field';
@@ -25,6 +25,8 @@ import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
 import { AbiItem } from 'web3-utils';
 
+import { SolanaToken } from './models/solana-token';
+import { SolanaTokensApiService } from './services/solana-tokens-api-service';
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
@@ -78,16 +80,8 @@ export class SolanaWeb3Public extends Web3Public {
         );
 
         const mints = filteredTokenAddresses.map(address => new PublicKey(address));
-        const tokenSdk = new TokenSdk({
-            chainId: 101,
-            connection: this.connection,
-            apiUrl: 'https://token-list-api.solana.cloud',
-            cdnUrl: 'https://cdn.jsdelivr.net/gh/solflare-wallet/token-list/solana-tokenlist.json',
-            metaplexTimeout: 5000,
-            timeout: 5000
-        });
 
-        const tokensMint = await tokenSdk.fetchMints(mints);
+        const tokensMint = await this.fetchMints(mints);
 
         const tokens = tokensMint.map(token => {
             const entries = tokenFields.map(field => [field, token?.[field]]);
@@ -138,6 +132,32 @@ export class SolanaWeb3Public extends Web3Public {
         } = {}
     ): Promise<T> {
         throw new Error('Method call is not supported');
+    }
+
+    private async fetchMints(mints: PublicKey[]): Promise<SolanaToken[]> {
+        const tokensAddresses = mints.map(mint => mint.toString());
+
+        let tokensList: SolanaToken[] = [];
+
+        try {
+            const { content } = await SolanaTokensApiService.getTokensList(tokensAddresses);
+            tokensList = content;
+        } catch {}
+
+        const tokensNotFetched = mints.filter(mint =>
+            tokensList.some(token => !compareAddresses(token.address, mint.toString()))
+        );
+
+        const config = new UtlConfig({
+            connection: this.connection,
+            timeout: 5000
+        });
+
+        const tokenSDK = new TokenSdk(config);
+
+        const metaplexTokens = await tokenSDK.getFromMetaplex(tokensNotFetched);
+
+        return [...tokensList, ...metaplexTokens];
     }
 
     public healthCheck(timeoutMs: number = 4000): Promise<boolean> {
