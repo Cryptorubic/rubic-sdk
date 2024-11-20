@@ -85,7 +85,7 @@ export class Web3PublicService {
             ),
             [BLOCKCHAIN_NAME.TRON]: this.createTronWeb3PublicProxy.bind(this),
             [BLOCKCHAIN_NAME.SOLANA]: this.createSolanaWeb3PublicProxy.bind(this),
-            [BLOCKCHAIN_NAME.TON]: this.createTonWeb3PublicProxy.bind(this)
+            [BLOCKCHAIN_NAME.TON]: this.createTonWeb3Public.bind(this)
         };
     }
 
@@ -125,11 +125,9 @@ export class Web3PublicService {
         return this.createWeb3PublicProxy(BLOCKCHAIN_NAME.SOLANA, solanaWeb3Public);
     }
 
-    private createTonWeb3PublicProxy(): TonWeb3Public {
-        // const rpcProvider = this.rpcProvider[BLOCKCHAIN_NAME.TON]!;
+    private createTonWeb3Public(): TonWeb3Public {
         const tonWeb3Public = new TonWeb3Public();
-
-        return this.createWeb3PublicProxy(BLOCKCHAIN_NAME.TON, tonWeb3Public);
+        return tonWeb3Public;
     }
 
     private createWeb3PublicProxy<T extends Web3Public = Web3Public>(

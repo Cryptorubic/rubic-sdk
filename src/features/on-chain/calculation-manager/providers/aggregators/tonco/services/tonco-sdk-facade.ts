@@ -3,6 +3,7 @@ import {
     computePoolAddress,
     PoolMessageManager,
     PoolV3Contract,
+    pTON_MINTER,
     pTON_ROUTER_WALLET,
     ROUTER,
     SwapType,
@@ -186,9 +187,8 @@ export class ToncoSdkFacade {
 
         const { jetton0_minter } = await poolV3Contract.getPoolStateAndConfiguration();
 
-        // @TODO zeroToOne for scrToken native
         const zeroToOne = srcToken.isNative
-            ? Address.parse(pTON_ROUTER_WALLET).equals(jetton0_minter)
+            ? Address.parse(pTON_MINTER).equals(jetton0_minter)
             : Address.parse(srcToken.address).equals(jetton0_minter);
         const swapType = this.getSwapType(srcToken, dstToken);
 
