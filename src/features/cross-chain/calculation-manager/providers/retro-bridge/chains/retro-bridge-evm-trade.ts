@@ -192,7 +192,7 @@ export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBrid
             };
         } catch (err) {
             console.error(err?.message);
-            throw new RubicSdkError(err?.message);
+            throw err;
         }
     }
 
