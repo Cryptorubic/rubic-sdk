@@ -78,15 +78,17 @@ export class SolanaWeb3Public extends Web3Public {
         const filteredTokenAddresses = tokenAddresses.filter(
             (_, index) => index !== nativeTokenIndex
         );
+        const { preparedTokens, addresses } =
+            SolanaTokensApiService.prepareTokens(filteredTokenAddresses);
 
-        const mints = filteredTokenAddresses.map(address => new PublicKey(address));
-
+        const mints = addresses.map(address => new PublicKey(address));
         const tokensMint = await this.fetchMints(mints);
 
-        const tokens = tokensMint.map(token => {
+        const fetchedTokens = tokensMint.map(token => {
             const entries = tokenFields.map(field => [field, token?.[field]]);
             return Object.fromEntries(entries);
         });
+        const tokens = [...fetchedTokens, ...preparedTokens];
 
         if (nativeTokenIndex === -1) {
             return tokens;
