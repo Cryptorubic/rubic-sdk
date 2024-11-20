@@ -13,7 +13,6 @@ import { UniZenApiService } from 'src/features/common/providers/unizen/services/
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
-import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -30,38 +29,6 @@ import { UniZenCcrSupportedChain } from './constants/unizen-ccr-supported-chains
 import { UniZenCcrUtilsService } from './services/unizen-ccr-utils-service';
 
 export class UniZenCcrTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        feeInfo: FeeInfo,
-        providerAddress: string,
-        slippage: number,
-        unizenContractAddress: string
-    ): Promise<GasData | null> {
-        try {
-            const trade = new UniZenCcrTrade(
-                {
-                    from,
-                    to,
-                    feeInfo,
-                    gasData: null,
-                    slippage,
-                    priceImpact: null,
-                    contractAddress: unizenContractAddress,
-                    toTokenAmountMin: new BigNumber(0)
-                },
-                providerAddress,
-                [],
-                false
-            );
-
-            return getCrossChainGasData(trade);
-        } catch (_err) {
-            return null;
-        }
-    }
-
     protected get methodName(): string {
         return 'startBridgeTokensViaGenericCrossChain';
     }

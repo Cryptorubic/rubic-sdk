@@ -1,6 +1,4 @@
-import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { UniZenSwapResponse } from 'src/features/common/providers/unizen/models/cross-chain-models/unizen-ccr-swap-response';
@@ -9,7 +7,6 @@ import { UniZenOnChainQuoteParams } from 'src/features/common/providers/unizen/m
 import { UniZenOnChainSwapParams } from 'src/features/common/providers/unizen/models/unizen-swap-params';
 import { UniZenApiService } from 'src/features/common/providers/unizen/services/unizen-api-service';
 
-import { getOnChainGasData } from '../../../utils/get-on-chain-gas-data';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
@@ -17,14 +14,6 @@ import { UniZenOnChainTradeStruct } from './models/unizen-on-chain-trade-struct'
 import { UniZenOnChainUtilsService } from './utils/unizen-on-chain-utils-service';
 
 export class UniZenOnChainTrade extends AggregatorEvmOnChainTrade {
-    /** @internal */
-    public static async getGasLimit(
-        tradeStruct: UniZenOnChainTradeStruct
-    ): Promise<BigNumber | null> {
-        const openOceanTrade = new UniZenOnChainTrade(tradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
-        return getOnChainGasData(openOceanTrade);
-    }
-
     public readonly type = ON_CHAIN_TRADE_TYPE.UNIZEN;
 
     public get dexContractAddress(): string {
