@@ -88,7 +88,7 @@
         "@ton/core": "0.59.0",
         "@ton/crypto": "^3.3.0",
         "@ton/ton": "15.1.0",
-        "@toncodex/sdk": "1.0.22",
+        "@toncodex/sdk": "1.0.25",
         "@tonconnect/ui": "^2.0.5",
         "@viaprotocol/router-sdk": "^1.0.7",
         "assert": "^2.0.0",
