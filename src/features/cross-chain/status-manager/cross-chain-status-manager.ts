@@ -759,32 +759,24 @@ export class CrossChainStatusManager {
         return { hash, status };
     }
 
-    private async getOrbiterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await OrbiterApiService.getTxStatus(data.srcTxHash);
-
-        return txStatusData;
+    private getOrbiterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return OrbiterApiService.getTxStatus(data.srcTxHash);
     }
 
     private async getMesonDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         return MesonCcrApiService.fetchTxStatus(data.srcTxHash);
     }
 
-    private async getOwlToDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await OwlToApiService.getTxStatus(data.srcTxHash);
-
-        return txStatusData;
+    private getOwlToDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return OwlToApiService.getTxStatus(data.srcTxHash);
     }
 
-    private async getEddyBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await getEddyBridgeDstSwapStatus(data);
-
-        return txStatusData;
+    private getEddyBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return getEddyBridgeDstSwapStatus(data);
     }
 
-    private async getRouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const txStatusData = await RouterApiService.getTxStatus(data);
-
-        return txStatusData;
+    private getRouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return RouterApiService.getTxStatus(data);
     }
 
     private async getRetroBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
