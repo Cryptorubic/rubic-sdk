@@ -28,6 +28,8 @@ import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-man
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 
 export class XyDexProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions = evmProviderDefaultOptions;
@@ -136,7 +138,7 @@ export class XyDexProvider extends AggregatorOnChainProvider {
         }
 
         return {
-            gasInfo: await this.getGasFeeInfo(bestRoute, from),
+            gasInfo: await this.getGasFeeInfo(from, bestRoute),
             toTokenAmountInWei: new BigNumber(bestRoute.dstQuoteTokenAmount),
             contractAddress: bestRoute.contractAddress,
             provider: bestRoute.srcSwapDescription.provider
@@ -144,16 +146,16 @@ export class XyDexProvider extends AggregatorOnChainProvider {
     }
 
     protected override async getGasFeeInfo(
-        route: XyRoute,
-        from: PriceTokenAmount<EvmBlockchainName>
+        from: PriceTokenAmount<EvmBlockchainName>,
+        route: XyRoute
     ): Promise<GasFeeInfo | null> {
-        const gasPrice = await Injector.web3PublicService
-            .getWeb3Public(from.blockchain)
-            .getGasPrice();
+        try {
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+            const gasLimit = route.estimatedGas;
 
-        return {
-            gasLimit: new BigNumber(route.estimatedGas),
-            gasPrice: new BigNumber(gasPrice)
-        };
+            return getGasFeeInfo(gasLimit, gasPriceInfo);
+        } catch {
+            return null;
+        }
     }
 }

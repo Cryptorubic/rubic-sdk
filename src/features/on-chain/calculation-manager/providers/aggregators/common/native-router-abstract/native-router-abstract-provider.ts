@@ -56,12 +56,12 @@ export abstract class NativeRouterAbstractProvider<
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(amountOut, toToken.decimals)
             });
-            const nativeRouterTradeStruct: NativeRouterTradeStruct = {
+            const tradeStruct: NativeRouterTradeStruct = {
                 from,
                 to,
                 slippageTolerance: options.slippageTolerance,
                 path,
-                gasFeeInfo: null,
+                gasFeeInfo: await this.getGasFeeInfo(),
                 useProxy: options.useProxy,
                 proxyFeeInfo,
                 fromWithoutFee,
@@ -71,10 +71,7 @@ export abstract class NativeRouterAbstractProvider<
             };
 
             const tradeInstance: NativeRouterTradeInstance = {
-                tradeStruct: {
-                    ...nativeRouterTradeStruct,
-                    gasFeeInfo: await this.getGasFeeInfo()
-                },
+                tradeStruct,
                 providerAddress: options.providerAddress,
                 nativeRouterQuoteParams,
                 providerGateway

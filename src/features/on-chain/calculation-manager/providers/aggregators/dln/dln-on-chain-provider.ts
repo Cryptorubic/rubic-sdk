@@ -19,8 +19,6 @@ import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager
 import { DlnTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-trade-struct';
 import { RequiredLifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
-import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
@@ -92,7 +90,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
         const tradeStruct: DlnTradeStruct<DlnOnChainSupportedBlockchain> = {
             from,
             to,
-            gasFeeInfo: null,
+            gasFeeInfo: await this.getGasFeeInfo(),
             slippageTolerance: fullOptions.slippageTolerance!,
             type: this.tradeType,
             path,
@@ -104,18 +102,8 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
             transactionRequest: requestParams,
             providerGateway: debridgeResponse.tx.to || ''
         };
-        if (fullOptions.gasCalculation === 'calculate') {
-            tradeStruct.gasFeeInfo = await this.getGasFeeInfo(tradeStruct);
-        }
 
         return DlnOnChainFactory.createTrade(from.blockchain, tradeStruct, options.providerAddress);
-    }
-
-    protected async getGasFeeInfo(
-        _tradeStruct: OnChainTradeStruct<BlockchainName>,
-        _providerGateway?: string
-    ): Promise<GasFeeInfo | null> {
-        return null;
     }
 
     private getAffiliateFee(

@@ -3,6 +3,7 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { SquidrouterTransactionRequest } from 'src/features/common/providers/squidrouter/models/transaction-request';
+import { SquidrouterTransactionResponse } from 'src/features/common/providers/squidrouter/models/transaction-response';
 import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
 import {
     SquidrouterCrossChainSupportedBlockchain,
@@ -76,19 +77,11 @@ export class SquidRouterOnChainProvider extends AggregatorOnChainProvider {
                 usedForCrossChain: options.usedForCrossChain,
                 withDeflation: options.withDeflation,
                 fromWithoutFee,
-                gasFeeInfo: null
+                gasFeeInfo: await this.getGasFeeInfo(from, route)
             };
 
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct, providerGateway)
-                    : null;
-
             return new SquidRouterOnChainTrade(
-                {
-                    ...tradeStruct,
-                    gasFeeInfo
-                },
+                tradeStruct,
                 options.providerAddress,
                 providerGateway
             );
@@ -100,16 +93,14 @@ export class SquidRouterOnChainProvider extends AggregatorOnChainProvider {
         }
     }
 
-    protected async getGasFeeInfo(
-        tradeStruct: SquidRouterOnChainTradeStruct,
-        providerGateway: string
+    protected override async getGasFeeInfo(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        route: SquidrouterTransactionResponse['route']
     ): Promise<GasFeeInfo | null> {
         try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await SquidRouterOnChainTrade.getGasLimit(
-                tradeStruct,
-                providerGateway
-            );
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+            const gasLimit = route.transactionRequest.gasLimit;
+
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;

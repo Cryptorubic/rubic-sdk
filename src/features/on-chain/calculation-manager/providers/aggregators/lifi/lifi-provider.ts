@@ -36,6 +36,8 @@ import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-man
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 import { LifiEvmOnChainTrade } from './chains/lifi-evm-on-chain-trade';
 import { LifiOnChainFactory } from './lifi-on-chain-factory';
 import { LifiOnChainApiService } from './services/lifi-on-chain-api-service';
@@ -134,7 +136,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
                     const lifiTradeStruct = {
                         from,
                         to,
-                        gasFeeInfo: await this.getGasFeeInfo(step, from),
+                        gasFeeInfo: await this.getGasFeeInfo(from, step),
                         slippageTolerance: fullOptions.slippageTolerance!,
                         type: this.tradeType,
                         path,
@@ -171,11 +173,11 @@ export class LifiProvider extends AggregatorOnChainProvider {
         return best;
     }
 
-    protected override getGasFeeInfo(
-        step: LifiStep,
-        fromToken: PriceTokenAmount
+    protected override async getGasFeeInfo(
+        from: PriceTokenAmount,
+        step: LifiStep
     ): Promise<GasFeeInfo | null> {
-        if (!BlockchainsInfo.isEvmBlockchainName(fromToken.blockchain)) {
+        if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
             return Promise.resolve(null);
         }
 
@@ -184,19 +186,18 @@ export class LifiProvider extends AggregatorOnChainProvider {
             return Promise.resolve(null);
         }
 
-        const gasPrice = new BigNumber(1);
-        let gasFeeUsd = new BigNumber(0);
         let gasLimit = new BigNumber(0);
 
         for (const el of gasCosts) {
             gasLimit = gasLimit.plus(el.amount);
-            gasFeeUsd = gasFeeUsd.plus(el.amountUSD);
         }
 
-        return Promise.resolve({
-            gasPrice,
-            gasLimit,
-            gasFeeInUsd: gasFeeUsd
-        });
+        try {
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+
+            return getGasFeeInfo(gasLimit, gasPriceInfo);
+        } catch {
+            return null;
+        }
     }
 }

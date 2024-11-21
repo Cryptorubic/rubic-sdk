@@ -21,6 +21,8 @@ import { AggregatorOnChainProvider } from 'src/features/on-chain/calculation-man
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 import { ZrxQuoteResponse } from './models/zrx-types';
 
 export class ZrxProvider extends AggregatorOnChainProvider {
@@ -92,10 +94,17 @@ export class ZrxProvider extends AggregatorOnChainProvider {
      * Fetches zrx data from api.
      */
 
-    protected override getGasFeeInfo(quote: ZrxQuoteResponse): Promise<GasFeeInfo | null> {
-        return Promise.resolve({
-            gasLimit: new BigNumber(quote.gas),
-            gasPrice: new BigNumber(quote.gasPrice)
-        });
+    protected override async getGasFeeInfo(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        quote: ZrxQuoteResponse
+    ): Promise<GasFeeInfo | null> {
+        try {
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+            const gasLimit = quote.gas;
+
+            return getGasFeeInfo(gasLimit, gasPriceInfo);
+        } catch {
+            return null;
+        }
     }
 }

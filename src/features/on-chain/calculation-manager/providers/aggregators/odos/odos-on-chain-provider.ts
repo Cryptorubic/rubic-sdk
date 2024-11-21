@@ -69,9 +69,7 @@ export class OdosOnChainProvider extends AggregatorOnChainProvider {
                 to,
                 fromWithoutFee,
                 proxyFeeInfo,
-                gasFeeInfo: {
-                    gasLimit: new BigNumber(gasEstimate)
-                },
+                gasFeeInfo: await this.getGasFeeInfo(from, gasEstimate),
                 slippageTolerance: options.slippageTolerance,
                 useProxy: options.useProxy,
                 withDeflation: options.withDeflation,
@@ -79,19 +77,7 @@ export class OdosOnChainProvider extends AggregatorOnChainProvider {
                 bestRouteRequestBody
             };
 
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct, providerGateway)
-                    : null;
-
-            return new OdosOnChainTrade(
-                {
-                    ...tradeStruct,
-                    gasFeeInfo
-                },
-                options.providerAddress,
-                providerGateway!
-            );
+            return new OdosOnChainTrade(tradeStruct, options.providerAddress, providerGateway!);
         } catch (err) {
             return {
                 type: ON_CHAIN_TRADE_TYPE.ODOS,
@@ -101,14 +87,12 @@ export class OdosOnChainProvider extends AggregatorOnChainProvider {
     }
 
     protected async getGasFeeInfo(
-        tradeStruct: OdosOnChainTradeStruct,
-        providerGateway: string
+        from: PriceTokenAmount<EvmBlockchainName>,
+        gasLimit: number
     ): Promise<GasFeeInfo | null> {
         try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = tradeStruct.gasFeeInfo?.gasLimit
-                ? tradeStruct.gasFeeInfo?.gasLimit
-                : await OdosOnChainTrade.getGasLimit(tradeStruct, providerGateway);
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;
