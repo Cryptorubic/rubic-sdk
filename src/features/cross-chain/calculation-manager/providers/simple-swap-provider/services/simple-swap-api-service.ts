@@ -10,13 +10,13 @@ import {
 } from '../models/simple-swap-requests';
 
 export class SimpleSwapApiService {
-    private static readonly apiKey = '10ae16f4-ff23-4da4-8bbc-e3a4c90cdddf';
+    private static readonly xApiKey = 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4';
 
-    private static readonly apiEndpoint = 'https://api.simpleswap.io/v3';
+    private static readonly apiEndpoint = 'https://x-api.rubic.exchange/simpleswap/v3';
 
     public static getAllCurrencies(): Promise<{ result: SimpleSwapCurrency[] }> {
         return Injector.httpClient.get(`${SimpleSwapApiService.apiEndpoint}/currencies`, {
-            headers: { 'x-api-key': SimpleSwapApiService.apiKey }
+            headers: { apikey: SimpleSwapApiService.xApiKey }
         });
     }
 
@@ -29,7 +29,7 @@ export class SimpleSwapApiService {
                 params: {
                     ...params
                 },
-                headers: { 'x-api-key': SimpleSwapApiService.apiKey }
+                headers: { apikey: SimpleSwapApiService.xApiKey }
             }
         );
 
@@ -43,7 +43,7 @@ export class SimpleSwapApiService {
                 params: {
                     ...params
                 },
-                headers: { 'x-api-key': SimpleSwapApiService.apiKey }
+                headers: { apikey: SimpleSwapApiService.xApiKey }
             }
         );
 
@@ -53,7 +53,7 @@ export class SimpleSwapApiService {
     public static createExchange(params: SimpleSwapExchangeRequest): Promise<SimpleSwapExchange> {
         return Injector.httpClient.post(`${SimpleSwapApiService.apiEndpoint}/exchanges`, params, {
             headers: {
-                'x-api-key': SimpleSwapApiService.apiKey
+                apikey: SimpleSwapApiService.xApiKey
             }
         });
     }
@@ -63,7 +63,7 @@ export class SimpleSwapApiService {
             `${SimpleSwapApiService.apiEndpoint}/exchanges/${id}`,
             {
                 headers: {
-                    'x-api-key': SimpleSwapApiService.apiKey
+                    apikey: SimpleSwapApiService.xApiKey
                 }
             }
         );
