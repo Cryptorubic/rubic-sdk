@@ -47,7 +47,7 @@ export class SparkDexV3FlareProvider extends UniswapV3AlgebraAbstractProvider<Sp
         this.routerConfiguration,
         SPARK_DEX_V3_FLARE_QUOTER_CONTRACT_ADDRESS,
         SPARK_DEX_V3_FLARE_QUOTER_CONTRACT_ABI,
-        '0xb3fB4f96175f6f9D716c17744e5A6d4BA9da8176'
+        '0x8A2578d23d4C532cC9A98FaD91C0523f5efDE652'
     );
 
     protected createTradeInstance(
