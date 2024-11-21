@@ -5,9 +5,6 @@ import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/mod
 
 import { RequiredOnChainCalculationOptions } from '../../../common/models/on-chain-calculation-options';
 import { AggregatorOnChainProvider } from '../../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { GasFeeInfo } from '../../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { getGasFeeInfo } from '../../../common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from '../../../common/utils/get-gas-price-info';
 import {
     AllSupportedNetworks,
     blockchainNameMapping
@@ -72,14 +69,11 @@ export abstract class NativeRouterAbstractProvider<
                 usedForCrossChain: options.usedForCrossChain,
                 txRequest
             };
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(nativeRouterTradeStruct, providerGateway)
-                    : null;
+
             const tradeInstance: NativeRouterTradeInstance = {
                 tradeStruct: {
                     ...nativeRouterTradeStruct,
-                    gasFeeInfo
+                    gasFeeInfo: await this.getGasFeeInfo()
                 },
                 providerAddress: options.providerAddress,
                 nativeRouterQuoteParams,
@@ -91,22 +85,6 @@ export abstract class NativeRouterAbstractProvider<
                 type: this.tradeType,
                 error: err
             };
-        }
-    }
-
-    protected async getGasFeeInfo(
-        tradeStruct: NativeRouterTradeStruct,
-        providerGateway: string
-    ): Promise<GasFeeInfo | null> {
-        try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await NativeRouterAbstractTrade.getGasLimit(
-                tradeStruct,
-                providerGateway
-            );
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
-        } catch {
-            return null;
         }
     }
 

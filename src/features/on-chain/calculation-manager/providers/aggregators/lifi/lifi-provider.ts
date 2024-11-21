@@ -4,9 +4,11 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { LifiUtilsService } from 'src/features/common/providers/lifi/lifi-utils-service';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
+import { LifiStep } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-fee-cost';
 import {
     RouteOptions,
     RoutesRequest
@@ -29,8 +31,6 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
-import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
@@ -123,10 +123,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
             await Promise.all(
                 routes.map(async route => {
                     const step = route.steps[0];
-                    if (!step) {
-                        return null;
-                    }
-                    const type = ON_CHAIN_TRADE_TYPE.LIFI;
+                    if (!step) return null;
 
                     const to = new PriceTokenAmount({
                         ...toToken.asStruct,
@@ -134,12 +131,12 @@ export class LifiProvider extends AggregatorOnChainProvider {
                     });
                     const path = this.getRoutePath(from, to);
 
-                    let lifiTradeStruct = {
+                    const lifiTradeStruct = {
                         from,
                         to,
-                        gasFeeInfo: null as GasFeeInfo | null,
+                        gasFeeInfo: await this.getGasFeeInfo(step, from),
                         slippageTolerance: fullOptions.slippageTolerance!,
-                        type,
+                        type: this.tradeType,
                         path,
                         route,
                         toTokenWeiAmountMin: new BigNumber(route.toAmountMin),
@@ -147,17 +144,6 @@ export class LifiProvider extends AggregatorOnChainProvider {
                         proxyFeeInfo,
                         fromWithoutFee,
                         withDeflation: fullOptions.withDeflation!
-                    };
-
-                    // const gasFeeInfo =
-                    //     fullOptions.gasCalculation === 'disabled'
-                    //         ? null
-                    //         : await this.getGasFeeInfo(
-                    //               lifiTradeStruct as LifiEvmOnChainTradeStruct
-                    //           );
-                    lifiTradeStruct = {
-                        ...lifiTradeStruct,
-                        gasFeeInfo: null
                     };
 
                     return LifiOnChainFactory.createTrade(
@@ -169,6 +155,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
             )
         ).filter(notNull);
         const bestTrade = this.getBestTrade(allTrades);
+
         return bestTrade;
     }
 
@@ -178,21 +165,38 @@ export class LifiProvider extends AggregatorOnChainProvider {
      * @returns best trade
      */
     private getBestTrade(trades: OnChainTrade[]): LifiEvmOnChainTrade {
-        const best = trades.sort((prev, next) =>
-            next.to.tokenAmount.comparedTo(prev.to.tokenAmount)
+        const best = trades.sort((curr, prev) =>
+            prev.to.tokenAmount.comparedTo(curr.to.tokenAmount)
         )[0] as LifiEvmOnChainTrade;
         return best;
     }
 
-    protected async getGasFeeInfo(
-        lifiTradeStruct: LifiEvmOnChainTradeStruct
+    protected override getGasFeeInfo(
+        step: LifiStep,
+        fromToken: PriceTokenAmount
     ): Promise<GasFeeInfo | null> {
-        try {
-            const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-            const gasLimit = await LifiEvmOnChainTrade.getGasLimit(lifiTradeStruct);
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
-        } catch {
-            return null;
+        if (!BlockchainsInfo.isEvmBlockchainName(fromToken.blockchain)) {
+            return Promise.resolve(null);
         }
+
+        const gasCosts = step.estimate.gasCosts;
+        if (!gasCosts || !gasCosts.length) {
+            return Promise.resolve(null);
+        }
+
+        const gasPrice = new BigNumber(1);
+        let gasFeeUsd = new BigNumber(0);
+        let gasLimit = new BigNumber(0);
+
+        for (const el of gasCosts) {
+            gasLimit = gasLimit.plus(el.amount);
+            gasFeeUsd = gasFeeUsd.plus(el.amountUSD);
+        }
+
+        return Promise.resolve({
+            gasPrice,
+            gasLimit,
+            gasFeeInUsd: gasFeeUsd
+        });
     }
 }

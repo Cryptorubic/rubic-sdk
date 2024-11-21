@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -16,12 +15,6 @@ import { LifiSolanaOnChainTradeStruct } from '../models/lifi-trade-struct';
 import { LifiOnChainApiService } from '../services/lifi-on-chain-api-service';
 
 export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
-    public static async getGasLimit(
-        _lifiTradeStruct: LifiSolanaOnChainTradeStruct
-    ): Promise<BigNumber | null> {
-        return null;
-    }
-
     public readonly providerGateway: string;
 
     public readonly type: OnChainTradeType;
