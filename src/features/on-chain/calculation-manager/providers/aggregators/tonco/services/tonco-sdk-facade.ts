@@ -17,8 +17,8 @@ import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-
 import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { FAKE_TON_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 
-import { FAKE_TON_ADDRESS } from '../../coffee-swap/constants/fake-ton-wallet';
 import { STONFI_REFERRAL_ADDRESS } from '../../stonfi/constants/addresses';
 import { convertTxParamsToTonConfig } from '../../stonfi/utils/convert-params-to-ton-config';
 import { ToncoCommonParams } from '../models/tonco-facade-types';
@@ -92,7 +92,7 @@ export class ToncoSdkFacade {
         toMinAmountWei: BigNumber
     ): Promise<BigNumber> {
         const web3Private = Injector.web3PrivateService.getWeb3Private(BLOCKCHAIN_NAME.TON);
-        const walletAddress = web3Private.address ?? FAKE_TON_ADDRESS;
+        const walletAddress = web3Private?.address ?? FAKE_TON_ADDRESS;
         const parsedWalletAddress = Address.parse(walletAddress);
 
         const priceLimitSqrt = params.zeroToOne
@@ -120,8 +120,9 @@ export class ToncoSdkFacade {
         srcToken: PriceTokenAmount,
         dstToken: PriceToken
     ): Promise<ToncoCommonParams> {
+        // @TODO web3Private is undefined if wallet is not connected
         const web3Private = Injector.web3PrivateService.getWeb3Private(BLOCKCHAIN_NAME.TON);
-        const walletAddress = web3Private.address ?? FAKE_TON_ADDRESS;
+        const walletAddress = web3Private?.address ?? FAKE_TON_ADDRESS;
 
         const parsedRouterAddress = Address.parse(ROUTER);
         const parsedWalletAddress = Address.parse(walletAddress);
