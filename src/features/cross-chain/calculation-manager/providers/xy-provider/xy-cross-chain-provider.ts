@@ -103,7 +103,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 srcSwapDescription,
                 bridgeDescription,
                 dstSwapDescription,
-                dstQuoteTokenAmount
+                dstQuoteTokenAmount,
+                estimatedGas
             } = routes[0]!;
 
             const to = new PriceTokenAmount({
@@ -129,16 +130,6 @@ export class XyCrossChainProvider extends CrossChainProvider {
             const bridgeType = (
                 bridgeDescription.provider === 'yBridge' ? BRIDGE_TYPE.YPOOL : BRIDGE_TYPE.XY
             ) as BridgeType;
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await XyCrossChainTrade.getGasData(
-                          fromToken,
-                          to,
-                          buildTxTransactionRequest,
-                          feeInfo,
-                          options.providerAddress
-                      )
-                    : null;
 
             return {
                 trade: new XyCrossChainTrade(
@@ -146,7 +137,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         from: fromToken,
                         to,
                         transactionRequest: buildTxTransactionRequest,
-                        gasData,
+                        gasData: await this.getGasData(fromToken, estimatedGas),
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo,

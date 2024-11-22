@@ -84,31 +84,19 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 };
             }
 
-            const { receive_value, txs } = await OwlToApiService.getSwapInfo(swapParams);
+            const { receive_value, txs, gas_fee } = await OwlToApiService.getSwapInfo(swapParams);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 weiAmount: new BigNumber(receive_value.raw_value)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await OwlToBridgeTrade.getGasData({
-                          feeInfo,
-                          fromToken: from,
-                          toToken: to,
-                          providerAddress: options.providerAddress,
-                          swapParams,
-                          approveAddress: txs.transfer_body.to
-                      })
-                    : null;
-
             const trade = new OwlToBridgeTrade({
                 crossChainTrade: {
                     feeInfo,
                     from,
                     to,
-                    gasData,
+                    gasData: await this.getGasData(from, gas_fee.raw_value),
                     priceImpact: from.calculatePriceImpactPercent(to),
                     swapParams,
                     approveAddress: txs.transfer_body.to

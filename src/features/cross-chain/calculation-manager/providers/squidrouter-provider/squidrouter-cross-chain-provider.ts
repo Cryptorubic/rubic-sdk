@@ -99,18 +99,6 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(estimate.toAmount, toToken.decimals)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await SquidrouterCrossChainTrade.getGasData(
-                          from,
-                          to,
-                          requestParams,
-                          feeInfo,
-                          receiver,
-                          options.providerAddress
-                      )
-                    : null;
-
             const feeAmount = estimate.feeCosts
                 .filter(fee => compareAddresses(this.nativeAddress, fee.token.address))
                 .reduce((acc, fee) => acc.plus(fee.amount), new BigNumber(0));
@@ -124,7 +112,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        gasData: gasData || squidGasData,
+                        gasData: squidGasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: transactionRequest.target,
                         slippage: options.slippageTolerance,

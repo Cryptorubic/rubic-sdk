@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -94,20 +95,14 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(toAmount, toToken.decimals)
             });
 
-            const gasData = await OrbiterBridgeFactory.getGasData(Boolean(options.gasCalculation), {
-                feeInfo,
-                fromToken: from,
-                toToken: to,
-                receiverAddress: options.receiverAddress,
-                providerAddress: options.providerAddress,
-                quoteConfig
-            });
+            const nativeToken = nativeTokensList[from.blockchain];
+            const gasLimit = Web3Pure.toWei(quoteConfig.withholdingFee, nativeToken.decimals);
 
             const trade = OrbiterBridgeFactory.createTrade({
                 crossChainTrade: {
                     feeInfo,
                     from,
-                    gasData,
+                    gasData: await this.getGasData(from, gasLimit),
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     quoteConfig

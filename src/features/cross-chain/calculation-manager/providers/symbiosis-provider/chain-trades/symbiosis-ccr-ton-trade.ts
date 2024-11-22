@@ -16,7 +16,6 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { TonCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/ton-cross-chain-trade/ton-cross-chain-trade';
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-supported-blockchains';
 import { SymbiosisTonCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
@@ -55,12 +54,6 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
 
     private readonly slippage: number;
 
-    private readonly contractAddresses: { providerRouter: string; providerGateway: string };
-
-    private get fromBlockchain(): SymbiosisCrossChainSupportedBlockchain {
-        return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
-    }
-
     protected get fromContractAddress(): string {
         throw new Error('Not implemented');
     }
@@ -90,7 +83,6 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
             crossChainTrade.tradeType,
             crossChainTrade.to.blockchain
         );
-        this.contractAddresses = crossChainTrade.contractAddresses;
         this.promotions = crossChainTrade?.promotions || [];
     }
 
@@ -132,7 +124,7 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
         const tx = tradeData.tx as SendTransactionRequest;
         const swapMessage = tx.messages[0];
         if (!swapMessage || tx.messages.length > 1) {
-            throw new Error('Wron config');
+            throw new Error('Wrong config');
         }
 
         const config = {
