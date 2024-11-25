@@ -167,21 +167,6 @@ export class ToncoSdkFacade {
 
         const poolAddress = computePoolAddress(srcRouterJettonWallet, dstRouterJettonWallet);
 
-        console.log('%c walletAddresses', 'color: pink; font-size: 24px;', {
-            srcRouterJettonWallet: {
-                rawString: srcRouterJettonWallet.toRawString(),
-                string: srcRouterJettonWallet.toString()
-            },
-            dstRouterJettonWallet: {
-                rawString: dstRouterJettonWallet.toRawString(),
-                string: dstRouterJettonWallet.toString()
-            },
-            srcUserJettonWallet: {
-                rawString: srcUserJettonWallet.toRawString(),
-                string: srcUserJettonWallet.toString()
-            }
-        });
-
         const poolV3Contract = TonClientInstance.getInstance().open(
             new PoolV3Contract(poolAddress)
         );
