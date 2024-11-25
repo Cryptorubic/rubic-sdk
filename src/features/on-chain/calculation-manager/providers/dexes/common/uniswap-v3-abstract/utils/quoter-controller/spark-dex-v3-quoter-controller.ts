@@ -1,12 +1,16 @@
+import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
+import { notNull } from 'src/common/utils/object';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
+import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { AbiItem } from 'web3-utils';
 
 import { UniswapV3RouterConfiguration } from '../../models/uniswap-v3-router-configuration';
-import { LiquidityPool } from './models/liquidity-pool';
+import { FeeAmount, LiquidityPool } from './models/liquidity-pool';
 import { UniswapV3QuoterController } from './uniswap-v3-quoter-controller';
 
 interface GetQuoterMethodsDataOptions {
@@ -27,6 +31,8 @@ interface QuoteExactInputSingleParams {
 }
 
 export class SparkDexV3QuoterController extends UniswapV3QuoterController {
+    protected readonly feeAmounts: FeeAmount[] = [100, 500, 3000];
+
     constructor(
         blockchain: EvmBlockchainName,
         routerConfiguration: UniswapV3RouterConfiguration<string>,
@@ -135,5 +141,63 @@ export class SparkDexV3QuoterController extends UniswapV3QuoterController {
                 return methodsData;
             })
             .flat();
+    }
+
+    public async getAllRoutes(
+        from: Token,
+        to: Token,
+        exact: Exact,
+        weiAmount: string,
+        routeMaxTransitTokens: number
+    ): Promise<UniswapV3Route[]> {
+        const routesLiquidityPools = await this.getAllLiquidityPools(from, to);
+        const options: Omit<GetQuoterMethodsDataOptions, 'maxTransitTokens'> = {
+            routesLiquidityPools,
+            from,
+            to,
+            exact,
+            weiAmount
+        };
+        const quoterMethodsData = [...Array(routeMaxTransitTokens + 1)]
+            .map((_, maxTransitTokens) =>
+                this.getQuoterMethodsData(
+                    {
+                        ...options,
+                        maxTransitTokens
+                    },
+                    [],
+                    from.address
+                )
+            )
+            .flat();
+
+        const results = await this.web3Public.multicallContractMethods<
+            string | { amountOut: string }
+        >(
+            this.quoterContractAddress,
+            this.quoterContractABI,
+            quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
+        );
+
+        return results
+            .map((result, index) => {
+                const pool = quoterMethodsData?.[index];
+                if (!pool) {
+                    throw new RubicSdkError('Pool has to be defined');
+                }
+                if (result.success) {
+                    return {
+                        outputAbsoluteAmount: new BigNumber(
+                            result?.output! instanceof Object
+                                ? result?.output?.amountOut
+                                : result.output!
+                        ),
+                        poolsPath: pool.poolsPath,
+                        initialTokenAddress: from.address
+                    };
+                }
+                return null;
+            })
+            .filter(notNull);
     }
 }
