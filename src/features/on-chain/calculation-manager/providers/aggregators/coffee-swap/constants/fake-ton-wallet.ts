@@ -1,1 +1,0 @@
-export const FAKE_TON_ADDRESS = 'UQATSC4TXAqjgLswuSEDVTIGmPG_kNnUTDhrTiIILVmymoQA';
