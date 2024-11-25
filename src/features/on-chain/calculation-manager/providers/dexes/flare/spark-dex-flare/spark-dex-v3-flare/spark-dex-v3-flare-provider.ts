@@ -4,6 +4,7 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
+import { UNI_SWAP_V3_SPARK_DEX_FLARE_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/flare/spark-dex-flare/spark-dex-v3-flare/constants/spark-dex-v3-flare-router-config';
 
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -22,7 +23,6 @@ import {
     SPARK_DEX_V3_FLARE_QUOTER_CONTRACT_ABI,
     SPARK_DEX_V3_FLARE_QUOTER_CONTRACT_ADDRESS
 } from './constants/spark-dex-v3-flare-quoter-data';
-import { UNI_SWAP_V3_SPARK_DEX_FLARE_ROUTER_CONFIGURATION } from './constants/uniswap-v3-spark-dex-flare-router-config';
 import { SparkDexV3FlareTrade } from './spark-dex-v3-flare-trade';
 
 export class SparkDexV3FlareProvider extends UniswapV3AlgebraAbstractProvider<SparkDexV3FlareTrade> {
@@ -47,7 +47,7 @@ export class SparkDexV3FlareProvider extends UniswapV3AlgebraAbstractProvider<Sp
         this.routerConfiguration,
         SPARK_DEX_V3_FLARE_QUOTER_CONTRACT_ADDRESS,
         SPARK_DEX_V3_FLARE_QUOTER_CONTRACT_ABI,
-        '0xb3fB4f96175f6f9D716c17744e5A6d4BA9da8176'
+        '0x8A2578d23d4C532cC9A98FaD91C0523f5efDE652'
     );
 
     protected createTradeInstance(
