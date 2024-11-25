@@ -26,7 +26,6 @@ import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/
 import { DebridgeEvmCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/debridge-cross-chain-trade-constructor';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { DlnEvmTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
@@ -46,41 +45,6 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
     private readonly slippage: number;
 
     private readonly onChainTrade: EvmOnChainTrade | null;
-
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: TransactionRequest,
-        feeInfo: FeeInfo,
-        providerAddress: string,
-        receiverAddress?: string
-    ): Promise<GasData | null> {
-        try {
-            const trade = new DebridgeEvmCrossChainTrade(
-                {
-                    from,
-                    to: toToken,
-                    transactionRequest,
-                    gasData: null,
-                    priceImpact: 0,
-                    allowanceTarget: '',
-                    slippage: 0,
-                    feeInfo,
-                    transitAmount: new BigNumber(NaN),
-                    toTokenAmountMin: new BigNumber(NaN),
-                    cryptoFeeToken: from,
-                    onChainTrade: null
-                },
-                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                [],
-                false
-            );
-            return getCrossChainGasData(trade, receiverAddress);
-        } catch (_err) {
-            return null;
-        }
-    }
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 

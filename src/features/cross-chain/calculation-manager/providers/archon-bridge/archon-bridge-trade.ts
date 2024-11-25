@@ -27,14 +27,6 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 
 export class ArchonBridgeTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        _from: PriceTokenAmount<EvmBlockchainName>,
-        _to: PriceTokenAmount<EvmBlockchainName>
-    ): Promise<GasData | null> {
-        return null;
-    }
-
     public readonly onChainSubtype = { from: undefined, to: undefined };
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ARCHON_BRIDGE;

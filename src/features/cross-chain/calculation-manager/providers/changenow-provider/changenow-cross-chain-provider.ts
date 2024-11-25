@@ -17,6 +17,7 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/bloc
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -109,7 +110,6 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
 
         let onChainTrade: EvmOnChainTrade | null = null;
-        let transitMinAmount = fromWithoutFee.tokenAmount;
         let transitFromToken = fromWithoutFee;
 
         if (!fromCurrency) {
@@ -120,22 +120,16 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                     tradeType: this.type
                 };
             }
-            onChainTrade = transitCurrency
-                ? await this.getOnChainTrade(
-                      fromWithoutFee,
-                      [],
-                      0.02,
-                      transitCurrency.tokenContract!
-                  )
-                : null;
-            if (!onChainTrade) {
-                onChainTrade = await this.getOnChainTrade(
-                    fromWithoutFee,
-                    [],
-                    options.slippageTolerance,
-                    nativeTokensList[fromBlockchain].address
-                );
-            }
+
+            onChainTrade = await this.getOnChainTrade(
+                fromWithoutFee,
+                [],
+                options.slippageTolerance,
+                transitCurrency
+                    ? transitCurrency.tokenContract!
+                    : nativeTokensList[fromBlockchain].address
+            );
+
             if (!onChainTrade) {
                 return {
                     trade: null,
@@ -144,17 +138,15 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            transitMinAmount = onChainTrade.toTokenAmountMin.tokenAmount;
             transitFromToken = onChainTrade.to;
         }
         const transit = onChainTrade ? transitCurrency! || nativeCurrency! : fromCurrency!;
 
         try {
-            const { toAmount, quoteError } = await this.getToAmount(
+            const { toAmount, quoteError, gasLimit } = await this.fetchQuoteData(
                 transit,
                 toCurrency,
-                transitMinAmount,
-                from.symbol
+                fromWithoutFee
             );
 
             const to = new PriceTokenAmount({
@@ -168,19 +160,12 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 fromCurrency: transit,
                 toCurrency,
                 feeInfo,
-                gasData: null,
+                gasData: await this.getGasData(from, gasLimit),
                 onChainTrade
             };
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await ChangenowCrossChainTrade.getGasData(
-                          changenowTrade,
-                          options.providerAddress,
-                          options.receiverAddress
-                      )
-                    : null;
+
             const trade = new ChangenowCrossChainTrade(
-                { ...changenowTrade, gasData },
+                changenowTrade,
                 options.providerAddress,
                 await this.getRoutePath(from, to),
                 useProxy
@@ -270,32 +255,37 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private async getToAmount(
+    private async fetchQuoteData(
         fromCurrency: ChangenowCurrency,
         toCurrency: ChangenowCurrency,
-        fromAmount: BigNumber,
-        fromSymbol: string
+        fromWithoutFee: PriceTokenAmount
     ): Promise<{
         toAmount: BigNumber;
+        gasLimit: string;
         quoteError?: RubicSdkError;
     }> {
         try {
             const res = await ChangeNowCrossChainApiService.getQuoteTx({
                 fromCurrency: fromCurrency.ticker,
                 toCurrency: toCurrency.ticker,
-                fromAmount: fromAmount.toFixed(),
+                fromAmount: fromWithoutFee.tokenAmount.toFixed(),
                 fromNetwork: fromCurrency.network,
                 toNetwork: toCurrency.network
             });
+            const nativeToken = nativeTokensList[fromWithoutFee.blockchain];
 
-            return { toAmount: new BigNumber(res.toAmount) };
+            return {
+                toAmount: new BigNumber(res.toAmount),
+                gasLimit: Web3Pure.toWei(res.depositFee, nativeToken.decimals)
+            };
         } catch (err) {
             const error = err?.error;
             if (error?.message?.includes('Out of min amount')) {
                 const minAmount = new BigNumber(error?.payload?.range?.minAmount);
                 return {
                     toAmount: new BigNumber(0),
-                    quoteError: new MinAmountError(minAmount, fromSymbol)
+                    gasLimit: '0',
+                    quoteError: new MinAmountError(minAmount, fromWithoutFee.symbol)
                 };
             }
             throw new RubicSdkError(error?.message);

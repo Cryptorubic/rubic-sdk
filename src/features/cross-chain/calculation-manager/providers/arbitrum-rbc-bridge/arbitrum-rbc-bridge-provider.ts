@@ -70,17 +70,13 @@ export class ArbitrumRbcBridgeProvider extends CrossChainProvider {
             });
 
             const l2network = await getL2Network(42161);
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await ArbitrumRbcBridgeTrade.getGasData(fromToken, to, l2network)
-                    : null;
 
             return {
                 trade: new ArbitrumRbcBridgeTrade(
                     {
                         from: fromToken,
                         to,
-                        gasData,
+                        gasData: await this.getGasData(fromToken),
                         l2network
                     },
                     options.providerAddress,
