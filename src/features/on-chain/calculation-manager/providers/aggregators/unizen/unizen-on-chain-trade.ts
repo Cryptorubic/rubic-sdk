@@ -1,3 +1,6 @@
+import BigNumber from 'bignumber.js';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -12,9 +15,6 @@ import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggr
 import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { UniZenOnChainTradeStruct } from './models/unizen-on-chain-trade-struct';
 import { UniZenOnChainUtilsService } from './utils/unizen-on-chain-utils-service';
-import { PriceTokenAmount } from 'src/common/tokens';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import BigNumber from 'bignumber.js';
 
 export class UniZenOnChainTrade extends AggregatorEvmOnChainTrade {
     public readonly type = ON_CHAIN_TRADE_TYPE.UNIZEN;
