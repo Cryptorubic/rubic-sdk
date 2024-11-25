@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.45.0-alpha.tonco.18",
+    "version": "5.45.0-alpha.tonco.20",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",

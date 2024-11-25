@@ -8,7 +8,6 @@ import { waitFor } from 'src/common/utils/waitFor';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TonApiService } from 'src/core/blockchain/services/ton/tonapi-service';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
-import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TonWalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 
@@ -97,7 +96,10 @@ export class TonWeb3Private extends Web3Private {
         const transferAmount = BigInt(amount);
         const receiverAddress = Address.parse(receiver);
 
-        const jettonWalletAddress = await this.getWalletAddress(fromAddress, contractAddress);
+        const jettonWalletAddress = await TonWeb3Pure.getWalletAddress(
+            fromAddress,
+            contractAddress
+        );
 
         const body = beginCell()
             .storeUint(0xf8a7ea5, 32)
@@ -135,15 +137,6 @@ export class TonWeb3Private extends Web3Private {
             await waitFor(30_000);
             isCompleted = await this.tonApi.checkIsTxCompleted(txHash);
         }
-    }
-
-    public async getWalletAddress(address: Address, contractAddress: Address): Promise<Address> {
-        const addressResult = await TonClientInstance.getInstance().runMethod(
-            contractAddress,
-            'get_wallet_address',
-            [{ type: 'slice', cell: beginCell().storeAddress(address).endCell() }]
-        );
-        return addressResult.stack.readAddress();
     }
 
     constructor(tonProviderCore: TonWalletProviderCore) {

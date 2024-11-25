@@ -15,6 +15,7 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
+import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { FAKE_TON_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
@@ -120,7 +121,6 @@ export class ToncoSdkFacade {
         srcToken: PriceTokenAmount,
         dstToken: PriceToken
     ): Promise<ToncoCommonParams> {
-        // @TODO web3Private is undefined if wallet is not connected
         const web3Private = Injector.web3PrivateService.getWeb3Private(BLOCKCHAIN_NAME.TON);
         const walletAddress = web3Private?.address ?? FAKE_TON_ADDRESS;
 
@@ -137,7 +137,7 @@ export class ToncoSdkFacade {
             [srcRouterJettonWallet, dstRouterJettonWallet, srcUserJettonWallet] = await Promise.all(
                 [
                     Promise.resolve(Address.parse(pTON_ROUTER_WALLET)),
-                    web3Private.getWalletAddress(parsedRouterAddress, parsedDstAddress),
+                    TonWeb3Pure.getWalletAddress(parsedRouterAddress, parsedDstAddress),
                     // tonco-sdk internally echanges userJettonWallet if src token is native
                     Promise.resolve(Address.parse(STONFI_REFERRAL_ADDRESS))
                 ]
@@ -147,9 +147,9 @@ export class ToncoSdkFacade {
 
             [srcRouterJettonWallet, dstRouterJettonWallet, srcUserJettonWallet] = await Promise.all(
                 [
-                    web3Private.getWalletAddress(parsedRouterAddress, parsedSrcAddress),
+                    TonWeb3Pure.getWalletAddress(parsedRouterAddress, parsedSrcAddress),
                     Promise.resolve(Address.parse(pTON_ROUTER_WALLET)),
-                    web3Private.getWalletAddress(parsedWalletAddress, parsedSrcAddress)
+                    TonWeb3Pure.getWalletAddress(parsedWalletAddress, parsedSrcAddress)
                 ]
             );
         } else {
@@ -158,9 +158,9 @@ export class ToncoSdkFacade {
 
             [srcRouterJettonWallet, dstRouterJettonWallet, srcUserJettonWallet] = await Promise.all(
                 [
-                    web3Private.getWalletAddress(parsedRouterAddress, parsedSrcAddress),
-                    web3Private.getWalletAddress(parsedRouterAddress, parsedDstAddress),
-                    web3Private.getWalletAddress(parsedWalletAddress, parsedSrcAddress)
+                    TonWeb3Pure.getWalletAddress(parsedRouterAddress, parsedSrcAddress),
+                    TonWeb3Pure.getWalletAddress(parsedRouterAddress, parsedDstAddress),
+                    TonWeb3Pure.getWalletAddress(parsedWalletAddress, parsedSrcAddress)
                 ]
             );
         }

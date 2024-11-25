@@ -256,7 +256,8 @@ export abstract class OnChainTrade {
     protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.5;
+        // @TODO set 0.5
+        const changePercent = 0.0001;
         const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
