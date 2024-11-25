@@ -12,6 +12,9 @@ import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggr
 import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { UniZenOnChainTradeStruct } from './models/unizen-on-chain-trade-struct';
 import { UniZenOnChainUtilsService } from './utils/unizen-on-chain-utils-service';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import BigNumber from 'bignumber.js';
 
 export class UniZenOnChainTrade extends AggregatorEvmOnChainTrade {
     public readonly type = ON_CHAIN_TRADE_TYPE.UNIZEN;
@@ -22,10 +25,20 @@ export class UniZenOnChainTrade extends AggregatorEvmOnChainTrade {
 
     private readonly unizenContractAddress: string;
 
+    public get toTokenAmountMin(): PriceTokenAmount<BlockchainName> {
+        return new PriceTokenAmount({
+            ...this.to.asStruct,
+            weiAmount: new BigNumber(this.minAmountOut)
+        });
+    }
+
+    private minAmountOut: string;
+
     constructor(tradeStruct: UniZenOnChainTradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);
 
         this.unizenContractAddress = tradeStruct.unizenContractAddress;
+        this.minAmountOut = tradeStruct.minAmountOut;
     }
 
     protected async getTransactionConfigAndAmount(
@@ -34,6 +47,8 @@ export class UniZenOnChainTrade extends AggregatorEvmOnChainTrade {
         const chainId = blockchainId[this.from.blockchain];
 
         const quoteInfo = await this.getBestQuote(chainId, options.receiverAddress);
+
+        this.minAmountOut = quoteInfo.transactionData.info.amountOutMin;
 
         const toAmount = quoteInfo.toTokenAmount;
 
