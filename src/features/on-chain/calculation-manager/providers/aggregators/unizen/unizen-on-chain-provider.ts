@@ -13,10 +13,7 @@ import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
-import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 import {
     UnizenOnChainSupportedChains,
     unizenOnChainSupportedChains
@@ -80,18 +77,14 @@ export class UniZenOnChainProvider extends AggregatorOnChainProvider {
                 slippageTolerance: options.slippageTolerance,
                 useProxy: options.useProxy,
                 withDeflation: options.withDeflation,
-                gasFeeInfo: null
+                gasFeeInfo: null,
+                minAmountOut: quoteInfo.transactionData.info.amountOutMin
             };
-
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(onChainTradeStruct)
-                    : null;
 
             const trade = new UniZenOnChainTrade(
                 {
                     ...onChainTradeStruct,
-                    gasFeeInfo
+                    gasFeeInfo: await this.getGasFeeInfo(onChainTradeStruct)
                 },
                 options.providerAddress
             );
@@ -102,20 +95,6 @@ export class UniZenOnChainProvider extends AggregatorOnChainProvider {
                 type: this.tradeType,
                 error
             };
-        }
-    }
-
-    protected async getGasFeeInfo(
-        tradeStruct: UniZenOnChainTradeStruct
-    ): Promise<GasFeeInfo | null> {
-        try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit =
-                tradeStruct?.gasFeeInfo?.gasLimit ||
-                (await UniZenOnChainTrade.getGasLimit(tradeStruct));
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
-        } catch {
-            return null;
         }
     }
 }

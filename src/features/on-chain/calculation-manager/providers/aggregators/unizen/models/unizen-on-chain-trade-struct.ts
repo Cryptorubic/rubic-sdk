@@ -2,4 +2,5 @@ import { EvmOnChainTradeStruct } from '../../../common/on-chain-trade/evm-on-cha
 
 export interface UniZenOnChainTradeStruct extends EvmOnChainTradeStruct {
     unizenContractAddress: string;
+    minAmountOut: string;
 }
