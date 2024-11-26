@@ -102,13 +102,14 @@ export class RetroBridgeProvider extends CrossChainProvider {
             });
 
             const routePath = await this.getRoutePath(from, to);
+            const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
 
-            const nativeToken = nativeTokensList[from.blockchain];
-            const gasLimit = Web3Pure.toWei(
-                retroBridgeQuoteConfig.blockchain_fee,
+            const totalGas = Web3Pure.toWei(
+                new BigNumber(retroBridgeQuoteConfig.blockchain_fee_in_usd).div(nativeToken.price),
                 nativeToken.decimals
             );
-            const gasData = await this.getGasData(from, { totalGas: gasLimit });
+
+            const gasData = await this.getGasData(from, { totalGas });
 
             const trade = RetroBridgeFactory.createTrade(
                 fromBlockchain,

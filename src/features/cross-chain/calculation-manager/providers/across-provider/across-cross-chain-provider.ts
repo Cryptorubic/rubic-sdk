@@ -70,7 +70,7 @@ export class AcrossCrossChainProvider extends CrossChainProvider {
 
             const routePath = await this.getRoutePath(from, to);
             const gasData = await this.getGasData(from, {
-                totalGas: feeQuote.relayerGasFee.total
+                totalGas: feeQuote.totalRelayFee.total
             });
 
             const trade = new AcrossCrossChainTrade(

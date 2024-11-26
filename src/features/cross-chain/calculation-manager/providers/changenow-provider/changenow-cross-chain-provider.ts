@@ -17,7 +17,6 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/bloc
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -143,7 +142,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const transit = onChainTrade ? transitCurrency! || nativeCurrency! : fromCurrency!;
 
         try {
-            const { toAmount, quoteError, totalGas } = await this.fetchQuoteData(
+            const { toAmount, quoteError } = await this.fetchQuoteData(
                 transit,
                 toCurrency,
                 fromWithoutFee
@@ -160,7 +159,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 fromCurrency: transit,
                 toCurrency,
                 feeInfo,
-                gasData: await this.getGasData(from, { totalGas }),
+                gasData: await this.getGasData(from),
                 onChainTrade
             };
 
@@ -261,7 +260,6 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         fromWithoutFee: PriceTokenAmount
     ): Promise<{
         toAmount: BigNumber;
-        totalGas: string;
         quoteError?: RubicSdkError;
     }> {
         try {
@@ -272,11 +270,9 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 fromNetwork: fromCurrency.network,
                 toNetwork: toCurrency.network
             });
-            const nativeToken = nativeTokensList[fromWithoutFee.blockchain];
 
             return {
-                toAmount: new BigNumber(res.toAmount),
-                totalGas: Web3Pure.toWei(res.depositFee, nativeToken.decimals)
+                toAmount: new BigNumber(res.toAmount)
             };
         } catch (err) {
             const error = err?.error;
@@ -284,7 +280,6 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 const minAmount = new BigNumber(error?.payload?.range?.minAmount);
                 return {
                     toAmount: new BigNumber(0),
-                    totalGas: '0',
                     quoteError: new MinAmountError(minAmount, fromWithoutFee.symbol)
                 };
             }
