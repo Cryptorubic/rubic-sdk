@@ -208,7 +208,8 @@ export class EvmWeb3Public extends Web3Public {
     private allowMultipleRequests(err: unknown): boolean {
         return (
             (err instanceof Error && err.message.includes('unsigned transaction')) ||
-            this.blockchainName === BLOCKCHAIN_NAME.ZETACHAIN
+            this.blockchainName === BLOCKCHAIN_NAME.ZETACHAIN ||
+            (err instanceof Error && err.message.includes('out of gas'))
         );
     }
 

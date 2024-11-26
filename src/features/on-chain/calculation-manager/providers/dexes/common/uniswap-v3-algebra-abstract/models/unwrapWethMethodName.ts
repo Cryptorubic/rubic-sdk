@@ -1,1 +1,6 @@
-export type UnwrapWethMethodName = 'unwrapWETH9' | 'unwrapWNativeToken' | 'unwrapWeth' | 'WETH9';
+export type UnwrapWethMethodName =
+    | 'unwrapWETH9'
+    | 'unwrapWNativeToken'
+    | 'unwrapWeth'
+    | 'WETH9'
+    | 'unwrapWNat';

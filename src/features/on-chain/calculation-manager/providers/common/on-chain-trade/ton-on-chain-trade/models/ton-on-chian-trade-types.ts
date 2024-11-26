@@ -15,5 +15,9 @@ export type TonOnChainTradeStruct = Omit<
 
 export interface TonTradeAdditionalInfo {
     isMultistep: boolean;
+
+    /**
+     * used when you manually change slippage in provider in specefic conditions
+     */
     isChangedSlippage: boolean;
 }

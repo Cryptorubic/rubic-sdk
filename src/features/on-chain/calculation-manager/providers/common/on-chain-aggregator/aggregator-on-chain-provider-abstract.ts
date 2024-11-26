@@ -31,10 +31,12 @@ export abstract class AggregatorOnChainProvider {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(blockchain).address;
     }
 
-    protected abstract getGasFeeInfo(
-        tradeStruct: OnChainTradeStruct<BlockchainName>,
-        providerGateway?: string
-    ): Promise<GasFeeInfo | null>;
+    protected getGasFeeInfo(
+        _tradeStruct: OnChainTradeStruct<BlockchainName>,
+        _providerGateway?: string
+    ): Promise<GasFeeInfo | null> {
+        return Promise.resolve(null);
+    }
 
     protected async handleProxyContract<T extends BlockchainName>(
         from: PriceTokenAmount<T>,
