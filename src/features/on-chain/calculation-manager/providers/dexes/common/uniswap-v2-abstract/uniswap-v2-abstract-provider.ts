@@ -183,7 +183,7 @@ export abstract class UniswapV2AbstractProvider<
             return new this.UniswapV2TradeClass(tradeStruct, fullOptions.providerAddress);
         }
 
-        const gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
+        const gasFeeInfo = getGasFeeInfo(gasPriceInfo, { gasLimit: estimatedGas });
         return new this.UniswapV2TradeClass(
             { ...tradeStruct, gasFeeInfo },
             fullOptions.providerAddress

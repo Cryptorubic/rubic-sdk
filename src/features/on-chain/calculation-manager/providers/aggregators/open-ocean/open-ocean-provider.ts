@@ -87,8 +87,9 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
     ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+            const gasLimit = new BigNumber(quote.data.estimatedGas);
 
-            return getGasFeeInfo(quote.data.estimatedGas, gasPriceInfo);
+            return getGasFeeInfo(gasPriceInfo, { gasLimit });
         } catch {
             return null;
         }

@@ -1,18 +1,16 @@
 import BigNumber from 'bignumber.js';
 
 export type GasData = {
-    /**
-     * gasLimit * gasPrice, used if provider's api returns total gas value
-     */
+    /* wei */
     readonly totalGas?: BigNumber;
-    /* in wei */
+    /* wei */
     readonly gasLimit?: BigNumber;
-    /* in wei */
+    /* wei */
     readonly gasPrice?: BigNumber;
-    /* in wei */
+    /* non wei */
     readonly baseFee?: BigNumber;
-    /* in wei */
+    /* non wei */
     readonly maxFeePerGas?: BigNumber;
-    /* in wei */
+    /* non wei */
     readonly maxPriorityFeePerGas?: BigNumber;
 } | null;

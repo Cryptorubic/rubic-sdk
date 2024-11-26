@@ -1,12 +1,14 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     TonBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
@@ -50,14 +52,15 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
                 options.slippageTolerance
             );
 
+            const totalGas = new BigNumber(
+                Web3Pure.toWei(quote.recommended_gas, nativeTokensList.TON.decimals)
+            );
+
             return new CoffeSwapTrade(
                 {
                     from,
                     to,
-                    gasFeeInfo: {
-                        gasPrice: new BigNumber(1),
-                        gasLimit: new BigNumber(quote.recommended_gas)
-                    },
+                    gasFeeInfo: { totalGas },
                     slippageTolerance: slippage,
                     useProxy: false,
                     withDeflation: options.withDeflation,

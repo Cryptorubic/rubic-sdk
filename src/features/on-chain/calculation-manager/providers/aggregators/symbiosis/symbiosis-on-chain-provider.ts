@@ -56,15 +56,10 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
                 path
             };
 
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct, providerGateway)
-                    : null;
-
             return new SymbiosisOnChainTrade(
                 {
                     ...tradeStruct,
-                    gasFeeInfo
+                    gasFeeInfo: await this.getGasFeeInfo()
                 },
                 options.providerAddress,
                 providerGateway

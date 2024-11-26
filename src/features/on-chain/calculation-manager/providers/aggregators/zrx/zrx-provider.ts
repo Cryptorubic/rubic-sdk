@@ -100,9 +100,9 @@ export class ZrxProvider extends AggregatorOnChainProvider {
     ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(from.blockchain);
-            const gasLimit = quote.gas;
+            const gasLimit = new BigNumber(quote.gas);
 
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            return getGasFeeInfo(gasPriceInfo, { gasLimit });
         } catch {
             return null;
         }

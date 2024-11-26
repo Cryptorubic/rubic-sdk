@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -103,7 +104,7 @@ export class PiteasProvider extends AggregatorOnChainProvider {
         try {
             const gasPriceInfo = await getGasPriceInfo(from.blockchain);
 
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            return getGasFeeInfo(gasPriceInfo, { gasLimit: new BigNumber(gasLimit) });
         } catch {
             return null;
         }

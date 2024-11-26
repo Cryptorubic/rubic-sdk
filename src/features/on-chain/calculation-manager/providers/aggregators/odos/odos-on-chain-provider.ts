@@ -93,7 +93,7 @@ export class OdosOnChainProvider extends AggregatorOnChainProvider {
         try {
             const gasPriceInfo = await getGasPriceInfo(from.blockchain);
 
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            return getGasFeeInfo(gasPriceInfo, { gasLimit: new BigNumber(gasLimit) });
         } catch {
             return null;
         }

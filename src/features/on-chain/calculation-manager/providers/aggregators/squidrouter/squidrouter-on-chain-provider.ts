@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -99,9 +100,9 @@ export class SquidRouterOnChainProvider extends AggregatorOnChainProvider {
     ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(from.blockchain);
-            const gasLimit = route.transactionRequest.gasLimit;
+            const gasLimit = new BigNumber(route.transactionRequest.gasLimit);
 
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            return getGasFeeInfo(gasPriceInfo, { gasLimit });
         } catch {
             return null;
         }

@@ -187,7 +187,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             return this.createTradeInstance(tradeStruct, route, fullOptions.providerAddress);
         }
 
-        const gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
+        const gasFeeInfo = getGasFeeInfo(gasPriceInfo, { gasLimit: estimatedGas });
+
         return this.createTradeInstance(
             {
                 ...tradeStruct,

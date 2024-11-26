@@ -151,9 +151,9 @@ export class XyDexProvider extends AggregatorOnChainProvider {
     ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(from.blockchain);
-            const gasLimit = route.estimatedGas;
+            const gasLimit = new BigNumber(route.estimatedGas);
 
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            return getGasFeeInfo(gasPriceInfo, { gasLimit });
         } catch {
             return null;
         }
