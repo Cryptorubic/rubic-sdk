@@ -41,33 +41,9 @@ const routerTokens: Record<TokenSymbol, string> = {
 
 const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
     {
-        poolAddress: '0x7E8EB77Feb4b3Fe2C58B493DF6Ce38875806bebb',
-        tokenSymbolA: 'WFLR',
-        tokenSymbolB: 'sFLR',
-        fee: 3000
-    },
-    {
-        poolAddress: '0xDf243D5631A68fDa74Db6572D7649aD341470c82',
-        tokenSymbolA: 'sFLR',
-        tokenSymbolB: 'eUSDT',
-        fee: 3000
-    },
-    {
-        poolAddress: '0x68cB5Bf8c9A54d664d9b6b483fC6A6401448223e',
-        tokenSymbolA: 'sFLR',
-        tokenSymbolB: 'eETH',
-        fee: 3000
-    },
-    {
-        poolAddress: '0xb7C6F8cff4D5B7266225f624e03a27BE0998C726',
-        tokenSymbolA: 'sFLR',
-        tokenSymbolB: 'eQNT',
-        fee: 3000
-    },
-    {
-        poolAddress: '0x6CbF760115F66502838B5622423D68DBCb4A9757',
-        tokenSymbolA: 'sFLR',
-        tokenSymbolB: 'HLN',
+        poolAddress: '0x7666Ab2482257578113194b9A5e9D3bd7dC759d9',
+        tokenSymbolA: 'HLN',
+        tokenSymbolB: 'WFLR',
         fee: 3000
     },
     {
@@ -77,89 +53,129 @@ const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
         fee: 500
     },
     {
-        poolAddress: '0xf06eeBF7A66C80760Bd8343A6BCe84c9D61879ee',
-        tokenSymbolA: 'sFLR',
+        poolAddress: '0xAFF8e67248E81eb63941b7eF769758e42cEf9189',
+        tokenSymbolA: 'WFLR',
         tokenSymbolB: 'APS',
         fee: 3000
     },
     {
-        poolAddress: '0x32fd7858393918A984DA6ee279EcA27f630a1C02',
-        tokenSymbolA: 'WFLR',
-        tokenSymbolB: 'eETH',
+        poolAddress: '0xcF93d54E7Fea895375667Fa071d5b48C81E76d7d',
+        tokenSymbolA: 'eUSDT',
+        tokenSymbolB: 'APS',
         fee: 3000
     },
     {
-        poolAddress: '0x7520005032F43229F606d3ACeae97045b9D6F7ea',
+        poolAddress: '0xcAA52e02504E6C637E307e0a3d9675e659016CD8',
         tokenSymbolA: 'WFLR',
         tokenSymbolB: 'eUSDT',
         fee: 3000
     },
     {
-        poolAddress: '0x80A08BbAbB0A5C51A9ae53211Df09EF23Debd4f3',
-        tokenSymbolA: 'WFLR',
-        tokenSymbolB: 'eQNT',
-        fee: 3000
-    },
-    {
-        poolAddress: '0xef24D5155818d4bD16AF0Cea1148A147eb620743',
-        tokenSymbolA: 'WFLR',
-        tokenSymbolB: 'APS',
-        fee: 3000
-    },
-    {
-        poolAddress: '0xEd920325b7dB1e909DbE2d562fCD07f714395e10',
-        tokenSymbolA: 'HLN',
-        tokenSymbolB: 'eQNT',
-        fee: 3000
-    },
-    {
-        poolAddress: '0x69F4b2dab237d92893e9dF9a70ACbcEa6C6b3DE3',
-        tokenSymbolA: 'HLN',
-        tokenSymbolB: 'eETH',
-        fee: 3000
-    },
-    {
-        poolAddress: '0x9bD53eCB4B7C09f41a336F85C345aa8DcAFdf52C',
-        tokenSymbolA: 'HLN',
-        tokenSymbolB: 'eUSDT',
-        fee: 3000
-    },
-    {
-        poolAddress: '0x3De8C22790549F323313d513Df2A1cb30b28B9A4',
-        tokenSymbolA: 'HLN',
-        tokenSymbolB: 'WFLR',
-        fee: 100
-    },
-    {
-        poolAddress: '0x87E0E33558c8e8EAE3c1E9EB276e05574190b48a',
-        tokenSymbolA: 'HLN',
-        tokenSymbolB: 'APS',
-        fee: 3000
-    },
-    {
-        poolAddress: '0x33E2354928002766C27F7424EcA6f9B133E922a5',
-        tokenSymbolA: 'eQNT',
-        tokenSymbolB: 'APS',
-        fee: 3000
-    },
-    {
-        poolAddress: '0x148DE4c1B0402b371B75EF97876E42C7eE4FDDA4',
+        poolAddress: '0x71951DaC21f1f531C1b0F7F685875c269f7596F9',
         tokenSymbolA: 'eETH',
         tokenSymbolB: 'APS',
         fee: 3000
     },
     {
-        poolAddress: '0x980Db8443D19B64B1d4616980ebbD44e7DD30C2E',
-        tokenSymbolA: 'APS',
+        poolAddress: '0xC9e27A759bFE2e518c133E1445B8b4D5DB05C824',
+        tokenSymbolA: 'eQNT',
+        tokenSymbolB: 'APS',
+        fee: 3000
+    },
+    {
+        poolAddress: '0x4dDC7854E0d3008D2B85e5Ed1529D726711ED05C',
+        tokenSymbolA: 'sFLR',
+        tokenSymbolB: 'APS',
+        fee: 3000
+    },
+    {
+        poolAddress: '0x5d03162f2623D98f21f30DD5024d0e6E243b0e3a',
+        tokenSymbolA: 'sFLR',
         tokenSymbolB: 'eUSDT',
         fee: 3000
     },
     {
-        poolAddress: '0x2C934BbBD152A40419d3330e4d79f362Bc6691D6',
-        tokenSymbolA: 'WFLR',
-        tokenSymbolB: 'BNZ',
+        poolAddress: '0x27A0B5C401B075679e60414c29e7F37FefBC8335',
+        tokenSymbolA: 'eUSDT',
+        tokenSymbolB: 'eETH',
         fee: 3000
     },
+    {
+        poolAddress: '0xebeA6Ac660313F03AB628c42747635b797337172',
+        tokenSymbolA: 'eQNT',
+        tokenSymbolB: 'eUSDT',
+        fee: 3000
+    },
+    // {
+    //     poolAddress: '0x32fd7858393918A984DA6ee279EcA27f630a1C02',
+    //     tokenSymbolA: 'WFLR',
+    //     tokenSymbolB: 'eETH',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0x7520005032F43229F606d3ACeae97045b9D6F7ea',
+    //     tokenSymbolA: 'WFLR',
+    //     tokenSymbolB: 'eUSDT',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0x80A08BbAbB0A5C51A9ae53211Df09EF23Debd4f3',
+    //     tokenSymbolA: 'WFLR',
+    //     tokenSymbolB: 'eQNT',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0xef24D5155818d4bD16AF0Cea1148A147eb620743',
+    //     tokenSymbolA: 'WFLR',
+    //     tokenSymbolB: 'APS',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0x69F4b2dab237d92893e9dF9a70ACbcEa6C6b3DE3',
+    //     tokenSymbolA: 'HLN',
+    //     tokenSymbolB: 'eETH',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0x9bD53eCB4B7C09f41a336F85C345aa8DcAFdf52C',
+    //     tokenSymbolA: 'HLN',
+    //     tokenSymbolB: 'eUSDT',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0x33E2354928002766C27F7424EcA6f9B133E922a5',
+    //     tokenSymbolA: 'eQNT',
+    //     tokenSymbolB: 'APS',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0x148DE4c1B0402b371B75EF97876E42C7eE4FDDA4',
+    //     tokenSymbolA: 'eETH',
+    //     tokenSymbolB: 'APS',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0x980Db8443D19B64B1d4616980ebbD44e7DD30C2E',
+    //     tokenSymbolA: 'APS',
+    //     tokenSymbolB: 'eUSDT',
+
+    //     fee: 3000
+    // },
+    // {
+    //     poolAddress: '0x2C934BbBD152A40419d3330e4d79f362Bc6691D6',
+    //     tokenSymbolA: 'WFLR',
+    //     tokenSymbolB: 'BNZ',
+
+    //     fee: 3000
+    // },
     {
         poolAddress: '0x164857e59CdE0848910Dac791650Da52db736dc2',
         tokenSymbolA: 'WFLR',
@@ -179,16 +195,22 @@ const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
         fee: 500
     },
     {
-        poolAddress: '0x130Bc3C6Ab530A56B7B7dc926A8E33C1E0eCA472',
+        poolAddress: '0x94fc6c22dD8f70c7FC9EB7830619E74Fed937E4c',
         tokenSymbolA: 'cUSDX',
         tokenSymbolB: 'USDC.e',
+        fee: 500
+    },
+    {
+        poolAddress: '0xe388298DFcc0Da8f81582E2c4F7Df92B46703a83',
+        tokenSymbolA: 'HLN',
+        tokenSymbolB: 'APS',
         fee: 3000
     },
     {
-        poolAddress: '0x04Af25eF7AEf113a5Da24124f69deDb8a88e8656',
+        poolAddress: '0xe6FbAB907141A578C51326C25300950a1C38B27c',
         tokenSymbolA: 'WFLR',
-        tokenSymbolB: 'APS',
-        fee: 10000
+        tokenSymbolB: 'eQNT',
+        fee: 3000
     },
     {
         poolAddress: '0x507Ba799d81c8e7848FA4e0c966bF96a7e28B5CD',
@@ -197,16 +219,28 @@ const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
         fee: 3000
     },
     {
-        poolAddress: '0xA6e32137CaCB5EFf9846B9af8e435abea6a15CC0',
+        poolAddress: '0x5FFD30c3893F9606CfEC9c87BFf2988860678d17',
         tokenSymbolA: 'HLN',
-        tokenSymbolB: 'APS',
-        fee: 10000
+        tokenSymbolB: 'eUSDT',
+        fee: 3000
     },
     {
-        poolAddress: '0x7Bd497D2af21e25F28F57bdd1Caf2d453B5a7272',
+        poolAddress: '0xc41939F37B31BF1f2FCEFC1CA89B5bf46a8713D0',
+        tokenSymbolA: 'HLN',
+        tokenSymbolB: 'eETH',
+        fee: 3000
+    },
+    {
+        poolAddress: '0xBdd80C82000151f355e523FED0b5Fa32a07d12a1',
         tokenSymbolA: 'HLN',
         tokenSymbolB: 'eQNT',
-        fee: 10000
+        fee: 3000
+    },
+    {
+        poolAddress: '0x942a493FE65172e42D276d07a612b678914EA402',
+        tokenSymbolA: 'sFLR',
+        tokenSymbolB: 'HLN',
+        fee: 3000
     }
 ];
 

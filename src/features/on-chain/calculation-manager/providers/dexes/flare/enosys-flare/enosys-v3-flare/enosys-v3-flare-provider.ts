@@ -38,7 +38,10 @@ export class EnosysV3FlareProvider extends UniswapV3AlgebraAbstractProvider<Enos
 
     protected readonly OnChainTradeClass = EnosysV3FlareTrade;
 
-    protected readonly providerConfiguration = UNI_SWAP_V3_FLARE_PROVIDER_CONFIGURATION;
+    protected readonly providerConfiguration = {
+        ...UNI_SWAP_V3_FLARE_PROVIDER_CONFIGURATION,
+        maxTransitTokens: 2
+    };
 
     protected readonly routerConfiguration = UNI_SWAP_V3_ENOSYS_FLARE_ROUTER_CONFIGURATION;
 
