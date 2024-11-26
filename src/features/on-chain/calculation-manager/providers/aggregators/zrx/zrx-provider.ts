@@ -73,7 +73,7 @@ export class ZrxProvider extends AggregatorOnChainProvider {
             from,
             to,
             slippageTolerance: fullOptions.slippageTolerance,
-            gasFeeInfo: null,
+            gasFeeInfo: await this.getGasFeeInfo(from, apiTradeData),
             path: [from, to],
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,

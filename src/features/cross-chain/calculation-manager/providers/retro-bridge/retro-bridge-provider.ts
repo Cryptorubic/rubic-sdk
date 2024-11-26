@@ -108,7 +108,7 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 retroBridgeQuoteConfig.blockchain_fee,
                 nativeToken.decimals
             );
-            const gasData = await this.getGasData(from, gasLimit);
+            const gasData = await this.getGasData(from, { totalGas: gasLimit });
 
             const trade = RetroBridgeFactory.createTrade(
                 fromBlockchain,

@@ -42,7 +42,5 @@ export async function estimateSendFeeLZ(
         methodArguments
     );
 
-    console.log('%cLZ_GAS', 'color: aqua; font-size: 24px;', gasFee);
-
     return gasFee[0];
 }

@@ -77,16 +77,20 @@ export abstract class CrossChainProvider {
 
     protected async getGasData(
         from: PriceTokenAmount,
-        gasLimit: string | null = null
+        gasData: {
+            gasLimit?: string;
+            totalGas?: string;
+        } = {}
     ): Promise<GasData | null> {
         try {
-            if (!gasLimit) return null;
+            if (!gasData.gasLimit && !gasData.totalGas) return null;
             if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) return null;
 
             const gasPriceInfo = await Injector.gasPriceApi.getGasPrice(from.blockchain);
 
             return {
-                gasLimit: new BigNumber(gasLimit),
+                ...(gasData.totalGas && { totalGas: new BigNumber(gasData.totalGas) }),
+                ...(gasData.gasLimit && { gasLimit: new BigNumber(gasData.gasLimit) }),
                 ...(gasPriceInfo.gasPrice && { gasPrice: new BigNumber(gasPriceInfo.gasPrice) }),
                 ...(gasPriceInfo.baseFee && { baseFee: new BigNumber(gasPriceInfo.baseFee) }),
                 ...(gasPriceInfo.maxFeePerGas && {

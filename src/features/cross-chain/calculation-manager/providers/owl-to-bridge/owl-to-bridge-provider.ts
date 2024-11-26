@@ -96,7 +96,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                     feeInfo,
                     from,
                     to,
-                    gasData: await this.getGasData(from, gas_fee.raw_value),
+                    gasData: await this.getGasData(from, { totalGas: gas_fee.raw_value }),
                     priceImpact: from.calculatePriceImpactPercent(to),
                     swapParams,
                     approveAddress: txs.transfer_body.to

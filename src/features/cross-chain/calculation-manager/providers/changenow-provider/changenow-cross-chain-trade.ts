@@ -109,7 +109,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         }
 
         if (this.gasData.gasPrice) {
-            return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+            return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit ?? 0);
         }
 
         return null;
@@ -362,13 +362,13 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { gasLimit } = options;
         if (this.isProxyTrade) {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
                 await this.getContractParams({
                     fromAddress: options.fromAddress,
                     receiverAddress: options.receiverAddress || options.fromAddress
                 });
+            const gasLimit = options.gasLimit || this.gasData?.gasLimit?.toFixed(0) || '0';
 
             return EvmWeb3Pure.encodeMethodCall(
                 contractAddress,
@@ -377,7 +377,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                 methodArguments,
                 value,
                 {
-                    gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
+                    gas: gasLimit,
                     ...getGasOptions(options)
                 }
             );

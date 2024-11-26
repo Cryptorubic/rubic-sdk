@@ -143,7 +143,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const transit = onChainTrade ? transitCurrency! || nativeCurrency! : fromCurrency!;
 
         try {
-            const { toAmount, quoteError, gasLimit } = await this.fetchQuoteData(
+            const { toAmount, quoteError, totalGas } = await this.fetchQuoteData(
                 transit,
                 toCurrency,
                 fromWithoutFee
@@ -160,7 +160,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 fromCurrency: transit,
                 toCurrency,
                 feeInfo,
-                gasData: await this.getGasData(from, gasLimit),
+                gasData: await this.getGasData(from, { totalGas }),
                 onChainTrade
             };
 
@@ -261,7 +261,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         fromWithoutFee: PriceTokenAmount
     ): Promise<{
         toAmount: BigNumber;
-        gasLimit: string;
+        totalGas: string;
         quoteError?: RubicSdkError;
     }> {
         try {
@@ -276,7 +276,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
 
             return {
                 toAmount: new BigNumber(res.toAmount),
-                gasLimit: Web3Pure.toWei(res.depositFee, nativeToken.decimals)
+                totalGas: Web3Pure.toWei(res.depositFee, nativeToken.decimals)
             };
         } catch (err) {
             const error = err?.error;
@@ -284,7 +284,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 const minAmount = new BigNumber(error?.payload?.range?.minAmount);
                 return {
                     toAmount: new BigNumber(0),
-                    gasLimit: '0',
+                    totalGas: '0',
                     quoteError: new MinAmountError(minAmount, fromWithoutFee.symbol)
                 };
             }

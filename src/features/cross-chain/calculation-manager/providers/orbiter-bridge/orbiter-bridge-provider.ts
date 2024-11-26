@@ -96,13 +96,15 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
             });
 
             const nativeToken = nativeTokensList[from.blockchain];
-            const gasLimit = Web3Pure.toWei(quoteConfig.withholdingFee, nativeToken.decimals);
+            const gasData = await this.getGasData(from, {
+                totalGas: Web3Pure.toWei(quoteConfig.withholdingFee, nativeToken.decimals)
+            });
 
             const trade = OrbiterBridgeFactory.createTrade({
                 crossChainTrade: {
                     feeInfo,
                     from,
-                    gasData: await this.getGasData(from, gasLimit),
+                    gasData,
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     quoteConfig

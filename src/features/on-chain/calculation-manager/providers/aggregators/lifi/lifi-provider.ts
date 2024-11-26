@@ -189,7 +189,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
         let gasLimit = new BigNumber(0);
 
         for (const el of gasCosts) {
-            gasLimit = gasLimit.plus(el.amount);
+            gasLimit = gasLimit.plus(el.limit);
         }
 
         try {

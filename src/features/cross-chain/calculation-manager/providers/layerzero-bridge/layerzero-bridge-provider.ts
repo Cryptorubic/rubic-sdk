@@ -49,7 +49,7 @@ export class LayerZeroBridgeProvider extends CrossChainProvider {
                 ...toToken.asStruct,
                 tokenAmount: fromToken.tokenAmount
             });
-            const gasLimit = await estimateSendFeeLZ(fromToken, to, options.receiverAddress).catch(
+            const gas = await estimateSendFeeLZ(fromToken, to, options.receiverAddress).catch(
                 () => null
             );
 
@@ -58,7 +58,9 @@ export class LayerZeroBridgeProvider extends CrossChainProvider {
                     {
                         from: fromToken,
                         to,
-                        gasData: await this.getGasData(fromToken, gasLimit)
+                        gasData: await this.getGasData(fromToken, {
+                            totalGas: gas ?? '0'
+                        })
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, to),

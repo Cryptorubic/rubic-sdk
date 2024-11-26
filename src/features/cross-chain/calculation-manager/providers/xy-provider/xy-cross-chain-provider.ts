@@ -137,7 +137,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         from: fromToken,
                         to,
                         transactionRequest: buildTxTransactionRequest,
-                        gasData: await this.getGasData(fromToken, estimatedGas),
+                        gasData: await this.getGasData(fromToken, { gasLimit: estimatedGas }),
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo,
