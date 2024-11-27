@@ -52,8 +52,8 @@ const nonProxyProviders = [
     ChangenowCrossChainProvider,
     ArbitrumRbcBridgeProvider,
     TaikoBridgeProvider,
-    LayerZeroBridgeProvider,
-    SimpleSwapCcrProvider
+    LayerZeroBridgeProvider
+    // SimpleSwapCcrProvider
     // ScrollBridgeProvider
 ] as const;
 
