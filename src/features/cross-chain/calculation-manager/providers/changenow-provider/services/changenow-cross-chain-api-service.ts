@@ -4,6 +4,7 @@ import { changenowApiKey } from 'src/features/common/providers/changenow/constan
 import { HttpClientParams } from 'src/features/common/providers/rango/models/rango-api-common-types';
 import { ChangenowStatusResponse } from 'src/features/cross-chain/status-manager/models/changenow-api-response';
 
+import { CrossChainDepositData } from '../../common/cross-chain-transfer-trade/models/cross-chain-deposit-statuses';
 import { ChangenowCurrenciesResponse } from '../models/changenow-currencies-api';
 import {
     ChangenowMinMapRangeRequestParams,
@@ -60,13 +61,20 @@ export class ChangeNowCrossChainApiService {
         );
     }
 
-    public static getTxStatus(changenowId: string): Promise<ChangenowStatusResponse> {
-        return Injector.httpClient.get<ChangenowStatusResponse>(
+    public static async getTxStatus(changenowId: string): Promise<CrossChainDepositData> {
+        const res = await Injector.httpClient.get<ChangenowStatusResponse>(
             `${ChangeNowCrossChainApiService.changenowApiEndpoint}/exchange/by-id`,
             {
                 params: { id: changenowId },
                 headers: { 'x-changenow-api-key': changenowApiKey }
             }
         );
+
+        const depositData: CrossChainDepositData = {
+            status: res.status,
+            dstHash: res.payoutHash
+        };
+
+        return depositData;
     }
 }

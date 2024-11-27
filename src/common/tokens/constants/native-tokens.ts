@@ -510,5 +510,187 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Gravity',
         symbol: 'G',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.COSMOS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.COSMOS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Cosmos',
+        symbol: 'ATOM',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ALGORAND]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ALGORAND,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Algorand',
+        symbol: 'ALGO',
+        decimals: 6
+    }),
+    [BLOCKCHAIN_NAME.NEAR]: new Token({
+        blockchain: BLOCKCHAIN_NAME.NEAR,
+        address: 'near',
+        name: 'NEAR Protocol',
+        symbol: 'NEAR',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.CARDANO]: new Token({
+        blockchain: BLOCKCHAIN_NAME.CARDANO,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Cardano',
+        symbol: 'ADA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.APTOS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.APTOS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Aptos',
+        symbol: 'APT',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ASTAR]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ASTAR,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Astar',
+        symbol: 'ASTR',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.DASH]: new Token({
+        blockchain: BLOCKCHAIN_NAME.DASH,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Dash',
+        symbol: 'DASH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.DOGECOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.DOGECOIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Dogecoin',
+        symbol: 'DOGE',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.POLKADOT]: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLKADOT,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Polkadot',
+        symbol: 'DOT',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FLOW]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FLOW,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Flow',
+        symbol: 'FLOW',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.IOTA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.IOTA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'IOTA',
+        symbol: 'IOTA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KUSAMA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KUSAMA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Kusama',
+        symbol: 'KSM',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.LITECOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.LITECOIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Litecoin',
+        symbol: 'LTC',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.NEO]: new Token({
+        blockchain: BLOCKCHAIN_NAME.NEO,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Neo',
+        symbol: 'NEO',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.OSMOSIS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.OSMOSIS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Osmosis',
+        symbol: 'OSMO',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SECRET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SECRET,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Secret',
+        symbol: 'SCRT',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.WAVES]: new Token({
+        blockchain: BLOCKCHAIN_NAME.WAVES,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Waves',
+        symbol: 'WAVES',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.WAX]: new Token({
+        blockchain: BLOCKCHAIN_NAME.WAX,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'WAX',
+        symbol: 'WAXP',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.STELLAR]: new Token({
+        blockchain: BLOCKCHAIN_NAME.STELLAR,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Stellar',
+        symbol: 'XLM',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MONERO]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MONERO,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Monero',
+        symbol: 'XMR',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.TEZOS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.TEZOS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Tezos',
+        symbol: 'XTZ',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FILECOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FILECOIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Filecoin',
+        symbol: 'FIL',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.EOS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.EOS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'EOS',
+        symbol: 'EOS',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ONTOLOGY]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ONTOLOGY,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ontology',
+        symbol: 'ONT',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.XDC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.XDC,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'XDC Network',
+        symbol: 'XDC',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZILLIQA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZILLIQA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ZIL',
+        symbol: 'ZIL',
+        decimals: 18
     })
 };
