@@ -47,7 +47,8 @@ export class Web3PrivateService {
         [CHAIN_TYPE.EVM]: this.createEvmWeb3Private.bind(this),
         [CHAIN_TYPE.TRON]: this.createTronWeb3Private.bind(this),
         [CHAIN_TYPE.SOLANA]: this.createSolanaWeb3Private.bind(this),
-        [CHAIN_TYPE.TON]: this.createTonWeb3Private.bind(this)
+        [CHAIN_TYPE.TON]: this.createTonWeb3Private.bind(this),
+        [CHAIN_TYPE.BITCOIN]: this.createTonWeb3Private.bind(this)
     };
 
     constructor(walletProvider: WalletProvider) {
@@ -128,6 +129,10 @@ export class Web3PrivateService {
     }
 
     private createTonWeb3Private(tonProviderCore: TonWalletProviderCore): TonWeb3Private {
+        return new TonWeb3Private(tonProviderCore);
+    }
+
+    private createBitcoinWeb3Private(tonProviderCore: TonWalletProviderCore): TonWeb3Private {
         return new TonWeb3Private(tonProviderCore);
     }
 
