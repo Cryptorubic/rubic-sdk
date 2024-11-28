@@ -1,7 +1,7 @@
 import { AbiItem } from 'web3-utils';
 
 export const SPARK_DEX_V3_FLARE_QUOTER_CONTRACT_ADDRESS =
-    '0x2DcABbB3a5Fe9DBb1F43edf48449aA7254Ef3a80';
+    '0x5B5513c55fd06e2658010c121c37b07fC8e8B705';
 
 export const SPARK_DEX_V3_FLARE_QUOTER_CONTRACT_ABI: AbiItem[] = [
     {

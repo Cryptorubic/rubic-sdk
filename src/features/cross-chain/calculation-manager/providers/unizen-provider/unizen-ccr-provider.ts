@@ -120,18 +120,6 @@ export class UniZenCcrProvider extends CrossChainProvider {
                 quoteInfo.dstTrade
             );
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await UniZenCcrTrade.getGasData(
-                          from,
-                          to,
-                          feeInfo,
-                          options.providerAddress,
-                          options.slippageTolerance,
-                          contractAddress
-                      )
-                    : null;
-
             const trade = new UniZenCcrTrade(
                 {
                     from,
@@ -152,7 +140,7 @@ export class UniZenCcrProvider extends CrossChainProvider {
                     to,
                     slippage: options.slippageTolerance,
                     priceImpact: from.calculatePriceImpactPercent(to),
-                    gasData,
+                    gasData: null,
                     contractAddress,
                     toTokenAmountMin
                 },

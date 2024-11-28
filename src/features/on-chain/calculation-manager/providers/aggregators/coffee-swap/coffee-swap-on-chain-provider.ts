@@ -7,6 +7,7 @@ import {
     TonBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
+import { FAKE_TON_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
@@ -17,7 +18,6 @@ import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/model
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getMultistepData } from '../common/utils/get-ton-multistep-data';
 import { CoffeSwapTrade } from './coffe-swap-on-chain-trade';
-import { FAKE_TON_ADDRESS } from './constants/fake-ton-wallet';
 import { CoffeeRoutePath } from './models/coffe-swap-api-types';
 import { CoffeeSwapApiService } from './services/coffee-swap-api-service';
 

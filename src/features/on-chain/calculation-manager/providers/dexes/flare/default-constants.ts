@@ -10,7 +10,11 @@ const defaultFantomRoutingProvidersAddresses = [
     '0xe6505f92583103af7ed9974dec451a7af4e3a3be', // JOULE
     '0x12e605bc104e93b45e1ad99f9e555f659051c2bb', // sFLR
     '0xb5010d5eb31aa8776b52c7394b76d6d627501c73', // PFL
-    '0x90e157a979074f9f2fe8b124ba08e6f72dc812fc' // GFLR
+    '0x90e157a979074f9f2fe8b124ba08e6f72dc812fc', // GFLR
+    '0x96b41289d90444b8add57e6f265db5ae8651df29', // eUSDT
+    '0x932e691aa8c8306c4bb0b19f3f00a284371be8ba', // PHIL
+    '0x4a771cc1a39fdd8aa08b8ea51f7fd412e73b3d2b', // USDX
+    '0x22757fb83836e3f9f0f353126cacd3b1dc82a387' // FLX
 ];
 
 const defaultFlareWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.FLARE]!.address;
