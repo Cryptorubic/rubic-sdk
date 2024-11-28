@@ -107,8 +107,8 @@ export class LifiEvmOnChainTrade extends AggregatorEvmOnChainTrade {
             } = await LifiOnChainApiService.getQuote(
                 step.action.fromChainId,
                 step.action.toChainId,
-                step.action.fromToken.symbol,
-                step.action.toToken.symbol,
+                step.action.fromToken.address,
+                step.action.toToken.address,
                 step.action.fromAmount,
                 step.action.fromAddress,
                 step.action.slippage

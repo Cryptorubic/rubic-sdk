@@ -115,8 +115,8 @@ export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
             } = await LifiOnChainApiService.getQuote(
                 step.action.fromChainId,
                 step.action.toChainId,
-                step.action.fromToken.symbol,
-                step.action.toToken.symbol,
+                step.action.fromToken.address,
+                step.action.toToken.address,
                 this.from.stringWeiAmount,
                 step.action.fromAddress,
                 step.action.slippage,
