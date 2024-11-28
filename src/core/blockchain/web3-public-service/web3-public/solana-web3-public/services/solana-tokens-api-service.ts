@@ -33,6 +33,13 @@ export class SolanaTokensApiService {
                 logoURI: null,
                 address: 'HAPPYwgFcjEJDzRtfWE6tiHE9zGdzpNky2FvjPHsvvGZ',
                 decimals: 9
+            },
+            {
+                name: 'Just a chill guy',
+                symbol: 'CHILLGUY',
+                logoURI: 'https://ipfs.io/ipfs/Qmckb3nWWHyoJKtX3FeagfmDZXNVqiXM4nKkYsTnygm2Ah',
+                address: 'Df6yfrKC8kZE3KNkrHERKzAetSxbrWeniQfyJY4Jpump',
+                decimals: 6
             }
         ];
         return tokenAddresses.reduce(
