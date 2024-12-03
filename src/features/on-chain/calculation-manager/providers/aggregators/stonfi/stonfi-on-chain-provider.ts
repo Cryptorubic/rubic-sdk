@@ -16,7 +16,7 @@ import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { TonOnChainTradeStruct } from '../../common/on-chain-trade/ton-on-chain-trade/models/ton-on-chian-trade-types';
 import { StonfiApiService } from './services/stonfi-api-service';
 import { StonfiOnChainTrade } from './stonfi-on-chain-trade';
-import { getStonfiGasLimit } from './utils/get-stonfi-gas';
+import { getStonfiTotalGas } from './utils/get-stonfi-gas';
 
 export class StonfiOnChainProvider extends AggregatorOnChainProvider {
     public tradeType = ON_CHAIN_TRADE_TYPE.STONFI;
@@ -72,9 +72,9 @@ export class StonfiOnChainProvider extends AggregatorOnChainProvider {
     }
 
     protected getGasFeeInfo(tradeStruct: TonOnChainTradeStruct): Promise<GasFeeInfo | null> {
+        const totalGas = getStonfiTotalGas(tradeStruct.from, tradeStruct.to);
         return Promise.resolve({
-            gasPrice: new BigNumber(1),
-            gasLimit: getStonfiGasLimit(tradeStruct.from, tradeStruct.to)
+            totalGas: new BigNumber(totalGas)
         });
     }
 }

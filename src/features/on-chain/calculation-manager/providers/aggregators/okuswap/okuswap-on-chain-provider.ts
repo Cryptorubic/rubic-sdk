@@ -87,9 +87,7 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 to,
                 fromWithoutFee,
                 proxyFeeInfo,
-                gasFeeInfo: {
-                    gasLimit: new BigNumber(gas)
-                },
+                gasFeeInfo: await this.getGasFeeInfo(from, gas),
                 slippageTolerance: fullOptions.slippageTolerance,
                 useProxy: fullOptions.useProxy,
                 withDeflation: fullOptions.withDeflation,
@@ -100,16 +98,8 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 ...(permit2Address && { permit2ApproveAddress: permit2Address })
             };
 
-            const gasFeeInfo =
-                fullOptions.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct, providerGateway)
-                    : null;
-
             return new OkuSwapOnChainTrade(
-                {
-                    ...tradeStruct,
-                    gasFeeInfo
-                },
+                tradeStruct,
                 fullOptions.providerAddress,
                 providerGateway
             );
@@ -147,13 +137,13 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
     }
 
     protected async getGasFeeInfo(
-        tradeStruct: OkuSwapOnChainTradeStruct,
-        providerGateway: string
+        from: PriceTokenAmount<EvmBlockchainName>,
+        gasLimit: string
     ): Promise<GasFeeInfo | null> {
         try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await OkuSwapOnChainTrade.getGasLimit(tradeStruct, providerGateway);
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+
+            return getGasFeeInfo(gasPriceInfo, { gasLimit: new BigNumber(gasLimit) });
         } catch {
             return null;
         }

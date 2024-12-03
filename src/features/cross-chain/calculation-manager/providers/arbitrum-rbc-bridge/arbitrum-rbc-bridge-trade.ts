@@ -32,34 +32,9 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { TransactionReceipt } from 'web3-eth';
 
 export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        l2network: L2Network
-    ): Promise<GasData | null> {
-        try {
-            const trade = new ArbitrumRbcBridgeTrade(
-                {
-                    from,
-                    to,
-                    gasData: null,
-                    l2network
-                },
-                EvmWeb3Pure.EMPTY_ADDRESS,
-                []
-            );
-
-            return getCrossChainGasData(trade);
-        } catch (_err) {
-            return null;
-        }
-    }
-
     public readonly onChainSubtype = { from: undefined, to: undefined };
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ARBITRUM;

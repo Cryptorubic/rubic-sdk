@@ -23,8 +23,7 @@ export class AerodromeProvider extends UniswapV2AbstractProvider<AerodromeTrade>
         weiAmount: BigNumber,
         exact: Exact,
         options: UniswapV2CalculationOptions,
-        proxyFeeInfo: OnChainProxyFeeInfo | undefined,
-        gasPriceInUsd: BigNumber | undefined
+        proxyFeeInfo: OnChainProxyFeeInfo | undefined
     ): Promise<UniswapCalculatedInfo> {
         const pathFactory = new AerodromePathFactory(this, {
             from,
@@ -34,6 +33,6 @@ export class AerodromeProvider extends UniswapV2AbstractProvider<AerodromeTrade>
             options,
             proxyFeeInfo
         });
-        return pathFactory.getAmountAndPath(gasPriceInUsd);
+        return pathFactory.getAmountAndPath();
     }
 }

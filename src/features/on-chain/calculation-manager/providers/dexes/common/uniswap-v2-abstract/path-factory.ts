@@ -5,23 +5,16 @@ import { Cache } from 'src/common/utils/decorators';
 import { notNull } from 'src/common/utils/object';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { DefaultRoutesMethodArgument } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/route-method-arguments';
-import {
-    UniswapCalculatedInfo,
-    UniswapCalculatedInfoWithProfit
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
+import { UniswapCalculatedInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
 import { UniswapRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-route';
 import { UniswapV2CalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 import { UniswapV2TradeClass } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
 import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { hasLengthAtLeast } from 'src/features/on-chain/calculation-manager/utils/type-guards';
 
 export interface PathFactoryStruct {
@@ -90,9 +83,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         this.proxyFeeInfo = pathFactoryStruct.proxyFeeInfo;
     }
 
-    public async getAmountAndPath(
-        gasPriceInUsd: BigNumber | undefined
-    ): Promise<UniswapCalculatedInfo> {
+    public async getAmountAndPath(): Promise<UniswapCalculatedInfo> {
         const allRoutes = await this.getAllRoutes();
         const sortedRoutes = allRoutes
             .filter(route => route.outputAbsoluteAmount.gt(0))
@@ -105,140 +96,12 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             throw new InsufficientLiquidityError();
         }
 
-        if (this.options.gasCalculation === 'disabled') {
-            if (!hasLengthAtLeast(sortedRoutes, 1)) {
-                throw new RubicSdkError('Routes array length has to be bigger than 0');
-            }
-            return {
-                route: sortedRoutes[0]
-            };
+        if (!hasLengthAtLeast(sortedRoutes, 1)) {
+            throw new RubicSdkError('Routes array length has to be bigger than 0');
         }
-
-        if (
-            this.options.gasCalculation === 'rubicOptimisation' &&
-            this.to.price?.isFinite() &&
-            gasPriceInUsd
-        ) {
-            const gasLimits = this.getDefaultGases(sortedRoutes);
-
-            if (this.walletAddress) {
-                try {
-                    const gasRequests = await Promise.all(this.getGasRequests(sortedRoutes));
-                    const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
-                        this.walletAddress,
-                        gasRequests
-                    );
-                    estimatedGasLimits.forEach((elem, index) => {
-                        if (elem?.isFinite()) {
-                            gasLimits[index] = elem;
-                        }
-                    });
-                } catch {}
-            }
-
-            const routesWithProfit: UniswapCalculatedInfoWithProfit[] = sortedRoutes.map(
-                (route, index) => {
-                    const estimatedGas = gasLimits[index];
-                    if (!estimatedGas) {
-                        throw new RubicSdkError('Estimated gas has to be defined');
-                    }
-                    const gasFeeInUsd = estimatedGas.multipliedBy(gasPriceInUsd);
-                    let profit: BigNumber;
-                    if (this.exact === 'input') {
-                        profit = Web3Pure.fromWei(route.outputAbsoluteAmount, this.to.decimals)
-                            .multipliedBy(this.to.price)
-                            .minus(gasFeeInUsd);
-                    } else {
-                        profit = Web3Pure.fromWei(route.outputAbsoluteAmount, this.from.decimals)
-                            .multipliedBy(this.from.price)
-                            .multipliedBy(-1)
-                            .minus(gasFeeInUsd);
-                    }
-
-                    return {
-                        route,
-                        estimatedGas,
-                        profit
-                    };
-                }
-            );
-
-            const sortedByProfitRoutes = routesWithProfit.sort((a, b) =>
-                b.profit.comparedTo(a.profit)
-            );
-
-            if (!sortedByProfitRoutes?.[0]) {
-                throw new RubicSdkError('Profit routes array length has to be bigger than 0');
-            }
-
-            return sortedByProfitRoutes[0];
-        }
-
-        let gasLimit = this.getDefaultGases(sortedRoutes.slice(0, 1))[0];
-
-        if (this.walletAddress) {
-            try {
-                const callData = await this.getGasRequests(sortedRoutes.slice(0, 1))[0];
-                if (!callData) {
-                    throw new RubicSdkError('Call data has to be defined');
-                }
-                const estimatedGas = (
-                    await this.web3Public.batchEstimatedGas(this.walletAddress, [callData])
-                )[0];
-                if (estimatedGas?.isFinite()) {
-                    gasLimit = estimatedGas;
-                }
-            } catch {}
-        }
-
-        if (!sortedRoutes?.[0]) {
-            throw new RubicSdkError('Routes length has to be bigger than 0');
-        }
-
         return {
-            route: sortedRoutes[0],
-            estimatedGas: gasLimit
+            route: sortedRoutes[0]
         };
-    }
-
-    private getGasRequests(routes: UniswapRoute[]): Promise<BatchCall>[] {
-        return this.getTradesByRoutes(routes).map(trade => trade.getEstimatedGasCallData());
-    }
-
-    private getDefaultGases(routes: UniswapRoute[]): BigNumber[] {
-        return this.getTradesByRoutes(routes).map(trade => trade.getDefaultEstimatedGas());
-    }
-
-    private getTradesByRoutes(routes: UniswapRoute[]): UniswapV2AbstractTrade[] {
-        return routes.map(route => {
-            const { from, to, fromWithoutFee } = getFromToTokensAmountsByExact(
-                this.from,
-                this.to,
-                this.exact,
-                this.weiAmount,
-                this.weiAmount,
-                route.outputAbsoluteAmount
-            );
-
-            return new this.UniswapV2TradeClass(
-                {
-                    from,
-                    to,
-                    path: route.path,
-                    routPoolInfo: route?.routPoolInfo,
-                    wrappedPath: route.path,
-                    exact: this.exact,
-                    deadlineMinutes: this.options.deadlineMinutes,
-                    slippageTolerance: this.options.slippageTolerance,
-                    gasFeeInfo: null,
-                    useProxy: this.options.useProxy,
-                    proxyFeeInfo: this.proxyFeeInfo,
-                    fromWithoutFee,
-                    withDeflation: { from: { isDeflation: false }, to: { isDeflation: false } }
-                },
-                EvmWeb3Pure.EMPTY_ADDRESS
-            );
-        });
     }
 
     protected async getAllRoutes(): Promise<UniswapRoute[]> {

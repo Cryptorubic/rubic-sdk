@@ -80,23 +80,11 @@ export class MesonCrossChainProvider extends CrossChainProvider {
                 tokenAmount: toAmount
             });
 
-            const gasData = await MesonCrossChainFactory.getGasData(
-                options?.gasCalculation === 'enabled',
-                {
-                    from: fromWith6Decimals,
-                    feeInfo,
-                    toToken: to,
-                    providerAddress: options.providerAddress,
-                    sourceAssetString,
-                    targetAssetString
-                }
-            );
-
             const trade = MesonCrossChainFactory.createTrade({
                 crossChainTrade: {
                     feeInfo,
                     from: fromWith6Decimals,
-                    gasData,
+                    gasData: await this.getGasData(from),
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     sourceAssetString,

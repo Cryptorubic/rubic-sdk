@@ -110,7 +110,7 @@ export abstract class VooiAbstractProvider<
         //     return new VooiTrade(tradeStruct, fullOptions.providerAddress);
         // }
 
-        // const gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
+        // const gasFeeInfo = getGasFeeInfo(gasPriceInfo, { gasLimit: estimatedGas });
         // return new VooiTrade({ ...tradeStruct, gasFeeInfo }, fullOptions.providerAddress);
     }
 

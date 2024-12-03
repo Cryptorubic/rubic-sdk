@@ -7,7 +7,6 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
 import { piteasOnChainSupportedBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/constants/piteas-on-chain-supported-blockchains';
-import { piteasRouterAddress } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/constants/piteas-router-address';
 import { PiteasQuoteRequestParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-quote';
 import { PiteasTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-trade-struct';
 import { PiteasApiService } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-api-service';
@@ -16,10 +15,10 @@ import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calcula
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
-import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 
 export class PiteasProvider extends AggregatorOnChainProvider {
@@ -80,29 +79,16 @@ export class PiteasProvider extends AggregatorOnChainProvider {
                 to,
                 slippageTolerance: fullOptions.slippageTolerance,
                 path: [from, to],
-                gasFeeInfo: null,
+                gasFeeInfo: await this.getGasFeeInfo(from, gasUseEstimate),
                 useProxy: fullOptions.useProxy,
                 proxyFeeInfo,
                 fromWithoutFee,
                 withDeflation: fullOptions.withDeflation,
                 usedForCrossChain: fullOptions.usedForCrossChain,
-                methodParameters,
-                gasUseEstimate
+                methodParameters
             };
 
-            const gasFeeInfo =
-                options?.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct, piteasRouterAddress)
-                    : null;
-
-            return new PiteasTrade(
-                {
-                    ...tradeStruct,
-                    gasFeeInfo
-                },
-                fullOptions.providerAddress,
-                quoteRequestParams
-            );
+            return new PiteasTrade(tradeStruct, fullOptions.providerAddress, quoteRequestParams);
         } catch (err) {
             return {
                 type: ON_CHAIN_TRADE_TYPE.PITEAS,
@@ -111,19 +97,14 @@ export class PiteasProvider extends AggregatorOnChainProvider {
         }
     }
 
-    protected async getGasFeeInfo(
-        tradeStruct: PiteasTradeStruct,
-        providerGateway: string
+    protected override async getGasFeeInfo(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        gasLimit: number
     ): Promise<GasFeeInfo | null> {
         try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit =
-                (await PiteasTrade.getGasLimit(
-                    tradeStruct,
-                    providerGateway,
-                    tradeStruct.methodParameters
-                )) || new BigNumber(tradeStruct.gasUseEstimate);
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+
+            return getGasFeeInfo(gasPriceInfo, { gasLimit: new BigNumber(gasLimit) });
         } catch {
             return null;
         }
