@@ -143,6 +143,7 @@ export const ON_CHAIN_TRADE_TYPE = {
 
     SYMBIOSIS_SWAP: 'SYMBIOSIS_SWAP', // Fake to show swap via unknown symbiosis dex
 
+    TONCO_DEX: 'TONCO_DEX',
     TRADER: 'TRADER',
     TRISOLARIS: 'TRISOLARIS',
 

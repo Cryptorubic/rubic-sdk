@@ -77,7 +77,8 @@ export class UniZenOnChainProvider extends AggregatorOnChainProvider {
                 slippageTolerance: options.slippageTolerance,
                 useProxy: options.useProxy,
                 withDeflation: options.withDeflation,
-                gasFeeInfo: null
+                gasFeeInfo: null,
+                minAmountOut: quoteInfo.transactionData.info.amountOutMin
             };
 
             const trade = new UniZenOnChainTrade(

@@ -52,6 +52,7 @@ const nonProxyProviders = [
     ArbitrumRbcBridgeProvider,
     TaikoBridgeProvider,
     LayerZeroBridgeProvider
+    // SimpleSwapCcrProvider
     // ScrollBridgeProvider
 ] as const;
 

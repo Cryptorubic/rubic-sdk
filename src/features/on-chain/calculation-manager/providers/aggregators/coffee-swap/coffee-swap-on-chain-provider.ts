@@ -9,6 +9,7 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { FAKE_TON_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
@@ -19,7 +20,6 @@ import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/model
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getMultistepData } from '../common/utils/get-ton-multistep-data';
 import { CoffeSwapTrade } from './coffe-swap-on-chain-trade';
-import { FAKE_TON_ADDRESS } from './constants/fake-ton-wallet';
 import { CoffeeRoutePath } from './models/coffe-swap-api-types';
 import { CoffeeSwapApiService } from './services/coffee-swap-api-service';
 
@@ -83,31 +83,26 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
         const promises = [] as Array<Promise<[PriceTokenAmount, PriceTokenAmount]>>;
         const path = txSteps[0]!;
 
-        let next: undefined | CoffeeRoutePath = undefined;
-        let isFirstStep = true;
-
         const getAddress = (addr: string): string =>
             addr === 'native' ? TonWeb3Pure.nativeTokenAddress : addr;
 
-        while (isFirstStep || !!next) {
-            const source = isFirstStep ? path : next;
-
+        let next: CoffeeRoutePath | undefined = path;
+        while (!!next) {
             const from = PriceTokenAmount.createToken({
-                address: getAddress(source!.input_token.address.address),
+                address: getAddress(next.input_token.address.address),
                 blockchain: BLOCKCHAIN_NAME.TON,
-                tokenAmount: new BigNumber(source!.swap.input_amount)
+                tokenAmount: new BigNumber(next!.swap.input_amount)
             });
             const to = PriceTokenAmount.createToken({
-                address: getAddress(source!.output_token.address.address),
+                address: getAddress(next.output_token.address.address),
                 blockchain: BLOCKCHAIN_NAME.TON,
-                tokenAmount: new BigNumber(source!.swap.output_amount)
+                tokenAmount: new BigNumber(next!.swap.output_amount)
             });
 
             const stepPromises = Promise.all([from, to]);
             promises.push(stepPromises);
 
-            next = isFirstStep ? path.next?.[0] : next!.next?.[0];
-            isFirstStep = false;
+            next = next.next?.[0];
         }
 
         const resolved = await Promise.all(promises);

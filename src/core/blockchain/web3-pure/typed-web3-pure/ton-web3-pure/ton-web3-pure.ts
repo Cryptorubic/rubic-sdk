@@ -1,8 +1,9 @@
-import { Cell } from '@ton/core';
+import { Address, beginCell, Cell } from '@ton/core';
 import { RubicSdkError } from 'src/common/errors';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
 import { TonApiParseAddressResp, TonApiResp } from 'src/core/blockchain/models/ton/tonapi-types';
+import { TonClientInstance } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-client/ton-client';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
@@ -63,5 +64,17 @@ export class TonWeb3Pure {
         }
 
         return res;
+    }
+
+    public static async getWalletAddress(
+        address: Address,
+        contractAddress: Address
+    ): Promise<Address> {
+        const addressResult = await TonClientInstance.getInstance().runMethod(
+            contractAddress,
+            'get_wallet_address',
+            [{ type: 'slice', cell: beginCell().storeAddress(address).endCell() }]
+        );
+        return addressResult.stack.readAddress();
     }
 }
