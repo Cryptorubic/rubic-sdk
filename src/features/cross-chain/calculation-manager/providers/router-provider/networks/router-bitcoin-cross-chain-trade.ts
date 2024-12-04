@@ -89,7 +89,8 @@ export class RouterBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
             ...this.routerQuoteConfig,
             senderAddress: this.walletAddress,
             receiverAddress: toAddress,
-            refundAddress: this.walletAddress
+            refundAddress: this.walletAddress,
+            isTransfer: true
         });
 
         if (!txn) {
