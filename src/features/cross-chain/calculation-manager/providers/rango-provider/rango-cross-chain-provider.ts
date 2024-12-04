@@ -3,7 +3,13 @@ import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Any } from 'src/common/utils/types';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import {
+    FAKE_BITCOIN_ADDRESS,
+    FAKE_WALLET_ADDRESS
+} from 'src/features/common/constants/fake-wallet-address';
 import {
     RANGO_API_ENDPOINT,
     RANGO_API_KEY
@@ -21,6 +27,7 @@ import {
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { RangoUtils } from 'src/features/common/providers/rango/utils/rango-utils';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { RangoCrossChainFactory } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/rango-cross-chain-factory';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { CrossChainProvider } from '../common/cross-chain-provider';
@@ -29,7 +36,6 @@ import { FeeInfo } from '../common/models/fee-info';
 import { CrossChainStep, RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RangoCrossChainOptions } from './model/rango-cross-chain-api-types';
-import { RangoCrossChainTrade } from './rango-cross-chain-trade';
 import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
 import { RangoCrossChainParser } from './services/rango-cross-chain-params-parser';
 
@@ -103,7 +109,6 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             const bridgeSubtype = (
                 routePath.find(el => el.type === 'cross-chain') as CrossChainStep
             )?.provider;
-            const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
             const tradeParams = await RangoCrossChainParser.getTradeConstructorParams({
                 fromToken: from,
                 toToken: to,
@@ -113,10 +118,10 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 toTokenAmountMin,
                 swapQueryParams,
                 bridgeSubtype,
-                receiverAddress: options?.receiverAddress || fakeAddress
+                receiverAddress: options?.receiverAddress || this.getReceiverAddress(to.blockchain)
             });
 
-            const trade = new RangoCrossChainTrade(tradeParams);
+            const trade = RangoCrossChainFactory.createTrade(fromBlockchain, tradeParams);
             const tradeType = this.type;
 
             return { trade, tradeType };
@@ -222,5 +227,16 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
             token: cryptoFeeToken
         };
+    }
+
+    private getReceiverAddress(blockchain: BlockchainName): string {
+        const type = BlockchainsInfo.getChainType(blockchain);
+        if (type === CHAIN_TYPE.EVM) {
+            return FAKE_WALLET_ADDRESS;
+        }
+        if (type === CHAIN_TYPE.BITCOIN) {
+            return FAKE_BITCOIN_ADDRESS;
+        }
+        throw new Error('Chain type not supported');
     }
 }

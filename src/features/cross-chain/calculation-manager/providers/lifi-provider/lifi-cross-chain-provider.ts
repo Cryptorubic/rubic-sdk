@@ -9,6 +9,7 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { BitcoinEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-encoded-config';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -64,7 +65,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
         toToken: PriceToken<LifiCrossChainSupportedBlockchain>,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult<EvmEncodeConfig | { data: string }>> {
+    ): Promise<CalculationResult<EvmEncodeConfig | { data: string } | BitcoinEncodedConfig>> {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;

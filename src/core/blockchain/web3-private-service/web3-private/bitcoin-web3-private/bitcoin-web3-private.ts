@@ -12,10 +12,10 @@ export class BitcoinWeb3Private extends Web3Private {
         return Promise.resolve(BLOCKCHAIN_NAME.BITCOIN);
     }
 
-    private async transfer(
+    public async transfer(
         recipient: string,
         amount: string,
-        memo: string,
+        memo?: string,
         options?: BasicTransactionOptions
     ): Promise<string> {
         const request = new Promise((resolve, reject) => {
@@ -27,8 +27,11 @@ export class BitcoinWeb3Private extends Web3Private {
                             feeRate: 10,
                             from: this.wallet.address,
                             recipient,
-                            amount,
-                            memo
+                            amount: {
+                                amount,
+                                decimals: 8
+                            },
+                            ...(memo && { memo })
                         }
                     ]
                 },

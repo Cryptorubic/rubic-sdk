@@ -1,9 +1,11 @@
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+
 import { CROSS_CHAIN_TRADE_TYPE } from '../../../models/cross-chain-trade-type';
+import { RangoEvmCrossChainTrade } from '../chains/rango-evm-cross-chain-trade';
 import {
     GetCrossChainTradeConstructorParamsType,
     RangoCrossChainTradeConstructorParams
 } from '../model/rango-cross-chain-parser-types';
-import { RangoCrossChainTrade } from '../rango-cross-chain-trade';
 
 export class RangoCrossChainParser {
     public static async getTradeConstructorParams({
@@ -16,11 +18,13 @@ export class RangoCrossChainParser {
         toTokenAmountMin,
         bridgeSubtype,
         receiverAddress
-    }: GetCrossChainTradeConstructorParamsType): Promise<RangoCrossChainTradeConstructorParams> {
+    }: GetCrossChainTradeConstructorParamsType): Promise<
+        RangoCrossChainTradeConstructorParams<BlockchainName>
+    > {
         const useProxy = options.useProxy?.[CROSS_CHAIN_TRADE_TYPE.RANGO] ?? true;
         const gasData =
             options.gasCalculation === 'enabled'
-                ? await RangoCrossChainTrade.getGasData({
+                ? await RangoEvmCrossChainTrade.getGasData({
                       fromToken,
                       toToken,
                       swapQueryParams,
@@ -33,17 +37,18 @@ export class RangoCrossChainParser {
         const priceImpact = fromToken.calculatePriceImpactPercent(toToken);
         const slippage = options.slippageTolerance;
 
-        const crossChainTrade: RangoCrossChainTradeConstructorParams['crossChainTrade'] = {
-            from: fromToken,
-            to: toToken,
-            gasData,
-            toTokenAmountMin,
-            priceImpact,
-            slippage,
-            feeInfo,
-            swapQueryParams,
-            bridgeSubtype
-        };
+        const crossChainTrade: RangoCrossChainTradeConstructorParams<BlockchainName>['crossChainTrade'] =
+            {
+                from: fromToken,
+                to: toToken,
+                gasData,
+                toTokenAmountMin,
+                priceImpact,
+                slippage,
+                feeInfo,
+                swapQueryParams,
+                bridgeSubtype
+            };
 
         const providerAddress = options.providerAddress;
 
