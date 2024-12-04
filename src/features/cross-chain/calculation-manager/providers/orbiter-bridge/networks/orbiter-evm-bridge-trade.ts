@@ -51,6 +51,7 @@ export class OrbiterEvmBridgeTrade extends EvmCrossChainTrade {
                     feeInfo,
                     gasData: null,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
+                    toTokenAmountMin: new BigNumber(0),
                     quoteConfig
                 },
                 routePath: [],
@@ -107,7 +108,7 @@ export class OrbiterEvmBridgeTrade extends EvmCrossChainTrade {
         super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
-        this.toTokenAmountMin = params.crossChainTrade.to.tokenAmount;
+        this.toTokenAmountMin = params.crossChainTrade.toTokenAmountMin;
         this.feeInfo = params.crossChainTrade.feeInfo;
         this.gasData = params.crossChainTrade.gasData;
         this.priceImpact = params.crossChainTrade.priceImpact;

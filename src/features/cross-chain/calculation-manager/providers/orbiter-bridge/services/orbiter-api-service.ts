@@ -26,9 +26,9 @@ export class OrbiterApiService {
     public static async getReceiveAmount(request: {
         line: string;
         value: string;
-    }): Promise<BigNumber> {
+    }): Promise<OrbiterReceiveAmountResponse> {
         const nonce = Math.round(Math.random() * 10 ** 4).toString();
-        const response = await Injector.httpClient.get<OrbiterReceiveAmountResponse>(
+        return Injector.httpClient.get<OrbiterReceiveAmountResponse>(
             `${ORBITER_API_ENDPOINT}/routers/simulation/receiveAmount`,
             {
                 params: {
@@ -38,7 +38,6 @@ export class OrbiterApiService {
                 }
             }
         );
-        return new BigNumber(response.result.receiveAmount);
     }
 
     public static async getTxStatus(txHash: string): Promise<TxStatusData> {

@@ -9,6 +9,7 @@ import { GasData } from '../../common/evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../../common/models/fee-info';
 import { RubicStep } from '../../common/models/rubicStep';
 import { OrbiterQuoteConfig } from './orbiter-api-quote-types';
+import BigNumber from 'bignumber.js';
 
 export interface OrbiterGetGasDataParams<Blockchain extends BlockchainName> {
     fromToken: PriceTokenAmount<Blockchain>;
@@ -27,6 +28,7 @@ export interface OrbiterTradeParams<Blockchain extends BlockchainName> {
         feeInfo: FeeInfo;
         priceImpact: number | null;
         quoteConfig: OrbiterQuoteConfig;
+        toTokenAmountMin: BigNumber;
     };
     providerAddress: string;
     routePath: RubicStep[];
