@@ -2,7 +2,6 @@ import { Connection } from '@solana/web3.js';
 import cloneDeep from 'lodash.clonedeep';
 import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import pTimeout from 'src/common/utils/p-timeout';
-import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -25,6 +24,7 @@ import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-pub
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 import Web3 from 'web3';
+import { TronWeb } from 'tronweb';
 
 import { TonWeb3Public } from './web3-public/ton-web3-public/ton-web3-public';
 
