@@ -132,7 +132,7 @@ export class MesonCcrApiService {
             }
         } = err as MesonErrorRes<T>;
 
-        if (!data) throw new NotSupportedTokensError();
+        if (!data || 'converted' in data) throw new NotSupportedTokensError();
 
         return data;
     }
