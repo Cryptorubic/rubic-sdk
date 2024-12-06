@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -7,6 +8,10 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
+import {
+    BridgersQuoteRequest,
+    BridgersQuoteResponse
+} from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
 import {
     BridgersSwapRequest,
     BridgersSwapResponse
@@ -36,6 +41,8 @@ export class BridgersTrade extends TronOnChainTrade {
 
     public readonly platformFee: OnChainPlatformFee;
 
+    public readonly quoteReqBody: BridgersQuoteRequest;
+
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.BRIDGERS;
     }
@@ -58,6 +65,7 @@ export class BridgersTrade extends TronOnChainTrade {
             contractAddress: string;
             cryptoFeeToken: TokenAmount;
             platformFee: OnChainPlatformFee;
+            quoteReqBody: BridgersQuoteRequest;
         },
         providerAddress: string
     ) {
@@ -69,6 +77,7 @@ export class BridgersTrade extends TronOnChainTrade {
         this.contractAddress = tradeStruct.contractAddress;
         this.cryptoFeeToken = tradeStruct.cryptoFeeToken;
         this.platformFee = tradeStruct.platformFee;
+        this.quoteReqBody = tradeStruct.quoteReqBody;
         this.feeInfo = {
             rubicProxy: {
                 platformFee: {
@@ -83,10 +92,14 @@ export class BridgersTrade extends TronOnChainTrade {
         await this.checkWalletState(options?.testMode);
         await this.checkAllowanceAndApprove(options);
 
+        if (!options.skipAmountCheck) {
+            await this.checkRateUpdated();
+        }
+
         try {
             const transactionData = await this.getTransactionData(options);
 
-            return await this.web3Private.sendTransaction(
+            return this.web3Private.sendTransaction(
                 this.contractAddress,
                 transactionData.functionName,
                 transactionData.parameter,
@@ -156,5 +169,19 @@ export class BridgersTrade extends TronOnChainTrade {
         >('https://sswap.swft.pro/api/sswap/swap', swapRequest);
 
         return swapData.data.txData;
+    }
+
+    private async checkRateUpdated(): Promise<void> {
+        const quoteResponse = await this.httpClient.post<BridgersQuoteResponse>(
+            'https://sswap.swft.pro/api/sswap/quote',
+            this.quoteReqBody
+        );
+        const transactionData = quoteResponse.data?.txData;
+        const newToToken = new PriceTokenAmount({
+            ...this.to.asStruct,
+            tokenAmount: new BigNumber(transactionData.toTokenAmount)
+        });
+
+        this.checkAmountChange(newToToken.stringWeiAmount, this.to.stringWeiAmount);
     }
 }

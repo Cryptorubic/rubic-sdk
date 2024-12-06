@@ -97,7 +97,8 @@ export class BridgersProvider extends TronOnChainProvider {
                 slippageTolerance: fullOptions.slippageTolerance,
                 contractAddress: transactionData.contractAddress,
                 cryptoFeeToken,
-                platformFee
+                platformFee,
+                quoteReqBody: quoteRequest
             },
             fullOptions.providerAddress
         );

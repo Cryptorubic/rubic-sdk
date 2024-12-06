@@ -58,4 +58,9 @@ export interface SwapTransactionOptions {
      * Use in case of eip-155
      */
     useEip155?: boolean;
+
+    /**
+     * true if trade.swap() called 2nd time after catch UpdatedRatesError
+     */
+    skipAmountCheck?: boolean;
 }
