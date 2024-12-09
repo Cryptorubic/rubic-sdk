@@ -84,7 +84,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                 };
             }
 
-            const { receive_value, txs, gas_fee } = await OwlToApiService.getSwapInfo(swapParams);
+            const { receive_value, txs } = await OwlToApiService.getSwapInfo(swapParams);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -96,7 +96,7 @@ export class OwlToBridgeProvider extends CrossChainProvider {
                     feeInfo,
                     from,
                     to,
-                    gasData: await this.getGasData(from, { totalGas: gas_fee.raw_value }),
+                    gasData: await this.getGasData(from),
                     priceImpact: from.calculatePriceImpactPercent(to),
                     swapParams,
                     approveAddress: txs.transfer_body.to

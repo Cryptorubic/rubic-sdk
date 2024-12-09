@@ -139,7 +139,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                     : defaultTransit;
             }
 
-            const { amount, maxSlippage, fee } = await this.getEstimates(
+            const { amount, maxSlippage } = await this.getEstimates(
                 transitToken,
                 toToken,
                 options,
@@ -162,7 +162,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                     {
                         from: fromToken,
                         to,
-                        gasData: await this.getGasData(fromToken, { totalGas: fee }),
+                        gasData: await this.getGasData(fromToken),
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo: feeInfo,
