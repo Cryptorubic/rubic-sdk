@@ -70,6 +70,7 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
 
 import { acrossFundsDepositedInputs } from '../calculation-manager/providers/across-provider/constants/across-deposit-abi';
 import { AcrossApiService } from '../calculation-manager/providers/across-provider/services/across-api-service';
+import { ChangellyApiService } from '../calculation-manager/providers/changelly-provider/services/changelly-api-service';
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
@@ -113,7 +114,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.UNIZEN]: this.getUniZenDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.CHANGELLY]: this.getChangellyDstSwapStatus
     };
 
     /**
@@ -807,6 +809,28 @@ export class CrossChainStatusManager {
 
         try {
             const { status, dstHash } = await SimpleSwapApiService.getTxStatus(data.simpleSwapId);
+            if (
+                status === CHANGENOW_API_STATUS.FINISHED ||
+                status === CHANGENOW_API_STATUS.REFUNDED
+            ) {
+                return { status: TX_STATUS.SUCCESS, hash: dstHash };
+            }
+            if (status === CHANGENOW_API_STATUS.FAILED) {
+                return { status: TX_STATUS.FAIL, hash: null };
+            }
+            return { status: TX_STATUS.PENDING, hash: null };
+        } catch {
+            return { status: TX_STATUS.PENDING, hash: null };
+        }
+    }
+
+    private async getChangellyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.changellySwapId) {
+            throw new RubicSdkError('Must provide Changelly trade ID');
+        }
+
+        try {
+            const { status, dstHash } = await ChangellyApiService.getTxStatus(data.changellySwapId);
             if (
                 status === CHANGENOW_API_STATUS.FINISHED ||
                 status === CHANGENOW_API_STATUS.REFUNDED
