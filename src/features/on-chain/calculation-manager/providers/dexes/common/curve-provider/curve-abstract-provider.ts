@@ -132,7 +132,7 @@ export abstract class CurveAbstractProvider<
             } catch {
                 gasLimit = new BigNumber(400_000); // Default gas limit
             }
-            gasFeeInfo = getGasFeeInfo(gasLimit, gasPrice);
+            gasFeeInfo = getGasFeeInfo(gasPrice, { ...(gasLimit && { gasLimit }) });
         }
 
         return new this.Trade({ ...tradeStruct, gasFeeInfo }, fullOptions.providerAddress);

@@ -12,7 +12,6 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
-import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { BRIDGE_TYPE } from '../common/models/bridge-type';
 import { FeeInfo } from '../common/models/fee-info';
@@ -28,37 +27,6 @@ import { AcrossFeeQuoteRequestParams, AcrossFeeQuoteResponse } from './models/ac
 import { AcrossApiService } from './services/across-api-service';
 
 export class AcrossCrossChainTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        feeInfo: FeeInfo,
-        providerAddress: string,
-        acrossFeeQuoteRequestParams: AcrossFeeQuoteRequestParams
-    ): Promise<GasData | null> {
-        try {
-            const trade = new AcrossCrossChainTrade(
-                {
-                    from,
-                    to,
-                    priceImpact: 0,
-                    toTokenAmountMin: new BigNumber(0),
-                    gasData: null,
-                    feeInfo,
-                    slippage: 0,
-                    acrossFeeQuoteRequestParams
-                },
-                providerAddress,
-                [],
-                false
-            );
-
-            return getCrossChainGasData(trade);
-        } catch (_err) {
-            return null;
-        }
-    }
-
     private readonly uniqCodeWithSeparator = '1dc0de003c';
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ACROSS;

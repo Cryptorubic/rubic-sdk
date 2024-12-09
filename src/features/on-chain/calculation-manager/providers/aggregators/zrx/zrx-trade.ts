@@ -1,6 +1,3 @@
-import BigNumber from 'bignumber.js';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { ZeroXSupportedBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/constants/zrx-supported-blockchains';
@@ -16,35 +13,6 @@ import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-m
 
 export class ZrxTrade extends AggregatorEvmOnChainTrade {
     private readonly affiliateAddress: string | undefined;
-
-    /** @internal */
-    public static async getGasLimit(zrxTradeStruct: ZrxTradeStruct): Promise<BigNumber | null> {
-        const fromBlockchain = zrxTradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
-        try {
-            const transactionConfig = await new ZrxTrade(
-                zrxTradeStruct,
-                EvmWeb3Pure.EMPTY_ADDRESS
-            ).encode({ fromAddress: walletAddress });
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = (
-                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-            )[0];
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-            return gasLimit;
-        } catch (_err) {
-            return null;
-        }
-    }
 
     public readonly dexContractAddress: string;
 

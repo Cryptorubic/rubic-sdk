@@ -11,10 +11,8 @@ import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-man
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
-import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
 import { UniswapCalculatedInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
 import { UniswapV2CalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
@@ -130,21 +128,13 @@ export abstract class UniswapV2AbstractProvider<
         );
         const toProxy = createTokenNativeAddressProxy(toToken, this.providerSettings.wethAddress);
 
-        let gasPriceInfo: GasPriceInfo | undefined;
-        if (fullOptions.gasCalculation !== 'disabled') {
-            try {
-                gasPriceInfo = await this.getGasPriceInfo();
-            } catch {}
-        }
-
-        const { route, estimatedGas } = await this.getAmountAndPath(
+        const { route } = await this.getAmountAndPath(
             fromProxy,
             toProxy,
             weiAmountWithoutFee,
             exact,
             fullOptions,
-            proxyFeeInfo,
-            gasPriceInfo?.gasPriceInUsd
+            proxyFeeInfo
         );
 
         const { from, to, fromWithoutFee } = getFromToTokensAmountsByExact(
@@ -179,15 +169,7 @@ export abstract class UniswapV2AbstractProvider<
             usedForCrossChain: fullOptions.usedForCrossChain
         };
 
-        if (fullOptions.gasCalculation === 'disabled') {
-            return new this.UniswapV2TradeClass(tradeStruct, fullOptions.providerAddress);
-        }
-
-        const gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
-        return new this.UniswapV2TradeClass(
-            { ...tradeStruct, gasFeeInfo },
-            fullOptions.providerAddress
-        );
+        return new this.UniswapV2TradeClass(tradeStruct, fullOptions.providerAddress);
     }
 
     protected async getAmountAndPath(
@@ -196,8 +178,7 @@ export abstract class UniswapV2AbstractProvider<
         weiAmount: BigNumber,
         exact: Exact,
         options: UniswapV2CalculationOptions,
-        proxyFeeInfo: OnChainProxyFeeInfo | undefined,
-        gasPriceInUsd: BigNumber | undefined
+        proxyFeeInfo: OnChainProxyFeeInfo | undefined
     ): Promise<UniswapCalculatedInfo> {
         const pathFactory = new PathFactory(this, {
             from,
@@ -207,6 +188,6 @@ export abstract class UniswapV2AbstractProvider<
             options,
             proxyFeeInfo
         });
-        return pathFactory.getAmountAndPath(gasPriceInUsd);
+        return pathFactory.getAmountAndPath();
     }
 }

@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { InsufficientFundsError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
@@ -81,13 +82,12 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
 
     protected async checkNativeBalance(): Promise<void> {
         const balanceWei = await this.web3Public.getBalance(this.walletAddress);
-        const balanceNonWei = Web3Pure.fromWei(
-            balanceWei,
-            nativeTokensList[BLOCKCHAIN_NAME.TON].decimals
-        );
-        const requiredBalanceNonWei = this.gasFeeInfo!.gasLimit!.plus(0.01);
+        const balanceNonWei = Web3Pure.fromWei(balanceWei, nativeTokensList.TON.decimals);
+        const requiredBalanceNonWei = this.gasFeeInfo?.totalGas
+            ? Web3Pure.fromWei(this.gasFeeInfo.totalGas, nativeTokensList.TON.decimals)
+            : new BigNumber(0);
 
-        if (balanceNonWei.lt(requiredBalanceNonWei)) {
+        if (balanceWei.lt(requiredBalanceNonWei)) {
             throw new InsufficientFundsError(
                 nativeTokensList[BLOCKCHAIN_NAME.TON],
                 balanceNonWei,

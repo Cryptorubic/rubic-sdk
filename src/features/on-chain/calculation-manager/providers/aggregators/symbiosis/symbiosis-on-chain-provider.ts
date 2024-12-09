@@ -8,10 +8,7 @@ import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
-import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 import { symbiosisOnChainSupportedBlockchains } from './models/symbiosis-on-chain-supported-blockchains';
 import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 import { SymbiosisOnChainTrade } from './symbiosis-on-chain-trade';
@@ -59,15 +56,10 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
                 path
             };
 
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct, providerGateway)
-                    : null;
-
             return new SymbiosisOnChainTrade(
                 {
                     ...tradeStruct,
-                    gasFeeInfo
+                    gasFeeInfo: await this.getGasFeeInfo()
                 },
                 options.providerAddress,
                 providerGateway
@@ -77,19 +69,6 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
                 type: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
                 error: err
             };
-        }
-    }
-
-    protected async getGasFeeInfo(
-        tradeStruct: SymbiosisTradeStruct,
-        providerGateway: string
-    ): Promise<GasFeeInfo | null> {
-        try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await SymbiosisOnChainTrade.getGasLimit(tradeStruct, providerGateway);
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
-        } catch {
-            return null;
         }
     }
 }

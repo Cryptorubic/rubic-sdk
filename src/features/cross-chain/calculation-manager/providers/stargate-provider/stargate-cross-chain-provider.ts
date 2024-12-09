@@ -232,20 +232,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 }
             };
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await StargateCrossChainTrade.getGasData(
-                          from,
-                          to,
-                          feeInfo,
-                          srcChainTrade,
-                          dstChainTrade,
-                          options.slippageTolerance,
-                          options.providerAddress,
-                          options.receiverAddress
-                      )
-                    : null;
-
             return {
                 trade: new StargateCrossChainTrade(
                     {
@@ -253,7 +239,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         to,
                         slippageTolerance: options.slippageTolerance,
                         priceImpact: transitTokenAmount.calculatePriceImpactPercent(to),
-                        gasData,
+                        gasData: await this.getGasData(from),
                         feeInfo,
                         srcChainTrade,
                         dstChainTrade,

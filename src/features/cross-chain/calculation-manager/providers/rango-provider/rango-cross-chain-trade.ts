@@ -11,7 +11,6 @@ import { rangoContractAddresses } from 'src/features/common/providers/rango/cons
 import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
 import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
@@ -25,47 +24,10 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import {
-    RangoCrossChainTradeConstructorParams,
-    RangoGetGasDataParams
-} from './model/rango-cross-chain-parser-types';
+import { RangoCrossChainTradeConstructorParams } from './model/rango-cross-chain-parser-types';
 import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData({
-        fromToken,
-        toToken,
-        feeInfo,
-        routePath,
-        swapQueryParams,
-        bridgeSubtype,
-        receiverAddress
-    }: RangoGetGasDataParams): Promise<GasData | null> {
-        try {
-            const trade = new RangoCrossChainTrade({
-                crossChainTrade: {
-                    from: fromToken,
-                    to: toToken,
-                    toTokenAmountMin: new BigNumber(0),
-                    feeInfo,
-                    gasData: null,
-                    priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                    slippage: swapQueryParams.slippage,
-                    bridgeSubtype,
-                    swapQueryParams
-                },
-                routePath,
-                providerAddress: swapQueryParams.toAddress,
-                useProxy: false
-            });
-
-            return getCrossChainGasData(trade, receiverAddress);
-        } catch (err) {
-            return null;
-        }
-    }
-
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
 
     public readonly isAggregator: boolean = true;

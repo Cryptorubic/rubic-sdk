@@ -101,24 +101,13 @@ export class RouterCrossChainProvider extends CrossChainProvider {
 
             const routePath = await this.getRoutePath(from, to, routerQuoteConfig);
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await RouterCrossChainTrade.getGasData(
-                          from,
-                          to,
-                          feeInfo,
-                          options.providerAddress,
-                          routerQuoteConfig,
-                          options?.receiverAddress
-                      )
-                    : null;
             return {
                 trade: new RouterCrossChainTrade(
                     {
                         from,
                         to,
                         feeInfo,
-                        gasData,
+                        gasData: await this.getGasData(from),
                         priceImpact: from.calculatePriceImpactPercent(to),
                         routerQuoteConfig,
                         slippage: options.slippageTolerance

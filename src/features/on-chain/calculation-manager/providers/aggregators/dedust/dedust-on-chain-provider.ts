@@ -1,10 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     TonBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
@@ -13,7 +15,7 @@ import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggr
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getMultistepData } from '../common/utils/get-ton-multistep-data';
-import { DEDUST_GAS } from './constants/dedust-consts';
+import { DEDUST_GAS_NON_WEI } from './constants/dedust-consts';
 import { DedustOnChainTrade } from './dedust-on-chain-trade';
 import { DedustSwapService } from './services/dedust-swap-service';
 
@@ -67,9 +69,11 @@ export class DedustOnChainProvider extends AggregatorOnChainProvider {
     }
 
     protected getGasFeeInfo(): Promise<GasFeeInfo | null> {
+        const totalGas = new BigNumber(
+            Web3Pure.toWei(DEDUST_GAS_NON_WEI, nativeTokensList.TON.decimals)
+        );
         return Promise.resolve({
-            gasPrice: new BigNumber(1),
-            gasLimit: new BigNumber(DEDUST_GAS)
+            totalGas
         });
     }
 }

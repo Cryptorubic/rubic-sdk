@@ -11,7 +11,6 @@ import { RouterApiService } from 'src/features/common/providers/router/services/
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -28,31 +27,6 @@ import { RouterCrossChainSupportedBlockchains } from './constants/router-cross-c
 import { RouterCrossChainUtilService } from './utils/router-cross-chain-util-service.ts';
 
 export class RouterCrossChainTrade extends EvmCrossChainTrade {
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        feeInfo: FeeInfo,
-        providerAddress: string,
-        routerQuoteConfig: RouterQuoteResponseConfig,
-        receiverAddress?: string
-    ): Promise<GasData | null> {
-        const trade = new RouterCrossChainTrade(
-            {
-                from,
-                to,
-                feeInfo,
-                gasData: null,
-                priceImpact: 0,
-                routerQuoteConfig,
-                slippage: 0
-            },
-            providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            [],
-            false
-        );
-        return getCrossChainGasData(trade, receiverAddress);
-    }
-
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.ROUTER;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;

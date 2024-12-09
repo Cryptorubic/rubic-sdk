@@ -114,7 +114,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
             if (quoteResponse.resCode !== 100 || !transactionData) {
                 return {
                     trade: null,
-                    error: CrossChainProvider.parseError(new BridgersPairIsUnavailableError()),
+                    error: new BridgersPairIsUnavailableError(),
                     tradeType: this.type
                 };
             }
@@ -150,17 +150,6 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 toToken.decimals
             );
 
-            const gasData = await BridgersCrossChainProviderFactory.getGasData(
-                options.gasCalculation === 'enabled' && Boolean(options.receiverAddress),
-                {
-                    from,
-                    to,
-                    receiverAddress: options.receiverAddress!,
-                    providerAddress: options.providerAddress,
-                    feeInfo
-                }
-            );
-
             const trade = BridgersCrossChainProviderFactory.createTrade({
                 crossChainTrade: {
                     from: from as
@@ -169,7 +158,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                     to,
                     toTokenAmountMin,
                     feeInfo,
-                    gasData,
+                    gasData: await this.getGasData(from),
                     slippage: options.slippageTolerance
                 },
                 providerAddress: options.providerAddress,

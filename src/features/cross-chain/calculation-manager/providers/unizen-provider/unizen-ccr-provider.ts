@@ -140,7 +140,7 @@ export class UniZenCcrProvider extends CrossChainProvider {
                     to,
                     slippage: options.slippageTolerance,
                     priceImpact: from.calculatePriceImpactPercent(to),
-                    gasData: null,
+                    gasData: await this.getGasData(from),
                     contractAddress,
                     toTokenAmountMin
                 },

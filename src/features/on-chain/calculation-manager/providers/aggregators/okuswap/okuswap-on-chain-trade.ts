@@ -1,13 +1,11 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, UnnecessaryApproveError } from 'src/common/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 import { TransactionReceipt } from 'web3-eth';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
@@ -19,19 +17,6 @@ import { OkuSwapOnChainTradeStruct } from './models/okuswap-trade-types';
 import { OkuSwapApiService } from './services/okuswap-api-service';
 
 export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
-    /* @internal */
-    public static async getGasLimit(
-        tradeStruct: OkuSwapOnChainTradeStruct,
-        providerGateway: string
-    ): Promise<BigNumber | null> {
-        const okuswapTrade = new OkuSwapOnChainTrade(
-            tradeStruct,
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            providerGateway
-        );
-        return getOnChainGasData(okuswapTrade);
-    }
-
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.OKU_SWAP;
 
     private readonly okuSubProvider: string;

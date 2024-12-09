@@ -184,7 +184,6 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
             this.type
         );
 
-        const { gasLimit } = options;
         if (this.isProxyTrade) {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
                 await this.getContractParams({
@@ -199,7 +198,6 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
                 methodArguments,
                 value,
                 {
-                    gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
                     ...getGasOptions(options)
                 }
             );

@@ -27,46 +27,11 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { MESON_ABI } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/constants/meson-abi';
 import { mesonContractAddresses } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/constants/meson-contract-addresses';
 import { MesonSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/constants/meson-cross-chain-supported-chains';
-import {
-    MesonCrossChainEvmTradeConstructorParams,
-    MesonGetGasDataParams
-} from 'src/features/cross-chain/calculation-manager/providers/meson-provider/models/meson-trade-types';
+import { MesonCrossChainEvmTradeConstructorParams } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/models/meson-trade-types';
 import { MesonCcrApiService } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
 import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 export class MesonCrossChainEvmTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData({
-        feeInfo,
-        from,
-        providerAddress,
-        sourceAssetString,
-        targetAssetString,
-        toToken
-    }: MesonGetGasDataParams<EvmBlockchainName>): Promise<GasData | null> {
-        try {
-            const trade = new MesonCrossChainEvmTrade({
-                crossChainTrade: {
-                    from,
-                    to: toToken,
-                    gasData: null,
-                    priceImpact: 0,
-                    feeInfo,
-                    sourceAssetString,
-                    targetAssetString
-                },
-                providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                routePath: [],
-                useProxy: true
-            });
-
-            return getCrossChainGasData(trade);
-        } catch (_err) {
-            return null;
-        }
-    }
-
     /**ABSTRACT PROPS */
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.MESON;
 

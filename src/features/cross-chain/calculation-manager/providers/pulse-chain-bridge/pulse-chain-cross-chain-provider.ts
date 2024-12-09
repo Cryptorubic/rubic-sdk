@@ -151,27 +151,12 @@ export class PulseChainCrossChainProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(targetAmount, toToken.decimals)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await PulseChainCrossChainTrade.getGasData(
-                          fromToken,
-                          to,
-                          onChainTrade,
-                          feeInfo,
-                          targetAmountMin,
-                          options.providerAddress,
-                          options.receiverAddress || this.getWalletAddress(fromToken.blockchain),
-                          sourceBridgeManager.sourceBridgeAddress,
-                          tokenRegistered
-                      )
-                    : null;
-
             return {
                 trade: new PulseChainCrossChainTrade(
                     {
                         from: fromToken,
                         to,
-                        gasData,
+                        gasData: await this.getGasData(fromToken),
                         slippage: options.slippageTolerance,
                         feeInfo: feeInfo,
                         toTokenAmountMin: targetAmountMin,

@@ -70,24 +70,13 @@ export class AcrossCrossChainProvider extends CrossChainProvider {
 
             const routePath = await this.getRoutePath(from, to);
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await AcrossCrossChainTrade.getGasData(
-                          from,
-                          to,
-                          feeInfo,
-                          options.providerAddress,
-                          quoteRequestParams
-                      )
-                    : null;
-
             const trade = new AcrossCrossChainTrade(
                 {
                     from,
                     to,
                     toTokenAmountMin: to.tokenAmount,
                     priceImpact: from.calculatePriceImpactPercent(to),
-                    gasData,
+                    gasData: await this.getGasData(from),
                     feeInfo,
                     slippage: options.slippageTolerance,
                     acrossFeeQuoteRequestParams: quoteRequestParams
