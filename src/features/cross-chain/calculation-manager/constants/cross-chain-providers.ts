@@ -12,6 +12,7 @@ import { SymbiosisCrossChainProvider } from 'src/features/cross-chain/calculatio
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 
 import { AcrossCrossChainProvider } from '../providers/across-provider/across-cross-chain-provider';
+import { ChangellyCcrProvider } from '../providers/changelly-provider/changelly-ccr-provider';
 import { EddyBridgeProvider } from '../providers/eddy-bridge/eddy-bridge-provider';
 import { LayerZeroBridgeProvider } from '../providers/layerzero-bridge/layerzero-bridge-provider';
 import { MesonCrossChainProvider } from '../providers/meson-provider/meson-cross-chain-provider';
@@ -51,7 +52,8 @@ const nonProxyProviders = [
     ChangenowCrossChainProvider,
     ArbitrumRbcBridgeProvider,
     TaikoBridgeProvider,
-    LayerZeroBridgeProvider
+    LayerZeroBridgeProvider,
+    ChangellyCcrProvider
     // SimpleSwapCcrProvider
     // ScrollBridgeProvider
 ] as const;

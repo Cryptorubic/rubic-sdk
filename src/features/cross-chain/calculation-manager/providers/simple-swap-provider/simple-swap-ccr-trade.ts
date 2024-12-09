@@ -56,18 +56,14 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
         routePath: RubicStep[],
         useProxy: boolean
     ) {
-        super(
+        super({
+            ...crossChainTrade,
             providerAddress,
-            routePath,
             useProxy,
-            null,
-            crossChainTrade.from,
-            crossChainTrade.to,
-            crossChainTrade.to.tokenAmount,
-            crossChainTrade.gasData,
-            crossChainTrade.feeInfo,
-            crossChainTrade.priceImpact
-        );
+            routePath,
+            onChainTrade: null,
+            toTokenAmountMin: crossChainTrade.to.tokenAmount
+        });
 
         this.fromCurrency = crossChainTrade.fromCurrency;
         this.toCurrency = crossChainTrade.toCurrency;

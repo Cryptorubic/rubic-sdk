@@ -74,4 +74,9 @@ export interface CrossChainTradeData {
      * SimpleSwap trade id.
      */
     simpleSwapId?: string;
+
+    /**
+     * Changelly trade id.
+     */
+    changellySwapId?: string;
 }
