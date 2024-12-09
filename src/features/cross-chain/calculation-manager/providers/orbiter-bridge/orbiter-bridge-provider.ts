@@ -98,7 +98,7 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 crossChainTrade: {
                     feeInfo,
                     from,
-                    gasData: await this.getGasData(from, { gasLimit: quoteConfig.tradeFee }),
+                    gasData: await this.getGasData(from),
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     quoteConfig
