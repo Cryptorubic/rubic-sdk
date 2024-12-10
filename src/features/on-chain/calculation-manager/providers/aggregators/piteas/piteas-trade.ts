@@ -1,14 +1,9 @@
-import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { piteasRouterAddress } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/constants/piteas-router-address';
-import {
-    PiteasMethodParameters,
-    PiteasQuoteRequestParams
-} from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-quote';
+import { PiteasQuoteRequestParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-quote';
 import { PiteasTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-trade-struct';
 import { PiteasApiService } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-api-service';
 import {
@@ -17,42 +12,8 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
-import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 
 export class PiteasTrade extends AggregatorEvmOnChainTrade {
-    public static async getGasLimit(
-        tradeStruct: EvmOnChainTradeStruct,
-        providerGateway: string,
-        methodParameters: PiteasMethodParameters
-    ): Promise<BigNumber | null> {
-        const fromBlockchain = tradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
-        try {
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = await web3Public.getEstimatedGasByData(
-                walletAddress,
-                providerGateway,
-                {
-                    data: methodParameters.calldata,
-                    value: methodParameters.value
-                }
-            );
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-            return gasLimit;
-        } catch (err) {
-            console.debug(err);
-            return null;
-        }
-    }
-
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.PITEAS;
 
     public readonly providerGateway = piteasRouterAddress;

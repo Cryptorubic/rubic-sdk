@@ -88,17 +88,12 @@ export class ScrollBridgeProvider extends CrossChainProvider {
                 tokenAmount: fromToken.tokenAmount
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await ScrollBridgeTrade.getGasData(fromToken, to)
-                    : null;
-
             return {
                 trade: new ScrollBridgeTrade(
                     {
                         from: fromToken,
                         to,
-                        gasData
+                        gasData: await this.getGasData(fromToken)
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, to),

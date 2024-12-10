@@ -30,30 +30,11 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { l1Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l1-erc20-scroll-gateway-abi';
 import { l2Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l2-erc20-scroll-gateway-abi';
 import { scrollBridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/scroll-bridge-contract-address';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { TransactionReceipt } from 'web3-eth';
 
 import { ScrollBridgeSupportedBlockchain } from './models/scroll-bridge-supported-blockchain';
 
 export class ScrollBridgeTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>
-    ): Promise<GasData | null> {
-        const trade = new ScrollBridgeTrade(
-            {
-                from,
-                to,
-                gasData: null
-            },
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            [],
-            false
-        );
-        return getCrossChainGasData(trade);
-    }
-
     public readonly onChainSubtype = { from: undefined, to: undefined };
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE;

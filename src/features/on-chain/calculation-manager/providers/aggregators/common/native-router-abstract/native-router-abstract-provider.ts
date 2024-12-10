@@ -5,9 +5,6 @@ import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/mod
 
 import { RequiredOnChainCalculationOptions } from '../../../common/models/on-chain-calculation-options';
 import { AggregatorOnChainProvider } from '../../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { GasFeeInfo } from '../../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { getGasFeeInfo } from '../../../common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from '../../../common/utils/get-gas-price-info';
 import {
     AllSupportedNetworks,
     blockchainNameMapping
@@ -59,12 +56,12 @@ export abstract class NativeRouterAbstractProvider<
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(amountOut, toToken.decimals)
             });
-            const nativeRouterTradeStruct: NativeRouterTradeStruct = {
+            const tradeStruct: NativeRouterTradeStruct = {
                 from,
                 to,
                 slippageTolerance: options.slippageTolerance,
                 path,
-                gasFeeInfo: null,
+                gasFeeInfo: await this.getGasFeeInfo(),
                 useProxy: options.useProxy,
                 proxyFeeInfo,
                 fromWithoutFee,
@@ -72,15 +69,9 @@ export abstract class NativeRouterAbstractProvider<
                 usedForCrossChain: options.usedForCrossChain,
                 txRequest
             };
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(nativeRouterTradeStruct, providerGateway)
-                    : null;
+
             const tradeInstance: NativeRouterTradeInstance = {
-                tradeStruct: {
-                    ...nativeRouterTradeStruct,
-                    gasFeeInfo
-                },
+                tradeStruct,
                 providerAddress: options.providerAddress,
                 nativeRouterQuoteParams,
                 providerGateway
@@ -91,22 +82,6 @@ export abstract class NativeRouterAbstractProvider<
                 type: this.tradeType,
                 error: err
             };
-        }
-    }
-
-    protected async getGasFeeInfo(
-        tradeStruct: NativeRouterTradeStruct,
-        providerGateway: string
-    ): Promise<GasFeeInfo | null> {
-        try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await NativeRouterAbstractTrade.getGasLimit(
-                tradeStruct,
-                providerGateway
-            );
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
-        } catch {
-            return null;
         }
     }
 

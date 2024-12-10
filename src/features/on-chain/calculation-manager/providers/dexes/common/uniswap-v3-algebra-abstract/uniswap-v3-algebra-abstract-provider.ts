@@ -187,7 +187,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             return this.createTradeInstance(tradeStruct, route, fullOptions.providerAddress);
         }
 
-        const gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
+        const gasFeeInfo = getGasFeeInfo(gasPriceInfo, { gasLimit: estimatedGas });
+
         return this.createTradeInstance(
             {
                 ...tradeStruct,
@@ -265,30 +266,19 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 }
             );
 
-            const sortedRoutes = calculatedProfits.sort((a, b) => b.profit.comparedTo(a.profit))[0];
-            if (!sortedRoutes) {
-                throw new RubicSdkError('Sorted routes have to be defined');
+            const bestRoute = calculatedProfits.sort((a, b) => b.profit.comparedTo(a.profit))[0];
+            if (!bestRoute) {
+                throw new RubicSdkError('bestRoute have to be defined');
             }
 
-            return sortedRoutes;
+            return bestRoute;
         }
 
         const route = routes[0];
         if (!route) {
             throw new RubicSdkError('Route has to be defined');
         }
-        const estimatedGas = await this.OnChainTradeClass.estimateGasLimitForRoute(
-            from,
-            to,
-            exact,
-            weiAmount,
-            options,
-            route,
-            this.createTradeInstance.bind(this)
-        );
-        return {
-            route,
-            estimatedGas
-        };
+
+        return { route };
     }
 }

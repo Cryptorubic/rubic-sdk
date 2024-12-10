@@ -14,6 +14,7 @@ import {
     LayerZeroBridgeSupportedBlockchain,
     layerZeroBridgeSupportedBlockchains
 } from './models/layerzero-bridge-supported-blockchains';
+import { estimateSendFeeLZ } from './utils/estimate-fee';
 
 export class LayerZeroBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LAYERZERO;
@@ -26,40 +27,40 @@ export class LayerZeroBridgeProvider extends CrossChainProvider {
         );
     }
 
+    private assertSupportedToken(
+        token: PriceToken
+    ): asserts token is PriceTokenAmount<LayerZeroBridgeSupportedBlockchain> {
+        if (!this.isSupportedBlockchain(token.blockchain)) {
+            throw new NotSupportedTokensError();
+        }
+    }
+
     public async calculate(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const fromBlockchain = fromToken.blockchain as LayerZeroBridgeSupportedBlockchain;
-        const toBlockchain = toToken.blockchain as LayerZeroBridgeSupportedBlockchain;
-
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return {
-                trade: null,
-                error: new NotSupportedTokensError(),
-                tradeType: this.type
-            };
-        }
-
         try {
+            this.assertSupportedToken(fromToken);
+            this.assertSupportedToken(toToken);
+
             const useProxy = options?.useProxy?.[this.type] ?? true;
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: fromToken.tokenAmount
             });
-
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await LayerZeroBridgeTrade.getGasData(fromToken, to, options)
-                    : null;
+            const gas = await estimateSendFeeLZ(fromToken, to, options.receiverAddress).catch(
+                () => null
+            );
 
             return {
                 trade: new LayerZeroBridgeTrade(
                     {
                         from: fromToken,
                         to,
-                        gasData
+                        gasData: await this.getGasData(fromToken, {
+                            totalGas: gas ?? '0'
+                        })
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, to),

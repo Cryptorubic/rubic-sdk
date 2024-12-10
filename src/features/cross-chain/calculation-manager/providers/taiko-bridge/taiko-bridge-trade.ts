@@ -16,31 +16,11 @@ import {
     taikoERC20BridgeABI,
     taikoNativeBridgeABI
 } from 'src/features/cross-chain/calculation-manager/providers/taiko-bridge/constants/taiko-gateway-abi';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 import { taikoBridgeContractAddress } from './constants/taiko-bridge-contract-address';
 import { TaikoBridgeSupportedBlockchain } from './models/taiko-bridge-supported-blockchains';
 
 export class TaikoBridgeTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>
-    ): Promise<GasData | null> {
-        const trade = new TaikoBridgeTrade(
-            {
-                from,
-                to,
-                gasData: null
-            },
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            [],
-            false
-        );
-
-        return getCrossChainGasData(trade);
-    }
-
     public readonly onChainSubtype = { from: undefined, to: undefined };
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE;

@@ -2,7 +2,6 @@ import { OneInchProvider } from 'src/features/on-chain/calculation-manager/provi
 import { DlnOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/dln-on-chain-provider';
 import { PiteasProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-provider';
 import { XyDexProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-provider';
-import { ZrxProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/zrx-provider';
 
 import { CoffeeSwapProvider } from '../providers/aggregators/coffee-swap/coffee-swap-on-chain-provider';
 import { DedustOnChainProvider } from '../providers/aggregators/dedust/dedust-on-chain-provider';
@@ -27,7 +26,7 @@ export const AGGREGATORS_ON_CHAIN = {
     OKU_SWAP: OkuSwapOnChainProvider,
     PITEAS: PiteasProvider,
     XY: XyDexProvider,
-    ZRX: ZrxProvider,
+    // ZRX: ZrxProvider, not free api
     ONE_INCH: OneInchProvider,
     ZETA_SWAP: ZetaSwapProvider,
     NATIVE_ROUTER: NativeRouterProvider,

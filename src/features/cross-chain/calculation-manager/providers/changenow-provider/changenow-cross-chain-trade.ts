@@ -62,7 +62,7 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
         }
 
         if (this.gasData.gasPrice) {
-            return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+            return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit ?? 0);
         }
 
         return null;

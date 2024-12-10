@@ -19,10 +19,7 @@ import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-man
 import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
-import {
-    BRIDGE_TYPE,
-    BridgeType
-} from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
@@ -30,45 +27,12 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
 import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 /**
  * Calculated XY cross-chain trade.
  */
 export class XyCrossChainTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: XyBuildTxRequest,
-        feeInfo: FeeInfo,
-        providerAddress: string
-    ): Promise<GasData | null> {
-        try {
-            const trade = new XyCrossChainTrade(
-                {
-                    from,
-                    to: toToken,
-                    transactionRequest,
-                    gasData: null,
-                    priceImpact: 0,
-                    slippage: 0,
-                    feeInfo,
-                    onChainTrade: null,
-                    bridgeType: BRIDGE_TYPE.XY
-                },
-                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                [],
-                false
-            );
-
-            return getCrossChainGasData(trade);
-        } catch (_err) {
-            return null;
-        }
-    }
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
 
     public readonly isAggregator = false;

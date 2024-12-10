@@ -11,7 +11,6 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
-import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -37,41 +36,6 @@ import {
 export class StargateV2CrossChainTrade extends EvmCrossChainTrade {
     protected get methodName(): string {
         return 'startBridgeTokensViaGenericCrossChain';
-    }
-
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
-        feeInfo: FeeInfo,
-        slippageTolerance: number,
-        providerAddress: string,
-        routePath: RubicStep[],
-        sendParams: StargateV2QuoteParamsStruct,
-        messagingFee: StargateV2MessagingFee,
-        receiverAddress?: string
-    ): Promise<GasData | null> {
-        try {
-            const trade = new StargateV2CrossChainTrade(
-                {
-                    from,
-                    to: toToken,
-                    slippageTolerance,
-                    gasData: null,
-                    feeInfo,
-                    sendParams,
-                    messagingFee,
-                    priceImpact: 0,
-                    toTokenAmountMin: new BigNumber(0)
-                },
-                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                routePath,
-                false
-            );
-
-            return getCrossChainGasData(trade, receiverAddress);
-        } catch (_err) {
-            return null;
-        }
     }
 
     protected get web3Private(): EvmWeb3Private {

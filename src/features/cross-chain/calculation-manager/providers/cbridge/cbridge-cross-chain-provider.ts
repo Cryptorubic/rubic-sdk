@@ -62,16 +62,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult<EvmEncodeConfig>> {
         const fromBlockchain = fromToken.blockchain as CbridgeCrossChainSupportedBlockchain;
-        const toBlockchain = toToken.blockchain as CbridgeCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return {
-                trade: null,
-                error: new NotSupportedTokensError(),
-                tradeType: this.type
-            };
-        }
 
         try {
             const config = await this.fetchContractAddressAndCheckTokens(fromToken, toToken);
@@ -164,20 +155,6 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(toAmount, toToken.decimals)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await CbridgeCrossChainTrade.getGasData(
-                          fromToken,
-                          to,
-                          onChainTrade,
-                          feeInfo,
-                          maxSlippage,
-                          config.address,
-                          options.providerAddress,
-                          options.receiverAddress || this.getWalletAddress(fromToken.blockchain)
-                      )
-                    : null;
-
             const amountsErrors = await this.getMinMaxAmountsErrors(transitToken, feeInfo);
 
             return {
@@ -185,7 +162,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                     {
                         from: fromToken,
                         to,
-                        gasData,
+                        gasData: await this.getGasData(fromToken),
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo: feeInfo,

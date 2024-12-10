@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { MaxDecimalsError } from 'src/common/errors/swap/max-decimals.error';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -100,19 +101,16 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 tokenAmount: new BigNumber(retroBridgeQuoteConfig.amount_out)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await RetroBridgeFactory.getGasData(
-                          from,
-                          to,
-                          feeInfo,
-                          options.slippageTolerance,
-                          options.providerAddress,
-                          quoteSendParams,
-                          retroBridgeQuoteConfig.hot_wallet_address
-                      )
-                    : null;
             const routePath = await this.getRoutePath(from, to);
+            const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
+
+            const totalGas = Web3Pure.toWei(
+                new BigNumber(retroBridgeQuoteConfig.blockchain_fee_in_usd).div(nativeToken.price),
+                nativeToken.decimals
+            );
+
+            const gasData = await this.getGasData(from, { totalGas });
+
             const trade = RetroBridgeFactory.createTrade(
                 fromBlockchain,
                 {

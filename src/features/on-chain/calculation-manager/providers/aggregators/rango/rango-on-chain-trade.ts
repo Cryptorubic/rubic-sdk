@@ -1,12 +1,9 @@
-import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -16,20 +13,6 @@ import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
 export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
-    /* @internal */
-    public static async getGasLimit(
-        tradeStruct: RangoOnChainTradeStruct,
-        providerGateway: string
-    ): Promise<BigNumber | null> {
-        const rangoTrade = new RangoOnChainTrade(
-            tradeStruct,
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            providerGateway
-        );
-
-        return getOnChainGasData(rangoTrade);
-    }
-
     /**
      * approveTo address - used in this.web3Public.getAllowance() method
      */
