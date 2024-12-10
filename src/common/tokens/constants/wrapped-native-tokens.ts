@@ -478,5 +478,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Gravity',
         symbol: 'WG',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.UNICHAIN_SEPOLIA_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.UNICHAIN_SEPOLIA_TESTNET,
+        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
     })
 };
