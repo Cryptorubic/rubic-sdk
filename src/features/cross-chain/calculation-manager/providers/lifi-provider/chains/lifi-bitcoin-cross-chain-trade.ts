@@ -1,8 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
+import { InsufficientFundsGasPriceValueError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BitcoinBlockchainName, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { BitcoinCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/bitcoin-cross-chain-trade/bitcoin-cross-chain-trade';
 
@@ -15,7 +16,7 @@ import { RubicStep } from '../../common/models/rubicStep';
 import { TradeInfo } from '../../common/models/trade-info';
 import { LifiCrossChainSupportedBlockchain } from '../constants/lifi-cross-chain-supported-blockchain';
 import { LifiCrossChainTradeConstructor } from '../models/lifi-cross-chain-trade-constructor';
-import { Estimate } from '../models/lifi-fee-cost';
+import { Estimate, GasCost } from '../models/lifi-fee-cost';
 import { Route } from '../models/lifi-route';
 import { LifiTransactionRequest } from '../models/lifi-transaction-request';
 import { LifiApiService } from '../services/lifi-api-service';
@@ -113,7 +114,6 @@ export class LifiBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
 
         try {
             const rubicFee = getSolanaFee(this.from);
-
             const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
                 await LifiApiService.getQuote(
                     step.action.fromChainId,
@@ -132,6 +132,19 @@ export class LifiBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
             };
         } catch (err) {
             if ('statusCode' in err && 'message' in err) {
+                if (
+                    err.message.includes(
+                        'None of the available routes could successfully generate a tx'
+                    )
+                ) {
+                    const enoughBalance = await this.checkEnoughBalance(
+                        step.estimate.gasCosts?.[0]
+                    );
+
+                    if (!enoughBalance) {
+                        throw new InsufficientFundsGasPriceValueError();
+                    }
+                }
                 throw new RubicSdkError(err.message);
             }
             throw err;
@@ -150,5 +163,20 @@ export class LifiBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
+    }
+
+    private async checkEnoughBalance(gasCosts?: GasCost): Promise<boolean> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
+
+        const userWeiBalance = await web3Public.getBalance(this.walletAddress);
+
+        if (gasCosts) {
+            const fromAmounWithGasCosts = this.from.weiAmount.plus(gasCosts.amount);
+            if (userWeiBalance.lte(fromAmounWithGasCosts)) {
+                return false;
+            }
+        }
+
+        return userWeiBalance.lte(this.from.weiAmount);
     }
 }
