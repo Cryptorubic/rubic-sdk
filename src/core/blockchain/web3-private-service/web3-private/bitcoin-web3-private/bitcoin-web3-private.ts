@@ -38,9 +38,10 @@ export class BitcoinWeb3Private extends Web3Private {
                 (error, result) => {
                     if (error) {
                         reject(error);
+                    } else {
+                        options?.onTransactionHash?.('hz');
+                        resolve([result]);
                     }
-                    options?.onTransactionHash?.('hz');
-                    resolve([result]);
                 }
             );
         });
