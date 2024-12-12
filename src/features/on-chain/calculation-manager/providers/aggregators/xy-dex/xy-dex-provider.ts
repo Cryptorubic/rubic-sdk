@@ -12,10 +12,10 @@ import {
 } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { XyQuoteRequest } from 'src/features/common/providers/xy/models/xy-quote-request';
 import { XyQuoteResponse } from 'src/features/common/providers/xy/models/xy-quote-response';
+import { XyRoute } from 'src/features/common/providers/xy/models/xy-quote-success-response';
 import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { xySupportedBlockchains } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { LifiEvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/models/xy-dex-trade-struct';
 import { XyDexTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-trade';
 import {
@@ -24,13 +24,12 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
-import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
+import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 
 export class XyDexProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions = evmProviderDefaultOptions;
@@ -96,14 +95,14 @@ export class XyDexProvider extends AggregatorOnChainProvider {
     }
 
     private async getTradeInfo(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         toToken: Token,
         options: RequiredOnChainCalculationOptions
     ): Promise<{
         toTokenAmountInWei: BigNumber;
-        estimatedGas: string;
         contractAddress: string;
         provider: string;
+        gasInfo: GasFeeInfo | null;
     }> {
         const chainId = blockchainId[from.blockchain];
         const srcQuoteTokenAddress = from.isNative ? XY_NATIVE_ADDRESS : from.address;
@@ -139,20 +138,22 @@ export class XyDexProvider extends AggregatorOnChainProvider {
         }
 
         return {
+            gasInfo: await this.getGasFeeInfo(from, bestRoute),
             toTokenAmountInWei: new BigNumber(bestRoute.dstQuoteTokenAmount),
-            estimatedGas: bestRoute.estimatedGas,
             contractAddress: bestRoute.contractAddress,
             provider: bestRoute.srcSwapDescription.provider
         };
     }
 
-    protected async getGasFeeInfo(
-        lifiTradeStruct: LifiEvmOnChainTradeStruct
+    protected override async getGasFeeInfo(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        route: XyRoute
     ): Promise<GasFeeInfo | null> {
         try {
-            const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-            const gasLimit = await LifiEvmOnChainTrade.getGasLimit(lifiTradeStruct);
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+            const gasLimit = new BigNumber(route.estimatedGas);
+
+            return getGasFeeInfo(gasPriceInfo, { gasLimit });
         } catch {
             return null;
         }

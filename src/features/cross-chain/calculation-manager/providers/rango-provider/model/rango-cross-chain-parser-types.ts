@@ -7,7 +7,6 @@ import { BridgeType } from 'src/features/cross-chain/calculation-manager/provide
 import { GasData } from '../../common/evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../../common/models/fee-info';
 import { RubicStep } from '../../common/models/rubicStep';
-import { RangoCrossChainOptions } from './rango-cross-chain-api-types';
 
 export interface RangoCrossChainTradeConstructorParams {
     crossChainTrade: {
@@ -25,20 +24,3 @@ export interface RangoCrossChainTradeConstructorParams {
     routePath: RubicStep[];
     useProxy: boolean;
 }
-
-export interface GetCrossChainTradeConstructorParamsType {
-    fromToken: PriceTokenAmount<EvmBlockchainName>;
-    toToken: PriceTokenAmount<EvmBlockchainName>;
-    options: RangoCrossChainOptions;
-    routePath: RubicStep[];
-    feeInfo: FeeInfo;
-    toTokenAmountMin: BigNumber;
-    swapQueryParams: RangoSwapQueryParams;
-    bridgeSubtype: BridgeType;
-    receiverAddress: string;
-}
-
-export type RangoGetGasDataParams = Omit<
-    GetCrossChainTradeConstructorParamsType,
-    'toTokenAmountMin' | 'options'
->;

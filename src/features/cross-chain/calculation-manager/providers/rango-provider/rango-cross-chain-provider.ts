@@ -31,7 +31,6 @@ import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/
 import { RangoCrossChainOptions } from './model/rango-cross-chain-api-types';
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
 import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
-import { RangoCrossChainParser } from './services/rango-cross-chain-params-parser';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
     public type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -103,23 +102,28 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             const bridgeSubtype = (
                 routePath.find(el => el.type === 'cross-chain') as CrossChainStep
             )?.provider;
-            const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
-            const tradeParams = await RangoCrossChainParser.getTradeConstructorParams({
-                fromToken: from,
-                toToken: to,
-                options,
-                routePath,
-                feeInfo,
-                toTokenAmountMin,
-                swapQueryParams,
-                bridgeSubtype,
-                receiverAddress: options?.receiverAddress || fakeAddress
-            });
 
-            const trade = new RangoCrossChainTrade(tradeParams);
-            const tradeType = this.type;
+            const priceImpact = from.calculatePriceImpactPercent(to);
 
-            return { trade, tradeType };
+            return {
+                trade: new RangoCrossChainTrade({
+                    crossChainTrade: {
+                        from,
+                        to,
+                        bridgeSubtype,
+                        priceImpact,
+                        feeInfo,
+                        toTokenAmountMin,
+                        slippage: options.slippageTolerance,
+                        swapQueryParams,
+                        gasData: await this.getGasData(from)
+                    },
+                    providerAddress: options.providerAddress,
+                    routePath,
+                    useProxy
+                }),
+                tradeType: this.type
+            };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 

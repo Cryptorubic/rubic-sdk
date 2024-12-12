@@ -7,7 +7,6 @@ import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-a
 import { ContractParams } from 'src/features/common/models/contract-params';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -21,36 +20,10 @@ import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { OwlToSupportedBlockchain } from './constants/owl-to-supported-chains';
 import { OwlTopSwapRequest } from './models/owl-to-api-types';
-import { OwlToGetGasDataParams, OwlToTradeParams } from './models/owl-to-trade-types';
+import { OwlToTradeParams } from './models/owl-to-trade-types';
 import { OwlToApiService } from './services/owl-to-api-service';
 
 export class OwlToBridgeTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData({
-        feeInfo,
-        fromToken,
-        toToken,
-        providerAddress,
-        swapParams,
-        approveAddress
-    }: OwlToGetGasDataParams): Promise<GasData | null> {
-        const trade = new OwlToBridgeTrade({
-            crossChainTrade: {
-                feeInfo,
-                from: fromToken,
-                to: toToken,
-                priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                gasData: null,
-                swapParams,
-                approveAddress
-            },
-            providerAddress,
-            routePath: [],
-            useProxy: false
-        });
-        return getCrossChainGasData(trade);
-    }
-
     /**ABSTRACT PROPS */
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.OWL_TO_BRIDGE;
 

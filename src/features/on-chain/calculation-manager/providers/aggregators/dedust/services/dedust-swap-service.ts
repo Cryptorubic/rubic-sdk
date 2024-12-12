@@ -23,7 +23,7 @@ import { Injector } from 'src/core/injector/injector';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type';
-import { DEDUST_GAS, RUBIC_REF_NAME_FOR_DEDUST } from '../constants/dedust-consts';
+import { DEDUST_GAS_NON_WEI, RUBIC_REF_NAME_FOR_DEDUST } from '../constants/dedust-consts';
 import { DedustTxStep } from '../models/dedust-api-types';
 import { DedustApiService } from './dedust-api-service';
 import { DedustTxSender } from './dedust-sender-class';
@@ -215,7 +215,7 @@ export class DedustSwapService {
             poolAddress,
             amount: fromAmount,
             limit: minAmountOut,
-            gasAmount: toNano(DEDUST_GAS),
+            gasAmount: toNano(DEDUST_GAS_NON_WEI),
             queryId: RUBIC_REF_NAME_FOR_DEDUST
         });
     }
@@ -237,7 +237,7 @@ export class DedustSwapService {
             JettonWallet.createFromAddress(jettonWalletAddress)
         );
 
-        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS), {
+        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS_NON_WEI), {
             amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
@@ -273,7 +273,7 @@ export class DedustSwapService {
             slippage
         );
 
-        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS), {
+        await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS_NON_WEI), {
             amount: BigInt(from.stringWeiAmount),
             destination: jettonVault.address,
             responseAddress: sender.address,
