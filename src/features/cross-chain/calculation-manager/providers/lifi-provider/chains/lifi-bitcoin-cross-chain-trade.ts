@@ -131,20 +131,18 @@ export class LifiBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
                 amount: swapResponse.estimate.toAmountMin
             };
         } catch (err) {
-            if ('statusCode' in err && 'message' in err) {
-                if (
-                    err.message.includes(
-                        'None of the available routes could successfully generate a tx'
-                    )
-                ) {
-                    const enoughBalance = await this.checkEnoughBalance(
-                        step.estimate.gasCosts?.[0]
-                    );
+            if (
+                err.error?.message?.includes(
+                    'None of the available routes could successfully generate a tx'
+                )
+            ) {
+                const enoughBalance = await this.checkEnoughBalance(step.estimate.gasCosts?.[0]);
 
-                    if (!enoughBalance) {
-                        throw new InsufficientFundsGasPriceValueError();
-                    }
+                if (!enoughBalance) {
+                    throw new InsufficientFundsGasPriceValueError();
                 }
+            }
+            if ('statusCode' in err && 'message' in err) {
                 throw new RubicSdkError(err.message);
             }
             throw err;
