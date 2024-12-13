@@ -1,5 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { FailedToCheckForTransactionReceiptError, TooLowAmountError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    TooLowAmountError,
+    UserRejectError
+} from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BitcoinBlockchainName, BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
@@ -72,12 +76,16 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
 
             return transactionHash!;
         } catch (err) {
+            if (err.message?.includes('User rejected the request') || err.code === 4001) {
+                throw new UserRejectError();
+            }
             if (err?.error?.errorId === 'ERROR_LOW_GIVE_AMOUNT') {
                 throw new TooLowAmountError();
             }
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }
+
             throw parseError(err);
         }
     }
