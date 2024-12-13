@@ -35,13 +35,12 @@ export class BitcoinWeb3Private extends Web3Private {
                         }
                     ]
                 },
-                (error, result) => {
+                (error, txHash) => {
                     if (error) {
                         reject(error);
                     } else {
-                        const hash = result[0]!;
-                        options?.onTransactionHash?.(hash);
-                        resolve([result]);
+                        options?.onTransactionHash?.(txHash);
+                        resolve([txHash]);
                     }
                 }
             );
