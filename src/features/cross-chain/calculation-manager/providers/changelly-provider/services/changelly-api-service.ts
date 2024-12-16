@@ -89,10 +89,17 @@ export class ChangellyApiService {
         if (
             txData.status === 'overdue' ||
             txData.status === 'expired' ||
-            txData.status === 'hold'
+            txData.status === 'failed'
         ) {
             return {
                 status: CROSS_CHAIN_DEPOSIT_STATUS.FAILED,
+                dstHash: null
+            };
+        }
+
+        if (txData.status === 'new' || txData.status === 'waiting') {
+            return {
+                status: CROSS_CHAIN_DEPOSIT_STATUS.WAITING,
                 dstHash: null
             };
         }
