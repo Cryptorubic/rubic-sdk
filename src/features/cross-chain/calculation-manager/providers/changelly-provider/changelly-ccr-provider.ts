@@ -2,11 +2,7 @@ import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -19,7 +15,9 @@ import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { ChangellyCcrTrade } from './changelly-ccr-trade';
+import { changellySpecificChainTickers } from './constants/changelly-specific-chain-ticker';
 import { changellySupportedChains } from './constants/changelly-supported-chains';
+import { changellyNativeTokensData } from './constants/native-token-data';
 import { ChangellyToken } from './models/changelly-token';
 import { ChangellyApiService } from './services/changelly-api-service';
 
@@ -87,15 +85,13 @@ export class ChangellyCcrProvider extends CrossChainProvider {
 
             const quote = response.result[0]!;
 
-            const toAmount = new BigNumber(quote.amountTo).minus(quote.networkFee);
-
-            const toAmountMin = quote.minTo;
+            const toAmountMin = new BigNumber(quote.amountTo).minus(quote.networkFee);
 
             // const rateId = quote.id;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: new BigNumber(toAmount)
+                tokenAmount: new BigNumber(quote.amountTo)
             });
 
             const routePath = await this.getRoutePath(from, to);
@@ -109,7 +105,7 @@ export class ChangellyCcrProvider extends CrossChainProvider {
                 priceImpact: from.calculatePriceImpactPercent(to),
                 providerAddress: options.providerAddress,
                 useProxy,
-                toTokenAmountMin: new BigNumber(toAmountMin),
+                toTokenAmountMin: toAmountMin,
                 routePath,
                 onChainTrade: null
                 //   rateId
@@ -163,7 +159,8 @@ export class ChangellyCcrProvider extends CrossChainProvider {
                 fetchedToken.blockchain.toLowerCase() === tokenBlockchain &&
                 ((fetchedToken.contractAddress &&
                     compareAddresses(fetchedToken.contractAddress, token.address)) ||
-                    (!fetchedToken.contractAddress && token.isNative))
+                    (!fetchedToken.contractAddress && token.isNative) ||
+                    this.isNativeTokenWithAddress(fetchedToken))
         );
 
         if (!changellytoken) {
@@ -174,14 +171,18 @@ export class ChangellyCcrProvider extends CrossChainProvider {
     }
 
     private getBlockchain(blockchain: BlockchainName): string {
-        if (blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
-            return 'ethereum';
-        }
-        if (blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) {
-            return 'binance_smart_chain';
-        }
+        const specificChainTicker = changellySpecificChainTickers[blockchain];
 
-        return blockchain.toLowerCase();
+        return specificChainTicker ? specificChainTicker : blockchain.toLowerCase();
+    }
+
+    private isNativeTokenWithAddress(currency: ChangellyToken): boolean {
+        return changellyNativeTokensData.some(
+            nativeTokenData =>
+                nativeTokenData.ticker === currency.ticker &&
+                nativeTokenData.blockchain === currency.blockchain.toLowerCase() &&
+                nativeTokenData.address === currency.contractAddress
+        );
     }
 
     protected async getRoutePath(
