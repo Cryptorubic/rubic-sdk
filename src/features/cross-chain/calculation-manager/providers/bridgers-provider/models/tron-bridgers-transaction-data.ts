@@ -4,7 +4,7 @@ export interface TronBridgersTransactionData {
     functionName: string;
     options: {
         feeLimit: number;
-        callValue: string;
+        callValue: number;
     };
     parameter: TronParameters;
     to: string;

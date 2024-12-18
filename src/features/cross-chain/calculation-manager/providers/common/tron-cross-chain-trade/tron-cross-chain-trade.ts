@@ -93,7 +93,10 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
                 {
                     onTransactionHash,
                     ...(transactionConfig?.feeLimit && { feeLimit: transactionConfig.feeLimit }),
-                    ...(transactionConfig.callValue && { callValue: transactionConfig.callValue })
+                    ...(transactionConfig.callValue && { callValue: transactionConfig.callValue }),
+                    ...(transactionConfig.rawParameter && {
+                        rawParameter: transactionConfig.rawParameter
+                    })
                 }
             );
 

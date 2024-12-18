@@ -120,7 +120,7 @@ export class OrbiterTronBridgeTrade extends TronCrossChainTrade {
             ORBITER_ROUTER_V3_ABI,
             methodName,
             methodArgs,
-            value
+            Number(value)
         );
 
         return {

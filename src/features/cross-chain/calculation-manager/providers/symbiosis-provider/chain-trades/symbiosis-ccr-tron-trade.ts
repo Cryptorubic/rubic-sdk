@@ -58,7 +58,7 @@ export class SymbiosisTronCcrTrade extends TronCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        throw new Error('Not implemented');
+        return this.contractAddresses.providerGateway;
     }
 
     protected get methodName(): string {
