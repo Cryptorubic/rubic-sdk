@@ -30,9 +30,12 @@ export class DlnApiService {
         requestParams: DlnOnChainEstimateRequest
     ): Promise<DlnOnChainEstimateResponse> {
         return Injector.httpClient.get<DlnOnChainEstimateResponse>(
-            `${DlnApiService.apiEndpoint}/chain/estimation`,
+            'https://x-api.rubic.exchange/dln/v1.0/chain/estimation',
             {
-                params: requestParams as unknown as {}
+                params: requestParams as unknown as {},
+                headers: {
+                    apiKey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4'
+                }
             }
         );
     }
@@ -41,9 +44,12 @@ export class DlnApiService {
         requestParams: DlnOnChainSwapRequest
     ): Promise<DlnOnChainSwapResponse<T>> {
         return Injector.httpClient.get<DlnOnChainSwapResponse<T>>(
-            `${DlnApiService.apiEndpoint}/chain/transaction`,
+            'https://x-api.rubic.exchange/dln/v1.0/chain/transaction',
             {
-                params: requestParams as unknown as {}
+                params: requestParams as unknown as {},
+                headers: {
+                    apiKey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4'
+                }
             }
         );
     }
