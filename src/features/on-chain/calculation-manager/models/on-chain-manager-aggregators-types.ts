@@ -25,7 +25,7 @@ export const AGGREGATORS_ON_CHAIN = {
     DLN: DlnOnChainProvider,
     OKU_SWAP: OkuSwapOnChainProvider,
     PITEAS: PiteasProvider,
-    XY: XyDexProvider,
+    // XY: XyDexProvider,
     // ZRX: ZrxProvider, not free api
     ONE_INCH: OneInchProvider,
     ZETA_SWAP: ZetaSwapProvider,
