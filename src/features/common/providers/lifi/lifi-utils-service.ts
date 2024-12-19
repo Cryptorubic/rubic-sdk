@@ -3,7 +3,6 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import {
-    FAKE_BITCOIN_ADDRESS,
     FAKE_SOLANA_WALLET_ADDRESS,
     FAKE_WALLET_ADDRESS
 } from 'src/features/common/constants/fake-wallet-address';
@@ -33,9 +32,9 @@ export class LifiUtilsService {
         if (toBlockchain === BLOCKCHAIN_NAME.SOLANA) {
             return FAKE_SOLANA_WALLET_ADDRESS;
         }
-        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            return FAKE_BITCOIN_ADDRESS;
-        }
+        // if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
+        //     return FAKE_BITCOIN_ADDRESS;
+        // }
 
         return fromAddress;
     }

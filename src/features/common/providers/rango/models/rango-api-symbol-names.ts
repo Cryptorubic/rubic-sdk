@@ -18,8 +18,8 @@ export const rangoApiSymbols: Record<RangoSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.METIS]: 'METIS',
     // [BLOCKCHAIN_NAME.FANTOM]: 'FTM',
     [BLOCKCHAIN_NAME.BLAST]: 'ETH',
-    [BLOCKCHAIN_NAME.SCROLL]: 'ETH',
-    [BLOCKCHAIN_NAME.BITCOIN]: 'BTC'
+    [BLOCKCHAIN_NAME.SCROLL]: 'ETH'
+    // [BLOCKCHAIN_NAME.BITCOIN]: 'BTC'
 };
 
 export type RangoSymbols = keyof typeof rangoApiSymbols;

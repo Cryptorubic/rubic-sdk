@@ -69,10 +69,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-        if (
-            !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
-            from.blockchain === BLOCKCHAIN_NAME.BITCOIN
-        ) {
+        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
                 trade: null,
                 error: new NotSupportedTokensError(),
