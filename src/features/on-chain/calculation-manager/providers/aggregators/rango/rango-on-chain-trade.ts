@@ -2,6 +2,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
+import { RangoTransaction } from 'src/features/common/providers/rango/models/rango-api-swap-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
@@ -66,15 +67,17 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
             true
         );
 
+        const { txData, txTo, value, gasLimit, gasPrice } = transaction as RangoTransaction;
+
         const { outputAmount: toAmount } = route as RangoBestRouteSimulationResult;
 
         return {
             tx: {
-                data: transaction!.txData!,
-                to: transaction!.txTo!,
-                value: transaction!.value || '0',
-                gas: transaction!.gasLimit ?? undefined,
-                gasPrice: transaction!.gasPrice ?? undefined
+                data: txData!,
+                to: txTo!,
+                value: value || '0',
+                gas: gasLimit ?? undefined,
+                gasPrice: gasPrice ?? undefined
             },
             toAmount
         };

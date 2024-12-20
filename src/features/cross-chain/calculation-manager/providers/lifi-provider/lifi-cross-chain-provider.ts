@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { BitcoinEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-encoded-config';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -59,17 +60,10 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
         toToken: PriceToken<LifiCrossChainSupportedBlockchain>,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult<EvmEncodeConfig | { data: string }>> {
+    ): Promise<CalculationResult<EvmEncodeConfig | { data: string } | BitcoinEncodedConfig>> {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return {
-                trade: null,
-                error: new NotSupportedTokensError(),
-                tradeType: this.type
-            };
-        }
 
         const { disabledBridges, disabledDexes } = this.mapDisabledProviders(
             options.lifiDisabledBridgeTypes || []
