@@ -1,10 +1,8 @@
-import BigNumber from 'bignumber.js';
 import { InsufficientFundsOneinchError, LowSlippageError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
     createTokenNativeAddressProxy,
@@ -23,35 +21,6 @@ import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-man
 import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 export class OneInchTrade extends AggregatorEvmOnChainTrade {
-    /** @internal */
-    public static async getGasLimit(tradeStruct: OneinchTradeStruct): Promise<BigNumber | null> {
-        const fromBlockchain = tradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
-        try {
-            const transactionConfig = await new OneInchTrade(
-                tradeStruct,
-                EvmWeb3Pure.EMPTY_ADDRESS
-            ).encode({ fromAddress: walletAddress });
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = (
-                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-            )[0];
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-            return gasLimit;
-        } catch (_err) {
-            return null;
-        }
-    }
-
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount,

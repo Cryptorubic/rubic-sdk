@@ -64,7 +64,6 @@ export class OpenOceanApiService {
                     gasPrice: gasPriceNonWei,
                     slippage: slippageTolerance * 100,
                     account: walletAddress,
-                    // @TODO check if need to pass referrer in quote
                     referrer: '0x429A3A1a2623DFb520f1D93F64F38c0738418F1f'
                 }
             }

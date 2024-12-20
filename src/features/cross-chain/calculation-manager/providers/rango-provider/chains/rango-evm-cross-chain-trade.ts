@@ -12,7 +12,6 @@ import { RangoTransaction } from 'src/features/common/providers/rango/models/ran
 import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
 import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 import {
     CROSS_CHAIN_TRADE_TYPE,

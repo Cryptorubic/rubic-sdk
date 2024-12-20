@@ -14,10 +14,7 @@ import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
-import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 import { RANGO_ON_CHAIN_DISABLED_PROVIDERS } from './models/rango-on-chain-disabled-providers';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainTrade } from './rango-on-chain-trade';
@@ -69,46 +66,19 @@ export class RangoOnChainProvider extends AggregatorOnChainProvider {
                 fromWithoutFee,
                 proxyFeeInfo,
                 toTokenWeiAmountMin,
-                gasFeeInfo: {
-                    gasLimit: undefined
-                },
+                gasFeeInfo: await this.getGasFeeInfo(),
                 slippageTolerance: options.slippageTolerance,
                 useProxy: options.useProxy,
                 withDeflation: options.withDeflation,
                 path
             };
 
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct, providerGateway!)
-                    : null;
-
-            return new RangoOnChainTrade(
-                {
-                    ...tradeStruct,
-                    gasFeeInfo
-                },
-                options.providerAddress,
-                providerGateway!
-            );
+            return new RangoOnChainTrade(tradeStruct, options.providerAddress, providerGateway!);
         } catch (err) {
             return {
                 type: ON_CHAIN_TRADE_TYPE.RANGO,
                 error: err
             };
-        }
-    }
-
-    protected async getGasFeeInfo(
-        tradeStruct: RangoOnChainTradeStruct,
-        providerGateway: string
-    ): Promise<GasFeeInfo | null> {
-        try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await RangoOnChainTrade.getGasLimit(tradeStruct, providerGateway);
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
-        } catch {
-            return null;
         }
     }
 }

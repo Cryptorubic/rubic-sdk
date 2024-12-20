@@ -35,8 +35,6 @@ import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/provi
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
-import { LifiEvmOnChainTradeStruct } from '../lifi/models/lifi-trade-struct';
 
 export class OneInchProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
@@ -75,10 +73,11 @@ export class OneInchProvider extends AggregatorOnChainProvider {
         );
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
 
-        const [dexContractAddress, { toTokenAmountInWei, path, data }] = await Promise.all([
-            this.loadContractAddress(fromBlockchain),
-            this.getTradeInfo(fromTokenClone, toTokenClone, fromWithoutFee, fullOptions)
-        ]);
+        const [dexContractAddress, { toTokenAmountInWei, path, data, estimatedGas }] =
+            await Promise.all([
+                this.loadContractAddress(fromBlockchain),
+                this.getTradeInfo(fromTokenClone, toTokenClone, fromWithoutFee, fullOptions)
+            ]);
         path[0] = from;
         path[path.length - 1] = toToken;
 
@@ -95,7 +94,7 @@ export class OneInchProvider extends AggregatorOnChainProvider {
             slippageTolerance: fullOptions.slippageTolerance,
             disableMultihops: fullOptions.disableMultihops,
             path,
-            gasFeeInfo: null,
+            gasFeeInfo: await this.getGasFeeInfo(from, estimatedGas),
             data,
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,
@@ -147,9 +146,7 @@ export class OneInchProvider extends AggregatorOnChainProvider {
         let path = [] as Token[];
 
         try {
-            if (!options.fromAddress) {
-                throw new Error('Address is not set');
-            }
+            if (!options.fromAddress) throw new Error('Address is not set');
 
             if (options.gasCalculation !== 'disabled') {
                 await OneInchTrade.checkIfNeedApproveAndThrowError(
@@ -201,24 +198,14 @@ export class OneInchProvider extends AggregatorOnChainProvider {
         return { toTokenAmountInWei: new BigNumber(toTokenAmount), estimatedGas, path, data };
     }
 
-    private getTokenAddress(token: PriceToken): string {
-        if (token.isNative) {
-            if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
-                return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
-            }
-
-            return oneinchApiParams.nativeAddress;
-        }
-        return token.address;
-    }
-
     protected async getGasFeeInfo(
-        lifiTradeStruct: LifiEvmOnChainTradeStruct
+        from: PriceTokenAmount<EvmBlockchainName>,
+        gasLimit: BigNumber
     ): Promise<GasFeeInfo | null> {
         try {
-            const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-            const gasLimit = await LifiEvmOnChainTrade.getGasLimit(lifiTradeStruct);
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+
+            return getGasFeeInfo(gasPriceInfo, { gasLimit });
         } catch {
             return null;
         }

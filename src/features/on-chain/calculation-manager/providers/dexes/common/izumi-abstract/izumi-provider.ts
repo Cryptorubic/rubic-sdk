@@ -189,7 +189,9 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
                     tradeStruct,
                     fullOptions.providerAddress
                 );
-                tradeStruct.gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo!);
+                tradeStruct.gasFeeInfo = getGasFeeInfo(gasPriceInfo, {
+                    ...(gasLimit && { gasLimit })
+                });
             } catch {}
         }
 

@@ -84,7 +84,7 @@ export class UniZenOnChainProvider extends AggregatorOnChainProvider {
             const trade = new UniZenOnChainTrade(
                 {
                     ...onChainTradeStruct,
-                    gasFeeInfo: await this.getGasFeeInfo(onChainTradeStruct)
+                    gasFeeInfo: await this.getGasFeeInfo()
                 },
                 options.providerAddress
             );

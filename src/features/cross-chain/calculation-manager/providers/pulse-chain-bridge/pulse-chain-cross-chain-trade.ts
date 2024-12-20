@@ -23,47 +23,9 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { PulseChainCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/pulse-chain-supported-blockchains';
 import { BridgeManager } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/omni-bridge-entities/bridge-manager';
 import { OmniBridge } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/omni-bridge-entities/omni-bridge';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
-        onChainTrade: EvmOnChainTrade | null,
-        feeInfo: FeeInfo,
-        toTokenAmountMin: BigNumber,
-        providerAddress: string,
-        receiverAddress: string,
-        routerAddress: string,
-        tokenRegistered: boolean
-    ): Promise<GasData | null> {
-        try {
-            const trade = new PulseChainCrossChainTrade(
-                {
-                    from,
-                    to: toToken,
-                    gasData: null,
-                    priceImpact: 0,
-                    slippage: 0,
-                    feeInfo: feeInfo!,
-                    toTokenAmountMin,
-                    onChainTrade: onChainTrade,
-                    routerAddress,
-                    tokenRegistered
-                },
-                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                [],
-                false
-            );
-
-            return getCrossChainGasData(trade, receiverAddress);
-        } catch (_err) {
-            return null;
-        }
-    }
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE;
 
     public readonly isAggregator = false;

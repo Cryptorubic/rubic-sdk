@@ -103,7 +103,7 @@ export class RouterCrossChainProvider extends CrossChainProvider {
                         from,
                         to,
                         feeInfo,
-                        gasData,
+                        gasData: await this.getGasData(from),
                         priceImpact: from.calculatePriceImpactPercent(to),
                         routerQuoteConfig,
                         slippage: options.slippageTolerance

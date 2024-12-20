@@ -163,26 +163,13 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(tokenAmountOut.amount, tokenAmountOut.decimals)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainFactory.getGasData(
-                          from,
-                          to,
-                          swapParams,
-                          feeInfo,
-                          approveTo,
-                          options.providerAddress,
-                          options.receiverAddress
-                      )
-                    : null;
-
             return {
                 trade: SymbiosisCrossChainFactory.createTrade(
                     fromBlockchain,
                     {
                         from,
                         to,
-                        gasData,
+                        gasData: await this.getGasData(from),
                         priceImpact: from.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         swapParams,

@@ -37,7 +37,6 @@ import { CrossChainStep, RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RangoCrossChainOptions } from './model/rango-cross-chain-api-types';
 import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
-import { RangoCrossChainParser } from './services/rango-cross-chain-params-parser';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
     public type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -125,6 +124,28 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             const tradeType = this.type;
 
             return { trade, tradeType };
+
+            const priceImpact = from.calculatePriceImpactPercent(to);
+
+            return {
+                trade: new RangoCrossChainTrade({
+                    crossChainTrade: {
+                        from,
+                        to,
+                        bridgeSubtype,
+                        priceImpact,
+                        feeInfo,
+                        toTokenAmountMin,
+                        slippage: options.slippageTolerance,
+                        swapQueryParams,
+                        gasData: await this.getGasData(from)
+                    },
+                    providerAddress: options.providerAddress,
+                    routePath,
+                    useProxy
+                }),
+                tradeType: this.type
+            };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 
