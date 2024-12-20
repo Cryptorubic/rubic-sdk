@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -64,13 +64,6 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return {
-                trade: null,
-                error: new NotSupportedTokensError(),
-                tradeType: this.type
-            };
-        }
 
         const { disabledBridges, disabledDexes } = this.mapDisabledProviders(
             options.lifiDisabledBridgeTypes || []
