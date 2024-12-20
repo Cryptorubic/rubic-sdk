@@ -25,11 +25,16 @@ export interface TronTx {
     value: string;
 }
 
+export interface BitcoinTx {
+    depositAddress: string;
+    expiresAt: string;
+}
+
 export interface SymbiosisTradeData {
     fee: SymbiosisTokenAmount;
     priceImpact: string;
     tokenAmountOut: SymbiosisTokenAmount;
-    tx: SendTransactionRequest | TransactionRequest | TronTx;
+    tx: SendTransactionRequest | TransactionRequest | TronTx | BitcoinTx;
     amountInUsd: SymbiosisTokenAmount;
     approveTo: string;
     route: SymbiosisToken[];

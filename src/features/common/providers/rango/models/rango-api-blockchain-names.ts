@@ -19,6 +19,7 @@ export const rangoApiBlockchainNames: Record<RangoSupportedBlockchain, string> =
     // [BLOCKCHAIN_NAME.FANTOM]: 'FANTOM',
     [BLOCKCHAIN_NAME.BLAST]: 'BLAST',
     [BLOCKCHAIN_NAME.SCROLL]: 'SCROLL'
+    // [BLOCKCHAIN_NAME.BITCOIN]: 'BTC'
 };
 
 export type RangoBlockchainName = keyof typeof rangoApiBlockchainNames;
