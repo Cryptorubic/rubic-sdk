@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 

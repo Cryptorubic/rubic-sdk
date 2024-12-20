@@ -36,6 +36,7 @@ import { FeeInfo } from '../common/models/fee-info';
 import { CrossChainStep, RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RangoCrossChainOptions } from './model/rango-cross-chain-api-types';
+import { RangoCrossChainTradeConstructorParams } from './model/rango-cross-chain-parser-types';
 import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
@@ -108,44 +109,30 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             const bridgeSubtype = (
                 routePath.find(el => el.type === 'cross-chain') as CrossChainStep
             )?.provider;
-            const tradeParams = await RangoCrossChainParser.getTradeConstructorParams({
-                fromToken: from,
-                toToken: to,
-                options,
+
+            const priceImpact = from.calculatePriceImpactPercent(to);
+
+            const tradeParams: RangoCrossChainTradeConstructorParams<BlockchainName> = {
+                crossChainTrade: {
+                    from,
+                    to,
+                    feeInfo,
+                    toTokenAmountMin,
+                    priceImpact,
+                    swapQueryParams,
+                    slippage: options.slippageTolerance,
+                    bridgeSubtype,
+                    gasData: await this.getGasData(from)
+                },
                 routePath,
-                feeInfo,
-                toTokenAmountMin,
-                swapQueryParams,
-                bridgeSubtype,
-                receiverAddress: options?.receiverAddress || this.getReceiverAddress(to.blockchain)
-            });
+                providerAddress: options.providerAddress,
+                useProxy
+            };
 
             const trade = RangoCrossChainFactory.createTrade(fromBlockchain, tradeParams);
             const tradeType = this.type;
 
             return { trade, tradeType };
-
-            const priceImpact = from.calculatePriceImpactPercent(to);
-
-            return {
-                trade: new RangoCrossChainTrade({
-                    crossChainTrade: {
-                        from,
-                        to,
-                        bridgeSubtype,
-                        priceImpact,
-                        feeInfo,
-                        toTokenAmountMin,
-                        slippage: options.slippageTolerance,
-                        swapQueryParams,
-                        gasData: await this.getGasData(from)
-                    },
-                    providerAddress: options.providerAddress,
-                    routePath,
-                    useProxy
-                }),
-                tradeType: this.type
-            };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 

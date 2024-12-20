@@ -95,8 +95,6 @@ export class RouterCrossChainProvider extends CrossChainProvider {
             });
 
             const routePath = await this.getRoutePath(from, to, routerQuoteConfig);
-
-            const gasData = null;
             return {
                 trade: RouterCrossChainFactory.createTrade(fromBlockchain, {
                     crossChainTrade: {
