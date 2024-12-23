@@ -15,6 +15,7 @@ import { StonfiOnChainProvider } from '../providers/aggregators/stonfi/stonfi-on
 import { ToncoOnChainProvider } from '../providers/aggregators/tonco/tonco-on-chain-provider';
 import { UniZenOnChainProvider } from '../providers/aggregators/unizen/unizen-on-chain-provider';
 import { ZetaSwapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
+import { XyDexProvider } from '../providers/aggregators/xy-dex/xy-dex-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
     LIFI: LifiProvider,
@@ -24,7 +25,7 @@ export const AGGREGATORS_ON_CHAIN = {
     DLN: DlnOnChainProvider,
     OKU_SWAP: OkuSwapOnChainProvider,
     PITEAS: PiteasProvider,
-    // XY: XyDexProvider,
+    XY: XyDexProvider,
     // ZRX: ZrxProvider, not free api
     ONE_INCH: OneInchProvider,
     ZETA_SWAP: ZetaSwapProvider,
