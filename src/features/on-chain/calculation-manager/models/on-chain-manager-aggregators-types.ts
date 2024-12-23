@@ -14,6 +14,7 @@ import { SquidRouterOnChainProvider } from '../providers/aggregators/squidrouter
 import { StonfiOnChainProvider } from '../providers/aggregators/stonfi/stonfi-on-chain-provider';
 import { ToncoOnChainProvider } from '../providers/aggregators/tonco/tonco-on-chain-provider';
 import { UniZenOnChainProvider } from '../providers/aggregators/unizen/unizen-on-chain-provider';
+import { XyDexProvider } from '../providers/aggregators/xy-dex/xy-dex-provider';
 import { ZetaSwapProvider } from '../providers/aggregators/zetaswap/zetaswap-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
@@ -24,7 +25,7 @@ export const AGGREGATORS_ON_CHAIN = {
     DLN: DlnOnChainProvider,
     OKU_SWAP: OkuSwapOnChainProvider,
     PITEAS: PiteasProvider,
-    // XY: XyDexProvider,
+    XY: XyDexProvider,
     // ZRX: ZrxProvider, not free api
     ONE_INCH: OneInchProvider,
     ZETA_SWAP: ZetaSwapProvider,
