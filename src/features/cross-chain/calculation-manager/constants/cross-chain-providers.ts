@@ -12,18 +12,20 @@ import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manag
 
 import { AcrossCrossChainProvider } from '../providers/across-provider/across-cross-chain-provider';
 import { EddyBridgeProvider } from '../providers/eddy-bridge/eddy-bridge-provider';
+import { LayerZeroBridgeProvider } from '../providers/layerzero-bridge/layerzero-bridge-provider';
 import { MesonCrossChainProvider } from '../providers/meson-provider/meson-cross-chain-provider';
 import { OrbiterBridgeProvider } from '../providers/orbiter-bridge/orbiter-bridge-provider';
 import { OwlToBridgeProvider } from '../providers/owl-to-bridge/owl-to-bridge-provider';
 import { RangoCrossChainProvider } from '../providers/rango-provider/rango-cross-chain-provider';
 import { RetroBridgeProvider } from '../providers/retro-bridge/retro-bridge-provider';
 import { RouterCrossChainProvider } from '../providers/router-provider/router-cross-chain-provider';
+import { StargateV2CrossChainProvider } from '../providers/stargate-v2-provider/stargate-v2-cross-chain-provider';
 import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-provider';
 import { UniZenCcrProvider } from '../providers/unizen-provider/unizen-ccr-provider';
 
 const proxyProviders = [
     SymbiosisCrossChainProvider,
-    // StargateV2CrossChainProvider,
+    StargateV2CrossChainProvider,
     XyCrossChainProvider,
     CbridgeCrossChainProvider,
     LifiCrossChainProvider,
@@ -46,8 +48,8 @@ const nonProxyProviders = [
     BridgersCrossChainProvider,
     ChangenowCrossChainProvider,
     ArbitrumRbcBridgeProvider,
-    TaikoBridgeProvider
-    // LayerZeroBridgeProvider
+    TaikoBridgeProvider,
+    LayerZeroBridgeProvider
     // SimpleSwapCcrProvider
     // ScrollBridgeProvider
 ] as const;
