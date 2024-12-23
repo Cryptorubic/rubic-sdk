@@ -1,8 +1,6 @@
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
-import { isChangenowReceiverAddressCorrect } from 'src/core/blockchain/utils/changenow-receiver-address-validator';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
-import { changenowApiBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 
 @staticImplements<TypedWeb3Pure>()
 export class OntologyWeb3Pure {
@@ -21,10 +19,6 @@ export class OntologyWeb3Pure {
     }
 
     public static async isAddressCorrect(address: string): Promise<boolean> {
-        return isChangenowReceiverAddressCorrect(
-            address,
-            changenowApiBlockchain.ONTOLOGY,
-            /^(A)[A-Za-z0-9]{33}$/
-        );
+        return /^(A)[A-Za-z0-9]{33}$/.test(address);
     }
 }
