@@ -178,19 +178,17 @@ export class Web3PublicService {
                                 e.message?.toLowerCase().includes(rpcString.toLowerCase()) ||
                                 rpcErrors.some(error => e.message?.toLowerCase().includes(error))
                             ) {
-                                if (curRpc === rpcProvider.rpcList[0]) {
-                                    rpcProvider.rpcList.shift();
-                                    if (!rpcProvider.rpcList.length) {
-                                        throw new RubicSdkError(
-                                            `There is no working rpc left for ${blockchainName}.`
-                                        );
-                                    }
-                                    const nextRpc = rpcProvider.rpcList![0]!;
-                                    web3Public.setProvider(nextRpc);
-                                    console.debug(
-                                        `Rpc provider for ${blockchainName} is changed to ${nextRpc}.`
+                                rpcProvider.rpcList.shift();
+                                if (!rpcProvider.rpcList.length) {
+                                    throw new RubicSdkError(
+                                        `There is no working rpc left for ${blockchainName}.`
                                     );
                                 }
+                                const nextRpc = rpcProvider.rpcList![0]!;
+                                web3Public.setProvider(nextRpc);
+                                console.debug(
+                                    `Rpc provider for ${blockchainName} is changed to ${nextRpc}.`
+                                );
 
                                 return method(...methodParams);
                             }
