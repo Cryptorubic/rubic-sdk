@@ -57,6 +57,11 @@ export class DedustSwapService {
             }
 
             this.cacheStepsOnCalculation(pools);
+            console.log(
+                '%cDedust_TransitTokensCount',
+                'color: blue; font-size: 20px;',
+                pools.length - 1
+            );
             const outputWeiAmountString = pools.at(-1)!.amountOut;
 
             return outputWeiAmountString;
