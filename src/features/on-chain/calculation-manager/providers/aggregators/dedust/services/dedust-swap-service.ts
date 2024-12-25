@@ -262,6 +262,7 @@ export class DedustSwapService {
 
         const payloadParams = {} as SwapStep;
         this.fillPayloadParams(this.txSteps, slippage, payloadParams);
+        console.log('%cDedust_Params', 'color: green; font-size: 20px;', payloadParams);
 
         if (!this.checkSwapPayloadValid(payloadParams)) {
             console.log(
