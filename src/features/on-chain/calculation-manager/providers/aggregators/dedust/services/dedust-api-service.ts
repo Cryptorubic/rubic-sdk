@@ -1,4 +1,5 @@
 import { Address } from '@ton/core';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -17,7 +18,7 @@ export class DedustApiService {
         const fromRawAddress = from.isNative ? 'native' : `jetton:${fromAddresses.raw_form}`;
         const toRawAddress = to.isNative ? 'native' : `jetton:${toAddresses.raw_form}`;
 
-        const [pools] = await Injector.httpClient.post<DedustPoolsResponse>(
+        const resp = await Injector.httpClient.post<DedustPoolsResponse>(
             `${this.apiUrl}/routing/plan`,
             {
                 from: fromRawAddress,
@@ -25,6 +26,11 @@ export class DedustApiService {
                 amount: from.stringWeiAmount
             }
         );
+
+        if (resp.length > 1) {
+            throw new RubicSdkError('Multihop swaps are forbidden in dedust.');
+        }
+        const pools = resp[0];
 
         return pools.map(p => ({
             amountOut: p.amountOut,

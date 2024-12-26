@@ -3,6 +3,7 @@ import { DlnOnChainProvider } from 'src/features/on-chain/calculation-manager/pr
 import { PiteasProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-provider';
 
 import { CoffeeSwapProvider } from '../providers/aggregators/coffee-swap/coffee-swap-on-chain-provider';
+import { DedustOnChainProvider } from '../providers/aggregators/dedust/dedust-on-chain-provider';
 import { LifiProvider } from '../providers/aggregators/lifi/lifi-provider';
 import { NativeRouterProvider } from '../providers/aggregators/native-router/native-router-provider';
 import { OdosOnChainProvider } from '../providers/aggregators/odos/odos-on-chain-provider';
@@ -28,7 +29,7 @@ export const AGGREGATORS_ON_CHAIN = {
     ONE_INCH: OneInchProvider,
     ZETA_SWAP: ZetaSwapProvider,
     NATIVE_ROUTER: NativeRouterProvider,
-    // DEDUST: DedustOnChainProvider,
+    DEDUST: DedustOnChainProvider,
     //STONFI: StonfiOnChainProvider,
     COFFEE_SWAP: CoffeeSwapProvider,
     SQUIDROUTER: SquidRouterOnChainProvider,

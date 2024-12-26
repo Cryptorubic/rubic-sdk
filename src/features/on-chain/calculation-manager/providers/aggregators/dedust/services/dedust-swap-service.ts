@@ -57,6 +57,11 @@ export class DedustSwapService {
             }
 
             this.cacheStepsOnCalculation(pools);
+            console.log(
+                '%cDedust_TransitTokensCount',
+                'color: blue; font-size: 20px;',
+                pools.length - 1
+            );
             const outputWeiAmountString = pools.at(-1)!.amountOut;
 
             return outputWeiAmountString;
@@ -260,18 +265,20 @@ export class DedustSwapService {
         const jettonRoot = this.tonClient.open(JettonRoot.createFromAddress(parsedAddress));
         const jettonWallet = this.tonClient.open(await jettonRoot.getWallet(sender.address!));
 
-        const initParams = {
-            poolAddress: this.txSteps[0]!.poolAddress,
-            limit: BigInt(this.txSteps[0]!.amountOut),
-            next: {}
-        } as SwapStep;
+        const payloadParams = {} as SwapStep;
+        this.fillPayloadParams(this.txSteps, slippage, payloadParams);
+        console.log('%cDedust_Params', 'color: green; font-size: 20px;', payloadParams);
 
-        const swapPayloadParams = this.makeSwapPayloadParams(
-            initParams,
-            initParams.next!,
-            this.txSteps,
-            slippage
-        );
+        if (!this.checkSwapPayloadValid(payloadParams)) {
+            console.log(
+                '%cInvalid_swapPayloadParams',
+                'color: red; font-size: 20px;',
+                payloadParams
+            );
+            throw new RubicSdkError(
+                'Swap payload for dedust has empty `next` property or undefined `poolAddress`.'
+            );
+        }
 
         await jettonWallet.sendTransfer(sender, toNano(DEDUST_GAS_NON_WEI), {
             amount: BigInt(from.stringWeiAmount),
@@ -279,38 +286,43 @@ export class DedustSwapService {
             responseAddress: sender.address,
             forwardAmount: toNano(0.15),
             queryId: RUBIC_REF_NAME_FOR_DEDUST,
-            forwardPayload: VaultJetton.createSwapPayload(swapPayloadParams)
+            forwardPayload: VaultJetton.createSwapPayload(payloadParams)
         });
     }
 
-    private makeSwapPayloadParams(
-        payloadParams: SwapStep,
-        next: SwapStep,
-        txSteps: DedustTxStep[],
-        slippage: number
-    ): SwapStep {
-        if (!txSteps.length) return payloadParams;
+    /**
+     * @param next on first iteration - it's payloadParams, then .next
+     * @param payloadParams
+     * @returns
+     */
+    private fillPayloadParams(steps: DedustTxStep[], slippage: number, next: SwapStep): void {
+        if (!steps.length) return;
 
-        const step = txSteps[0]!;
-        const isFirstStep = txSteps.length === this.txSteps.length;
+        const step = steps[0]!;
         const minAmountOut = BigInt(
             new BigNumber(step.amountOut).multipliedBy(1 - slippage).toFixed(0)
         );
 
-        if (isFirstStep) {
-            payloadParams.poolAddress = step.poolAddress;
-            payloadParams.limit = minAmountOut;
-        } else {
-            next.poolAddress = step.poolAddress;
-            next.limit = minAmountOut;
-        }
+        next.poolAddress = step.poolAddress;
+        next.limit = minAmountOut;
 
-        const slicedSteps = txSteps.slice(1);
-        if (slicedSteps.length && !isFirstStep) {
+        steps.shift();
+        if (steps.length) {
             next.next = {} as SwapStep;
             next = next.next;
         }
 
-        return this.makeSwapPayloadParams(payloadParams, next, slicedSteps, slippage);
+        return this.fillPayloadParams(steps, slippage, next);
+    }
+
+    public checkSwapPayloadValid(payloadParams: SwapStep): boolean {
+        let next: SwapStep | undefined = payloadParams;
+        while (next) {
+            if (!next.poolAddress) return false;
+            if (next.next && !Object.keys(next.next).length) return false;
+            next = next.next;
+        }
+
+        return true;
     }
 }
