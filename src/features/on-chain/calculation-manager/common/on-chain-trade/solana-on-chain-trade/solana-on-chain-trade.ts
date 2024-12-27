@@ -15,8 +15,8 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/on-chain-trade';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 

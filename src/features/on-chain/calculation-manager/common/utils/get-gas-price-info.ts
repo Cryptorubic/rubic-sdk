@@ -3,7 +3,7 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
+import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/models/gas-price-info';
 
 export async function getGasPriceInfo(blockchain: EvmBlockchainName): Promise<GasPriceInfo> {
     const address = nativeTokensList[blockchain].address;

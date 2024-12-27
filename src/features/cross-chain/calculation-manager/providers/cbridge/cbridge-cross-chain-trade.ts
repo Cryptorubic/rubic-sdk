@@ -13,7 +13,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE;

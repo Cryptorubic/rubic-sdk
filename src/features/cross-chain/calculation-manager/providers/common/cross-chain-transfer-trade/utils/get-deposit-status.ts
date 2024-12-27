@@ -3,7 +3,7 @@ import {
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTradeType
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
 import { ChangeNowCrossChainApiService } from '../../../changenow-provider/services/changenow-cross-chain-api-service';
 import { SimpleSwapApiService } from '../../../simple-swap-provider/services/simple-swap-api-service';

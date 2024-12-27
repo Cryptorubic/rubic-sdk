@@ -5,7 +5,7 @@ import {
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+} from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
 const RANGO_TO_RUBIC_ON_CHAIN_PROVIDERS = {
     '10KSwap': ON_CHAIN_TRADE_TYPE['10K_SWAP'],

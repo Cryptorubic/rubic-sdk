@@ -16,7 +16,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-bridge-params';
 import { ProxySwapParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-swap-params';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/constants';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/constants/constants';
 import { AbiItem, utf8ToHex } from 'web3-utils';
 
 type BridgeParams = [

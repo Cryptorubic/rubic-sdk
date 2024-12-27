@@ -16,7 +16,7 @@ import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-man
 import {
     OnChainPlatformFee,
     OnChainProxyFeeInfo
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+} from 'src/features/on-chain/calculation-manager/models/on-chain-proxy-fee-info';
 
 export class OnChainProxyService {
     public static isSupportedBlockchain(

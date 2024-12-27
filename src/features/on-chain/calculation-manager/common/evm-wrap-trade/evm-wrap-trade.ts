@@ -4,11 +4,11 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { wrapAbi } from 'src/features/on-chain/calculation-manager/providers/common/evm-wrap-trade/wrap-abi';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
+import { wrapAbi } from 'src/features/on-chain/calculation-manager/common/evm-wrap-trade/wrap-abi';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/models/aggregator-on-chain-types';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
 export class EvmWrapTrade extends EvmOnChainTrade {
     public get dexContractAddress(): string {

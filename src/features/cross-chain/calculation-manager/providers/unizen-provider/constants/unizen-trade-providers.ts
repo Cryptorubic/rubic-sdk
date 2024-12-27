@@ -1,4 +1,4 @@
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../../models/cross-chain-trade-type';
 

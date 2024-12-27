@@ -13,7 +13,7 @@ import { BridgeType } from 'src/features/cross-chain/calculation-manager/provide
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+} from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
 import { rangoApiBlockchainNames, RangoBlockchainName } from '../models/rango-api-blockchain-names';
 import { RANGO_SWAP_STATUS, RangoSwapStatus } from '../models/rango-api-status-types';

@@ -12,9 +12,9 @@ import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/pr
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/models/wrapped-cross-chain-trade';
 import { LifiCrossChainFactory } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-factory';
 import { RangoCrossChainFactory } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/rango-cross-chain-factory';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/on-chain-trade';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { CommonEvmApiCrossChainTrade } from 'src/features/ws-api/models/common-evm-api-cross-chain-trade';
 import { CommonEvmApiOnChainTrade } from 'src/features/ws-api/models/common-evm-api-on-chain-trade';
 

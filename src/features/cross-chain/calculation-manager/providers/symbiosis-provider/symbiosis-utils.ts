@@ -8,7 +8,7 @@ import { SymbiosisTradeType } from 'src/features/cross-chain/calculation-manager
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+} from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
 export class SymbiosisUtils {
     public static getChainId(token: PriceToken): number;

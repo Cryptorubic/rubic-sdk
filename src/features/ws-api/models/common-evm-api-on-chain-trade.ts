@@ -3,8 +3,8 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 import { CommonEvmApiOnChainConstructor } from 'src/features/ws-api/models/common-evm-api-on-chain-constructor';
 
 export class CommonEvmApiOnChainTrade extends EvmOnChainTrade {

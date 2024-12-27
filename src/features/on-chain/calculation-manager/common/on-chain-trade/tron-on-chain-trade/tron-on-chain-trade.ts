@@ -9,7 +9,7 @@ import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/on-chain-trade';
 
 export abstract class TronOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<TronBlockchainName>;

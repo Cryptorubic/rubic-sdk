@@ -10,14 +10,14 @@ import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-pri
 import { defaultProviderAddresses } from 'src/features/cross-chain/calculation-manager/constants/default-provider-addresses';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/common/evm-wrap-trade/evm-wrap-trade';
+import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/common/on-chain-proxy-service/on-chain-proxy-service';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/models/on-chain-calculation-options';
 import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/on-chain-manager-calculation-options';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
-import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/providers/common/evm-wrap-trade/evm-wrap-trade';
-import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
 
 /**
