@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
     BlockchainName,
@@ -22,6 +23,8 @@ export interface MesonCrossChainTradeConstructorParams<Blockchain extends Blockc
     providerAddress: string;
     routePath: RubicStep[];
     useProxy: boolean;
+    apiQuote: QuoteRequestInterface;
+    apiResponse: QuoteResponseInterface;
 }
 
 export interface MesonGetGasDataParams<Blockchain extends BlockchainName> {

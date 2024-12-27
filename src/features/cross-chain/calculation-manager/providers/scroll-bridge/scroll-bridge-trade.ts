@@ -4,6 +4,7 @@ import {
     L2ToL1MessageReader,
     L2TransactionReceipt
 } from '@arbitrum/sdk';
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import BigNumber from 'bignumber.js';
 import { BigNumber as EtherBigNumber } from 'ethers';
@@ -11,11 +12,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { outboxAbi } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/constants/outbox-abi';
@@ -24,11 +21,8 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { l1Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l1-erc20-scroll-gateway-abi';
-import { l2Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l2-erc20-scroll-gateway-abi';
 import { scrollBridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/scroll-bridge-contract-address';
 import { TransactionReceipt } from 'web3-eth';
 
@@ -77,18 +71,16 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         },
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.to.tokenAmount;
-    }
-
-    public async getContractParams(_options: GetContractParamsOptions): Promise<ContractParams> {
-        throw new Error('Method is not supported');
     }
 
     public getTradeAmountRatio(_fromUsd: BigNumber): BigNumber {
@@ -105,6 +97,7 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         };
     }
 
+    // @TODO API
     public static async claimTargetTokens(
         sourceTransaction: string,
         options: SwapTransactionOptions
@@ -164,6 +157,7 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         );
     }
 
+    // @TODO API
     public static async redeemTokens(
         sourceTransactionHash: string,
         options: SwapTransactionOptions
@@ -209,58 +203,5 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
                 gasPriceOptions
             }
         );
-    }
-
-    protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
-    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        let contractParams: ContractParams | null = null;
-        if (this.fromBlockchain === BLOCKCHAIN_NAME.GOERLI) {
-            const methodArguments = [
-                ...(this.from.isNative ? [] : [this.from.address]),
-                ...(receiverAddress ? [receiverAddress] : []),
-                this.from.stringWeiAmount,
-                '40000'
-            ];
-            const fee = Web3Pure.toWei(0.005);
-
-            contractParams = {
-                contractAddress: scrollBridgeContractAddress[this.fromBlockchain]!.providerGateway,
-                contractAbi: l1Erc20ScrollGatewayAbi,
-                methodName: this.from.isNative ? 'depositETH' : 'depositERC20',
-                methodArguments,
-                value: this.from.isNative
-                    ? this.from.weiAmount.plus(fee).toFixed()
-                    : this.from.stringWeiAmount
-            };
-        } else {
-            const methodArguments = [
-                ...(this.from.isNative ? [] : [this.from.address]),
-                ...(receiverAddress ? [receiverAddress] : []),
-                this.from.stringWeiAmount,
-                '160000'
-            ];
-            const fee = Web3Pure.toWei(0.005);
-
-            contractParams = {
-                contractAddress: scrollBridgeContractAddress[this.fromBlockchain]!.providerGateway,
-                contractAbi: l2Erc20ScrollGatewayAbi,
-                methodName: this.from.isNative ? 'withdrawETH' : 'withdrawERC20',
-                methodArguments,
-                value: this.from.isNative
-                    ? this.from.weiAmount.plus(fee).toFixed()
-                    : this.from.stringWeiAmount
-            };
-        }
-
-        const config = EvmWeb3Pure.encodeMethodCall(
-            contractParams.contractAddress,
-            contractParams.contractAbi,
-            contractParams.methodName,
-            contractParams.methodArguments,
-            contractParams.value
-        );
-
-        return { config, amount: this.to.stringWeiAmount };
     }
 }

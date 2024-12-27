@@ -1,21 +1,15 @@
+import { TronTransactionConfig } from '@cryptorubic/web3';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
-import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
 import { TonWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/ton-web3-public/ton-web3-public';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
-import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
-import { TransactionConfig } from 'web3-core';
-import { TransactionReceipt } from 'web3-eth';
 
 export abstract class TonCrossChainTrade extends CrossChainTrade<TonEncodedConfig> {
     public abstract readonly from: PriceTokenAmount<TonBlockchainName>;
@@ -31,39 +25,62 @@ export abstract class TonCrossChainTrade extends CrossChainTrade<TonEncodedConfi
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.TON);
     }
 
-    public async approve(
-        _options: EvmBasicTransactionOptions,
-        _checkNeedApprove = true,
-        _amount: BigNumber | 'infinity' = 'infinity'
-    ): Promise<TransactionReceipt> {
-        throw new RubicSdkError('Method not implemented!');
-    }
-
-    protected async checkAllowanceAndApprove(
-        _options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
-    ): Promise<void> {
-        return;
-    }
-
-    public async encode(_options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    public async encode(_options: EncodeTransactionOptions): Promise<TronTransactionConfig> {
         throw new RubicSdkError(
             'Method not implemented! Use custom swap methods on each child class!'
         );
     }
 
-    public async encodeApprove(
-        _tokenAddress: string,
-        _spenderAddress: string,
-        _value: BigNumber | 'infinity',
-        _options: EvmTransactionOptions = {}
-    ): Promise<TransactionConfig> {
-        throw new Error('Method not implemented');
+    public async swap(_options: SwapTransactionOptions = {}): Promise<string | never> {
+        // @TODO API
+        throw new Error('Not implemented');
+        // if (!options?.testMode) {
+        //     await this.checkTradeErrors();
+        // }
+        // await this.checkReceiverAddress(
+        //     options.receiverAddress,
+        //     !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+        // );
+        // const fromAddress = this.walletAddress;
+        //
+        // const { data, value, to } = await this.encode({ ...options, fromAddress });
+        //
+        // const { onConfirm, gasPriceOptions } = options;
+        // let transactionHash: string;
+        // const onTransactionHash = (hash: string) => {
+        //     if (onConfirm) {
+        //         onConfirm(hash);
+        //     }
+        //     transactionHash = hash;
+        // };
+        //
+        // try {
+        //     await this.web3Private[method](to, {
+        //         data,
+        //         value,
+        //         onTransactionHash,
+        //         gasPriceOptions,
+        //         gasLimitRatio: this.gasLimitRatio,
+        //         ...(options?.useEip155 && {
+        //             chainId: `0x${blockchainId[this.from.blockchain].toString(16)}`
+        //         })
+        //     });
+        //
+        //     return transactionHash!;
+        // } catch (err) {
+        //     if (err instanceof FailedToCheckForTransactionReceiptError) {
+        //         return transactionHash!;
+        //     }
+        //     throw err;
+        // }
     }
 
-    protected abstract getContractParams(
-        options: GetContractParamsOptions,
-        skipAmountChangeCheck?: boolean
-    ): Promise<ContractParams>;
+    protected getTransactionConfigAndAmount(
+        _receiverAddress?: string
+    ): Promise<{ config: any; amount: string }> {
+        // @TODO API
+        throw new RubicSdkError('Not implemented');
+    }
 
     public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
         let feeSum = new BigNumber(0);

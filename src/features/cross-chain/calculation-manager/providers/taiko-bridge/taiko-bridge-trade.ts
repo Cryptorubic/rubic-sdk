@@ -1,10 +1,7 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { ContractParams } from 'src/features/common/models/contract-params';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
@@ -12,10 +9,6 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import {
-    taikoERC20BridgeABI,
-    taikoNativeBridgeABI
-} from 'src/features/cross-chain/calculation-manager/providers/taiko-bridge/constants/taiko-gateway-abi';
 
 import { taikoBridgeContractAddress } from './constants/taiko-bridge-contract-address';
 import { TaikoBridgeSupportedBlockchain } from './models/taiko-bridge-supported-blockchains';
@@ -70,18 +63,16 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
         },
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.to.tokenAmount;
-    }
-
-    public async getContractParams(): Promise<ContractParams> {
-        throw new Error('Method is not supported');
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
@@ -96,100 +87,5 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
             slippage: 0,
             routePath: this.routePath
         };
-    }
-
-    protected async getTransactionConfigAndAmount(
-        _receiverAddress?: string
-    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        let methodArguments;
-        let fee;
-
-        const account = this.web3Private.address;
-
-        if (this.fromBlockchain === BLOCKCHAIN_NAME.HOLESKY) {
-            if (this.from.isNative) {
-                methodArguments = [
-                    {
-                        id: 0,
-                        from: account,
-                        srcChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
-                        destChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                        owner: account,
-                        to: account,
-                        refundTo: account,
-                        value: this.from.stringWeiAmount,
-                        fee: '9000000',
-                        gasLimit: '140000',
-                        data: '0x',
-                        memo: ''
-                    }
-                ];
-
-                fee = '9000000';
-            } else {
-                methodArguments = [
-                    {
-                        destChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                        to: account,
-                        token: this.from.address,
-                        amount: this.from.stringWeiAmount,
-                        gasLimit: '140000',
-                        fee: '11459820715200000',
-                        refundTo: account,
-                        memo: ''
-                    }
-                ];
-
-                fee = '11459820715200000';
-            }
-        } else {
-            if (this.from.isNative) {
-                methodArguments = [
-                    {
-                        id: 0,
-                        from: account,
-                        srcChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                        destChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
-                        owner: account,
-                        to: account,
-                        refundTo: account,
-                        value: this.from.stringWeiAmount,
-                        fee: '34774829357400000',
-                        gasLimit: '140000',
-                        data: '0x',
-                        memo: ''
-                    }
-                ];
-
-                fee = '34774829357400000';
-            } else {
-                methodArguments = [
-                    {
-                        destChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
-                        to: account,
-                        token: this.from.address,
-                        amount: this.from.stringWeiAmount,
-                        gasLimit: '140000',
-                        fee: '88242155100000',
-                        refundTo: account,
-                        memo: ''
-                    }
-                ];
-
-                fee = '88242155100000';
-            }
-        }
-
-        const config = EvmWeb3Pure.encodeMethodCall(
-            this.from.isNative
-                ? taikoBridgeContractAddress[this.fromBlockchain].nativeProvider
-                : taikoBridgeContractAddress[this.fromBlockchain].erc20Provider,
-            this.from.isNative ? taikoNativeBridgeABI : taikoERC20BridgeABI,
-            this.from.isNative ? 'sendMessage' : 'sendToken',
-            methodArguments,
-            this.from.isNative ? this.from.weiAmount.plus(fee).toFixed() : fee
-        );
-
-        return { config, amount: this.to.stringWeiAmount };
     }
 }

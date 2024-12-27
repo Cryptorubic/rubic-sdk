@@ -1,12 +1,11 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, WrongReceiverAddressError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
-import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import {
@@ -19,7 +18,6 @@ import {
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
@@ -83,9 +81,11 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
     constructor(
         crossChainTrade: RetroBridgeTonConstructorParams,
         providerAddress: string,
-        routePath: RubicStep[]
+        routePath: RubicStep[],
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, false);
+        super(providerAddress, routePath, false, apiQuote, apiResponse);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.feeInfo = crossChainTrade.feeInfo;
@@ -98,12 +98,6 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
         this.isSimulation = crossChainTrade.isSimulation ? crossChainTrade.isSimulation : false;
     }
 
-    protected async getTransactionConfigAndAmount(
-        _receiverAddress?: string
-    ): Promise<{ config: TonEncodedConfig; amount: string }> {
-        throw new Error('Method is not implemented');
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: null,
@@ -113,6 +107,8 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
             routePath: this.routePath
         };
     }
+
+    // @TODO API
 
     public async swap(options: SwapTransactionOptions | undefined): Promise<string> {
         if (!options?.receiverAddress) {
@@ -156,13 +152,6 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
         );
     }
 
-    protected getContractParams(
-        _options: GetContractParamsOptions,
-        _skipAmountChangeCheck?: boolean
-    ): Promise<ContractParams> {
-        throw new Error('Not implemented');
-    }
-
     public async needAuthWallet(): Promise<boolean> {
         try {
             const addresses = await TonWeb3Pure.getAllFormatsOfAddress(this.walletAddress);
@@ -176,5 +165,12 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
 
     public async authWallet(): Promise<never | void> {
         console.error('Wallet should be authenticated on connection stage');
+    }
+
+    protected getTransactionConfigAndAmount(
+        _receiverAddress?: string
+    ): Promise<{ config: any; amount: string }> {
+        // @TODO API
+        throw new Error('NOT IMPLEMENTED');
     }
 }

@@ -26,7 +26,25 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
-    public async approve(
+    /**
+     * Returns true, if allowance is not enough.
+     */
+    public override async needApprove(): Promise<boolean> {
+        this.checkWalletConnected();
+
+        if (this.from.isNative) {
+            return false;
+        }
+
+        const allowance = await this.fromWeb3Public.getAllowance(
+            this.from.address,
+            this.walletAddress,
+            this.contractSpender
+        );
+        return this.from.weiAmount.gt(allowance);
+    }
+
+    public override async approve(
         options: TronTransactionOptions,
         checkNeedApprove = true,
         amount: BigNumber | 'infinity' = 'infinity'
@@ -43,7 +61,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
 
         return this.web3Private.approveTokens(
             this.from.address,
-            this.fromContractAddress,
+            this.contractSpender,
             amount,
             options
         );
@@ -136,5 +154,12 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
         }
 
         return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
+    }
+
+    protected getTransactionConfigAndAmount(
+        _receiverAddress?: string
+    ): Promise<{ config: any; amount: string }> {
+        // @TODO API
+        throw new Error('not implemented');
     }
 }

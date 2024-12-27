@@ -1,13 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BitcoinBlockchainName, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BitcoinEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-encoded-config';
 import { RouterQuoteResponseConfig } from 'src/features/common/providers/router/models/router-quote-response-config';
-import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
 import { BitcoinCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/bitcoin-cross-chain-trade/bitcoin-cross-chain-trade';
 import { RouterBitcoinConstructorParams } from 'src/features/cross-chain/calculation-manager/providers/router-provider/models/router-constructor-params';
-import { RouterCrossChainUtilService } from 'src/features/cross-chain/calculation-manager/providers/router-provider/utils/router-cross-chain-util-service';
 
 import {
     CROSS_CHAIN_TRADE_TYPE,
@@ -63,8 +59,9 @@ export class RouterBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
     public readonly memo: string = '';
 
     constructor(params: RouterBitcoinConstructorParams) {
-        const { providerAddress, routePath, useProxy, crossChainTrade } = params;
-        super(providerAddress, routePath, useProxy);
+        const { providerAddress, routePath, useProxy, crossChainTrade, apiQuote, apiResponse } =
+            params;
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.feeInfo = crossChainTrade.feeInfo;
@@ -73,37 +70,6 @@ export class RouterBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
         this.routerQuoteConfig = crossChainTrade.routerQuoteConfig;
         this.slippage = crossChainTrade.slippage;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - this.slippage);
-    }
-
-    protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
-    ): Promise<{ config: BitcoinEncodedConfig; amount: string }> {
-        const toBlockchain = this.to.blockchain as RouterCrossChainSupportedBlockchains;
-
-        const toAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
-            toBlockchain,
-            receiverAddress || this.walletAddress,
-            this.to.address
-        );
-        const { txn, destination } = await RouterApiService.getSwapTx({
-            ...this.routerQuoteConfig,
-            senderAddress: this.walletAddress,
-            receiverAddress: toAddress,
-            refundAddress: this.walletAddress,
-            isTransfer: true
-        });
-
-        if (!txn) {
-            throw new RubicSdkError();
-        }
-
-        const config = {
-            // data: txn.data,
-            value: this.from.stringWeiAmount,
-            to: txn.to
-        };
-
-        return { config, amount: destination.tokenAmount };
     }
 
     public getTradeInfo(): TradeInfo {

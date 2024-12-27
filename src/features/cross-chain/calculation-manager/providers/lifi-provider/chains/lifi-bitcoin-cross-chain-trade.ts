@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { InsufficientFundsGasPriceValueError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -70,9 +71,11 @@ export class LifiBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
         crossChainTrade: LifiCrossChainTradeConstructor<BitcoinBlockchainName>,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -87,6 +90,7 @@ export class LifiBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
         this.bridgeType = crossChainTrade.bridgeType;
     }
 
+    // @TODO API
     protected async getTransactionConfigAndAmount(receiverAddress?: string): Promise<{
         config: { data: string; value: string; to: string };
         amount: string;

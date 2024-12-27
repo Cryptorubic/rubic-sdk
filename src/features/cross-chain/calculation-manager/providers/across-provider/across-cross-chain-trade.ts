@@ -1,13 +1,8 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { ContractParams } from 'src/features/common/models/contract-params';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 
@@ -15,16 +10,12 @@ import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { BRIDGE_TYPE } from '../common/models/bridge-type';
 import { FeeInfo } from '../common/models/fee-info';
-import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { RubicStep } from '../common/models/rubicStep';
 import { TradeInfo } from '../common/models/trade-info';
-import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { AccrossCcrSupportedChains } from './constants/across-ccr-supported-chains';
 import { acrossContractAddresses } from './constants/across-contract-addresses';
-import { acrossDepositAbi } from './constants/across-deposit-abi';
-import { AcrossFeeQuoteRequestParams, AcrossFeeQuoteResponse } from './models/across-fee-quote';
-import { AcrossApiService } from './services/across-api-service';
+import { AcrossFeeQuoteRequestParams } from './models/across-fee-quote';
 
 export class AcrossCrossChainTrade extends EvmCrossChainTrade {
     private readonly uniqCodeWithSeparator = '1dc0de003c';
@@ -82,9 +73,11 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
         },
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
 
         this.from = ccrTrade.from;
         this.to = ccrTrade.to;
@@ -100,75 +93,6 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
         );
     }
 
-    protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const {
-            data,
-            value: providerValue,
-            to: providerRouter
-        } = await this.setTransactionConfig(
-            false,
-            options?.useCacheData || false,
-            options?.receiverAddress || this.walletAddress
-        );
-
-        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-            walletAddress: receiverAddress,
-            fromTokenAmount: this.from,
-            toTokenAmount: this.to,
-            srcChainTrade: null,
-            providerAddress: this.providerAddress,
-            type: `native:${this.bridgeType}`,
-            fromAddress: this.walletAddress
-        });
-
-        const extraNativeFee = '0';
-        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
-            providerRouter,
-            data,
-            this.from.blockchain,
-            providerRouter,
-            extraNativeFee
-        );
-
-        const methodArguments = [bridgeData, providerData];
-        const value = this.getSwapValue(providerValue);
-        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
-            rubicProxyContractAddress[this.from.blockchain].router,
-            evmCommonCrossChainAbi,
-            this.methodName,
-            methodArguments,
-            value
-        );
-
-        const sendingToken = this.from.isNative ? [] : [this.from.address];
-        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
-
-        return {
-            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
-            contractAbi: gatewayRubicCrossChainAbi,
-            methodName: 'startViaRubic',
-            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
-            value
-        };
-    }
-
-    protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
-    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        const feeQuote = await AcrossApiService.getFeeQuote({
-            ...this.acrossFeeQuoteRequestParams,
-            recipient: receiverAddress,
-            depositMethod: 'depositV3'
-        });
-
-        const toAmount = this.fromWithoutFee.weiAmount.minus(feeQuote.totalRelayFee.total);
-
-        const callData = this.getAcrossCallData(feeQuote, toAmount, receiverAddress);
-
-        return { config: callData, amount: toAmount.toFixed() };
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,
@@ -177,49 +101,5 @@ export class AcrossCrossChainTrade extends EvmCrossChainTrade {
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
-    }
-
-    private getAcrossCallData(
-        quote: AcrossFeeQuoteResponse,
-        toAmount: BigNumber,
-        receiverAddress?: string
-    ): EvmEncodeConfig {
-        const args = [
-            this.walletAddress,
-            receiverAddress || this.walletAddress,
-            this.acrossFeeQuoteRequestParams.inputToken,
-            this.acrossFeeQuoteRequestParams.outputToken,
-            this.fromWithoutFee.stringWeiAmount,
-            toAmount.toFixed(),
-            this.acrossFeeQuoteRequestParams.destinationChainId.toString(),
-            quote.exclusiveRelayer,
-            Number(quote.timestamp),
-            this.getFillDeadline(),
-            Number(quote.exclusivityDeadline),
-            '0x'
-        ];
-
-        const evmConfig = EvmWeb3Pure.encodeMethodCall(
-            acrossContractAddresses[this.fromBlockchain],
-            acrossDepositAbi,
-            'depositV3',
-            args,
-            this.from.isNative ? this.fromWithoutFee.stringWeiAmount : '0'
-        );
-
-        return evmConfig;
-    }
-
-    public override async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        const evmEncodeConfig = await super.encode(options);
-
-        return {
-            ...evmEncodeConfig,
-            data: evmEncodeConfig.data + this.uniqCodeWithSeparator
-        };
-    }
-
-    private getFillDeadline(): number {
-        return Math.round(Date.now() / 1000) + 18_000;
     }
 }

@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { SymbiosisCcrBitcoinTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-bitcoin-trade';
@@ -20,7 +21,9 @@ export class SymbiosisCrossChainFactory {
         constructorParams: SymbiosisCrossChainTradeConstructor<BlockchainName>,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ):
         | SymbiosisCcrTonTrade
         | SymbiosisEvmCcrTrade
@@ -31,7 +34,9 @@ export class SymbiosisCrossChainFactory {
                 constructorParams as SymbiosisTonCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
-                useProxy
+                useProxy,
+                apiQuote,
+                apiResponse
             );
         }
 
@@ -40,7 +45,9 @@ export class SymbiosisCrossChainFactory {
                 constructorParams as SymbiosisEvmCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
-                useProxy
+                useProxy,
+                apiQuote,
+                apiResponse
             );
         }
 
@@ -49,7 +56,9 @@ export class SymbiosisCrossChainFactory {
                 constructorParams as SymbiosisTronCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
-                useProxy
+                useProxy,
+                apiQuote,
+                apiResponse
             );
         }
         if (BlockchainsInfo.isBitcoinBlockchainName(fromBlockchain)) {
@@ -57,7 +66,9 @@ export class SymbiosisCrossChainFactory {
                 constructorParams as SymbiosisbitcoinCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
-                useProxy
+                useProxy,
+                apiQuote,
+                apiResponse
             );
         }
         throw new Error('Can not create trade instance');

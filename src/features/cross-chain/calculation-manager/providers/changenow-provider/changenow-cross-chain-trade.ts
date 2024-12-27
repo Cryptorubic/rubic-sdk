@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -72,7 +73,9 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
         crossChainTrade: ChangenowTrade,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
         super(
             providerAddress,
@@ -84,7 +87,9 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
             crossChainTrade.toTokenAmountMin,
             crossChainTrade.gasData,
             crossChainTrade.feeInfo,
-            crossChainTrade.from.calculatePriceImpactPercent(crossChainTrade.to)
+            crossChainTrade.from.calculatePriceImpactPercent(crossChainTrade.to),
+            apiQuote,
+            apiResponse
         );
         this.fromCurrency = crossChainTrade.fromCurrency;
         this.toCurrency = crossChainTrade.toCurrency;

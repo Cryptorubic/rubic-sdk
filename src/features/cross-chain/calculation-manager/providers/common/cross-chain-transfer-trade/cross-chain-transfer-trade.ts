@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -101,9 +102,11 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         toTokenAmountMin: BigNumber,
         gasData: GasData,
         feeInfo: FeeInfo,
-        priceImpact: number | null
+        priceImpact: number | null,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
         this.onChainTrade = onChainTrade;
         this.from = from as PriceTokenAmount<EvmBlockchainName>;
         this.to = to;

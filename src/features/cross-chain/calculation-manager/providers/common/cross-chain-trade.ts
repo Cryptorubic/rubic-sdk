@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     RubicSdkError,
@@ -62,6 +63,7 @@ export abstract class CrossChainTrade<T = unknown> {
     public abstract readonly onChainSubtype: OnChainSubtype;
 
     /**
+     * @deprecated
      * Contains bridge provider's type used in route.
      */
     public abstract readonly bridgeType: BridgeType;
@@ -76,7 +78,7 @@ export abstract class CrossChainTrade<T = unknown> {
      */
     public promotions: string[] = [];
 
-    protected abstract get fromContractAddress(): string;
+    public readonly contractSpender: string;
 
     protected get httpClient(): HttpClient {
         return Injector.httpClient;
@@ -93,8 +95,6 @@ export abstract class CrossChainTrade<T = unknown> {
     protected get walletAddress(): string {
         return this._apiFromAddress ?? this.web3Private.address;
     }
-
-    protected abstract get methodName(): string;
 
     public get networkFee(): BigNumber {
         return new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || 0).plus(
@@ -142,32 +142,19 @@ export abstract class CrossChainTrade<T = unknown> {
     protected constructor(
         protected readonly providerAddress: string,
         protected readonly routePath: RubicStep[],
-        protected readonly useProxy: boolean
+        protected readonly useProxy: boolean,
+        protected readonly apiQuote: QuoteRequestInterface,
+        protected readonly apiResponse: QuoteResponseInterface
     ) {
         this.isProxyTrade = useProxy;
+        this.contractSpender = apiResponse.transaction.approvalAddress!;
     }
 
     /**
      * Returns true, if allowance is not enough.
      */
     public async needApprove(): Promise<boolean> {
-        this.checkWalletConnected();
-
-        if (this.from.isNative && this.from.blockchain !== BLOCKCHAIN_NAME.METIS) {
-            return false;
-        }
-
-        const fromTokenAddress =
-            this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
-                ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
-                : this.from.address;
-
-        const allowance = await this.fromWeb3Public.getAllowance(
-            fromTokenAddress,
-            this.walletAddress,
-            this.fromContractAddress
-        );
-        return this.from.weiAmount.gt(allowance);
+        return false;
     }
 
     /**
@@ -176,11 +163,13 @@ export abstract class CrossChainTrade<T = unknown> {
      * @param checkNeedApprove If true, first allowance is checked.
      * @param amount Amount of tokens in approval window in spending cap field
      */
-    public abstract approve(
-        options: BasicTransactionOptions,
-        checkNeedApprove?: boolean,
-        amount?: BigNumber | 'infinity'
-    ): Promise<unknown>;
+    public async approve(
+        _options: BasicTransactionOptions,
+        _checkNeedApprove?: boolean,
+        _amount?: BigNumber | 'infinity'
+    ): Promise<unknown> {
+        return undefined;
+    }
 
     /**
      * Sends swap transaction with connected wallet.
@@ -201,21 +190,6 @@ export abstract class CrossChainTrade<T = unknown> {
      * @param options Encode transaction options.
      */
     public abstract encode(options: EncodeTransactionOptions): Promise<unknown>;
-
-    /**
-     * Build encoded approve transaction config.
-     * @param tokenAddress Address of the smart-contract corresponding to the token.
-     * @param spenderAddress Wallet or contract address to approve.
-     * @param value Token amount to approve in wei.
-     * @param [options] Additional options.
-     * @returns Encoded approve transaction config.
-     */
-    public abstract encodeApprove(
-        tokenAddress: string,
-        spenderAddress: string,
-        value: BigNumber | 'infinity',
-        options: BasicTransactionOptions
-    ): Promise<unknown>;
 
     protected async checkTradeErrors(): Promise<void | never> {
         this.checkWalletConnected();
@@ -325,7 +299,17 @@ export abstract class CrossChainTrade<T = unknown> {
         return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
 
-    public abstract getUsdPrice(providerFeeTokenPrice?: BigNumber): BigNumber;
+    public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
+        let feeSum = new BigNumber(0);
+        const providerFee = this.feeInfo.provider?.cryptoFee;
+        if (providerFee) {
+            feeSum = feeSum.plus(
+                providerFee.amount.multipliedBy(providerFeeToken || providerFee.token.price)
+            );
+        }
+
+        return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
+    }
 
     public abstract getTradeInfo(): TradeInfo;
 

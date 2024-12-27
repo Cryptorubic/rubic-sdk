@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
@@ -18,13 +19,17 @@ export class RetroBridgeFactory {
         constructorParams: RetroBridgeConstructorParams<BlockchainName>,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ): CrossChainTrade<EvmEncodeConfig | { data: string } | TonEncodedConfig> {
         if (BlockchainsInfo.isTonBlockchainName(fromBlockchain)) {
             return new RetroBridgeTonTrade(
                 constructorParams as RetroBridgeTonConstructorParams,
                 providerAddress,
-                routePath
+                routePath,
+                apiQuote,
+                apiResponse
             );
         }
 
@@ -33,7 +38,9 @@ export class RetroBridgeFactory {
                 constructorParams as RetroBridgeEvmConstructorParams,
                 providerAddress,
                 routePath,
-                useProxy
+                useProxy,
+                apiQuote,
+                apiResponse
             );
         }
         throw new Error('Can not create trade instance');

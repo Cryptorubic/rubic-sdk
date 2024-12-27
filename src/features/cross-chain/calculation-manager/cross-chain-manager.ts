@@ -1,21 +1,14 @@
+import { QuoteRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
-import { from, map, merge, Observable, startWith, switchMap } from 'rxjs';
-import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
 import pTimeout from 'src/common/utils/p-timeout';
-import { Mutable } from 'src/common/utils/types';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { Injector } from 'src/core/injector/injector';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
-import {
-    ProxySupportedBlockchain,
-    proxySupportedBlockchains
-} from 'src/features/common/constants/proxy-supported-blockchain';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
-import { CrossChainProviders } from 'src/features/cross-chain/calculation-manager/constants/cross-chain-providers';
 import { defaultCrossChainCalculationOptions } from 'src/features/cross-chain/calculation-manager/constants/default-cross-chain-calculation-options';
 import { defaultProviderAddresses } from 'src/features/cross-chain/calculation-manager/constants/default-provider-addresses';
 import {
@@ -23,30 +16,15 @@ import {
     RequiredCrossChainManagerCalculationOptions
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-manager-options';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { CrossChainReactivelyCalculatedTradeData } from 'src/features/cross-chain/calculation-manager/models/cross-chain-reactively-calculated-trade-data';
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    CrossChainTradeType
-} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { CrossChainTypedTradeProviders } from 'src/features/cross-chain/calculation-manager/models/cross-chain-typed-trade-provider';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/models/wrapped-cross-chain-trade';
-import { compareCrossChainTrades } from 'src/features/cross-chain/calculation-manager/utils/compare-cross-chain-trades';
+import { TransformUtils } from 'src/features/ws-api/transform-utils';
 
 /**
  * Contains method to calculate best cross-chain trade.
  */
 export class CrossChainManager {
-    public readonly tradeProviders: CrossChainTypedTradeProviders = CrossChainProviders.reduce(
-        (acc, ProviderClass) => {
-            const provider = new ProviderClass();
-            acc[provider.type] = provider;
-            return acc;
-        },
-        {} as Mutable<CrossChainTypedTradeProviders>
-    );
-
     constructor(private readonly providerAddress: ProviderAddress) {}
 
     /**
@@ -116,123 +94,33 @@ export class CrossChainManager {
             options
         );
 
-        const providers = this.getNotDisabledProviders(
-            from.blockchain,
-            to.blockchain,
-            disabledProviders
+        // @TODO API
+        const request: QuoteRequestInterface = {
+            srcTokenAddress: from.address,
+            dstTokenBlockchain: to.blockchain,
+            srcTokenBlockchain: from.blockchain,
+            srcTokenAmount: from.stringWeiAmount,
+            dstTokenAddress: to.address
+        };
+        const routes = await Injector.rubicApiService.fetchRoutes(request);
+
+        return Promise.all(
+            routes.routes.map(route =>
+                TransformUtils.transformCrossChain(route, request, providerOptions.providerAddress)
+            )
         );
 
-        const calculationPromises = providers.map(provider =>
-            this.getProviderCalculationPromise(provider, from, to, providerOptions)
-        );
-        const wrappedTrades = (await Promise.all(calculationPromises)).filter(notNull);
-        if (!wrappedTrades?.length) {
-            throw new RubicSdkError('No success providers calculation for the trade');
-        }
-
-        return wrappedTrades.sort((nextTrade, prevTrade) =>
-            compareCrossChainTrades(nextTrade, prevTrade)
-        );
-    }
-
-    /**
-     * Calculates cross-chain trades reactively in sequence.
-     * Contains wrapped trade object which may contain error, but sometimes course can be
-     * calculated even with thrown error (e.g. min/max amount error).
-     *
-     * @example
-     * ```ts
-     * const fromBlockchain = BLOCKCHAIN_NAME.ETHEREUM;
-     * // ETH
-     * const fromTokenAddress = '0x0000000000000000000000000000000000000000';
-     * const fromAmount = 1;
-     * const toBlockchain = BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN;
-     * // BUSD
-     * const toTokenAddress = '0xe9e7cea3dedca5984780bafc599bd69add087d56';
-     *
-     * sdk.crossChain.calculateTrade(
-     *     { blockchain: fromBlockchain, address: fromTokenAddress },
-     *     fromAmount,
-     *     { blockchain: toBlockchain, address: toTokenAddress }
-     * ).subscribe(tradeData => {
-     *     console.log(tradeData.total) // 3
-     *     console.log(tradeData.calculated) // 0 or 1 ... or tradeData.total
-     *
-     *     const wrappedTrade = tradeData.wrappedTrade;
-     *     if (wrappedTrade) {
-     *         console.log(wrappedTrade.tradeType, `to amount: ${wrappedTrade.trade.to.tokenAmount.toFormat(3)}`));
-     *         if (wrappedTrade.error) {
-     *             console.error(wrappedTrade.tradeType, 'error: wrappedTrade.error');
-     *         }
-     *    }
-     * });
-     *
-     * ```
-     *
-     * @param fromToken Token to sell.
-     * @param fromAmount Amount to sell.
-     * @param toToken Token to get.
-     * @param options Additional options.
-     * @returns Observable of cross-chain providers calculation data with best trade and possible errors.
-     */
-    public calculateTradesReactively(
-        fromToken:
-            | Token
-            | {
-                  address: string;
-                  blockchain: BlockchainName;
-              }
-            | PriceToken,
-        fromAmount: string | number | BigNumber,
-        toToken:
-            | Token
-            | {
-                  address: string;
-                  blockchain: BlockchainName;
-              }
-            | PriceToken,
-        options?: CrossChainManagerCalculationOptions
-    ): Observable<CrossChainReactivelyCalculatedTradeData> {
-        if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
-            throw new RubicSdkError('Blockchains of from and to tokens must be different.');
-        }
-
-        return from(getPriceTokensFromInputTokens(fromToken, fromAmount, toToken)).pipe(
-            switchMap(({ from, to }) => {
-                const { disabledProviders, ...providerOptions } = this.getFullOptions(
-                    from.blockchain,
-                    options
-                );
-
-                const providers = this.getNotDisabledProviders(
-                    from.blockchain,
-                    to.blockchain,
-                    disabledProviders
-                );
-                const totalTrades = providers.length;
-
-                return merge(
-                    ...providers.map(provider =>
-                        fromPromise(
-                            this.getProviderCalculationPromise(provider, from, to, providerOptions)
-                        )
-                    )
-                ).pipe(
-                    map((wrappedTrade, index) => {
-                        return {
-                            total: totalTrades,
-                            calculated: index + 1,
-                            wrappedTrade
-                        };
-                    }),
-                    startWith({
-                        total: totalTrades,
-                        calculated: 0,
-                        wrappedTrade: null
-                    })
-                );
-            })
-        );
+        // const calculationPromises = providers.map(provider =>
+        //     this.getProviderCalculationPromise(provider, from, to, providerOptions)
+        // );
+        // const wrappedTrades = (await Promise.all(calculationPromises)).filter(notNull);
+        // if (!wrappedTrades?.length) {
+        //     throw new RubicSdkError('No success providers calculation for the trade');
+        // }
+        //
+        // return wrappedTrades.sort((nextTrade, prevTrade) =>
+        //     compareCrossChainTrades(nextTrade, prevTrade)
+        // );
     }
 
     private getFullOptions(
@@ -242,39 +130,14 @@ export class CrossChainManager {
         const providerAddress = options?.providerAddress
             ? options.providerAddress
             : this.getProviderAddress(fromBlockchain);
-        const useProxy = this.getProxyConfig(fromBlockchain, options);
 
         return combineOptions(
-            { ...options, useProxy },
+            { ...options },
             {
                 ...defaultCrossChainCalculationOptions,
-                providerAddress,
-                useProxy
+                providerAddress
             }
         );
-    }
-
-    private getNotDisabledProviders(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName,
-        disabledProviders: CrossChainTradeType[]
-    ): CrossChainProvider[] {
-        const providers = (
-            Object.entries(this.tradeProviders) as [CrossChainTradeType, CrossChainProvider][]
-        )
-            .filter(([type, provider]) => {
-                if (disabledProviders.includes(type)) {
-                    return false;
-                }
-
-                return provider.areSupportedBlockchains(fromBlockchain, toBlockchain);
-            })
-            .map(([_type, provider]) => provider);
-        if (!providers.length) {
-            throw new RubicSdkError(`There are no providers for trade`);
-        }
-
-        return providers;
     }
 
     private async getProviderCalculationPromise(
@@ -324,21 +187,5 @@ export class CrossChainManager {
             providerAddress = this.providerAddress[chainType]!.crossChain!;
         }
         return providerAddress;
-    }
-
-    private getProxyConfig(
-        fromBlockchain: BlockchainName,
-        options: CrossChainManagerCalculationOptions | undefined
-    ) {
-        const isBlockchainSupportedByProxy = proxySupportedBlockchains.includes(
-            fromBlockchain as ProxySupportedBlockchain
-        );
-        return Object.values(CROSS_CHAIN_TRADE_TYPE).reduce(
-            (acc, chain) => ({
-                ...acc,
-                [chain]: isBlockchainSupportedByProxy ? options?.useProxy?.[chain] ?? true : false
-            }),
-            {} as Record<CrossChainTradeType, boolean>
-        );
     }
 }

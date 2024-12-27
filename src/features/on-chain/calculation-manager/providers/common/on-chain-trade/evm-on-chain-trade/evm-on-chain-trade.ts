@@ -1,3 +1,8 @@
+import {
+    QuoteRequestInterface,
+    QuoteResponseInterface,
+    SwapRequestInterface
+} from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
@@ -104,6 +109,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
+    private readonly apiQuote: QuoteRequestInterface | null = null;
+
+    private readonly apiResponse: QuoteResponseInterface | null = null;
+
     protected constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
         super(providerAddress);
 
@@ -118,6 +127,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         this.useProxy = evmOnChainTradeStruct.useProxy;
         this.fromWithoutFee = evmOnChainTradeStruct.fromWithoutFee;
         this.usedForCrossChain = evmOnChainTradeStruct.usedForCrossChain || false;
+
+        this.apiQuote = evmOnChainTradeStruct?.apiQuote || null;
+        this.apiResponse = evmOnChainTradeStruct?.apiResponse || null;
 
         if (evmOnChainTradeStruct.permit2ApproveAddress) {
             this.permit2ApproveConfig = {
@@ -310,10 +322,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
 
-        if (this.useProxy) {
-            return this.encodeProxy(options);
-        }
-        return this.encodeDirect(options);
+        return this.setTransactionConfig(options);
     }
 
     /**
@@ -471,9 +480,30 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         ];
     }
 
-    protected abstract getTransactionConfigAndAmount(
-        options: EncodeTransactionOptions
-    ): Promise<EvmEncodedConfigAndToAmount>;
+    protected async getTransactionConfigAndAmount(
+        options?: EncodeTransactionOptions
+    ): Promise<EvmEncodedConfigAndToAmount> {
+        if (!this.apiResponse || !this.apiQuote) {
+            throw new Error('Failed to load api response');
+        }
+        const swapRequestData: SwapRequestInterface = {
+            ...this.apiQuote,
+            fromAddress: this.walletAddress,
+            receiver: options?.receiverAddress || this.walletAddress,
+            id: this.apiResponse.id
+        };
+        const swapData = await Injector.rubicApiService.fetchSwapData(swapRequestData);
+
+        const config = {
+            data: swapData.transaction.data!,
+            value: swapData.transaction.value!,
+            to: swapData.transaction.to!
+        };
+
+        const amount = swapData.estimate.destinationWeiAmount;
+
+        return { tx: config, toAmount: amount };
+    }
 
     protected async setTransactionConfig(
         options: EncodeTransactionOptions

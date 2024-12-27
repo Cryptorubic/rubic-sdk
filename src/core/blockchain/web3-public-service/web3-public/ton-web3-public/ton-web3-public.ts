@@ -1,6 +1,6 @@
 import { Address } from '@ton/core';
 import BigNumber from 'bignumber.js';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { nativeTokensStruct } from 'src/common/tokens/constants/native-token-struct';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TonApiTxDataByBocResp } from 'src/core/blockchain/models/ton/tonapi-types';
@@ -103,7 +103,7 @@ export class TonWeb3Public extends Web3Public {
         const info = await Promise.all(
             tokensAddresses.map(address => {
                 if (TonWeb3Pure.isNativeAddress(address)) {
-                    const nativeToken = nativeTokensList[BLOCKCHAIN_NAME.TON];
+                    const nativeToken = nativeTokensStruct[BLOCKCHAIN_NAME.TON];
                     return nativeToken;
                 }
                 return this.tonApi.fetchTokenInfo(address);

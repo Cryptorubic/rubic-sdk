@@ -31,4 +31,9 @@ export interface Configuration {
      * Integrator wallet address.
      */
     readonly providerAddress?: Partial<ProviderAddress>;
+
+    /**
+     * Api env type
+     */
+    readonly envType?: 'local' | 'dev' | 'dev2' | 'prod';
 }

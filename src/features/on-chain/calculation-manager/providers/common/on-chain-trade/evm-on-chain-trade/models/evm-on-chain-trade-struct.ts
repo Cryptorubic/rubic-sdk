@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
@@ -27,4 +28,6 @@ export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainN
     proxyFeeInfo: OnChainProxyFeeInfo | undefined;
     fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
     path: ReadonlyArray<Token>;
+    apiQuote?: QuoteRequestInterface;
+    apiResponse?: QuoteResponseInterface;
 }

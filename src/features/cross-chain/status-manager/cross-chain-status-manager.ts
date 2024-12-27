@@ -21,7 +21,6 @@ import {
     TxStatus
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
-import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { LifiUtilsService } from 'src/features/common/providers/lifi/lifi-utils-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
@@ -62,7 +61,6 @@ import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/model
 import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
 import {
     BtcStatusResponse,
-    DE_BRIDGE_API_STATE_STATUS,
     GetDstTxDataFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
@@ -91,7 +89,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
+        // [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
@@ -384,44 +382,49 @@ export class CrossChainStatusManager {
      * @param data Trade data.
      * @returns Cross-chain transaction status and hash.
      */
-    private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    private async getDebridgeDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { orderIds } = await DlnApiService.fetchCrossChainOrdersByHash(data.srcTxHash);
-
-            if (!orderIds.length) {
-                return {
-                    status: TX_STATUS.PENDING,
-                    hash: null
-                };
-            }
-
-            const orderId = orderIds[0];
-            const dstTxData: TxStatusData = {
+            return {
                 status: TX_STATUS.PENDING,
                 hash: null
             };
-
-            const { status } = await DlnApiService.fetchCrossChainStatus(orderId);
-
-            if (
-                status === DE_BRIDGE_API_STATE_STATUS.FULFILLED ||
-                status === DE_BRIDGE_API_STATE_STATUS.SENTUNLOCK ||
-                status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDUNLOCK
-            ) {
-                const { fulfilledDstEventMetadata } =
-                    await DlnApiService.fetchCrossChainEventMetaData(orderId);
-
-                dstTxData.hash = fulfilledDstEventMetadata.transactionHash.stringValue;
-                dstTxData.status = TX_STATUS.SUCCESS;
-            } else if (
-                status === DE_BRIDGE_API_STATE_STATUS.ORDERCANCELLED ||
-                status === DE_BRIDGE_API_STATE_STATUS.SENTORDERCANCEL ||
-                status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDORDERCANCEL
-            ) {
-                dstTxData.status = TX_STATUS.FAIL;
-            }
-
-            return dstTxData;
+            // @TODO API
+            // const { orderIds } = await DlnApiService.fetchCrossChainOrdersByHash(data.srcTxHash);
+            //
+            // if (!orderIds.length) {
+            //     return {
+            //         status: TX_STATUS.PENDING,
+            //         hash: null
+            //     };
+            // }
+            //
+            // const orderId = orderIds[0];
+            // const dstTxData: TxStatusData = {
+            //     status: TX_STATUS.PENDING,
+            //     hash: null
+            // };
+            //
+            // const { status } = await DlnApiService.fetchCrossChainStatus(orderId);
+            //
+            // if (
+            //     status === DE_BRIDGE_API_STATE_STATUS.FULFILLED ||
+            //     status === DE_BRIDGE_API_STATE_STATUS.SENTUNLOCK ||
+            //     status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDUNLOCK
+            // ) {
+            //     const { fulfilledDstEventMetadata } =
+            //         await DlnApiService.fetchCrossChainEventMetaData(orderId);
+            //
+            //     dstTxData.hash = fulfilledDstEventMetadata.transactionHash.stringValue;
+            //     dstTxData.status = TX_STATUS.SUCCESS;
+            // } else if (
+            //     status === DE_BRIDGE_API_STATE_STATUS.ORDERCANCELLED ||
+            //     status === DE_BRIDGE_API_STATE_STATUS.SENTORDERCANCEL ||
+            //     status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDORDERCANCEL
+            // ) {
+            //     dstTxData.status = TX_STATUS.FAIL;
+            // }
+            //
+            // return dstTxData;
         } catch {
             return {
                 status: TX_STATUS.PENDING,

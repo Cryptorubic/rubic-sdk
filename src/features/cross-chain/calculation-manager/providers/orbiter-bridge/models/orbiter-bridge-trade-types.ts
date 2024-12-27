@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
     BlockchainName,
@@ -31,6 +32,8 @@ export interface OrbiterTradeParams<Blockchain extends BlockchainName> {
     providerAddress: string;
     routePath: RubicStep[];
     useProxy: boolean;
+    apiQuote: QuoteRequestInterface;
+    apiResponse: QuoteResponseInterface;
 }
 
 export type OrbiterEvmTradeParams = OrbiterTradeParams<EvmBlockchainName>;
