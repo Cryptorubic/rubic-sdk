@@ -5,6 +5,7 @@ import { TxStatusData } from 'src/features/common/status-manager/models/tx-statu
 
 import {
     EncodeSwapSchema,
+    ErrorFeeResp,
     FetchEncodedParamRequest,
     MesonErrorRes,
     MesonLimitsChain,
@@ -38,9 +39,9 @@ export class MesonCcrApiService {
 
             return res.result.totalFee;
         } catch (e: unknown) {
-            const res = this.parseMesonError<TxFeeSchema>(e);
+            const res = this.parseMesonError<ErrorFeeResp>(e);
 
-            return res.totalFee;
+            return res.fee;
         }
     }
 
@@ -127,16 +128,12 @@ export class MesonCcrApiService {
 
         const {
             error: {
-                error: {
-                    data: { swapData }
-                }
+                error: { data }
             }
         } = err as MesonErrorRes<T>;
 
-        if ('converted' in swapData) {
-            throw new NotSupportedTokensError();
-        }
+        if (!data || 'converted' in data) throw new NotSupportedTokensError();
 
-        return swapData;
+        return data;
     }
 }

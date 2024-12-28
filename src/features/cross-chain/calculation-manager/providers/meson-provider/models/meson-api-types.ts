@@ -2,9 +2,7 @@ export type MesonErrorRes<T> = {
     error: {
         error: {
             code: number;
-            data: {
-                swapData: T;
-            };
+            data: T;
             message: string;
         };
     };
@@ -87,6 +85,10 @@ export interface TxFeeSchema {
     /* in decimal number format - example 1.5, 0.001 etc   */
     totalFee: string;
     converted?: { amount: string; token: string };
+}
+
+export interface ErrorFeeResp {
+    fee: string;
 }
 
 export interface TxStatusSchema {
