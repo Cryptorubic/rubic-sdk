@@ -4,5 +4,4 @@ import { EvmOnChainTradeStruct } from '../../../common/on-chain-trade/evm-on-cha
 
 export interface PiteasTradeStruct extends EvmOnChainTradeStruct {
     methodParameters: PiteasMethodParameters;
-    gasUseEstimate: number;
 }

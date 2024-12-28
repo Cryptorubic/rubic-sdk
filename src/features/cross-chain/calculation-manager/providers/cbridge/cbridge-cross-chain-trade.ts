@@ -22,46 +22,9 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
-        onChainTrade: EvmOnChainTrade | null,
-        feeInfo: FeeInfo,
-        maxSlippage: number,
-        celerContractAddress: string,
-        providerAddress: string,
-        receiverAddress: string
-    ): Promise<GasData | null> {
-        try {
-            const trade = new CbridgeCrossChainTrade(
-                {
-                    from,
-                    to: toToken,
-                    gasData: null,
-                    priceImpact: 0,
-                    slippage: 0,
-                    feeInfo: feeInfo!,
-                    maxSlippage,
-                    contractAddress: celerContractAddress,
-                    transitMinAmount: new BigNumber(0),
-                    onChainTrade: onChainTrade
-                },
-                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                [],
-                false
-            );
-
-            return getCrossChainGasData(trade, receiverAddress);
-        } catch (_err) {
-            return null;
-        }
-    }
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE;
 
     public readonly isAggregator = false;

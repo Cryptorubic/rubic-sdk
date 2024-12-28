@@ -14,7 +14,6 @@ import { TransactionReceipt } from 'web3-eth';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { getCrossChainGasData } from '../../utils/get-cross-chain-gas-data';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -31,43 +30,10 @@ import {
     EDDY_OMNI_CONTRACT_IN_ZETACHAIN
 } from './constants/eddy-bridge-contract-addresses';
 import { EddyBridgeSupportedChain } from './constants/eddy-bridge-supported-chains';
-import {
-    EddyBridgeGetGasDataParams,
-    EddyBridgeTradeConstructorParams
-} from './models/eddy-trade-types';
+import { EddyBridgeTradeConstructorParams } from './models/eddy-trade-types';
 import { EddyRoutingDirection, ERD } from './utils/eddy-bridge-routing-directions';
 
 export class EddyBridgeTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData({
-        feeInfo,
-        from,
-        providerAddress,
-        toToken,
-        slippage,
-        routingDirection,
-        quoteOptions
-    }: EddyBridgeGetGasDataParams): Promise<GasData | null> {
-        const trade = new EddyBridgeTrade({
-            crossChainTrade: {
-                from,
-                to: toToken,
-                gasData: null,
-                priceImpact: 0,
-                feeInfo,
-                slippage,
-                routingDirection,
-                // ratioToAmount: 1,
-                quoteOptions
-            },
-            providerAddress: providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            routePath: [],
-            useProxy: false
-        });
-
-        return getCrossChainGasData(trade);
-    }
-
     /**ABSTRACT PROPS */
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE;
 

@@ -110,14 +110,12 @@ export class ArchonBridgeProvider extends CrossChainProvider {
                 tokenAmount: toAmount
             });
 
-            const gasData = null;
-
             return {
                 trade: new ArchonBridgeTrade(
                     {
                         from: fromToken,
                         to,
-                        gasData,
+                        gasData: await this.getGasData(fromToken),
                         feeInfo
                     },
                     options.providerAddress,

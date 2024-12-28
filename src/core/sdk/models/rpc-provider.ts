@@ -1,4 +1,5 @@
 import {
+    BitcoinBlockchainName,
     EvmBlockchainName,
     SolanaBlockchainName,
     TonBlockchainName,
@@ -20,5 +21,6 @@ export type RpcProviders = Partial<
     Record<EvmBlockchainName, RpcProvider<string>> &
         Record<TronBlockchainName, RpcProvider<TronWebProvider>> &
         Record<SolanaBlockchainName, RpcProvider<string>> &
-        Record<TonBlockchainName, RpcProvider<string>>
+        Record<TonBlockchainName, RpcProvider<string>> &
+        Record<BitcoinBlockchainName, RpcProvider<string>>
 >;

@@ -1,14 +1,8 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError, RubicSdkError, TooLowAmountError } from 'src/common/errors';
+import { RubicSdkError, TooLowAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -19,12 +13,10 @@ import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { DebridgeEvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/chains/debridge-evm-cross-chain-trade';
 import {
     DeBridgeCrossChainSupportedBlockchain,
     deBridgeCrossChainSupportedBlockchains
@@ -66,14 +58,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         await this.checkDeflationTokens(from, toToken);
-
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return {
-                trade: null,
-                error: new NotSupportedTokensError(),
-                tradeType: this.type
-            };
-        }
 
         try {
             const fakeAddress = DlnUtils.getFakeReceiver(toBlockchain);
@@ -146,14 +130,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(debridgeResponse.fixFee)
             });
 
-            const gasData = await this.getGasData(
-                { ...options, receiverAddress: fakeAddress },
-                from,
-                to,
-                requestParams,
-                feeInfo
-            );
-
             return {
                 trade: DebridgeCrossChainFactory.createTrade(
                     fromBlockchain,
@@ -161,7 +137,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         from,
                         to,
                         transactionRequest: requestParams,
-                        gasData,
+                        gasData: await this.getGasData(from),
                         priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: (
                             debridgeResponse?.tx as { allowanceTarget: string | undefined }
@@ -319,34 +295,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         );
 
         return trade;
-    }
-
-    private async getGasData(
-        options: RequiredCrossChainOptions,
-        from: PriceTokenAmount<DeBridgeCrossChainSupportedBlockchain>,
-        to: PriceTokenAmount<DeBridgeCrossChainSupportedBlockchain>,
-        requestParams: TransactionRequest,
-        feeInfo: FeeInfo
-    ): Promise<GasData | null> {
-        if (options.gasCalculation !== 'enabled') {
-            return null;
-        }
-
-        const blockchain = from.blockchain;
-        const chainType = BlockchainsInfo.getChainType(blockchain);
-
-        if (chainType === CHAIN_TYPE.EVM) {
-            return DebridgeEvmCrossChainTrade.getGasData(
-                from as PriceTokenAmount<EvmBlockchainName>,
-                to as PriceTokenAmount<EvmBlockchainName>,
-                requestParams,
-                feeInfo,
-                options.providerAddress,
-                options.receiverAddress
-            );
-        }
-        // Chain is not supported
-        return null;
     }
 
     private async checkDeflationTokens(

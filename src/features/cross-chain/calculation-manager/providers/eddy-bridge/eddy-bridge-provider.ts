@@ -69,24 +69,11 @@ export class EddyBridgeProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(outputAmount)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await EddyBridgeTrade.getGasData({
-                          feeInfo,
-                          from: fromWithoutFee,
-                          toToken: to,
-                          providerAddress: options.providerAddress,
-                          slippage: options.slippageTolerance,
-                          routingDirection,
-                          quoteOptions: options
-                      })
-                    : null;
-
             const trade = new EddyBridgeTrade({
                 crossChainTrade: {
                     feeInfo,
                     from: fromWithoutFee,
-                    gasData,
+                    gasData: await this.getGasData(from),
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: eddySlippage + options.slippageTolerance,

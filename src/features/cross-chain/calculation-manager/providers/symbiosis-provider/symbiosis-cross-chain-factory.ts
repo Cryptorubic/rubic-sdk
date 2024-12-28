@@ -1,19 +1,16 @@
-import { PriceTokenAmount } from 'src/common/tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { SymbiosisCcrBitcoinTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-bitcoin-trade';
 import { SymbiosisEvmCcrTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-evm-trade';
 import { SymbiosisCcrTonTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-ton-trade';
 import { SymbiosisTronCcrTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-tron-trade';
 import {
+    SymbiosisbitcoinCrossChainTradeConstructor,
     SymbiosisCrossChainTradeConstructor,
     SymbiosisEvmCrossChainTradeConstructor,
     SymbiosisTonCrossChainTradeConstructor,
     SymbiosisTronCrossChainTradeConstructor
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
-import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 
 import { RubicStep } from '../common/models/rubicStep';
 
@@ -24,7 +21,11 @@ export class SymbiosisCrossChainFactory {
         providerAddress: string,
         routePath: RubicStep[],
         useProxy: boolean
-    ): SymbiosisCcrTonTrade | SymbiosisEvmCcrTrade | SymbiosisTronCcrTrade {
+    ):
+        | SymbiosisCcrTonTrade
+        | SymbiosisEvmCcrTrade
+        | SymbiosisTronCcrTrade
+        | SymbiosisCcrBitcoinTrade {
         if (BlockchainsInfo.isTonBlockchainName(fromBlockchain)) {
             return new SymbiosisCcrTonTrade(
                 constructorParams as SymbiosisTonCrossChainTradeConstructor,
@@ -51,33 +52,14 @@ export class SymbiosisCrossChainFactory {
                 useProxy
             );
         }
-        throw new Error('Can not create trade instance');
-    }
-
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount,
-        swapParams: SymbiosisSwappingParams,
-        feeInfo: FeeInfo,
-        providerGateway: string,
-        providerAddress: string,
-        receiverAddress?: string
-    ): Promise<GasData | null> {
-        const type = BlockchainsInfo.getChainType(from.blockchain);
-        if (type === CHAIN_TYPE.TON || CHAIN_TYPE.TRON) {
-            return null;
-        }
-        if (type === CHAIN_TYPE.EVM) {
-            return SymbiosisEvmCcrTrade.getGasData(
-                from,
-                toToken,
-                swapParams,
-                feeInfo,
-                providerGateway,
+        if (BlockchainsInfo.isBitcoinBlockchainName(fromBlockchain)) {
+            return new SymbiosisCcrBitcoinTrade(
+                constructorParams as SymbiosisbitcoinCrossChainTradeConstructor,
                 providerAddress,
-                receiverAddress
+                routePath,
+                useProxy
             );
         }
-        throw new Error('From blockchain not supported');
+        throw new Error('Can not create trade instance');
     }
 }

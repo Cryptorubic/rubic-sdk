@@ -4,19 +4,19 @@ import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/
 import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
 
 export function getGasFeeInfo(
-    estimatedGas: BigNumber | string | number | null | undefined,
-    gasPriceInfo: GasPriceInfo | undefined
+    gasPriceInfo: GasPriceInfo | undefined,
+    gasData: { gasLimit?: BigNumber; totalGas?: BigNumber } = {}
 ): GasFeeInfo {
-    const gasLimit = estimatedGas ? Web3Pure.calculateGasMargin(estimatedGas, 1.2) : undefined;
+    const gasLimit = gasData.gasLimit
+        ? Web3Pure.calculateGasMargin(gasData.gasLimit, 1.2)
+        : new BigNumber(0);
 
-    if (!gasLimit) {
-        return { gasPrice: gasPriceInfo?.gasPrice };
-    }
     const gasFeeInEth = gasPriceInfo?.gasPriceInEth?.multipliedBy(gasLimit);
     const gasFeeInUsd = gasPriceInfo?.gasPriceInUsd?.multipliedBy(gasLimit);
 
     return {
-        gasLimit,
+        ...(gasData.totalGas && { totalGas: gasData.totalGas }),
+        ...(gasLimit.gt(0) && { gasLimit }),
         gasPrice: gasPriceInfo?.gasPrice,
         gasFeeInEth,
         gasFeeInUsd,

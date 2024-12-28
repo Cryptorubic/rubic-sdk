@@ -1,17 +1,18 @@
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     TonBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
-import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { ToncoOnChainTradeStruct } from './models/tonco-trade-types';
 import { ToncoSdkFacade } from './services/tonco-sdk-facade';
@@ -38,10 +39,13 @@ export class ToncoOnChainProvider extends AggregatorOnChainProvider {
                 weiAmount: amountOutWei
             });
 
-            const gasLimit = await ToncoSdkFacade.estimateGas(
+            const totalGasNonWei = await ToncoSdkFacade.estimateGas(
                 params,
                 from.weiAmount,
                 to.weiAmountMinusSlippage(options.slippageTolerance)
+            );
+            const totalGas = new BigNumber(
+                Web3Pure.toWei(totalGasNonWei, nativeTokensList.TON.decimals)
             );
 
             const routingPath = [
@@ -55,10 +59,7 @@ export class ToncoOnChainProvider extends AggregatorOnChainProvider {
             const tradeStruct = {
                 from,
                 to,
-                gasFeeInfo: {
-                    gasPrice: new BigNumber(1),
-                    gasLimit
-                },
+                gasFeeInfo: { totalGas },
                 slippageTolerance: options.slippageTolerance,
                 useProxy: false,
                 withDeflation: options.withDeflation,
@@ -75,9 +76,5 @@ export class ToncoOnChainProvider extends AggregatorOnChainProvider {
                 error: err
             };
         }
-    }
-
-    protected getGasFeeInfo(): Promise<GasFeeInfo | null> {
-        return Promise.resolve(null);
     }
 }
