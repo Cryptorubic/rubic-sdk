@@ -699,5 +699,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ZIL',
         symbol: 'ZIL',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SONIC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SONIC,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'SONIC',
+        symbol: 'S',
+        decimals: 18
     })
 };
