@@ -10,11 +10,9 @@ import { RubicSdkError } from 'src/common/errors';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
-    EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
 import { TonApiTxDataByBocResp } from 'src/core/blockchain/models/ton/tonapi-types';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import {
     TX_STATUS,
@@ -36,21 +34,12 @@ import {
     CrossChainTradeType
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
-import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
-import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
-import {
-    TRANSFER_HISTORY_STATUS,
-    TRANSFER_HISTORY_STATUS_CODE,
-    XFER_STATUS,
-    XFER_STATUS_CODE
-} from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import {
     LIFI_SWAP_STATUS,
     LifiSwapStatus
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
-import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 import { CHANGENOW_API_STATUS } from 'src/features/cross-chain/status-manager/models/changenow-api-response';
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
@@ -66,8 +55,6 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
-import { acrossFundsDepositedInputs } from '../calculation-manager/providers/across-provider/constants/across-deposit-abi';
-import { AcrossApiService } from '../calculation-manager/providers/across-provider/services/across-api-service';
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
@@ -515,53 +502,55 @@ export class CrossChainStatusManager {
         }
     }
 
-    private async getCelerBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        try {
-            const transferId = await CrossChainCbridgeManager.getTransferId(
-                data.srcTxHash,
-                data.fromBlockchain as CbridgeCrossChainSupportedBlockchain
-            );
-            const useTestnet = BlockchainsInfo.isTestBlockchainName(data.fromBlockchain);
-            const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(transferId, {
-                useTestnet
-            });
-
-            const transformedStatus = TRANSFER_HISTORY_STATUS_CODE[swapData.status as number];
-
-            switch (transformedStatus) {
-                case TRANSFER_HISTORY_STATUS.TRANSFER_UNKNOWN:
-                case TRANSFER_HISTORY_STATUS.TRANSFER_SUBMITTING:
-                case TRANSFER_HISTORY_STATUS.TRANSFER_WAITING_FOR_SGN_CONFIRMATION:
-                case TRANSFER_HISTORY_STATUS.TRANSFER_REQUESTING_REFUND:
-                case TRANSFER_HISTORY_STATUS.TRANSFER_CONFIRMING_YOUR_REFUND:
-                default:
-                    return { status: TX_STATUS.PENDING, hash: null };
-                case TRANSFER_HISTORY_STATUS.TRANSFER_REFUNDED:
-                case TRANSFER_HISTORY_STATUS.TRANSFER_COMPLETED:
-                    return {
-                        status: TX_STATUS.SUCCESS,
-                        hash: swapData.dst_block_tx_link.split('/').at(-1)!
-                    };
-                case TRANSFER_HISTORY_STATUS.TRANSFER_FAILED:
-                    return {
-                        status: TX_STATUS.FAIL,
-                        hash: null
-                    };
-                case TRANSFER_HISTORY_STATUS.TRANSFER_WAITING_FOR_FUND_RELEASE:
-                case TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED:
-                    return XFER_STATUS_CODE[swapData.refund_reason] === XFER_STATUS.OK_TO_RELAY
-                        ? {
-                              status: TX_STATUS.PENDING,
-                              hash: null
-                          }
-                        : {
-                              status: TX_STATUS.REVERT,
-                              hash: null
-                          };
-            }
-        } catch {
-            return { status: TX_STATUS.PENDING, hash: null };
-        }
+    private async getCelerBridgeDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
+        // @TODO API
+        return { status: TX_STATUS.PENDING, hash: null };
+        // try {
+        //     const transferId = await CrossChainCbridgeManager.getTransferId(
+        //         data.srcTxHash,
+        //         data.fromBlockchain as CbridgeCrossChainSupportedBlockchain
+        //     );
+        //     const useTestnet = BlockchainsInfo.isTestBlockchainName(data.fromBlockchain);
+        //     const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(transferId, {
+        //         useTestnet
+        //     });
+        //
+        //     const transformedStatus = TRANSFER_HISTORY_STATUS_CODE[swapData.status as number];
+        //
+        //     switch (transformedStatus) {
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_UNKNOWN:
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_SUBMITTING:
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_WAITING_FOR_SGN_CONFIRMATION:
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_REQUESTING_REFUND:
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_CONFIRMING_YOUR_REFUND:
+        //         default:
+        //             return { status: TX_STATUS.PENDING, hash: null };
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_REFUNDED:
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_COMPLETED:
+        //             return {
+        //                 status: TX_STATUS.SUCCESS,
+        //                 hash: swapData.dst_block_tx_link.split('/').at(-1)!
+        //             };
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_FAILED:
+        //             return {
+        //                 status: TX_STATUS.FAIL,
+        //                 hash: null
+        //             };
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_WAITING_FOR_FUND_RELEASE:
+        //         case TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED:
+        //             return XFER_STATUS_CODE[swapData.refund_reason] === XFER_STATUS.OK_TO_RELAY
+        //                 ? {
+        //                       status: TX_STATUS.PENDING,
+        //                       hash: null
+        //                   }
+        //                 : {
+        //                       status: TX_STATUS.REVERT,
+        //                       hash: null
+        //                   };
+        //     }
+        // } catch {
+        //     return { status: TX_STATUS.PENDING, hash: null };
+        // }
     }
 
     private async getChangenowDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
@@ -791,12 +780,14 @@ export class CrossChainStatusManager {
         return await RetroBridgeApiService.getTxStatus(data.retroBridgeId);
     }
 
-    private async getAcrossDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const depositId = await Injector.web3PublicService
-            .getWeb3Public(data.fromBlockchain as EvmBlockchainName)
-            .getTxDecodedLogData(data.srcTxHash, acrossFundsDepositedInputs, 'depositId');
-        const srcChainId = blockchainId[data.fromBlockchain];
-        return AcrossApiService.getTxStatus(srcChainId, Number(depositId));
+    private async getAcrossDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
+        // @TODO API
+        return { status: TX_STATUS.PENDING, hash: null };
+        // const depositId = await Injector.web3PublicService
+        //     .getWeb3Public(data.fromBlockchain as EvmBlockchainName)
+        //     .getTxDecodedLogData(data.srcTxHash, acrossFundsDepositedInputs, 'depositId');
+        // const srcChainId = blockchainId[data.fromBlockchain];
+        // return AcrossApiService.getTxStatus(srcChainId, Number(depositId));
     }
 
     private getUniZenDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
@@ -804,12 +795,13 @@ export class CrossChainStatusManager {
     }
 
     private async getSimpleSwapDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        return { status: TX_STATUS.PENDING, hash: null };
         if (!data.simpleSwapId) {
             throw new RubicSdkError('Must provide SimpleSwap trade ID');
         }
 
         try {
-            const { status, dstHash } = await SimpleSwapApiService.getTxStatus(data.simpleSwapId);
+            const { status, dstHash } = await SimpleSwapApiService.getTxStatus(data.simpleSwapId!);
             if (
                 status === CHANGENOW_API_STATUS.FINISHED ||
                 status === CHANGENOW_API_STATUS.REFUNDED

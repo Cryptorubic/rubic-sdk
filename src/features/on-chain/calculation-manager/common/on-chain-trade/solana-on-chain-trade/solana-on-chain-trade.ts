@@ -1,3 +1,8 @@
+import {
+    QuoteRequestInterface,
+    QuoteResponseInterface,
+    SwapRequestInterface
+} from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
@@ -17,12 +22,15 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/on-chain-trade';
+import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-manager/models/aggregator-on-chain-types';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
 import { SolanaOnChainTradeStruct } from './models/solana-on-chain-trade-struct';
 
 export abstract class SolanaOnChainTrade extends OnChainTrade {
+    protected lastTransactionConfig: EvmEncodeConfig | null = null;
+
     public readonly from: PriceTokenAmount<SolanaBlockchainName>;
 
     public readonly to: PriceTokenAmount<SolanaBlockchainName>;
@@ -68,6 +76,10 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.SOLANA);
     }
 
+    private readonly apiQuote: QuoteRequestInterface | null = null;
+
+    private readonly apiResponse: QuoteResponseInterface | null = null;
+
     protected constructor(tradeStruct: SolanaOnChainTradeStruct, providerAddress: string) {
         super(providerAddress);
 
@@ -81,6 +93,9 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
 
         this.useProxy = tradeStruct.useProxy;
         this.fromWithoutFee = tradeStruct.fromWithoutFee;
+
+        this.apiQuote = tradeStruct?.apiQuote || null;
+        this.apiResponse = tradeStruct?.apiResponse || null;
 
         this.feeInfo = {
             rubicProxy: {
@@ -191,11 +206,50 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
 
-        return this.encodeDirect(options);
+        return this.setTransactionConfig(options);
     }
 
-    /**
-     * Encodes trade to swap it directly through dex contract.
-     */
-    public abstract encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig>;
+    protected async getTransactionConfigAndAmount(
+        options?: EncodeTransactionOptions
+    ): Promise<EvmEncodedConfigAndToAmount> {
+        if (!this.apiResponse || !this.apiQuote) {
+            throw new Error('Failed to load api response');
+        }
+        const swapRequestData: SwapRequestInterface = {
+            ...this.apiQuote,
+            fromAddress: this.walletAddress,
+            receiver: options?.receiverAddress || this.walletAddress,
+            id: this.apiResponse.id
+        };
+        const swapData = await Injector.rubicApiService.fetchSwapData(swapRequestData);
+
+        const config = {
+            data: swapData.transaction.data!,
+            value: swapData.transaction.value!,
+            to: swapData.transaction.to!
+        };
+
+        const amount = swapData.estimate.destinationWeiAmount;
+
+        return { tx: config, toAmount: amount };
+    }
+
+    protected async setTransactionConfig(
+        options: EncodeTransactionOptions
+    ): Promise<EvmEncodeConfig> {
+        if (this.lastTransactionConfig && options.useCacheData) {
+            return this.lastTransactionConfig;
+        }
+
+        const { tx, toAmount } = await this.getTransactionConfigAndAmount(options);
+        this.lastTransactionConfig = tx;
+        setTimeout(() => {
+            this.lastTransactionConfig = null;
+        }, 15_000);
+
+        if (!options.skipAmountCheck) {
+            this.checkAmountChange(toAmount, this.to.stringWeiAmount);
+        }
+        return tx;
+    }
 }

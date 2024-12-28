@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
@@ -8,4 +9,6 @@ export interface SolanaOnChainTradeStruct extends OnChainTradeStruct<SolanaBlock
     proxyFeeInfo: OnChainProxyFeeInfo | undefined;
     fromWithoutFee: PriceTokenAmount<SolanaBlockchainName>;
     path: ReadonlyArray<Token>;
+    apiQuote?: QuoteRequestInterface;
+    apiResponse?: QuoteResponseInterface;
 }

@@ -1,10 +1,10 @@
 import BigNumber from 'bignumber.js';
 import { UnnecessaryApproveError } from 'src/common/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
-import { CommonEvmApiCrossChainTrade } from 'src/features/ws-api/models/common-evm-api-cross-chain-trade';
+import { EvmApiCrossChainTrade } from 'src/features/ws-api/chains/evm/evm-api-cross-chain-trade';
 import { TransactionReceipt } from 'web3-eth';
 
-export class EddyBridgeTrade extends CommonEvmApiCrossChainTrade {
+export class EddyBridgeTrade extends EvmApiCrossChainTrade {
     public override async needApprove(): Promise<boolean> {
         // @TODO API FIX
         this.checkWalletConnected();
