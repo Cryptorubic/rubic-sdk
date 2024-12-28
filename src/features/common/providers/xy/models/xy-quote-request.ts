@@ -8,6 +8,6 @@ export interface XyQuoteRequest {
     affiliate?: string;
     commissionRate?: number;
     srcSwapProvider?: string;
-    bridgeProvider?: string;
+    bridgeProviders?: string;
     dstSwapProvider?: string;
 }

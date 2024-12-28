@@ -87,7 +87,9 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 dstChainId: blockchainId[toBlockchain],
                 dstQuoteTokenAddress: toToken.isNative ? XY_NATIVE_ADDRESS : toToken.address,
                 slippage: slippageTolerance,
-                affiliate: XY_AFFILIATE_ADDRESS
+                affiliate: XY_AFFILIATE_ADDRESS,
+                bridgeProviders:
+                    'yBridge,XassetBridge,Synapse,Across,Owlto,PolygonPoSEtherBridge,ArbitrumEtherBridge'
             };
 
             const { success, routes, errorCode, errorMsg } =
