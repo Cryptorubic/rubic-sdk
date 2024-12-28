@@ -67,7 +67,8 @@
         "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json",
         "docs": "yarn create-index && typedoc && yarn delete-index",
         "publish": "yarn publish --access public",
-        "publish:alpha": "yarn publish --access public --tag alpha"
+        "publish:alpha": "yarn publish --access public --tag alpha",
+        "test:file": "jest -- __tests__/unit-tests/dedust"
     },
     "dependencies": {
         "@1inch/limit-order-protocol-utils": "3.0.1",
