@@ -91,6 +91,8 @@ export class TransformUtils {
                 feeInfo: {}
             });
         } else if (chainType === CHAIN_TYPE.BITCOIN) {
+            // @TODO API
+            console.log('btc swap');
         } else if (chainType === CHAIN_TYPE.SOLANA) {
             trade = new SolanaApiCrossChainTrade({
                 from: fromToken as PriceTokenAmount<SolanaBlockchainName>,
@@ -180,6 +182,8 @@ export class TransformUtils {
                 feeInfo: {}
             });
         } else if (chainType === CHAIN_TYPE.BITCOIN) {
+            // @TODO API
+            console.log('btc swap');
         } else if (chainType === CHAIN_TYPE.SOLANA) {
             trade = new SolanaApiOnChainTrade({
                 from: fromToken as PriceTokenAmount<SolanaBlockchainName>,
