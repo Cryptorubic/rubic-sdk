@@ -24,8 +24,6 @@ import { OpenOceanApiService } from './services/open-ocean-api-service';
 export class OpenOceanProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
 
-    public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-
     public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return openoceanOnChainSupportedBlockchains.some(item => item === blockchain);
     }

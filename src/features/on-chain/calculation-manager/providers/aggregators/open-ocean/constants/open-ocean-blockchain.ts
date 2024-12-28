@@ -24,5 +24,6 @@ export const openOceanBlockchainName: Record<OpenoceanOnChainSupportedBlockchain
     [BLOCKCHAIN_NAME.BLAST]: 'blast',
     [BLOCKCHAIN_NAME.MODE]: 'mode',
     [BLOCKCHAIN_NAME.ROOTSTOCK]: 'rootstock',
-    [BLOCKCHAIN_NAME.MANTLE]: 'mantle'
+    [BLOCKCHAIN_NAME.MANTLE]: 'mantle',
+    [BLOCKCHAIN_NAME.SONIC]: 'sonic'
 };

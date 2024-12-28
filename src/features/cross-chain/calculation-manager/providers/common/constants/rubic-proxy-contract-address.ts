@@ -21,7 +21,8 @@ const ALTERNATIVE_ROUTER1_NETWORKS = [
     BLOCKCHAIN_NAME.CORE,
     BLOCKCHAIN_NAME.BAHAMUT,
     BLOCKCHAIN_NAME.BITLAYER,
-    BLOCKCHAIN_NAME.FLARE
+    BLOCKCHAIN_NAME.FLARE,
+    BLOCKCHAIN_NAME.SONIC
 ] as const;
 
 function isAlternativeRouter1Network(blockchain: BlockchainName): boolean {
