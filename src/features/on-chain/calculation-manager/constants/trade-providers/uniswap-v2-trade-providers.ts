@@ -42,6 +42,7 @@ import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/provi
 import { EddyFinanceModeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mode/eddy-finance-mode/eddy-finance-mode-provider';
 import { SolarbeamProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/solarbeam-provider';
 import { SushiSwapMoonriverProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { BulbaswapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/morph/bulbaswap/bulbaswap-provider';
 import { QuickSwapMumbaiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mumbai/quick-swap-mumbai/quick-swap-mumbai-provider';
 import { YuzuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/oasis/yuzu-swap/yuzu-swap-provider';
 import { QuickSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap/quick-swap-provider';
@@ -169,5 +170,7 @@ export const UniswapV2TradeProviders = [
     // Flare
     BlazeSwapFlareProvider,
     SparkDexFlareProvider,
-    EnosysFlareProvider
+    EnosysFlareProvider,
+    // Morph
+    BulbaswapProvider
 ] as const;

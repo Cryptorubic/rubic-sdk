@@ -25,7 +25,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     RETRO_BRIDGE: 'retro_bridge',
     ACROSS: 'across',
     UNIZEN: 'unizen',
-    SIMPLE_SWAP: 'simple_swap'
+    SIMPLE_SWAP: 'simple_swap',
+    MORPH_BRIDGE: 'morph_bridge'
 } as const;
 
 export type CrossChainTradeType =

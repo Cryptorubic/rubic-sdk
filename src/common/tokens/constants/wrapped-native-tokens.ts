@@ -492,5 +492,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Sonic',
         symbol: 'WS',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MORPH]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MORPH,
+        address: '0x5300000000000000000000000000000000000011',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
     })
 };
