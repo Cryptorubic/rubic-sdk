@@ -94,7 +94,9 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(result.receiveAmount, toToken.decimals)
             });
 
-            const toAmountWithoutTradeFee = to.tokenAmount.minus(result.tradeFeeAmount);
+            const toAmountWithoutTradeFee = to.tokenAmount.minus(
+                to.tokenAmount.multipliedBy(result.router.tradeFee)
+            );
 
             const gasData = await OrbiterBridgeFactory.getGasData(Boolean(options.gasCalculation), {
                 feeInfo,
