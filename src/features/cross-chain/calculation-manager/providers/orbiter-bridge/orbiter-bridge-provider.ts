@@ -98,20 +98,11 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 to.tokenAmount.multipliedBy(result.router.tradeFee)
             );
 
-            const gasData = await OrbiterBridgeFactory.getGasData(Boolean(options.gasCalculation), {
-                feeInfo,
-                fromToken: from,
-                toToken: to,
-                receiverAddress: options.receiverAddress,
-                providerAddress: options.providerAddress,
-                quoteConfig
-            });
-
             const trade = OrbiterBridgeFactory.createTrade({
                 crossChainTrade: {
                     feeInfo,
                     from,
-                    gasData,
+                    gasData: await this.getGasData(from),
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     quoteConfig,

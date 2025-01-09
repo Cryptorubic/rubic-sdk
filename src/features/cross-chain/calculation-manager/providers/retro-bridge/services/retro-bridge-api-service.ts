@@ -8,6 +8,7 @@ import {
     RetroBridgeTxResponse,
     RetroBridgeTxSendParams
 } from '../models/retro-bridge-quote-send-params';
+import { RetroBridgeToken } from '../models/retro-bridge-token';
 import {
     RETRO_BRIDGE_TX_STATUS,
     RetroBridgeStatusResponse
@@ -144,5 +145,19 @@ export class RetroBridgeApiService {
             hash: null,
             status: TX_STATUS.PENDING
         };
+    }
+
+    public static getTokenList(
+        srcChain: string,
+        dstChain: string
+    ): Promise<{ data: RetroBridgeToken[] }> {
+        return Injector.httpClient.get(
+            `${this.RETRO_BRIDGE_API_ENDPOINT}/assets/?source_chain=${srcChain}&destination_chain=${dstChain}`,
+            {
+                headers: {
+                    'api-key': this.API_KEY
+                }
+            }
+        );
     }
 }

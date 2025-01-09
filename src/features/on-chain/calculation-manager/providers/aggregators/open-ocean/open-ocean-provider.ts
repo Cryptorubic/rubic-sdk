@@ -14,16 +14,15 @@ import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calcula
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
-import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
+import { OpenOceanQuoteResponse } from './models/open-ocean-quote-response';
 import { OpenOceanApiService } from './services/open-ocean-api-service';
 
 export class OpenOceanProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
-
-    public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
     public isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return openoceanOnChainSupportedBlockchains.some(item => item === blockchain);
@@ -59,12 +58,10 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
                 weiAmount: new BigNumber(quoteResponse.data.outAmount)
             });
 
-            const openOceanTradeStruct: OpenOceanTradeStruct = {
+            const tradeStruct: OpenOceanTradeStruct = {
                 from,
                 to,
-                gasFeeInfo: {
-                    gasLimit: new BigNumber(quoteResponse.data.estimatedGas)
-                },
+                gasFeeInfo: await this.getGasFeeInfo(from, quoteResponse),
                 slippageTolerance: options.slippageTolerance!,
                 path: [from, to],
                 useProxy: options.useProxy,
@@ -72,18 +69,8 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
                 fromWithoutFee,
                 withDeflation: options.withDeflation
             };
-            const gasFeeInfo =
-                options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(openOceanTradeStruct)
-                    : null;
 
-            return new OpenOceanTrade(
-                {
-                    ...openOceanTradeStruct,
-                    gasFeeInfo
-                },
-                options.providerAddress
-            );
+            return new OpenOceanTrade(tradeStruct, options.providerAddress);
         } catch (error) {
             return {
                 type: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
@@ -92,13 +79,15 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
         }
     }
 
-    protected async getGasFeeInfo(tradeStruct: OpenOceanTradeStruct): Promise<GasFeeInfo | null> {
+    protected override async getGasFeeInfo(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        quote: OpenOceanQuoteResponse
+    ): Promise<GasFeeInfo | null> {
         try {
-            const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit =
-                tradeStruct?.gasFeeInfo?.gasLimit ||
-                (await OpenOceanTrade.getGasLimit(tradeStruct));
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+            const gasLimit = new BigNumber(quote.data.estimatedGas);
+
+            return getGasFeeInfo(gasPriceInfo, { gasLimit });
         } catch {
             return null;
         }

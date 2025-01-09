@@ -1,9 +1,21 @@
+import { Address } from '@ton/core';
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    NotSupportedTokensError,
+    RubicSdkError
+} from 'src/common/errors';
 import { MaxDecimalsError } from 'src/common/errors/swap/max-decimals.error';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { parseError } from 'src/common/utils/errors';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -46,6 +58,11 @@ export class RetroBridgeProvider extends CrossChainProvider {
         }
 
         try {
+            const { fromTokenTicker, toTokenTicker } = await this.getFromToTokenTickers(
+                from,
+                toToken
+            );
+
             this.checkFromAmountDecimals(from);
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -69,8 +86,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
             const quoteSendParams: RetroBridgeQuoteSendParams = {
                 source_chain: srcChain,
                 destination_chain: dstChain,
-                asset_from: from.symbol,
-                asset_to: toToken.symbol,
+                asset_from: fromTokenTicker,
+                asset_to: toTokenTicker,
                 amount: Web3Pure.fromWei(
                     fromWithoutFee.stringWeiAmount,
                     fromWithoutFee.decimals
@@ -78,7 +95,7 @@ export class RetroBridgeProvider extends CrossChainProvider {
             };
 
             try {
-                await this.checkMinMaxAmount(from, toToken);
+                await this.checkMinMaxAmount(from, toToken, fromTokenTicker, toTokenTicker);
             } catch (err) {
                 if (err instanceof MinAmountError || err instanceof MaxAmountError) {
                     return this.getEmptyTrade(
@@ -100,19 +117,16 @@ export class RetroBridgeProvider extends CrossChainProvider {
                 tokenAmount: new BigNumber(retroBridgeQuoteConfig.amount_out)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await RetroBridgeFactory.getGasData(
-                          from,
-                          to,
-                          feeInfo,
-                          options.slippageTolerance,
-                          options.providerAddress,
-                          quoteSendParams,
-                          retroBridgeQuoteConfig.hot_wallet_address
-                      )
-                    : null;
             const routePath = await this.getRoutePath(from, to);
+            const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
+
+            const totalGas = Web3Pure.toWei(
+                new BigNumber(retroBridgeQuoteConfig.blockchain_fee_in_usd).div(nativeToken.price),
+                nativeToken.decimals
+            );
+
+            const gasData = await this.getGasData(from, { totalGas });
+
             const trade = RetroBridgeFactory.createTrade(
                 fromBlockchain,
                 {
@@ -176,7 +190,9 @@ export class RetroBridgeProvider extends CrossChainProvider {
 
     private async checkMinMaxAmount(
         from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>
+        toToken: PriceToken<EvmBlockchainName>,
+        fromTokenTicker: string,
+        toTokenTicker: string
     ): Promise<void | never> {
         const srcChain = this.getBlockchainTicker(
             from.blockchain as RetroBridgeSupportedBlockchain
@@ -189,8 +205,8 @@ export class RetroBridgeProvider extends CrossChainProvider {
         const tokenLimits = await RetroBridgeApiService.getTokenLimits(
             srcChain,
             dstChain,
-            from.symbol,
-            toToken.symbol
+            fromTokenTicker,
+            toTokenTicker
         );
         const minSendAmount = new BigNumber(Web3Pure.toWei(tokenLimits.min_send, from.decimals));
         const maxSendAmount = new BigNumber(Web3Pure.toWei(tokenLimits.max_send, from.decimals));
@@ -217,8 +233,9 @@ export class RetroBridgeProvider extends CrossChainProvider {
         return false;
     }
 
-    private getBlockchainTicker(blockchain: RetroBridgeSupportedBlockchain): string {
-        const blockchainTicker = retroBridgeBlockchainTickers[blockchain];
+    private getBlockchainTicker(blockchain: BlockchainName): string {
+        const blockchainTicker =
+            retroBridgeBlockchainTickers[blockchain as RetroBridgeSupportedBlockchain];
 
         if (!blockchainTicker) {
             return blockchain;
@@ -261,5 +278,54 @@ export class RetroBridgeProvider extends CrossChainProvider {
             trade,
             error
         };
+    }
+
+    private async getFromToTokenTickers(
+        fromToken: PriceTokenAmount,
+        toToken: PriceToken
+    ): Promise<{ fromTokenTicker: string; toTokenTicker: string }> {
+        const fromChainTicker = this.getBlockchainTicker(fromToken.blockchain);
+        const toChainTicker = this.getBlockchainTicker(toToken.blockchain);
+
+        const { data: tokenList } = await RetroBridgeApiService.getTokenList(
+            fromChainTicker,
+            toChainTicker
+        );
+
+        const fromTokenAddress = this.parseTokenAddress(fromToken.address, fromToken.blockchain);
+        const toTokenAddress = this.parseTokenAddress(toToken.address, toToken.blockchain);
+
+        const from = tokenList.find(
+            token =>
+                (compareAddresses(token.contract_address, fromTokenAddress) && !token.native) ||
+                (fromToken.isNative && token.native)
+        );
+
+        if (!from) {
+            throw new NotSupportedTokensError();
+        }
+
+        const to = from.pairs.find(
+            tokenTo =>
+                (compareAddresses(tokenTo.contract_address, toTokenAddress) && !tokenTo.native) ||
+                (toToken.isNative && tokenTo.native)
+        );
+
+        if (!to) {
+            throw new NotSupportedTokensError();
+        }
+
+        return { fromTokenTicker: from.name, toTokenTicker: to.name };
+    }
+
+    private parseTokenAddress(tokenAddress: string, blockchain: BlockchainName): string {
+        const chainType = BlockchainsInfo.getChainType(blockchain);
+        if (Web3Pure[chainType].isNativeAddress(tokenAddress)) return tokenAddress;
+
+        if (blockchain === BLOCKCHAIN_NAME.TON) {
+            return Address.parseRaw(tokenAddress).toString();
+        }
+
+        return tokenAddress;
     }
 }

@@ -1,11 +1,8 @@
-import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { SymbiosisParser } from 'src/features/common/providers/symbiosis/services/symbiosis-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -13,20 +10,6 @@ import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/mo
 import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 
 export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
-    /* @internal */
-    public static async getGasLimit(
-        tradeStruct: SymbiosisTradeStruct,
-        providerGateway: string
-    ): Promise<BigNumber | null> {
-        const symbiosisTrade = new SymbiosisOnChainTrade(
-            tradeStruct,
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            providerGateway
-        );
-
-        return getOnChainGasData(symbiosisTrade);
-    }
-
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
 
     public readonly providerGateway: string;

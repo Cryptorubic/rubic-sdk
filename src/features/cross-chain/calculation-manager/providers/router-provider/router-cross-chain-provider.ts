@@ -2,12 +2,12 @@ import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { RouterQuoteResponseConfig } from 'src/features/common/providers/router/models/router-quote-response-config';
 import { RouterApiService } from 'src/features/common/providers/router/services/router-api-service';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { RouterCrossChainFactory } from 'src/features/cross-chain/calculation-manager/providers/router-provider/router-cross-chain-factory';
+import { RouterCrossChainUtilService } from 'src/features/cross-chain/calculation-manager/providers/router-provider/utils/router-cross-chain-util-service';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -21,8 +21,6 @@ import {
     RouterCrossChainSupportedBlockchains,
     routerCrossChainSupportedChains
 } from './constants/router-cross-chain-supported-chains';
-import { RouterCrossChainTrade } from './router-cross-chain-trade';
-import { RouterCrossChainUtilService } from './utils/router-cross-chain-util-service.ts';
 export class RouterCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ROUTER;
 
@@ -37,10 +35,7 @@ export class RouterCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as RouterCrossChainSupportedBlockchains;
         const toBlockchain = toToken.blockchain as RouterCrossChainSupportedBlockchains;
-        if (
-            !this.areSupportedBlockchains(from.blockchain, toToken.blockchain) ||
-            BlockchainsInfo.getChainType(fromBlockchain) !== CHAIN_TYPE.EVM
-        ) {
+        if (!this.areSupportedBlockchains(from.blockchain, toToken.blockchain)) {
             return {
                 trade: null,
                 error: new NotSupportedTokensError(),
@@ -100,33 +95,21 @@ export class RouterCrossChainProvider extends CrossChainProvider {
             });
 
             const routePath = await this.getRoutePath(from, to, routerQuoteConfig);
-
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await RouterCrossChainTrade.getGasData(
-                          from,
-                          to,
-                          feeInfo,
-                          options.providerAddress,
-                          routerQuoteConfig,
-                          options?.receiverAddress
-                      )
-                    : null;
             return {
-                trade: new RouterCrossChainTrade(
-                    {
+                trade: RouterCrossChainFactory.createTrade(fromBlockchain, {
+                    crossChainTrade: {
                         from,
                         to,
                         feeInfo,
-                        gasData,
+                        gasData: await this.getGasData(from),
                         priceImpact: from.calculatePriceImpactPercent(to),
                         routerQuoteConfig,
                         slippage: options.slippageTolerance
                     },
-                    options.providerAddress,
+                    providerAddress: options.providerAddress,
                     routePath,
                     useProxy
-                ),
+                }),
                 tradeType: this.type
             };
         } catch (err) {

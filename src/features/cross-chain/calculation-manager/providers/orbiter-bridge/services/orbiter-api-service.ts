@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';

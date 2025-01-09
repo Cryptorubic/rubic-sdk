@@ -24,47 +24,13 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { ORBITER_ROUTER_V3_ABI } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/constants/orbiter-router-v3-abi';
 import { OrbiterQuoteConfig } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-api-quote-types';
-import {
-    OrbiterEvmTradeParams,
-    OrbiterGetGasDataParams
-} from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-bridge-trade-types';
+import { OrbiterEvmTradeParams } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-bridge-trade-types';
 import { orbiterContractAddresses } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-contract-addresses';
 import { OrbiterSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/models/orbiter-supported-blockchains';
 import { OrbiterUtils } from 'src/features/cross-chain/calculation-manager/providers/orbiter-bridge/services/orbiter-utils';
 import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 export class OrbiterEvmBridgeTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData({
-        fromToken,
-        toToken,
-        feeInfo,
-        providerAddress,
-        quoteConfig
-    }: OrbiterGetGasDataParams<EvmBlockchainName>): Promise<GasData | null> {
-        try {
-            const trade = new OrbiterEvmBridgeTrade({
-                crossChainTrade: {
-                    from: fromToken,
-                    to: toToken,
-                    feeInfo,
-                    gasData: null,
-                    priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                    toTokenAmountMin: new BigNumber(0),
-                    quoteConfig
-                },
-                routePath: [],
-                providerAddress,
-                useProxy: false
-            });
-
-            return getCrossChainGasData(trade);
-        } catch (err) {
-            return null;
-        }
-    }
-
     /**ABSTRACT PROPS */
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE;
 

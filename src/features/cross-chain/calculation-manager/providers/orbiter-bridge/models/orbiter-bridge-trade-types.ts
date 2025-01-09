@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
     BlockchainName,
@@ -9,7 +10,6 @@ import { GasData } from '../../common/evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../../common/models/fee-info';
 import { RubicStep } from '../../common/models/rubicStep';
 import { OrbiterQuoteConfig } from './orbiter-api-quote-types';
-import BigNumber from 'bignumber.js';
 
 export interface OrbiterGetGasDataParams<Blockchain extends BlockchainName> {
     fromToken: PriceTokenAmount<Blockchain>;

@@ -275,8 +275,8 @@ export class EvmWeb3Public extends Web3Public {
         return callableContract.call({
             ...(options.from && { from: options.from }),
             ...(options.value && { value: options.value }),
-            ...(options.gasPrice && { value: options.gasPrice }),
-            ...(options.gas && { value: options.gas })
+            ...(options.gasPrice && { gasPrice: options.gasPrice }),
+            ...(options.gas && { gas: options.gas })
         });
     }
 

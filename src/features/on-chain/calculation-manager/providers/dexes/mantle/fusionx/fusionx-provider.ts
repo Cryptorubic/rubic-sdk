@@ -5,7 +5,13 @@ import { FUSIONX_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculatio
 import { FUSIONX_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/mantle/fusionx/constants/router-configuration';
 import { FusionXTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/mantle/fusionx/fusionx-trade';
 
+import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../../common/models/on-chain-trade-type';
+
 export class FusionXProvider extends UniswapV3AbstractProvider<FusionXTrade> {
+    public get type(): OnChainTradeType {
+        return ON_CHAIN_TRADE_TYPE.FUSIONX;
+    }
+
     public readonly blockchain = BLOCKCHAIN_NAME.MANTLE;
 
     public readonly OnChainTradeClass = FusionXTrade;

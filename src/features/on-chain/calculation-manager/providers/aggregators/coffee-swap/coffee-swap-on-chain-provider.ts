@@ -1,12 +1,14 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     TonBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { FAKE_TON_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
@@ -50,14 +52,15 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
                 options.slippageTolerance
             );
 
+            const totalGas = new BigNumber(
+                Web3Pure.toWei(quote.recommended_gas, nativeTokensList.TON.decimals)
+            );
+
             return new CoffeSwapTrade(
                 {
                     from,
                     to,
-                    gasFeeInfo: {
-                        gasPrice: new BigNumber(1),
-                        gasLimit: new BigNumber(quote.recommended_gas)
-                    },
+                    gasFeeInfo: { totalGas },
                     slippageTolerance: slippage,
                     useProxy: false,
                     withDeflation: options.withDeflation,
@@ -80,31 +83,26 @@ export class CoffeeSwapProvider extends AggregatorOnChainProvider {
         const promises = [] as Array<Promise<[PriceTokenAmount, PriceTokenAmount]>>;
         const path = txSteps[0]!;
 
-        let next: undefined | CoffeeRoutePath = undefined;
-        let isFirstStep = true;
-
         const getAddress = (addr: string): string =>
             addr === 'native' ? TonWeb3Pure.nativeTokenAddress : addr;
 
-        while (isFirstStep || !!next) {
-            const source = isFirstStep ? path : next;
-
+        let next: CoffeeRoutePath | undefined = path;
+        while (!!next) {
             const from = PriceTokenAmount.createToken({
-                address: getAddress(source!.input_token.address.address),
+                address: getAddress(next.input_token.address.address),
                 blockchain: BLOCKCHAIN_NAME.TON,
-                tokenAmount: new BigNumber(source!.swap.input_amount)
+                tokenAmount: new BigNumber(next!.swap.input_amount)
             });
             const to = PriceTokenAmount.createToken({
-                address: getAddress(source!.output_token.address.address),
+                address: getAddress(next.output_token.address.address),
                 blockchain: BLOCKCHAIN_NAME.TON,
-                tokenAmount: new BigNumber(source!.swap.output_amount)
+                tokenAmount: new BigNumber(next!.swap.output_amount)
             });
 
             const stepPromises = Promise.all([from, to]);
             promises.push(stepPromises);
 
-            next = isFirstStep ? path.next?.[0] : next!.next?.[0];
-            isFirstStep = false;
+            next = next.next?.[0];
         }
 
         const resolved = await Promise.all(promises);

@@ -24,10 +24,7 @@ import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fe
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
-import {
-    BridgersCrossChainGasParams,
-    BridgersEvmCrossChainParams
-} from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/bridgers-cross-chain-trade-types';
+import { BridgersEvmCrossChainParams } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/bridgers-cross-chain-trade-types';
 import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/evm-bridgers-transaction-data';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -39,32 +36,9 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { MarkRequired } from 'ts-essentials';
 
 export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        params: BridgersCrossChainGasParams<EvmBlockchainName>
-    ): Promise<GasData | null> {
-        const tradeStruct = {
-            crossChainTrade: {
-                from: params.from,
-                to: params.to,
-                toTokenAmountMin: new BigNumber(0),
-                feeInfo: params.feeInfo,
-                gasData: null,
-                slippage: 0
-            },
-            providerAddress: params.providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            routePath: [],
-            useProxy: false
-        };
-        const trade = new EvmBridgersCrossChainTrade(tradeStruct);
-
-        return getCrossChainGasData(trade, params.receiverAddress);
-    }
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
 
     public readonly isAggregator = false;
