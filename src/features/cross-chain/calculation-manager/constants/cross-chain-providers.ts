@@ -5,7 +5,6 @@ import { CbridgeCrossChainProvider } from 'src/features/cross-chain/calculation-
 import { ChangenowCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/changenow-cross-chain-provider';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { LifiCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-provider';
-import { MorphBridgeProvider } from 'src/features/cross-chain/calculation-manager/providers/morph-bridge/morph-bridge-provider';
 import { PulseChainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/pulse-chain-cross-chain-provider';
 import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
 import { SymbiosisCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-provider';
@@ -41,8 +40,7 @@ const proxyProviders = [
     RouterCrossChainProvider,
     RetroBridgeProvider,
     AcrossCrossChainProvider,
-    UniZenCcrProvider,
-    MorphBridgeProvider
+    UniZenCcrProvider
 ] as const;
 
 const nonProxyProviders = [
