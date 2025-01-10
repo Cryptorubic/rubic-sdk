@@ -84,15 +84,19 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 };
             }
 
-            const toAmount = await OrbiterApiService.getReceiveAmount({
+            const { result } = await OrbiterApiService.getReceiveAmount({
                 line: quoteConfig.line,
                 value: fromWithoutFee.stringWeiAmount
             });
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: Web3Pure.fromWei(toAmount, toToken.decimals)
+                tokenAmount: Web3Pure.fromWei(result.receiveAmount, toToken.decimals)
             });
+
+            const toAmountWithoutTradeFee = to.tokenAmount.minus(
+                to.tokenAmount.multipliedBy(result.router.tradeFee)
+            );
 
             const trade = OrbiterBridgeFactory.createTrade({
                 crossChainTrade: {
@@ -101,7 +105,8 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                     gasData: await this.getGasData(from),
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
-                    quoteConfig
+                    quoteConfig,
+                    toTokenAmountMin: toAmountWithoutTradeFee
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to),
@@ -172,7 +177,8 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 feeInfo,
                 to,
                 priceImpact: 0,
-                quoteConfig
+                quoteConfig,
+                toTokenAmountMin: new BigNumber(0)
             },
             providerAddress,
             useProxy: false,
