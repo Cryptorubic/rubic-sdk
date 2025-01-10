@@ -93,7 +93,6 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(result.receiveAmount, toToken.decimals)
             });
-            
 
             const toAmountWithoutTradeFee = to.tokenAmount.minus(
                 to.tokenAmount.multipliedBy(result.router.tradeFee)
