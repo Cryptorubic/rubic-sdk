@@ -67,7 +67,7 @@ export class OrbiterTronBridgeTrade extends TronCrossChainTrade {
         super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
-        this.toTokenAmountMin = params.crossChainTrade.to.tokenAmount;
+        this.toTokenAmountMin = params.crossChainTrade.toTokenAmountMin;
         this.feeInfo = params.crossChainTrade.feeInfo;
         this.gasData = params.crossChainTrade.gasData;
         this.priceImpact = params.crossChainTrade.priceImpact;
