@@ -37,8 +37,8 @@ export class EvmWrapTrade extends EvmOnChainTrade {
         return { tx: config, toAmount: this.to.stringWeiAmount };
     }
 
-    public constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
-        super(evmOnChainTradeStruct, providerAddress);
+    public constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct) {
+        super(evmOnChainTradeStruct);
     }
 
     public static isSupportedBlockchain(blockchain: EvmBlockchainName): boolean {

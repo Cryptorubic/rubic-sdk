@@ -28,6 +28,6 @@ export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainN
     proxyFeeInfo: OnChainProxyFeeInfo | undefined;
     fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
     path: ReadonlyArray<Token>;
-    apiQuote?: QuoteRequestInterface;
-    apiResponse?: QuoteResponseInterface;
+    apiQuote: QuoteRequestInterface | null;
+    apiResponse: QuoteResponseInterface | null;
 }

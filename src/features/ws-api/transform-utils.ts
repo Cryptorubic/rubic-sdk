@@ -133,8 +133,6 @@ export class TransformUtils {
             trade = new EvmApiOnChainTrade({
                 from: fromToken as PriceTokenAmount<EvmBlockchainName>,
                 to: toToken as PriceTokenAmount<EvmBlockchainName>,
-                apiQuote: quote,
-                apiResponse: response,
                 feeInfo: {},
                 tradeStruct: {
                     from: fromToken as PriceTokenAmount<EvmBlockchainName>,
@@ -145,6 +143,8 @@ export class TransformUtils {
                     useProxy: false,
                     proxyFeeInfo: undefined,
                     fromWithoutFee: fromToken as PriceTokenAmount<EvmBlockchainName>,
+                    apiQuote: quote,
+                    apiResponse: response,
                     withDeflation: {
                         from: { isDeflation: false },
                         to: { isDeflation: false }

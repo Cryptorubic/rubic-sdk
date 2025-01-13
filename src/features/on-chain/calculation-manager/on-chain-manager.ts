@@ -13,7 +13,6 @@ import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is
 import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/common/evm-wrap-trade/evm-wrap-trade';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/common/on-chain-proxy-service/on-chain-proxy-service';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/models/on-chain-calculation-options';
 import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/on-chain-manager-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
@@ -86,7 +85,7 @@ export class OnChainManager {
 
         const fullOptions = await this.getFullOptions(from, to, options);
         if ((from.isNative && to.isWrapped) || (from.isWrapped && to.isNative)) {
-            const trade = this.getWrappedWrapTrade(from, to, fullOptions);
+            const trade = this.getWrappedWrapTrade(from, to);
             return [trade];
         }
 
@@ -149,40 +148,34 @@ export class OnChainManager {
         return this.deflationTokenManager.isDeflationToken(token);
     }
 
-    public static getWrapTrade(
-        from: PriceTokenAmount,
-        to: PriceToken,
-        options: OnChainCalculationOptions
-    ): EvmOnChainTrade {
+    public static getWrapTrade(from: PriceTokenAmount, to: PriceToken): EvmOnChainTrade {
         const fromToken = from as PriceTokenAmount<EvmBlockchainName>;
         const toToken = to as PriceToken<EvmBlockchainName>;
-        return new EvmWrapTrade(
-            {
-                from: fromToken,
-                to: new PriceTokenAmount<EvmBlockchainName>({
-                    ...toToken.asStruct,
-                    weiAmount: from.weiAmount
-                }),
-                slippageTolerance: 0,
-                path: [from, to],
-                gasFeeInfo: null,
-                useProxy: false,
-                proxyFeeInfo: undefined,
-                fromWithoutFee: fromToken,
+        return new EvmWrapTrade({
+            from: fromToken,
+            to: new PriceTokenAmount<EvmBlockchainName>({
+                ...toToken.asStruct,
+                weiAmount: from.weiAmount
+            }),
+            slippageTolerance: 0,
+            path: [from, to],
+            gasFeeInfo: null,
+            useProxy: false,
+            proxyFeeInfo: undefined,
+            fromWithoutFee: fromToken,
+            apiResponse: null,
+            apiQuote: null,
 
-                withDeflation: {
-                    from: { isDeflation: false },
-                    to: { isDeflation: false }
-                }
-            },
-            options.providerAddress!
-        );
+            withDeflation: {
+                from: { isDeflation: false },
+                to: { isDeflation: false }
+            }
+        });
     }
 
     private getWrappedWrapTrade(
         fromToken: PriceTokenAmount,
-        toToken: PriceToken,
-        fullOptions: RequiredOnChainManagerCalculationOptions
+        toToken: PriceToken
     ): WrappedOnChainTradeOrNull {
         const wrappedTrade: WrappedOnChainTradeOrNull = {
             error: undefined,
@@ -190,7 +183,7 @@ export class OnChainManager {
             tradeType: ON_CHAIN_TRADE_TYPE.WRAPPED
         };
         try {
-            wrappedTrade.trade = OnChainManager.getWrapTrade(fromToken, toToken, fullOptions);
+            wrappedTrade.trade = OnChainManager.getWrapTrade(fromToken, toToken);
         } catch (err: unknown) {
             wrappedTrade.error = err as RubicSdkError;
         }

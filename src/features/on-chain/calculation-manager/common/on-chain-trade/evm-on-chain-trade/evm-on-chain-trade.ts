@@ -113,8 +113,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     private readonly apiResponse: QuoteResponseInterface | null = null;
 
-    protected constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
-        super(providerAddress);
+    protected constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct) {
+        super(evmOnChainTradeStruct.apiQuote!.integratorAddress!);
 
         this.from = evmOnChainTradeStruct.from;
         this.to = evmOnChainTradeStruct.to;

@@ -33,11 +33,11 @@ export class EvmApiOnChainTrade extends EvmOnChainTrade {
     public readonly dexContractAddress = '';
 
     constructor(params: EvmApiOnChainConstructor) {
-        super(params.tradeStruct, params.apiQuote.integratorAddress!);
+        super(params.tradeStruct);
 
-        this.type = params.apiResponse.providerType as OnChainTradeType;
-        this._priceImpact = params.apiResponse.estimate.priceImpact;
-        this.slippage = params.apiResponse.estimate.slippage;
+        this.type = params.tradeStruct.apiResponse!.providerType as OnChainTradeType;
+        this._priceImpact = params.tradeStruct.apiResponse!.estimate.priceImpact;
+        this.slippage = params.tradeStruct.apiResponse!.estimate.slippage;
 
         this.to = params.to;
         this.feeInfo = params.feeInfo;
