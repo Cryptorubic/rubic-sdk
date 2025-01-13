@@ -51,7 +51,10 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
         // this.rateId = ccrTrade.rateId;
     }
 
-    protected async getPaymentInfo(receiverAddress: string): Promise<CrossChainTransferData> {
+    protected async getPaymentInfo(
+        receiverAddress: string,
+        refundAddress?: string
+    ): Promise<CrossChainTransferData> {
         const fromWithoutFee = getFromWithoutFee(
             this.from,
             this.feeInfo.rubicProxy?.platformFee?.percent
@@ -63,6 +66,7 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             to: this.changellyTokens.toToken.ticker,
             amountFrom: fromWithoutFee.tokenAmount.toFixed(),
             address: receiverAddress,
+            ...(refundAddress && { refundAddress }),
             // rateId: this.rateId,
             ...(isFromEvm && { refundAddress: this.walletAddress })
         };

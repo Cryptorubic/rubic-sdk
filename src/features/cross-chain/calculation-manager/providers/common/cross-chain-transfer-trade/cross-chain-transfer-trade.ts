@@ -122,9 +122,10 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     }
 
     protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
+        receiverAddress?: string,
+        refundAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        const res = await this.getPaymentInfo(receiverAddress || this.walletAddress);
+        const res = await this.getPaymentInfo(receiverAddress || this.walletAddress, refundAddress);
 
         const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
         this.paymentInfo = res;
@@ -159,7 +160,10 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         return { config, amount: toAmountWei };
     }
 
-    protected abstract getPaymentInfo(receiverAddress: string): Promise<CrossChainTransferData>;
+    protected abstract getPaymentInfo(
+        receiverAddress: string,
+        refundAddress?: string
+    ): Promise<CrossChainTransferData>;
 
     public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         if (!BlockchainsInfo.isEvmBlockchainName(this.from.blockchain)) {
