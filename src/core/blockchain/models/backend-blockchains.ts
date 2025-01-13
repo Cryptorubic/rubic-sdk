@@ -147,6 +147,7 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.BITLAYER]: 'bitlayer',
     [BLOCKCHAIN_NAME.GRAVITY]: 'gravity',
     [BLOCKCHAIN_NAME.UNICHAIN_SEPOLIA_TESTNET]: 'unichain-sepolia-testnet',
+    [BLOCKCHAIN_NAME.SONEIUM_TESTNET]: 'soneium-minato',
     [BLOCKCHAIN_NAME.SONIC]: 'sonic'
 } as const;
 
