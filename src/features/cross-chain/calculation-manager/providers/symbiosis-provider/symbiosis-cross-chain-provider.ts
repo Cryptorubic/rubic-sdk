@@ -15,6 +15,7 @@ import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import {
+    FAKE_BITCOIN_ADDRESS,
     FAKE_TRON_WALLET_ADDRESS,
     FAKE_WALLET_ADDRESS
 } from 'src/features/common/constants/fake-wallet-address';
@@ -27,6 +28,7 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { SymbiosisCcrBitcoinTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-bitcoin-trade';
 import { SymbiosisEvmCcrTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-evm-trade';
 import { SymbiosisCcrTonTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-ton-trade';
 import { SymbiosisTronCcrTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/chain-trades/symbiosis-ccr-tron-trade';
@@ -60,10 +62,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
     ): boolean {
-        if (fromBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            return false;
-        }
-
         return super.areSupportedBlockchains(fromBlockchain, toBlockchain);
     }
 
@@ -84,7 +82,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         let disabledTrade = {} as
             | SymbiosisCcrTonTrade
             | SymbiosisEvmCcrTrade
-            | SymbiosisTronCcrTrade;
+            | SymbiosisTronCcrTrade
+            | SymbiosisCcrBitcoinTrade;
 
         try {
             const fromAddress =
@@ -164,26 +163,13 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(tokenAmountOut.amount, tokenAmountOut.decimals)
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainFactory.getGasData(
-                          from,
-                          to,
-                          swapParams,
-                          feeInfo,
-                          approveTo,
-                          options.providerAddress,
-                          options.receiverAddress
-                      )
-                    : null;
-
             return {
                 trade: SymbiosisCrossChainFactory.createTrade(
                     fromBlockchain,
                     {
                         from,
                         to,
-                        gasData,
+                        gasData: await this.getGasData(from),
                         priceImpact: from.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         swapParams,
@@ -333,7 +319,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         to: PriceTokenAmount<BlockchainName>,
         swapParams: SymbiosisSwappingParams,
         feeInfo: FeeInfo
-    ): SymbiosisEvmCcrTrade | SymbiosisCcrTonTrade | SymbiosisTronCcrTrade {
+    ):
+        | SymbiosisEvmCcrTrade
+        | SymbiosisCcrTonTrade
+        | SymbiosisTronCcrTrade
+        | SymbiosisCcrBitcoinTrade {
         return SymbiosisCrossChainFactory.createTrade(
             from.blockchain,
             {
@@ -423,6 +413,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
         if (chainType === CHAIN_TYPE.TRON) {
             return FAKE_TRON_WALLET_ADDRESS;
+        }
+
+        if (chainType === CHAIN_TYPE.BITCOIN) {
+            return FAKE_BITCOIN_ADDRESS;
         }
         throw new Error('Blockchain not supported');
     }

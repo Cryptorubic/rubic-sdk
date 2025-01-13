@@ -19,8 +19,9 @@ export interface LifiCrossChainTradeConstructor<T extends BlockchainName> {
     bridgeType: BridgeType;
     slippage: number;
     gasData?: GasData | null;
+    memo?: string;
 }
 
 export type LifiEvmCrossChainTradeConstructor = Required<
-    LifiCrossChainTradeConstructor<EvmBlockchainName>
+    Omit<LifiCrossChainTradeConstructor<EvmBlockchainName>, 'memo'>
 >;

@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
-import { solidityPack } from 'ethers/lib/utils';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -13,37 +12,15 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 import { ALGB_TOKEN } from './constants/algb-token-addresses';
 import { layerZeroProxyOFT } from './constants/layerzero-bridge-address';
 import { layerZeroChainIds } from './constants/layzerzero-chain-ids';
 import { LayerZeroBridgeSupportedBlockchain } from './models/layerzero-bridge-supported-blockchains';
 import { layerZeroOFTABI } from './models/layerzero-oft-abi';
+import { estimateSendFeeLZ } from './utils/estimate-fee';
 
 export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        options: SwapTransactionOptions
-    ): Promise<GasData | null> {
-        const trade = new LayerZeroBridgeTrade(
-            {
-                from,
-                to,
-                gasData: {
-                    gasLimit: new BigNumber(0),
-                    gasPrice: new BigNumber(0)
-                }
-            },
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            [],
-            false
-        );
-        return getCrossChainGasData(trade, options?.receiverAddress);
-    }
-
     public readonly onChainSubtype = { from: undefined, to: undefined };
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LAYERZERO;
@@ -52,24 +29,16 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
 
     public readonly bridgeType = BRIDGE_TYPE.LAYERZERO;
 
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
+    public readonly from: PriceTokenAmount<LayerZeroBridgeSupportedBlockchain>;
 
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
+    public readonly to: PriceTokenAmount<LayerZeroBridgeSupportedBlockchain>;
 
     public readonly toTokenAmountMin: BigNumber;
 
     public readonly gasData: GasData | null;
 
-    private get fromBlockchain(): LayerZeroBridgeSupportedBlockchain {
-        return this.from.blockchain as LayerZeroBridgeSupportedBlockchain;
-    }
-
-    private get toBlockchain(): LayerZeroBridgeSupportedBlockchain {
-        return this.to.blockchain as LayerZeroBridgeSupportedBlockchain;
-    }
-
     protected get fromContractAddress(): string {
-        return layerZeroProxyOFT[this.fromBlockchain];
+        return layerZeroProxyOFT[this.from.blockchain];
     }
 
     public readonly feeInfo: FeeInfo = {};
@@ -82,8 +51,8 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
 
     constructor(
         crossChainTrade: {
-            from: PriceTokenAmount<EvmBlockchainName>;
-            to: PriceTokenAmount<EvmBlockchainName>;
+            from: PriceTokenAmount<LayerZeroBridgeSupportedBlockchain>;
+            to: PriceTokenAmount<LayerZeroBridgeSupportedBlockchain>;
             gasData: GasData | null;
         },
         providerAddress: string,
@@ -136,11 +105,11 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const account = this.web3Private.address;
 
-        const fee = await this.estimateSendFee(options);
+        const fee = await estimateSendFeeLZ(this.from, this.to, options.receiverAddress);
 
         const methodArguments = [
             account,
-            layerZeroChainIds[this.toBlockchain],
+            layerZeroChainIds[this.to.blockchain],
             options.receiverAddress || account,
             this.from.stringWeiAmount,
             options.receiverAddress || account,
@@ -150,9 +119,9 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
 
         return {
             contractAddress:
-                this.fromBlockchain === BLOCKCHAIN_NAME.POLYGON
+                this.from.blockchain === BLOCKCHAIN_NAME.POLYGON
                     ? layerZeroProxyOFT[BLOCKCHAIN_NAME.POLYGON]
-                    : ALGB_TOKEN[this.fromBlockchain],
+                    : ALGB_TOKEN[this.from.blockchain],
             contractAbi: layerZeroOFTABI,
             methodName: this.methodName,
             methodArguments,
@@ -172,39 +141,6 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
             params.value
         );
         return { config, amount: this.to.stringWeiAmount };
-    }
-
-    private async estimateSendFee(options: SwapTransactionOptions) {
-        const adapterParams = solidityPack(
-            ['uint16', 'uint256'],
-            [1, this.toBlockchain === BLOCKCHAIN_NAME.ARBITRUM ? 2_000_000 : 200_000]
-        );
-
-        const params = {
-            contractAddress:
-                this.fromBlockchain === BLOCKCHAIN_NAME.POLYGON
-                    ? layerZeroProxyOFT[BLOCKCHAIN_NAME.POLYGON]
-                    : ALGB_TOKEN[this.fromBlockchain],
-            contractAbi: layerZeroOFTABI,
-            methodName: 'estimateSendFee',
-            methodArguments: [
-                layerZeroChainIds[this.toBlockchain],
-                options.receiverAddress || this.web3Private.address,
-                this.from.stringWeiAmount,
-                false,
-                adapterParams
-            ],
-            value: '0'
-        };
-
-        const gasFee = await this.fromWeb3Public.callContractMethod(
-            params.contractAddress,
-            params.contractAbi,
-            params.methodName,
-            params.methodArguments
-        );
-
-        return gasFee[0];
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {

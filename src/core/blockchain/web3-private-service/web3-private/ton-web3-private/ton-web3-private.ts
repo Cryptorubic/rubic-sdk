@@ -35,7 +35,7 @@ export class TonWeb3Private extends Web3Private {
             options.onTransactionHash?.(txHash);
             const isCompleted = await this.waitForTransactionReceipt(txHash);
             if (!isCompleted) {
-                throw new RubicSdkError('[TonWeb3Private] TON transaction timeout expired!');
+                throw new RubicSdkError('[BitcoinWeb3Private] TON transaction timeout expired!');
             }
 
             return boc;

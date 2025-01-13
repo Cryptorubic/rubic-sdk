@@ -49,17 +49,12 @@ export class TaikoBridgeProvider extends CrossChainProvider {
                 tokenAmount: fromToken.tokenAmount
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await TaikoBridgeTrade.getGasData(fromToken, to)
-                    : null;
-
             return {
                 trade: new TaikoBridgeTrade(
                     {
                         from: fromToken,
                         to,
-                        gasData
+                        gasData: await this.getGasData(fromToken)
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, to),

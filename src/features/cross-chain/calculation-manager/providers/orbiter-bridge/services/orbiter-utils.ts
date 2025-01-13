@@ -1,18 +1,12 @@
-import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import Web3 from 'web3';
 
-import { ORBITER_FEE_DIVIDER } from '../constants/orbiter-api';
 import { OrbiterQuoteConfig } from '../models/orbiter-api-quote-types';
 import { OrbiterGetQuoteConfigParams } from '../models/orbiter-utils-types';
 
@@ -60,19 +54,6 @@ export class OrbiterUtils {
         const hexString = Web3.utils.toHex(value);
 
         return hexString;
-    }
-
-    public static getTradingFee(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        config: OrbiterQuoteConfig
-    ): BigNumber {
-        const digit = from.decimals === 18 ? 8 : 5;
-        const tradingFee = from.tokenAmount
-            .multipliedBy(config.tradeFee)
-            .dividedBy(ORBITER_FEE_DIVIDER)
-            .decimalPlaces(digit, BigNumber.ROUND_UP);
-
-        return tradingFee;
     }
 
     public static getAmountWithVcCode(fromWeiAmount: string, config: OrbiterQuoteConfig): string {

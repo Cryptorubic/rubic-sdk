@@ -1,12 +1,16 @@
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
+import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 
 import { RANGO_API_KEY } from '../constants/rango-api-common';
 import { RangoBestRouteRequestOptions } from '../models/rango-api-best-route-types';
 import { RangoSwapRequestOptions } from '../models/rango-api-swap-types';
+import { RangoTradeType, RUBIC_TO_RANGO_PROVIDERS } from '../models/rango-api-trade-types';
 import {
     RangoBestRouteQueryParams,
     RangoSwapQueryParams,
@@ -25,12 +29,11 @@ export class RangoCommonParser {
     ): Promise<RangoBestRouteQueryParams> {
         const fromParam = await RangoUtils.getFromToQueryParam(from);
         const toParam = await RangoUtils.getFromToQueryParam(toToken);
-
+        const disabledProviders = this.getRangoDisabledProviders(from, options.swapperGroups || []);
         const amountParam = Web3Pure.toWei(from.tokenAmount, from.decimals);
-
         const apiKey = RANGO_API_KEY;
-
-        const swapperGroups = options.swapperGroups?.join(',');
+        const swapperGroups = disabledProviders?.join(',');
+        const fromBlockchainType = BlockchainsInfo.getChainType(from.blockchain);
 
         return {
             apiKey,
@@ -40,7 +43,7 @@ export class RangoCommonParser {
             ...(options.slippageTolerance && { slippage: options.slippageTolerance * 100 }),
             ...(options.swapperGroups?.length && { swapperGroups }),
             swappersGroupsExclude: options?.swappersGroupsExclude ?? true,
-            contractCall: true
+            contractCall: fromBlockchainType === CHAIN_TYPE.EVM
         };
     }
 
@@ -57,13 +60,16 @@ export class RangoCommonParser {
         const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
             fromToken.blockchain
         ).address;
+        const disabledProviders = this.getRangoDisabledProviders(
+            fromToken,
+            options.swapperGroups || []
+        );
         const fromAddress = options.fromAddress || walletAddress;
         const toAddress = options?.receiverAddress || walletAddress || FAKE_WALLET_ADDRESS;
-
         const slippage = options.slippageTolerance * 100;
         const apiKey = RANGO_API_KEY;
-
-        const swapperGroups = options.swapperGroups?.join(',');
+        const swapperGroups = disabledProviders?.join(',');
+        const fromBlockchainType = BlockchainsInfo.getChainType(fromToken.blockchain);
 
         return {
             apiKey,
@@ -75,7 +81,7 @@ export class RangoCommonParser {
             toAddress,
             ...(options.swapperGroups?.length && { swapperGroups }),
             swappersGroupsExclude: options?.swappersGroupsExclude ?? true,
-            contractCall: true
+            contractCall: fromBlockchainType === CHAIN_TYPE.EVM
         };
     }
 
@@ -86,5 +92,22 @@ export class RangoCommonParser {
         const apiKey = RANGO_API_KEY;
 
         return { apiKey, requestId, txId: srcTxHash };
+    }
+
+    private static getRangoDisabledProviders(
+        fromToken: PriceTokenAmount,
+        disabledProviders: RangoTradeType[]
+    ): RangoTradeType[] {
+        if (!disabledProviders?.length) {
+            return [];
+        }
+
+        if (fromToken.blockchain === BLOCKCHAIN_NAME.BITCOIN) {
+            const mayaProtocol = RUBIC_TO_RANGO_PROVIDERS[BRIDGE_TYPE.MAYA_PROTOCOL];
+
+            return disabledProviders.filter(provider => provider !== mayaProtocol);
+        }
+
+        return disabledProviders;
     }
 }

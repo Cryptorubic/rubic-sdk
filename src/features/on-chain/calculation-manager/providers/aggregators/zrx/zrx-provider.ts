@@ -3,7 +3,6 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
-import { LifiEvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { zrxApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/zrx/constants';
 import {
     ZeroXSupportedBlockchains,
@@ -20,11 +19,11 @@ import {
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
-import { LifiEvmOnChainTrade } from '../lifi/chains/lifi-evm-on-chain-trade';
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
+import { ZrxQuoteResponse } from './models/zrx-types';
 
 export class ZrxProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions: RequiredOnChainCalculationOptions = evmProviderDefaultOptions;
@@ -74,7 +73,7 @@ export class ZrxProvider extends AggregatorOnChainProvider {
             from,
             to,
             slippageTolerance: fullOptions.slippageTolerance,
-            gasFeeInfo: null,
+            gasFeeInfo: await this.getGasFeeInfo(from, apiTradeData),
             path: [from, to],
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,
@@ -95,13 +94,15 @@ export class ZrxProvider extends AggregatorOnChainProvider {
      * Fetches zrx data from api.
      */
 
-    protected async getGasFeeInfo(
-        lifiTradeStruct: LifiEvmOnChainTradeStruct
+    protected override async getGasFeeInfo(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        quote: ZrxQuoteResponse
     ): Promise<GasFeeInfo | null> {
         try {
-            const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-            const gasLimit = await LifiEvmOnChainTrade.getGasLimit(lifiTradeStruct);
-            return getGasFeeInfo(gasLimit, gasPriceInfo);
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+            const gasLimit = new BigNumber(quote.gas);
+
+            return getGasFeeInfo(gasPriceInfo, { gasLimit });
         } catch {
             return null;
         }

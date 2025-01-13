@@ -1,5 +1,6 @@
 import { RubicSdkError } from 'src/common/errors';
 import {
+    BitcoinBlockchainName,
     BlockchainName,
     EvmBlockchainName,
     SolanaBlockchainName,
@@ -15,12 +16,14 @@ import {
     web3PrivateSupportedChainTypes
 } from 'src/core/blockchain/web3-private-service/models/web-private-supported-chain-type';
 import { Web3PrivateStorage } from 'src/core/blockchain/web3-private-service/models/web3-private-storage';
+import { BitcoinWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/bitcoin-web3-private';
 import { EmptyWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/empty-web3-private';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { SolanaWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/solana-web3-private/solana-web3-private';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import {
+    BitcoinWalletProviderCore,
     EvmWalletProviderCore,
     SolanaWalletProviderCore,
     TonWalletProviderCore,
@@ -47,7 +50,8 @@ export class Web3PrivateService {
         [CHAIN_TYPE.EVM]: this.createEvmWeb3Private.bind(this),
         [CHAIN_TYPE.TRON]: this.createTronWeb3Private.bind(this),
         [CHAIN_TYPE.SOLANA]: this.createSolanaWeb3Private.bind(this),
-        [CHAIN_TYPE.TON]: this.createTonWeb3Private.bind(this)
+        [CHAIN_TYPE.TON]: this.createTonWeb3Private.bind(this),
+        [CHAIN_TYPE.BITCOIN]: this.createBitcoinWeb3Private.bind(this)
     };
 
     constructor(walletProvider: WalletProvider) {
@@ -58,6 +62,7 @@ export class Web3PrivateService {
     public getWeb3Private(chainType: 'TRON'): TronWeb3Private;
     public getWeb3Private(chainType: 'SOLANA'): SolanaWeb3Private;
     public getWeb3Private(chainType: 'TON'): TonWeb3Private;
+    public getWeb3Private(chainType: 'BITCOIN'): BitcoinWeb3Private;
     public getWeb3Private(chainType: ChainType): never;
     public getWeb3Private(chainType: ChainType) {
         if (!Web3PrivateService.isSupportedChainType(chainType)) {
@@ -75,6 +80,7 @@ export class Web3PrivateService {
     public getWeb3PrivateByBlockchain(blockchain: SolanaBlockchainName): SolanaWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: TronBlockchainName): TronWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: TonBlockchainName): TonWeb3Private;
+    public getWeb3PrivateByBlockchain(blockchain: BitcoinBlockchainName): BitcoinWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: Web3PrivateSupportedBlockchain): Web3Private;
     public getWeb3PrivateByBlockchain(blockchain: BlockchainName): never;
     public getWeb3PrivateByBlockchain(blockchain: BlockchainName) {
@@ -129,6 +135,10 @@ export class Web3PrivateService {
 
     private createTonWeb3Private(tonProviderCore: TonWalletProviderCore): TonWeb3Private {
         return new TonWeb3Private(tonProviderCore);
+    }
+
+    private createBitcoinWeb3Private(providerCore: BitcoinWalletProviderCore): BitcoinWeb3Private {
+        return new BitcoinWeb3Private(providerCore);
     }
 
     public updateWeb3PrivateStorage(walletProvider: WalletProvider) {

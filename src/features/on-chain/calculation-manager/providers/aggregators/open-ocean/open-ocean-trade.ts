@@ -1,8 +1,6 @@
-import BigNumber from 'bignumber.js';
 import { NotWhitelistedProviderError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
@@ -10,21 +8,12 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { OpenOceanApiService } from './services/open-ocean-api-service';
 
 export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
-    /** @internal */
-    public static async getGasLimit(
-        openOceanTradeStruct: OpenOceanTradeStruct
-    ): Promise<BigNumber | null> {
-        const openOceanTrade = new OpenOceanTrade(openOceanTradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
-        return getOnChainGasData(openOceanTrade);
-    }
-
     public readonly type = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
 
     protected get spenderAddress(): string {

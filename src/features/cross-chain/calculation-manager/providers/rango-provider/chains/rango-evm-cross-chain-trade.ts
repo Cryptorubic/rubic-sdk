@@ -2,75 +2,41 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { rangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
+import { RangoTransaction } from 'src/features/common/providers/rango/models/rango-api-swap-types';
 import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
 import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from '../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
-import { EvmCrossChainTrade } from '../common/evm-cross-chain-trade/evm-cross-chain-trade';
-import { GasData } from '../common/evm-cross-chain-trade/models/gas-data';
-import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
-import { FeeInfo } from '../common/models/fee-info';
-import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
-import { OnChainSubtype } from '../common/models/on-chain-subtype';
-import { TradeInfo } from '../common/models/trade-info';
-import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
-    RangoCrossChainTradeConstructorParams,
-    RangoGetGasDataParams
-} from './model/rango-cross-chain-parser-types';
-import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from '../../../models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from '../../common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from '../../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from '../../common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from '../../common/evm-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from '../../common/evm-cross-chain-trade/models/gas-data';
+import { BRIDGE_TYPE, BridgeType } from '../../common/models/bridge-type';
+import { FeeInfo } from '../../common/models/fee-info';
+import { GetContractParamsOptions } from '../../common/models/get-contract-params-options';
+import { OnChainSubtype } from '../../common/models/on-chain-subtype';
+import { TradeInfo } from '../../common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from '../../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { RangoCrossChainTradeConstructorParams } from '../model/rango-cross-chain-parser-types';
+import { RangoCrossChainApiService } from '../services/rango-cross-chain-api-service';
 
-export class RangoCrossChainTrade extends EvmCrossChainTrade {
-    /** @internal */
-    public static async getGasData({
-        fromToken,
-        toToken,
-        feeInfo,
-        routePath,
-        swapQueryParams,
-        bridgeSubtype,
-        receiverAddress
-    }: RangoGetGasDataParams): Promise<GasData | null> {
-        try {
-            const trade = new RangoCrossChainTrade({
-                crossChainTrade: {
-                    from: fromToken,
-                    to: toToken,
-                    toTokenAmountMin: new BigNumber(0),
-                    feeInfo,
-                    gasData: null,
-                    priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                    slippage: swapQueryParams.slippage,
-                    bridgeSubtype,
-                    swapQueryParams
-                },
-                routePath,
-                providerAddress: swapQueryParams.toAddress,
-                useProxy: false
-            });
-
-            return getCrossChainGasData(trade, receiverAddress);
-        } catch (err) {
-            return null;
-        }
-    }
-
+export class RangoEvmCrossChainTrade extends EvmCrossChainTrade {
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
 
     public readonly isAggregator: boolean = true;
 
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
+    public readonly to: PriceTokenAmount<BlockchainName>;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -109,7 +75,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
-    constructor(params: RangoCrossChainTradeConstructorParams) {
+    constructor(params: RangoCrossChainTradeConstructorParams<EvmBlockchainName>) {
         super(params.providerAddress, params.routePath, params.useProxy);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
@@ -239,10 +205,12 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             throw new RubicSdkError('Invalid data after sending swap request. Error text:' + error);
         }
 
+        const { txData, value, txTo } = tx as RangoTransaction;
+
         const config = {
-            data: tx.txData!,
-            value: tx.value || '0',
-            to: tx.txTo
+            data: txData!,
+            value: value || '0',
+            to: txTo
         };
 
         return { config, amount: route.outputAmount };

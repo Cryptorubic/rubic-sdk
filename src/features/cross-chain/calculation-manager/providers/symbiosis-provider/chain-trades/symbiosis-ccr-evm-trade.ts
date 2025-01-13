@@ -29,46 +29,12 @@ import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain
 import { SymbiosisEvmCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 /**
  * Calculated Symbiosis cross-chain trade.
  */
 export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
     private readonly swappingParams: SymbiosisSwappingParams;
-
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount,
-        swapParams: SymbiosisSwappingParams,
-        feeInfo: FeeInfo,
-        providerGateway: string,
-        providerAddress: string,
-        receiverAddress?: string
-    ): Promise<GasData | null> {
-        const trade = new SymbiosisEvmCcrTrade(
-            {
-                from,
-                to: toToken,
-                gasData: null,
-                priceImpact: 0,
-                slippage: 0,
-                feeInfo,
-                transitAmount: new BigNumber(NaN),
-                tradeType: { in: undefined, out: undefined },
-                contractAddresses: {
-                    providerRouter: '',
-                    providerGateway: providerGateway
-                },
-                swapParams
-            },
-            providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            [],
-            false
-        );
-        return getCrossChainGasData(trade, receiverAddress);
-    }
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 

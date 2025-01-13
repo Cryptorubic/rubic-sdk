@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
@@ -8,7 +7,6 @@ import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -285,30 +283,30 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         ]) as Parameters<InstanceType<typeof EvmWeb3Public>['callContractMethod']>;
     }
 
-    /** @internal */
-    public async getEstimatedGasCallData(): Promise<BatchCall> {
-        return this.encode({ fromAddress: this.walletAddress, supportFee: false });
-    }
+    // /** @internal */
+    // public async getEstimatedGasCallData(): Promise<BatchCall> {
+    //     return this.encode({ fromAddress: this.walletAddress, supportFee: false });
+    // }
 
-    /** @internal */
-    public getDefaultEstimatedGas(): BigNumber {
-        const transitTokensNumber = this.wrappedPath.length - 2;
-        let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
-        if (this.from.isNative) {
-            methodName = 'ethToTokens';
-        }
-        if (this.to.isNative) {
-            methodName = 'tokensToEth';
-        }
+    // /** @internal */
+    // public getDefaultEstimatedGas(): BigNumber {
+    //     const transitTokensNumber = this.wrappedPath.length - 2;
+    //     let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
+    //     if (this.from.isNative) {
+    //         methodName = 'ethToTokens';
+    //     }
+    //     if (this.to.isNative) {
+    //         methodName = 'tokensToEth';
+    //     }
 
-        const constructor = <typeof UniswapV2AbstractTrade>this.constructor;
-        const gasLimitAmount =
-            constructor.defaultEstimatedGasInfo[methodName]?.[transitTokensNumber];
-        if (!gasLimitAmount) {
-            throw new RubicSdkError('Gas limit has to be defined');
-        }
+    //     const constructor = <typeof UniswapV2AbstractTrade>this.constructor;
+    //     const gasLimitAmount =
+    //         constructor.defaultEstimatedGasInfo[methodName]?.[transitTokensNumber];
+    //     if (!gasLimitAmount) {
+    //         throw new RubicSdkError('Gas limit has to be defined');
+    //     }
 
-        const gasLimit = gasLimitAmount.toFixed(0);
-        return new BigNumber(gasLimit);
-    }
+    //     const gasLimit = gasLimitAmount.toFixed(0);
+    //     return new BigNumber(gasLimit);
+    // }
 }

@@ -6,7 +6,7 @@ export interface RangoSwapRequestOptions extends RangoBestRouteRequestOptions {
 }
 
 export interface RangoSwapTransactionResponse extends RangoBestRouteResponse {
-    tx: RangoTransaction | null;
+    tx: RangoTransaction | null | RangoTransfer;
 }
 
 export interface RangoTransaction {
@@ -22,6 +22,12 @@ export interface RangoTransaction {
     gasPrice: string | null;
     maxPriorityFeePerGas: string | null;
     maxFeePerGas: string | null;
+}
+
+export interface RangoTransfer {
+    type: 'TRANSFER';
+    recipientAddress: string;
+    memo?: string;
 }
 
 interface RangoEvmBlockchainMeta {

@@ -31,7 +31,6 @@ import {
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
 import { StargateCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/stargate-cross-chain-provider';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { evmCommonCrossChainAbi } from '../common/evm-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -49,41 +48,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         return this.onChainTrade
             ? 'swapAndStartBridgeTokensViaStargate'
             : 'startBridgeTokensViaStargate';
-    }
-
-    /**  @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
-        feeInfo: FeeInfo,
-        srcChainTrade: EvmOnChainTrade | null,
-        dstChainTrade: EvmOnChainTrade | null,
-        slippageTolerance: number,
-        providerAddress: string,
-        receiverAddress?: string
-    ): Promise<GasData | null> {
-        try {
-            const trade = new StargateCrossChainTrade(
-                {
-                    from,
-                    to: toToken,
-                    slippageTolerance,
-                    priceImpact: null,
-                    gasData: null,
-                    feeInfo,
-                    srcChainTrade,
-                    dstChainTrade,
-                    cryptoFeeToken: null
-                },
-                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                [],
-                false
-            );
-
-            return getCrossChainGasData(trade, receiverAddress);
-        } catch (_err) {
-            return null;
-        }
     }
 
     public readonly feeInfo: FeeInfo;

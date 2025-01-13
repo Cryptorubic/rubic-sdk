@@ -10,7 +10,6 @@ import { RequiredOnChainCalculationOptions } from '../models/on-chain-calculatio
 import { OnChainProxyFeeInfo } from '../models/on-chain-proxy-fee-info';
 import { OnChainTradeType } from '../models/on-chain-trade-type';
 import { OnChainProxyService } from '../on-chain-proxy-service/on-chain-proxy-service';
-import { OnChainTradeStruct } from '../on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from '../on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../on-chain-trade/on-chain-trade';
 
@@ -31,10 +30,7 @@ export abstract class AggregatorOnChainProvider {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(blockchain).address;
     }
 
-    protected getGasFeeInfo(
-        _tradeStruct: OnChainTradeStruct<BlockchainName>,
-        _providerGateway?: string
-    ): Promise<GasFeeInfo | null> {
+    protected getGasFeeInfo(..._args: unknown[]): Promise<GasFeeInfo | null> {
         return Promise.resolve(null);
     }
 

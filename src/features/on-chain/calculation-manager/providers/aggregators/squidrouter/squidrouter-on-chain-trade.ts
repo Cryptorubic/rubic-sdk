@@ -1,31 +1,15 @@
-import BigNumber from 'bignumber.js';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SquidrouterTransactionRequest } from 'src/features/common/providers/squidrouter/models/transaction-request';
 import { SquidRouterApiService } from 'src/features/common/providers/squidrouter/services/squidrouter-api-service';
 import { SquidrouterContractAddress } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-contract-address';
 import { SquidrouterCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
 
-import { getOnChainGasData } from '../../../utils/get-on-chain-gas-data';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { SquidRouterOnChainTradeStruct } from './models/squidrouter-on-chain-trade-struct';
 
 export class SquidRouterOnChainTrade extends AggregatorEvmOnChainTrade {
-    public static async getGasLimit(
-        tradeStruct: SquidRouterOnChainTradeStruct,
-        providerGateway: string
-    ): Promise<BigNumber | null> {
-        const trade = new SquidRouterOnChainTrade(
-            tradeStruct,
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            providerGateway
-        );
-
-        return getOnChainGasData(trade);
-    }
-
     public readonly type = ON_CHAIN_TRADE_TYPE.SQUIDROUTER;
 
     private readonly requestParams: SquidrouterTransactionRequest;

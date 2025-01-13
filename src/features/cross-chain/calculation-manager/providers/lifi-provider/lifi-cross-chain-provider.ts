@@ -1,22 +1,18 @@
 import BigNumber from 'bignumber.js';
-import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { BitcoinEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-encoded-config';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import {
     BRIDGE_TYPE,
     bridges,
@@ -44,7 +40,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import { LifiUtilsService } from '../../../../common/providers/lifi/lifi-utils-service';
-import { LifiEvmCrossChainTrade } from './chains/lifi-evm-cross-chain-trade';
+import { GasData } from '../common/evm-cross-chain-trade/models/gas-data';
 import { LifiCrossChainFactory } from './lifi-cross-chain-factory';
 import { FeeCost, LifiStep } from './models/lifi-fee-cost';
 import { Route, RouteOptions, RoutesRequest } from './models/lifi-route';
@@ -64,17 +60,10 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
         toToken: PriceToken<LifiCrossChainSupportedBlockchain>,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult<EvmEncodeConfig | { data: string }>> {
+    ): Promise<CalculationResult<EvmEncodeConfig | { data: string } | BitcoinEncodedConfig>> {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return {
-                trade: null,
-                error: new NotSupportedTokensError(),
-                tradeType: this.type
-            };
-        }
 
         const { disabledBridges, disabledDexes } = this.mapDisabledProviders(
             options.lifiDisabledBridgeTypes || []
@@ -172,8 +161,6 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         const priceImpact = from.calculatePriceImpactPercent(to);
 
-        const gasData = null;
-
         const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute.steps);
 
         const trade = LifiCrossChainFactory.createTrade(
@@ -182,7 +169,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 from,
                 to,
                 route: bestRoute,
-                gasData,
+                gasData: await this.getLifiGasData(from, bestRoute.steps[0]!),
                 toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
                 feeInfo,
                 priceImpact,
@@ -372,35 +359,42 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         return routePath;
     }
 
-    private getMinAmountUSD(): BigNumber {
-        return new BigNumber(1);
-    }
+    private async getLifiGasData(from: PriceTokenAmount, step: LifiStep): Promise<GasData | null> {
+        if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
+            return Promise.resolve(null);
+        }
 
-    private async getGasData(
-        options: RequiredCrossChainOptions,
-        from: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
-        to: PriceTokenAmount<LifiCrossChainSupportedBlockchain>,
-        bestRoute: Route,
-        feeInfo: FeeInfo
-    ): Promise<GasData | null> {
-        if (options.gasCalculation !== 'enabled') {
+        const gasCosts = step.estimate.gasCosts;
+        if (!gasCosts || !gasCosts.length) {
+            return Promise.resolve(null);
+        }
+
+        let gasLimit = new BigNumber(0);
+
+        for (const el of gasCosts) {
+            gasLimit = gasLimit.plus(el.limit);
+        }
+
+        try {
+            const gasPriceInfo = await Injector.gasPriceApi.getGasPrice(from.blockchain);
+
+            return {
+                gasLimit: new BigNumber(gasLimit),
+                ...(gasPriceInfo.gasPrice && { gasPrice: new BigNumber(gasPriceInfo.gasPrice) }),
+                ...(gasPriceInfo.baseFee && { baseFee: new BigNumber(gasPriceInfo.baseFee) }),
+                ...(gasPriceInfo.maxFeePerGas && {
+                    maxFeePerGas: new BigNumber(gasPriceInfo.maxFeePerGas)
+                }),
+                ...(gasPriceInfo.maxPriorityFeePerGas && {
+                    maxPriorityFeePerGas: new BigNumber(gasPriceInfo.maxPriorityFeePerGas)
+                })
+            };
+        } catch {
             return null;
         }
+    }
 
-        const blockchain = from.blockchain;
-        const chainType = BlockchainsInfo.getChainType(blockchain);
-
-        if (chainType === CHAIN_TYPE.EVM) {
-            return LifiEvmCrossChainTrade.getGasData(
-                from as PriceTokenAmount<EvmBlockchainName>,
-                to as PriceTokenAmount<EvmBlockchainName>,
-                bestRoute,
-                feeInfo,
-                options.slippageTolerance,
-                options.providerAddress,
-                options?.receiverAddress
-            );
-        }
-        return null;
+    private getMinAmountUSD(): BigNumber {
+        return new BigNumber(1);
     }
 }
