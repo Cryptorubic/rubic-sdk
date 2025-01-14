@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
@@ -11,7 +12,12 @@ export interface TonEncodedConfigAndToAmount<T> {
 export type TonOnChainTradeStruct = Omit<
     OnChainTradeStruct<TonBlockchainName>,
     'fromWithoutFee' | 'proxyFeeInfo' | 'path'
-> & { routingPath: RubicStep[]; isChangedSlippage: boolean };
+> & {
+    routingPath: RubicStep[];
+    isChangedSlippage: boolean;
+    apiQuote: QuoteRequestInterface | null;
+    apiResponse: QuoteResponseInterface | null;
+};
 
 export interface TonTradeAdditionalInfo {
     isMultistep: boolean;

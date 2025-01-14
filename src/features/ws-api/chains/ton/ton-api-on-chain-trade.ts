@@ -1,7 +1,6 @@
 import { TonBlockchainName } from '@cryptorubic/core';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
@@ -46,11 +45,6 @@ export class TonApiOnChainTrade extends TonOnChainTrade {
     }
 
     protected calculateOutputAmount(_options: EncodeTransactionOptions): Promise<string> {
-        // @TODO API
-        throw new Error('Not implemented');
-    }
-
-    public swap(_options?: SwapTransactionOptions): Promise<string | never> {
         // @TODO API
         throw new Error('Not implemented');
     }

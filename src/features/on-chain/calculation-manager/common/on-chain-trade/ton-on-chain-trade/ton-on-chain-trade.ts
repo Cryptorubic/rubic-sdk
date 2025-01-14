@@ -1,5 +1,14 @@
+import {
+    QuoteRequestInterface,
+    QuoteResponseInterface,
+    SwapRequestInterface
+} from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
-import { InsufficientFundsError, RubicSdkError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    InsufficientFundsError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
@@ -8,9 +17,11 @@ import { TonWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
+import { TonTransactionConfig } from 'src/features/cross-chain/calculation-manager/providers/common/models/ton-transaction-config';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { TransactionConfig } from 'web3-core';
 
@@ -18,7 +29,7 @@ import { GasFeeInfo } from '../evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../on-chain-trade';
 import { TonOnChainTradeStruct, TonTradeAdditionalInfo } from './models/ton-on-chian-trade-types';
 
-export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
+export abstract class TonOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
@@ -36,6 +47,10 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
     protected skipAmountCheck: boolean = false;
 
     public readonly additionalInfo: TonTradeAdditionalInfo;
+
+    private readonly apiQuote: QuoteRequestInterface | null = null;
+
+    private readonly apiResponse: QuoteResponseInterface | null = null;
 
     protected get spenderAddress(): string {
         throw new RubicSdkError('No spender address!');
@@ -60,6 +75,9 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
             isMultistep: this.routingPath.length > 1,
             isChangedSlippage: tradeStruct.isChangedSlippage
         };
+
+        this.apiQuote = tradeStruct?.apiQuote || null;
+        this.apiResponse = tradeStruct?.apiResponse || null;
     }
 
     public override async needApprove(): Promise<boolean> {
@@ -74,10 +92,77 @@ export abstract class TonOnChainTrade<T = undefined> extends OnChainTrade {
         throw new Error('Method is not supported');
     }
 
-    public async encode(): Promise<T> {
-        throw new RubicSdkError(
-            'Method not implemented! Use custom swap methods on each child class!'
+    public async encode(options: EncodeTransactionOptions): Promise<TonTransactionConfig> {
+        await this.checkFromAddress(options.fromAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress);
+
+        return this.setTransactionConfig(options);
+    }
+
+    public async swap(options: SwapTransactionOptions): Promise<string | never> {
+        await this.checkWalletState(options?.testMode);
+
+        const fromAddress = this.walletAddress;
+        const transactionConfig = await this.encode({ ...options, fromAddress });
+
+        const { onConfirm } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        try {
+            await this.web3Private.sendTransaction({
+                messages: transactionConfig.tonMessages,
+                onTransactionHash
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw err;
+        }
+    }
+
+    protected async setTransactionConfig(
+        options: EncodeTransactionOptions
+    ): Promise<TonTransactionConfig> {
+        const { config, amount } = await this.getTransactionConfigAndAmount(
+            options.receiverAddress
         );
+
+        if (!options.skipAmountCheck) {
+            this.checkAmountChange(amount, this.to.stringWeiAmount);
+        }
+        return config;
+    }
+
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{ config: TonTransactionConfig; amount: string }> {
+        if (!this.apiResponse || !this.apiQuote) {
+            throw new Error('Failed to load api response');
+        }
+
+        const swapRequestParams: SwapRequestInterface = {
+            ...this.apiQuote,
+            fromAddress: this.walletAddress,
+            receiver: receiverAddress || this.walletAddress,
+            id: this.apiResponse.id
+        };
+
+        const swapData = await Injector.rubicApiService.fetchSwapData<TonTransactionConfig>(
+            swapRequestParams
+        );
+
+        const toAmount = swapData.estimate.destinationWeiAmount;
+
+        return { config: swapData.transaction, amount: toAmount };
     }
 
     protected async checkNativeBalance(): Promise<void> {

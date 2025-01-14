@@ -195,7 +195,9 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             receiver: receiverAddress,
             id: this.apiResponse.id
         };
-        const swapData = await Injector.rubicApiService.fetchSwapData(swapRequestData);
+        const swapData = await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(
+            swapRequestData
+        );
 
         const config = {
             data: swapData.transaction.data!,

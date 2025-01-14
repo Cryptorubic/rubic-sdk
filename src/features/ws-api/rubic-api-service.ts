@@ -2,7 +2,6 @@ import {
     QuoteAllInterface,
     QuoteRequestInterface,
     SwapRequestInterface,
-    SwapResponseInterface,
     WsQuoteRequestInterface,
     WsQuoteResponseInterface
 } from '@cryptorubic/core';
@@ -13,6 +12,8 @@ import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculati
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
 import { WrappedAsyncTradeOrNull } from 'src/features/ws-api/models/wrapped-async-trade-or-null';
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
+
+import { SwapResponseInterface } from './models/swap-response-interface';
 
 export class RubicApiService {
     public get apiUrl(): string {
@@ -48,8 +49,8 @@ export class RubicApiService {
         this.client.emit('calculate', params);
     }
 
-    public fetchSwapData(body: SwapRequestInterface): Promise<SwapResponseInterface> {
-        return Injector.httpClient.post<SwapResponseInterface>(
+    public fetchSwapData<T>(body: SwapRequestInterface): Promise<SwapResponseInterface<T>> {
+        return Injector.httpClient.post<SwapResponseInterface<T>>(
             `${this.apiUrl}/api/routes/swap`,
             body
         );
@@ -73,7 +74,7 @@ export class RubicApiService {
     public handleQuotesAsync(): Observable<WrappedAsyncTradeOrNull> {
         return fromEvent<WsQuoteResponseInterface>(this.client, 'events').pipe(
             concatMap(wsResponse => {
-                const { trade, total, calculated, type } = wsResponse;
+                const { trade, total, calculated } = wsResponse;
 
                 let promise: Promise<
                     null | WrappedCrossChainTradeOrNull | WrappedOnChainTradeOrNull

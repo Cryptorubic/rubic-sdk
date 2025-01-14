@@ -1,12 +1,19 @@
-import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import {
+    QuoteRequestInterface,
+    QuoteResponseInterface,
+    SwapRequestInterface
+} from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
-import { UnnecessaryApproveError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    UnnecessaryApproveError
+} from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { parseError } from 'src/common/utils/errors';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -81,99 +88,95 @@ export abstract class TronOnChainTrade extends OnChainTrade {
         await this.approve(approveOptions, false);
     }
 
-    public async swap(_options: SwapTransactionOptions = {}): Promise<string | never> {
-        // @TODO API
-        throw new Error('Not implemented');
-        // await this.checkWalletState(options?.testMode);
-        // await this.checkAllowanceAndApprove(options);
-        //
-        // const { onConfirm } = options;
-        // let transactionHash: string;
-        // const onTransactionHash = (hash: string) => {
-        //     if (onConfirm) {
-        //         onConfirm(hash);
-        //     }
-        //     transactionHash = hash;
-        // };
-        //
-        // const fromAddress = this.walletAddress;
-        // const { data, value, to } = await this.encode({ ...options, fromAddress });
-        // const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
-        //
-        // try {
-        //     await this.web3Private[method](to, {
-        //         data,
-        //         value,
-        //         onTransactionHash,
-        //         gasPriceOptions: options.gasPriceOptions,
-        //         ...(options?.useEip155 && {
-        //             chainId: `0x${blockchainId[this.from.blockchain].toString(16)}`
-        //         })
-        //     });
-        //
-        //     return transactionHash!;
-        // } catch (err) {
-        //     if (err instanceof FailedToCheckForTransactionReceiptError) {
-        //         return transactionHash!;
-        //     }
-        //
-        //     throw parseError(err);
-        // }
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkWalletState(options?.testMode);
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        const fromAddress = this.walletAddress;
+        const transactionData = await this.encode({
+            ...options,
+            fromAddress
+        });
+        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
+
+        try {
+            await this.web3Private[method](
+                transactionData.to,
+                transactionData.signature,
+                transactionData.arguments,
+                {
+                    onTransactionHash,
+                    ...(transactionData?.feeLimit && { feeLimit: transactionData.feeLimit }),
+                    ...(transactionData.callValue && { callValue: transactionData.callValue }),
+                    ...(transactionData.rawParameter && {
+                        rawParameter: transactionData.rawParameter
+                    })
+                }
+            );
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+
+            throw parseError(err);
+        }
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TronTransactionConfig> {
         await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
+        await this.checkReceiverAddress(options.receiverAddress, true);
 
         return this.setTransactionConfig(options);
     }
 
     protected async setTransactionConfig(
-        _options: EncodeTransactionOptions
-    ): Promise<EvmEncodeConfig> {
-        // @TODO API
-        throw new Error('Not implemented');
-        // if (this.lastTransactionConfig && options.useCacheData) {
-        //     return this.lastTransactionConfig;
-        // }
-        //
-        // const { tx, toAmount } = await this.getTransactionConfigAndAmount(options);
-        // this.lastTransactionConfig = tx;
-        // setTimeout(() => {
-        //     this.lastTransactionConfig = null;
-        // }, 15_000);
-        //
-        // if (!options.skipAmountCheck) {
-        //     this.checkAmountChange(toAmount, this.to.stringWeiAmount);
-        // }
-        // return tx;
+        options: EncodeTransactionOptions
+    ): Promise<TronTransactionConfig> {
+        if (this.lastTransactionConfig && options.useCacheData) {
+            return this.lastTransactionConfig;
+        }
+
+        const { tx, toAmount } = await this.getTransactionConfigAndAmount(options.receiverAddress);
+        this.lastTransactionConfig = tx;
+        setTimeout(() => {
+            this.lastTransactionConfig = null;
+        }, 15_000);
+
+        if (!options.skipAmountCheck) {
+            this.checkAmountChange(toAmount, this.to.stringWeiAmount);
+        }
+        return tx;
     }
 
     protected async getTransactionConfigAndAmount(
-        _options?: TronTransactionConfig
+        receiverAddress?: string
     ): Promise<TronEncodedConfigAndToAmount> {
-        // @TODO API
-        throw new Error('Not implemented');
-        // if (!this.apiResponse || !this.apiQuote) {
-        //     throw new Error('Failed to load api response');
-        // }
-        // const swapRequestData: SwapRequestInterface = {
-        //     ...this.apiQuote,
-        //     fromAddress: this.walletAddress,
-        //     receiver: options?.receiverAddress || this.walletAddress,
-        //     id: this.apiResponse.id
-        // };
-        // const swapData = await Injector.rubicApiService.fetchSwapData(swapRequestData);
-        //
-        // const config = {
-        //     data: swapData.transaction.data!,
-        //     value: swapData.transaction.value!,
-        //     to: swapData.transaction.to!
-        // };
-        //
-        // const amount = swapData.estimate.destinationWeiAmount;
-        //
-        // return { tx: config, toAmount: amount };
+        if (!this.apiResponse || !this.apiQuote) {
+            throw new Error('Failed to load api response');
+        }
+        const swapRequestData: SwapRequestInterface = {
+            ...this.apiQuote,
+            fromAddress: this.walletAddress,
+            receiver: receiverAddress || this.walletAddress,
+            id: this.apiResponse.id
+        };
+        const { transaction, estimate } =
+            await Injector.rubicApiService.fetchSwapData<TronTransactionConfig>(swapRequestData);
+
+        const amount = estimate.destinationWeiAmount;
+
+        return { tx: transaction, toAmount: amount };
     }
 
     public async encodeApprove(
