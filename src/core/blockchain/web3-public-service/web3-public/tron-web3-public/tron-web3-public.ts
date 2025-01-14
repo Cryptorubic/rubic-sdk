@@ -257,18 +257,7 @@ export class TronWeb3Public extends Web3Public {
             promises[1] = this.getBalance(userAddress);
         }
 
-        promises[0] = this.multicallContractsMethods<string>(
-            this.tokenContractAbi,
-            tokensAddresses.map(tokenAddress => ({
-                contractAddress: tokenAddress,
-                methodsData: [
-                    {
-                        methodName: 'balanceOf',
-                        methodArguments: [userAddress]
-                    }
-                ]
-            }))
-        );
+        promises[0] = this.batchMulticallTokenBalance(userAddress, tokensAddresses, 10);
 
         const results = await Promise.all(
             promises as [Promise<ContractMulticallResponse<string>[][]>, Promise<BigNumber>]
@@ -331,5 +320,47 @@ export class TronWeb3Public extends Web3Public {
         };
         tokens.splice(nativeTokenIndex, 0, nativeToken);
         return tokens;
+    }
+
+    private async batchMulticallTokenBalance(
+        userAddress: string,
+        tokensAddresses: string[],
+        batchSize: number
+    ) {
+        if (tokensAddresses.length > 100) {
+            const balances = [];
+            for (let i = 0; i < tokensAddresses.length; i += batchSize) {
+                const batchRequest = tokensAddresses.slice(i, i + batchSize);
+                const batchResult = await this.multicallContractsMethods<string>(
+                    this.tokenContractAbi,
+                    batchRequest.map(tokenAddress => ({
+                        contractAddress: tokenAddress,
+                        methodsData: [
+                            {
+                                methodName: 'balanceOf',
+                                methodArguments: [userAddress]
+                            }
+                        ]
+                    }))
+                );
+
+                balances.push(...batchResult);
+            }
+
+            return balances;
+        }
+
+        return this.multicallContractsMethods<string>(
+            this.tokenContractAbi,
+            tokensAddresses.map(tokenAddress => ({
+                contractAddress: tokenAddress,
+                methodsData: [
+                    {
+                        methodName: 'balanceOf',
+                        methodArguments: [userAddress]
+                    }
+                ]
+            }))
+        );
     }
 }

@@ -168,7 +168,11 @@ export class TronWeb3Pure {
     }
 
     public static flattenParameterToPrimitive(parameter: TronWeb3PrimitiveType): Web3PrimitiveType {
-        if (typeof parameter === 'number' || parameter instanceof EthersBigNumber) {
+        if (
+            typeof parameter === 'number' ||
+            parameter instanceof EthersBigNumber ||
+            typeof parameter === 'bigint'
+        ) {
             return parameter.toString();
         }
         if (typeof parameter === 'string' || typeof parameter === 'boolean') {
