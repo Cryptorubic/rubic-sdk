@@ -3,6 +3,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { rangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
+import { RangoTransaction } from 'src/features/common/providers/rango/models/rango-api-swap-types';
 import {
     RangoSupportedBlockchain,
     rangoSupportedBlockchains
@@ -46,9 +47,10 @@ export class RangoOnChainProvider extends AggregatorOnChainProvider {
                 false
             );
             const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
+            const { txTo } = tx as RangoTransaction;
 
             const providerGateway =
-                tx?.txTo ||
+                txTo ||
                 rangoContractAddresses[from.blockchain as RangoSupportedBlockchain].providerGateway;
 
             const to = new PriceTokenAmount({

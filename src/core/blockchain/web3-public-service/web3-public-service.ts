@@ -3,6 +3,7 @@ import cloneDeep from 'lodash.clonedeep';
 import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import pTimeout from 'src/common/utils/p-timeout';
 import {
+    BitcoinBlockchainName,
     BLOCKCHAIN_NAME,
     BlockchainName,
     EVM_BLOCKCHAIN_NAME,
@@ -18,6 +19,7 @@ import {
     Web3PublicSupportedBlockchain,
     web3PublicSupportedBlockchains
 } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { BitcoinWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/bitcoin-web3-public/bitcoin-web3-public';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/solana-web3-public/solana-web3-public';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
@@ -53,6 +55,7 @@ export class Web3PublicService {
     public getWeb3Public(blockchainName: TronBlockchainName): TronWeb3Public;
     public getWeb3Public(blockchainName: SolanaBlockchainName): SolanaWeb3Public;
     public getWeb3Public(blockchainName: TonBlockchainName): TonWeb3Public;
+    public getWeb3Public(blockchainName: BitcoinBlockchainName): BitcoinWeb3Public;
     public getWeb3Public(blockchainName: Web3PublicSupportedBlockchain): Web3Public;
     public getWeb3Public(blockchainName: BlockchainName): never;
     public getWeb3Public(blockchainName: BlockchainName) {
@@ -85,7 +88,8 @@ export class Web3PublicService {
             ),
             [BLOCKCHAIN_NAME.TRON]: this.createTronWeb3PublicProxy.bind(this),
             [BLOCKCHAIN_NAME.SOLANA]: this.createSolanaWeb3PublicProxy.bind(this),
-            [BLOCKCHAIN_NAME.TON]: this.createTonWeb3Public.bind(this)
+            [BLOCKCHAIN_NAME.TON]: this.createTonWeb3Public.bind(this),
+            [BLOCKCHAIN_NAME.BITCOIN]: this.createBitcoinWeb3Public.bind(this)
         };
     }
 
@@ -128,6 +132,10 @@ export class Web3PublicService {
     private createTonWeb3Public(): TonWeb3Public {
         const tonWeb3Public = new TonWeb3Public();
         return tonWeb3Public;
+    }
+
+    private createBitcoinWeb3Public(): BitcoinWeb3Public {
+        return new BitcoinWeb3Public();
     }
 
     private createWeb3PublicProxy<T extends Web3Public = Web3Public>(

@@ -89,6 +89,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Ether',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SONEIUM_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SONEIUM_TESTNET,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
 
@@ -698,6 +705,13 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ZIL',
         symbol: 'ZIL',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SONIC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SONIC,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'SONIC',
+        symbol: 'S',
         decimals: 18
     })
 };

@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
+    BitcoinBlockchainName,
     BlockchainName,
     EvmBlockchainName,
     TonBlockchainName,
@@ -34,3 +35,6 @@ export type SymbiosisTonCrossChainTradeConstructor =
 
 export type SymbiosisTronCrossChainTradeConstructor =
     SymbiosisCrossChainTradeConstructor<TronBlockchainName>;
+
+export type SymbiosisbitcoinCrossChainTradeConstructor =
+    SymbiosisCrossChainTradeConstructor<BitcoinBlockchainName>;

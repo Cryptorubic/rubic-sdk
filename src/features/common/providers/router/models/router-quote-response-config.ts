@@ -38,10 +38,11 @@ export interface RouterQuoteResponseConfig {
     partnerId: number;
     estimatedTime: number;
     slippageTolerance: number;
-    bridgeFee: {
-        address: string;
+    bridgeFee?: {
+        // wei
         amount: string;
         decimals: number;
         symbol: string;
+        address: string;
     };
 }
