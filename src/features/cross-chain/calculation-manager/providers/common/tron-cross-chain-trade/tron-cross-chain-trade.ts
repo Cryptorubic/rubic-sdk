@@ -1,3 +1,4 @@
+import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
@@ -111,7 +112,10 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
                 {
                     onTransactionHash,
                     ...(transactionConfig?.feeLimit && { feeLimit: transactionConfig.feeLimit }),
-                    ...(transactionConfig.callValue && { callValue: transactionConfig.callValue })
+                    ...(transactionConfig.callValue && { callValue: transactionConfig.callValue }),
+                    ...(transactionConfig.rawParameter && {
+                        rawParameter: transactionConfig.rawParameter
+                    })
                 }
             );
 
@@ -156,10 +160,22 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
         return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
     }
 
-    protected getTransactionConfigAndAmount(
-        _receiverAddress?: string
-    ): Promise<{ config: any; amount: string }> {
-        // @TODO API
-        throw new Error('not implemented');
+    protected async getTransactionConfigAndAmount(
+        receiverAddress: string
+    ): Promise<{ config: TronTransactionConfig; amount: string }> {
+        const swapRequestParams: SwapRequestInterface = {
+            ...this.apiQuote,
+            fromAddress: this.walletAddress,
+            receiver: receiverAddress,
+            id: this.apiResponse.id
+        };
+
+        const swapData = await Injector.rubicApiService.fetchSwapData<TronTransactionConfig>(
+            swapRequestParams
+        );
+
+        const toAmount = swapData.estimate.destinationWeiAmount;
+
+        return { config: swapData.transaction, amount: toAmount };
     }
 }

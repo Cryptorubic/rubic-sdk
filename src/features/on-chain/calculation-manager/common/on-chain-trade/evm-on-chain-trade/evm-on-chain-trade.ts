@@ -492,7 +492,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             receiver: options?.receiverAddress || this.walletAddress,
             id: this.apiResponse.id
         };
-        const swapData = await Injector.rubicApiService.fetchSwapData(swapRequestData);
+        const swapData = await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(
+            swapRequestData
+        );
 
         const config = {
             data: swapData.transaction.data!,
