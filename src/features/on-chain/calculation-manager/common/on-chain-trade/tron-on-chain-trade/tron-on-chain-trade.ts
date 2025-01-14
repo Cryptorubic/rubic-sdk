@@ -135,7 +135,7 @@ export abstract class TronOnChainTrade extends OnChainTrade {
 
     public async encode(options: EncodeTransactionOptions): Promise<TronTransactionConfig> {
         await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress);
 
         return this.setTransactionConfig(options);
     }
