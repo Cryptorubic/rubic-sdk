@@ -3,7 +3,7 @@ import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-servic
 export interface TronTransactionOptions extends BasicTransactionOptions {
     feeLimit?: number;
 
-    callValue?: number | string;
+    callValue?: number;
 
     rawParameter?: string;
 }

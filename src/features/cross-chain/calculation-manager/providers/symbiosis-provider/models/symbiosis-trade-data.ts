@@ -22,7 +22,7 @@ export interface TronTx {
     from: string;
     functionSelector: string;
     to: string;
-    value: string;
+    value: number;
 }
 
 export interface BitcoinTx {
