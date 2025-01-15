@@ -63,6 +63,13 @@ export class RubicApiService {
         );
     }
 
+    public fetchCelerRefundData(): void {
+        // return Injector.httpClient.post<TransactionInterface>(
+        //     `${this.apiUrl}/api/routes/swap`,
+        //     body
+        // );
+    }
+
     public disconnectSocket(): void {
         this.client.disconnect();
     }
