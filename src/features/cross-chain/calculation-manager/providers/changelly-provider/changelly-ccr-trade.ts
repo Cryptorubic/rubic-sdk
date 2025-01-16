@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -60,17 +59,13 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             this.feeInfo.rubicProxy?.platformFee?.percent
         );
 
-        const isFromEvm = BlockchainsInfo.isEvmBlockchainName(this.from.blockchain);
-
-        const refund = !refundAddress && isFromEvm ? this.walletAddress : refundAddress;
-
         const exchangeParams: ChangellyExchangeSendParams = {
             from: this.changellyTokens.fromToken.ticker,
             to: this.changellyTokens.toToken.ticker,
             amountFrom: fromWithoutFee.tokenAmount.toFixed(),
             address: receiverAddress,
             rateId: this.rateId,
-            ...(refund && { refundAddress: refund })
+            ...(refundAddress && { refundAddress })
         };
 
         const { result: exchange } = await ChangellyApiService.createExchange(exchangeParams);
