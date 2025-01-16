@@ -3,5 +3,5 @@ import { ChangellyToken } from './changelly-token';
 
 export interface ChangellyCcrTradeParams extends CrossChainTransferTradeParams {
     changellyTokens: { fromToken: ChangellyToken; toToken: ChangellyToken };
-    // rateId: string;
+    rateId: string;
 }

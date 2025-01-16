@@ -94,7 +94,7 @@ export class ChangellyCcrProvider extends CrossChainProvider {
 
             const toAmountMin = toAmount;
 
-            // const rateId = quote.id;
+            const rateId = quote.id;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -114,8 +114,8 @@ export class ChangellyCcrProvider extends CrossChainProvider {
                 useProxy,
                 toTokenAmountMin: toAmountMin,
                 routePath,
-                onChainTrade: null
-                //   rateId
+                onChainTrade: null,
+                rateId
             });
 
             return {
@@ -228,7 +228,8 @@ export class ChangellyCcrProvider extends CrossChainProvider {
             useProxy: false,
             providerAddress,
             gasData: null,
-            onChainTrade: null
+            onChainTrade: null,
+            rateId: ''
         });
 
         return trade;

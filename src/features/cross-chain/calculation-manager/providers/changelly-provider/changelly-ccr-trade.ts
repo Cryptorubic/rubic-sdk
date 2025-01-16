@@ -31,7 +31,7 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
     /**
      * rate id from getFixRateForAmount request
      */
-    //  private readonly rateId: string;
+    private readonly rateId: string;
 
     protected get fromContractAddress(): string {
         if (this.isProxyTrade) {
@@ -48,8 +48,9 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
         });
 
         this.changellyTokens = ccrTrade.changellyTokens;
-        // this.rateId = ccrTrade.rateId;
+        this.rateId = ccrTrade.rateId;
     }
+
 
     protected async getPaymentInfo(
         receiverAddress: string,
@@ -59,7 +60,10 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             this.from,
             this.feeInfo.rubicProxy?.platformFee?.percent
         );
+
         const isFromEvm = BlockchainsInfo.isEvmBlockchainName(this.from.blockchain);
+
+        const refund = !refundAddress && isFromEvm ? this.walletAddress : refundAddress;
 
         const exchangeParams: ChangellyExchangeSendParams = {
             from: this.changellyTokens.fromToken.ticker,
@@ -67,7 +71,7 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             amountFrom: fromWithoutFee.tokenAmount.toFixed(),
             address: receiverAddress,
             ...(refundAddress && { refundAddress }),
-            // rateId: this.rateId,
+            rateId: this.rateId,
             ...(isFromEvm && { refundAddress: this.walletAddress })
         };
 

@@ -39,7 +39,7 @@ export class ChangellyApiService {
         amountTo?: string;
     }): Promise<{ result: ChangellyEstimateResponse[]; error?: ChangellyLimitError }> {
         return Injector.httpClient.post(
-            `${ChangellyApiService.endpoint}?method=getExchangeAmount`,
+            `${ChangellyApiService.endpoint}?method=getFixRateForAmount`,
             {
                 params
             },
@@ -55,7 +55,7 @@ export class ChangellyApiService {
         params: ChangellyExchangeSendParams
     ): Promise<{ result: ChangellyExchangeResponse }> {
         return Injector.httpClient.post(
-            `${ChangellyApiService.endpoint}?method=createTransaction`,
+            `${ChangellyApiService.endpoint}?method=createFixTransaction`,
             {
                 params
             },

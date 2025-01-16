@@ -102,8 +102,11 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
     }
 
-    public async getTransferTrade(receiverAddress: string): Promise<CrossChainPaymentInfo> {
-        await this.setTransactionConfig(false, false, receiverAddress);
+    public async getTransferTrade(
+        receiverAddress: string,
+        refundAddress?: string
+    ): Promise<CrossChainPaymentInfo> {
+        await this.setTransactionConfig(false, false, receiverAddress, refundAddress);
         if (!this.paymentInfo) {
             throw new Error('Deposit address is not set');
         }
@@ -343,14 +346,16 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     protected async setTransactionConfig(
         skipAmountChangeCheck: boolean,
         useCacheData: boolean,
-        receiverAddress?: string
+        receiverAddress?: string,
+        refundAddress?: string
     ): Promise<EvmEncodeConfig> {
         if (this.lastTransactionConfig && useCacheData) {
             return this.lastTransactionConfig;
         }
 
         const { config, amount } = await this.getTransactionConfigAndAmount(
-            receiverAddress || this.walletAddress
+            receiverAddress || this.walletAddress,
+            refundAddress
         );
         this.lastTransactionConfig = config;
         setTimeout(() => {
