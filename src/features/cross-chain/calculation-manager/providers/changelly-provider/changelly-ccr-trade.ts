@@ -59,13 +59,15 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             this.feeInfo.rubicProxy?.platformFee?.percent
         );
 
+        const refund = refundAddress || this.walletAddress;
+
         const exchangeParams: ChangellyExchangeSendParams = {
             from: this.changellyTokens.fromToken.ticker,
             to: this.changellyTokens.toToken.ticker,
             amountFrom: fromWithoutFee.tokenAmount.toFixed(),
             address: receiverAddress,
             rateId: this.rateId,
-            ...(refundAddress && { refundAddress })
+            refundAddress: refund
         };
 
         const { result: exchange } = await ChangellyApiService.createExchange(exchangeParams);
