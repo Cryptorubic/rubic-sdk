@@ -115,7 +115,7 @@ export class OrbiterEvmBridgeTrade extends EvmCrossChainTrade {
             { ...options, receiverAddress: proxyReceiver },
             {
                 walletAddress: receiverAddress,
-                fromTokenAmount: fromWithCode,
+                fromTokenAmount: this.from,
                 toTokenAmount: this.to,
                 srcChainTrade: null,
                 providerAddress: this.providerAddress,
