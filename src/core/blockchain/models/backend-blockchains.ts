@@ -150,7 +150,6 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.SONEIUM_TESTNET]: 'soneium-minato',
     [BLOCKCHAIN_NAME.SONIC]: 'sonic',
     [BLOCKCHAIN_NAME.MORPH]: 'morph'
-
 } as const;
 
 export const TO_BACKEND_BLOCKCHAINS: Record<BlockchainName, BackendBlockchain> = {
