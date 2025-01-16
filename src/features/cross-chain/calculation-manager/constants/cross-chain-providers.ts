@@ -52,7 +52,7 @@ const nonProxyProviders = [
     TaikoBridgeProvider,
     LayerZeroBridgeProvider,
     SimpleSwapCcrProvider
-    // ScrollBridgeProvider
+    // MorphBridgeProvider
 ] as const;
 
 export const CrossChainProviders = [...proxyProviders, ...nonProxyProviders] as const;

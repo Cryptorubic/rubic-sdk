@@ -74,7 +74,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     BAHAMUT: 'BAHAMUT',
     BITLAYER: 'BITLAYER',
     GRAVITY: 'GRAVITY',
-    SONIC: 'SONIC'
+    SONIC: 'SONIC',
+    MORPH: 'MORPH'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
