@@ -26,10 +26,10 @@ import { EvmCrossChainTrade } from '../evm-cross-chain-trade/evm-cross-chain-tra
 import { GasData } from '../evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../models/fee-info';
 import { GetContractParamsOptions } from '../models/get-contract-params-options';
-import { RubicStep } from '../models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { transferGasLimit } from './constans/gas-limit-estimation';
 import { CrossChainPaymentInfo, CrossChainTransferData } from './models/cross-chain-payment-info';
+import { CrossChainTransferTradeParams } from './models/cross-chain-transfer-trade-params';
 
 export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     public static async getGasData(from: PriceTokenAmount): Promise<GasData | null> {
@@ -91,30 +91,22 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
-    constructor(
-        providerAddress: string,
-        routePath: RubicStep[],
-        useProxy: boolean,
-        onChainTrade: EvmOnChainTrade | null,
-        from: PriceTokenAmount<BlockchainName>,
-        to: PriceTokenAmount<BlockchainName>,
-        toTokenAmountMin: BigNumber,
-        gasData: GasData,
-        feeInfo: FeeInfo,
-        priceImpact: number | null
-    ) {
-        super(providerAddress, routePath, useProxy);
-        this.onChainTrade = onChainTrade;
-        this.from = from as PriceTokenAmount<EvmBlockchainName>;
-        this.to = to;
-        this.toTokenAmountMin = toTokenAmountMin;
-        this.gasData = gasData;
-        this.feeInfo = feeInfo;
-        this.priceImpact = priceImpact;
+    constructor(crossChainTrade: CrossChainTransferTradeParams) {
+        super(crossChainTrade.providerAddress, crossChainTrade.routePath, crossChainTrade.useProxy);
+        this.onChainTrade = crossChainTrade.onChainTrade;
+        this.from = crossChainTrade.from as PriceTokenAmount<EvmBlockchainName>;
+        this.to = crossChainTrade.to;
+        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
+        this.gasData = crossChainTrade.gasData;
+        this.feeInfo = crossChainTrade.feeInfo;
+        this.priceImpact = crossChainTrade.priceImpact;
     }
 
-    public async getTransferTrade(receiverAddress: string): Promise<CrossChainPaymentInfo> {
-        await this.setTransactionConfig(false, false, receiverAddress);
+    public async getTransferTrade(
+        receiverAddress: string,
+        refundAddress?: string
+    ): Promise<CrossChainPaymentInfo> {
+        await this.setTransactionConfig(false, false, receiverAddress, refundAddress);
         if (!this.paymentInfo) {
             throw new Error('Deposit address is not set');
         }
@@ -133,9 +125,10 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     }
 
     protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
+        receiverAddress?: string,
+        refundAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        const res = await this.getPaymentInfo(receiverAddress || this.walletAddress);
+        const res = await this.getPaymentInfo(receiverAddress || this.walletAddress, refundAddress);
 
         const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
         this.paymentInfo = res;
@@ -170,7 +163,10 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         return { config, amount: toAmountWei };
     }
 
-    protected abstract getPaymentInfo(receiverAddress: string): Promise<CrossChainTransferData>;
+    protected abstract getPaymentInfo(
+        receiverAddress: string,
+        refundAddress?: string
+    ): Promise<CrossChainTransferData>;
 
     public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         if (!BlockchainsInfo.isEvmBlockchainName(this.from.blockchain)) {
@@ -350,14 +346,16 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     protected async setTransactionConfig(
         skipAmountChangeCheck: boolean,
         useCacheData: boolean,
-        receiverAddress?: string
+        receiverAddress?: string,
+        refundAddress?: string
     ): Promise<EvmEncodeConfig> {
         if (this.lastTransactionConfig && useCacheData) {
             return this.lastTransactionConfig;
         }
 
         const { config, amount } = await this.getTransactionConfigAndAmount(
-            receiverAddress || this.walletAddress
+            receiverAddress || this.walletAddress,
+            refundAddress
         );
         this.lastTransactionConfig = config;
         setTimeout(() => {
