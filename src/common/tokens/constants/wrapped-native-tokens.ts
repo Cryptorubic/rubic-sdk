@@ -486,6 +486,13 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WETH',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.SONEIUM_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SONEIUM_TESTNET,
+        address: '0x4200000000000000000000000000000000000006',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.SONIC]: new Token({
         blockchain: BLOCKCHAIN_NAME.SONIC,
         address: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',

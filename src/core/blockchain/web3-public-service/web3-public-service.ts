@@ -2,7 +2,6 @@ import { Connection } from '@solana/web3.js';
 import cloneDeep from 'lodash.clonedeep';
 import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import pTimeout from 'src/common/utils/p-timeout';
-import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import {
     BitcoinBlockchainName,
     BLOCKCHAIN_NAME,
@@ -26,6 +25,7 @@ import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-p
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
+import { TronWeb } from 'tronweb';
 import Web3 from 'web3';
 
 import { TonWeb3Public } from './web3-public/ton-web3-public/ton-web3-public';
