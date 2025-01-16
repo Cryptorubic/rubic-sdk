@@ -1,3 +1,3 @@
-export const RANGO_API_KEY = 'a24ca428-a18e-4e84-b57f-edb3e2a5bf13';
+export const RANGO_X_API_KEY = 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4';
 
-export const RANGO_API_ENDPOINT = 'https://api.rango.exchange/basic';
+export const RANGO_X_API_ENDPOINT = 'https://x-api.rubic.exchange/rango/basic';
