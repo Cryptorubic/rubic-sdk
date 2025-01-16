@@ -51,7 +51,6 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
         this.rateId = ccrTrade.rateId;
     }
 
-
     protected async getPaymentInfo(
         receiverAddress: string,
         refundAddress?: string
@@ -70,9 +69,8 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             to: this.changellyTokens.toToken.ticker,
             amountFrom: fromWithoutFee.tokenAmount.toFixed(),
             address: receiverAddress,
-            ...(refundAddress && { refundAddress }),
             rateId: this.rateId,
-            ...(isFromEvm && { refundAddress: this.walletAddress })
+            ...(refund && { refundAddress: refund })
         };
 
         const { result: exchange } = await ChangellyApiService.createExchange(exchangeParams);

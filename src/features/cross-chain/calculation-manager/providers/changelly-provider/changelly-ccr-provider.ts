@@ -2,11 +2,7 @@ import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -19,12 +15,11 @@ import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { ChangellyCcrTrade } from './changelly-ccr-trade';
+import { changellySpecificChainTickers } from './constants/changelly-specific-chain-ticker';
 import { changellySupportedChains } from './constants/changelly-supported-chains';
+import { changellyNativeTokensData } from './constants/native-token-data';
 import { ChangellyToken } from './models/changelly-token';
 import { ChangellyApiService } from './services/changelly-api-service';
-import { changellyNativeTokensData } from './constants/native-token-data';
-import { nativeTokensData } from '../changenow-provider/constants/native-addresses';
-import { changellySpecificChainTickers } from './constants/changelly-specific-chain-ticker';
 
 export class ChangellyCcrProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CHANGELLY;
