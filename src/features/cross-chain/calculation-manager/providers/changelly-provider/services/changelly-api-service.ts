@@ -104,9 +104,16 @@ export class ChangellyApiService {
             };
         }
 
+        if (txData.status === 'refunded' || txData.status === 'finished') {
+            return {
+                status: CROSS_CHAIN_DEPOSIT_STATUS.FINISHED,
+                dstHash: txData.payoutHash
+            };
+        }
+
         const depositData: CrossChainDepositData = {
             status: txData.status,
-            dstHash: txData.payoutHash ? txData.payoutHash : null
+            dstHash: null
         };
 
         return depositData;

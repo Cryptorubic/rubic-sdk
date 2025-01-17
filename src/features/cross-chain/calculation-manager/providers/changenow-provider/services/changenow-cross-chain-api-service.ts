@@ -4,7 +4,10 @@ import { changenowApiKey } from 'src/features/common/providers/changenow/constan
 import { HttpClientParams } from 'src/features/common/providers/rango/models/rango-api-common-types';
 import { ChangenowStatusResponse } from 'src/features/cross-chain/status-manager/models/changenow-api-response';
 
-import { CrossChainDepositData } from '../../common/cross-chain-transfer-trade/models/cross-chain-deposit-statuses';
+import {
+    CROSS_CHAIN_DEPOSIT_STATUS,
+    CrossChainDepositData
+} from '../../common/cross-chain-transfer-trade/models/cross-chain-deposit-statuses';
 import { ChangenowCurrenciesResponse } from '../models/changenow-currencies-api';
 import {
     ChangenowMinMapRangeRequestParams,
@@ -69,6 +72,13 @@ export class ChangeNowCrossChainApiService {
                 headers: { 'x-changenow-api-key': changenowApiKey }
             }
         );
+
+        if (res.status === 'refunded' || res.status === 'finished') {
+            return {
+                status: CROSS_CHAIN_DEPOSIT_STATUS.FINISHED,
+                dstHash: res.payoutHash
+            };
+        }
 
         const depositData: CrossChainDepositData = {
             status: res.status,
