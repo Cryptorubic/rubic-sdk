@@ -85,7 +85,7 @@ export class ChangellyCcrProvider extends CrossChainProvider {
 
             const quote = response.result[0]!;
 
-            const toAmount = new BigNumber(quote.amountTo).minus(quote.networkFee);
+            const toAmount = new BigNumber(quote.amountTo);
 
             const toAmountMin = toAmount;
 
