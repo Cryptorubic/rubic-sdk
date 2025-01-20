@@ -1,6 +1,7 @@
 import {
     ASSOCIATED_TOKEN_PROGRAM_ID,
     getAssociatedTokenAddress,
+    getMint,
     getTokenMetadata,
     TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
@@ -143,6 +144,12 @@ export class SolanaWeb3Public extends Web3Public {
         let tokensList: SolanaToken[] = [];
         let notFetchedList: PublicKey[] = [];
 
+        const m = await getMint(this.connection, mints[0]!, 'confirmed');
+        const tokenData = await getTokenMetadata(this.connection, mints[0]!, 'confirmed').catch(
+            err => err
+        );
+        console.log(`%cMINT`, 'color: aqua; font-sie: 20px;', { mint: m, tokenData });
+
         try {
             const { content } = await SolanaTokensApiService.getTokensList(tokensAddresses);
             tokensList = content;
@@ -161,7 +168,6 @@ export class SolanaWeb3Public extends Web3Public {
         const tokenSDK = new TokenSdk(config);
         const metaplexTokens = await tokenSDK.getFromMetaplex(notFetchedList);
 
-        // tokensList = [...tokensList, ...metaplexTokens];
         notFetchedList = mints.filter(mint =>
             [...tokensList, ...metaplexTokens].some(
                 token => !compareAddresses(token.address, mint.toString())
@@ -170,23 +176,22 @@ export class SolanaWeb3Public extends Web3Public {
 
         if (!this.hasNotFetchedTokens(notFetchedList)) return [...tokensList, ...metaplexTokens];
 
-        const splApiResp = await Promise.all(
-            notFetchedList.map(mint => getTokenMetadata(this.connection, mint, 'confirmed'))
-        );
-        console.log('%cSOLANA_TOKENS ==> ', 'color: yellow; font-size: 20px;', splApiResp);
-        const splApiTokens = splApiResp.filter(Boolean).map(
-            token =>
-                ({
-                    name: token!.name,
-                    symbol: token!.symbol,
-                    logoURI: token!.uri,
-                    decimals: 9,
-                    address: token!.mint.toString(),
-                    verified: true
-                } as SolanaToken)
-        );
+        // const splApiResp = await Promise.all(
+        notFetchedList.map(mint => getTokenMetadata(this.connection, mint, 'confirmed'));
+        // );
+        // const splApiTokens = splApiResp.filter(Boolean).map(
+        //     token =>
+        //         ({
+        //             name: token!.name,
+        //             symbol: token!.symbol,
+        //             logoURI: token!.uri,
+        //             decimals: Number(token?.additionalMetadata?.[0]?.[0] || 9),
+        //             address: token!.mint.toString(),
+        //             verified: true
+        //         } as SolanaToken)
+        // );
 
-        return [...tokensList, ...metaplexTokens, ...splApiTokens];
+        return [...tokensList, ...metaplexTokens];
     }
 
     private hasNotFetchedTokens(notFetchedList: PublicKey[]): boolean {
