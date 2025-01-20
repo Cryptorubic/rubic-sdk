@@ -53,7 +53,7 @@ export class ChangellyApiService {
 
     public static createExchange(
         params: ChangellyExchangeSendParams
-    ): Promise<{ result: ChangellyExchangeResponse }> {
+    ): Promise<{ result: ChangellyExchangeResponse; error?: { message: string } }> {
         return Injector.httpClient.post(
             `${ChangellyApiService.endpoint}?method=createFixTransaction`,
             {
@@ -86,11 +86,7 @@ export class ChangellyApiService {
 
         const txData = result[0]!;
 
-        if (
-            txData.status === 'overdue' ||
-            txData.status === 'expired' ||
-            txData.status === 'failed'
-        ) {
+        if (txData.status === 'overdue' || txData.status === 'failed') {
             return {
                 status: CROSS_CHAIN_DEPOSIT_STATUS.FAILED,
                 dstHash: null

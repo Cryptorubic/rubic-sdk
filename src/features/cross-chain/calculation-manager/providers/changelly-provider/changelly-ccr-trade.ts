@@ -70,7 +70,13 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             refundAddress: refund
         };
 
-        const { result: exchange } = await ChangellyApiService.createExchange(exchangeParams);
+        const response = await ChangellyApiService.createExchange(exchangeParams);
+
+        if (!response.result && response.error) {
+            throw new RubicSdkError('Current trade already unavailable');
+        }
+
+        const exchange = response.result;
 
         const toAmount = new BigNumber(exchange.amountExpectedTo).minus(exchange.networkFee);
 

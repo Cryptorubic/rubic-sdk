@@ -80,13 +80,6 @@ export class SimpleSwapApiService {
             };
         }
 
-        if (txData.status === 'failed' || txData.status === 'expired') {
-            return {
-                status: CROSS_CHAIN_DEPOSIT_STATUS.FAILED,
-                dstHash: null
-            };
-        }
-
         const depositData: CrossChainDepositData = {
             status: txData.status,
             dstHash: null
