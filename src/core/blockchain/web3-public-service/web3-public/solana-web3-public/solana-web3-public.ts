@@ -1,17 +1,12 @@
 import {
     ASSOCIATED_TOKEN_PROGRAM_ID,
     getAssociatedTokenAddress,
-    getMint,
-    getTokenMetadata,
     TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
 import { BlockhashWithExpiryBlockHeight, Connection, PublicKey } from '@solana/web3.js';
-import { Client as TokenSdk, UtlConfig } from '@solflare-wallet/utl-sdk';
 import BigNumber from 'bignumber.js';
 import { catchError, firstValueFrom, from, map, of, timeout } from 'rxjs';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
-import { Cache } from 'src/common/utils/decorators';
 import { NATIVE_SOLANA_MINT_ADDRESS } from 'src/core/blockchain/constants/solana/native-solana-mint-address';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { ReturnValue } from 'src/core/blockchain/models/solana-web3-types';
@@ -27,15 +22,18 @@ import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
 import { AbiItem } from 'web3-utils';
 
-import { SolanaToken } from './models/solana-token';
 import { SolanaTokensApiService } from './services/solana-tokens-api-service';
+import { SolanaTokensService } from './services/solana-tokens-service';
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class SolanaWeb3Public extends Web3Public {
+    private tokensService: SolanaTokensService;
+
     constructor(private readonly connection: Connection) {
         super(BLOCKCHAIN_NAME.SOLANA);
+        this.tokensService = SolanaTokensService.getInstance(connection);
     }
 
     public getBlockNumber(): Promise<number> {
@@ -69,7 +67,6 @@ export class SolanaWeb3Public extends Web3Public {
         }
     }
 
-    @Cache
     public async callForTokensInfo(
         tokenAddresses: string[] | ReadonlyArray<string>,
         tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
@@ -84,7 +81,7 @@ export class SolanaWeb3Public extends Web3Public {
             SolanaTokensApiService.prepareTokens(filteredTokenAddresses);
 
         const mints = addresses.map(address => new PublicKey(address));
-        const tokensMint = await this.fetchMints(mints);
+        const tokensMint = await this.tokensService.fetchTokensData(mints);
 
         const fetchedTokens = tokensMint.map(token => {
             const entries = tokenFields.map(field => [field, token?.[field]]);
@@ -138,66 +135,6 @@ export class SolanaWeb3Public extends Web3Public {
         throw new Error('Method call is not supported');
     }
 
-    private async fetchMints(mints: PublicKey[]): Promise<SolanaToken[]> {
-        const tokensAddresses = mints.map(mint => mint.toString());
-
-        let tokensList: SolanaToken[] = [];
-        let notFetchedList: PublicKey[] = [];
-
-        const m = await getMint(this.connection, mints[0]!, 'confirmed');
-        const tokenData = await getTokenMetadata(this.connection, mints[0]!, 'confirmed').catch(
-            err => err
-        );
-        console.log(`%cMINT`, 'color: aqua; font-sie: 20px;', { mint: m, tokenData });
-
-        try {
-            const { content } = await SolanaTokensApiService.getTokensList(tokensAddresses);
-            tokensList = content;
-            notFetchedList = mints.filter(mint =>
-                tokensList.some(token => !compareAddresses(token.address, mint.toString()))
-            );
-        } catch {}
-
-        if (!this.hasNotFetchedTokens(notFetchedList)) return tokensList;
-
-        const config = new UtlConfig({
-            connection: this.connection,
-            timeout: 5000
-        });
-
-        const tokenSDK = new TokenSdk(config);
-        const metaplexTokens = await tokenSDK.getFromMetaplex(notFetchedList);
-
-        notFetchedList = mints.filter(mint =>
-            [...tokensList, ...metaplexTokens].some(
-                token => !compareAddresses(token.address, mint.toString())
-            )
-        );
-
-        if (!this.hasNotFetchedTokens(notFetchedList)) return [...tokensList, ...metaplexTokens];
-
-        // const splApiResp = await Promise.all(
-        notFetchedList.map(mint => getTokenMetadata(this.connection, mint, 'confirmed'));
-        // );
-        // const splApiTokens = splApiResp.filter(Boolean).map(
-        //     token =>
-        //         ({
-        //             name: token!.name,
-        //             symbol: token!.symbol,
-        //             logoURI: token!.uri,
-        //             decimals: Number(token?.additionalMetadata?.[0]?.[0] || 9),
-        //             address: token!.mint.toString(),
-        //             verified: true
-        //         } as SolanaToken)
-        // );
-
-        return [...tokensList, ...metaplexTokens];
-    }
-
-    private hasNotFetchedTokens(notFetchedList: PublicKey[]): boolean {
-        return notFetchedList.length > 0;
-    }
-
     public healthCheck(timeoutMs: number = 4000): Promise<boolean> {
         const request = this.connection.getBalanceAndContext(
             new PublicKey('DVLwQbEaw5txuduQwvfbNP3sXvjawHqaoMuGMKZx15bQ'),
@@ -236,7 +173,7 @@ export class SolanaWeb3Public extends Web3Public {
             }
         )._rpcRequest('getTokenAccountsByOwner', [
             address,
-            { programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' },
+            { programId: TOKEN_PROGRAM_ID },
             { encoding: 'jsonParsed' }
         ]);
 
