@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -14,7 +15,7 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
 
@@ -101,9 +102,11 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         toTokenAmountMin: BigNumber,
         gasData: GasData,
         feeInfo: FeeInfo,
-        priceImpact: number | null
+        priceImpact: number | null,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
         this.onChainTrade = onChainTrade;
         this.from = from as PriceTokenAmount<EvmBlockchainName>;
         this.to = to;

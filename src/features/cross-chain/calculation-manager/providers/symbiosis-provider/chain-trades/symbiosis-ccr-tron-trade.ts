@@ -1,8 +1,7 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
-import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -14,7 +13,6 @@ import { TronCrossChainTrade } from 'src/features/cross-chain/calculation-manage
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-supported-blockchains';
 import { SymbiosisTronCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
-import { TronTx } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
 
 /**
@@ -69,9 +67,11 @@ export class SymbiosisTronCcrTrade extends TronCrossChainTrade {
         crossChainTrade: SymbiosisTronCrossChainTradeConstructor,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -102,37 +102,5 @@ export class SymbiosisTronCcrTrade extends TronCrossChainTrade {
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
-    }
-
-    protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
-    ): Promise<{ config: TronTransactionConfig; amount: string }> {
-        const walletAddress = this.walletAddress;
-
-        const params: SymbiosisSwappingParams = {
-            ...this.swappingParams,
-            from: walletAddress,
-            to: receiverAddress || walletAddress,
-            revertableAddress: SymbiosisUtils.getRevertableAddress(
-                receiverAddress,
-                walletAddress,
-                this.to.blockchain
-            )
-        };
-
-        const tradeData = await SymbiosisApiService.getCrossChainSwapTx(params);
-        const tx = tradeData.tx as TronTx;
-
-        const amount = tradeData.tokenAmountOut.amount;
-        const config: TronTransactionConfig = {
-            signature: tx.functionSelector,
-            arguments: [],
-            to: tx.to,
-            rawParameter: tx.data,
-            callValue: tx.value,
-            feeLimit: tx.feeLimit
-        };
-
-        return { amount, config };
     }
 }

@@ -118,4 +118,11 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
 
         return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
     }
+
+    protected getTransactionConfigAndAmount(
+        _receiverAddress?: string
+    ): Promise<{ config: any; amount: string }> {
+        // @TODO API
+        throw new Error('NOT IMPLEMENTED');
+    }
 }

@@ -1,7 +1,7 @@
 import { AbiInput } from '@1inch/limit-order-protocol-utils';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, TimeoutError } from 'src/common/errors';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { nativeTokensStruct } from 'src/common/tokens/constants/native-token-struct';
 import { Cache } from 'src/common/utils/decorators';
 import pTimeout from 'src/common/utils/p-timeout';
 import {
@@ -677,7 +677,7 @@ export class EvmWeb3Public extends Web3Public {
             return tokens;
         }
 
-        const blockchainNativeToken = nativeTokensList[this.blockchainName];
+        const blockchainNativeToken = nativeTokensStruct[this.blockchainName];
         const nativeToken = {
             ...blockchainNativeToken,
             decimals: blockchainNativeToken.decimals.toString()

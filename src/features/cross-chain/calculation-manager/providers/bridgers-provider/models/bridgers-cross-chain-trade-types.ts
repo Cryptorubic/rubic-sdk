@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
@@ -30,6 +31,8 @@ export interface BridgersCrossChainParams<Blockchain extends BlockchainName> {
     providerAddress: string;
     routePath: RubicStep[];
     useProxy: boolean;
+    apiQuote: QuoteRequestInterface;
+    apiResponse: QuoteResponseInterface;
 }
 
 export type BridgersEvmCrossChainParams = BridgersCrossChainParams<EvmBlockchainName>;

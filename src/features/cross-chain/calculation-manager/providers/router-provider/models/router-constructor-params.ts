@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
     BitcoinBlockchainName,
@@ -22,6 +23,8 @@ export interface RouterConstructorParams<T extends BlockchainName> {
     providerAddress: string;
     routePath: RubicStep[];
     useProxy: boolean;
+    apiQuote: QuoteRequestInterface;
+    apiResponse: QuoteResponseInterface;
 }
 
 export interface RouterEvmConstructorParams extends RouterConstructorParams<EvmBlockchainName> {}

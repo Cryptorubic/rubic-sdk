@@ -1,7 +1,7 @@
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
-import { RUBIC_X_API_OKU_APIKEY } from 'src/features/on-chain/calculation-manager/providers/aggregators/okuswap/constants/okuswap-api';
+import { RUBIC_X_API_OKU_APIKEY } from 'src/features/on-chain/calculation-manager/models/okuswap-api';
 
 import { UniZenCcrTxResponse } from '../models/cross-chain-models/unizen-ccr-tx-response';
 import { UniZenQuoteParams } from '../models/unizen-quote-params';

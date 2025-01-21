@@ -7,7 +7,7 @@ import { BlockhashWithExpiryBlockHeight, Connection, PublicKey } from '@solana/w
 import { Client as TokenSdk, UtlConfig } from '@solflare-wallet/utl-sdk';
 import BigNumber from 'bignumber.js';
 import { catchError, firstValueFrom, from, map, of, timeout } from 'rxjs';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { nativeTokensStruct } from 'src/common/tokens/constants/native-token-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { Cache } from 'src/common/utils/decorators';
 import { NATIVE_SOLANA_MINT_ADDRESS } from 'src/core/blockchain/constants/solana/native-solana-mint-address';
@@ -94,7 +94,7 @@ export class SolanaWeb3Public extends Web3Public {
             return tokens;
         }
 
-        const blockchainNativeToken = nativeTokensList[this.blockchainName];
+        const blockchainNativeToken = nativeTokensStruct[this.blockchainName];
         const nativeToken = {
             ...blockchainNativeToken,
             decimals: blockchainNativeToken.decimals.toString()

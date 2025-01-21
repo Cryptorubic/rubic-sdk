@@ -74,8 +74,9 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: BridgersEvmCrossChainParams) {
-        const { crossChainTrade, providerAddress, routePath, useProxy } = params;
-        super(providerAddress, routePath, useProxy);
+        const { crossChainTrade, providerAddress, routePath, useProxy, apiQuote, apiResponse } =
+            params;
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

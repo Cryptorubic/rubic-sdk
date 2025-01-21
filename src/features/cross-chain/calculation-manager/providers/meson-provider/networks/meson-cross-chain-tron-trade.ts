@@ -66,7 +66,13 @@ export class MesonCrossChainTronTrade extends TronCrossChainTrade {
     }
 
     constructor(params: MesonCrossChainTronTradeConstructorParams) {
-        super(params.providerAddress, params.routePath, params.useProxy);
+        super(
+            params.providerAddress,
+            params.routePath,
+            params.useProxy,
+            params.apiQuote,
+            params.apiResponse
+        );
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.feeInfo = params.crossChainTrade.feeInfo;

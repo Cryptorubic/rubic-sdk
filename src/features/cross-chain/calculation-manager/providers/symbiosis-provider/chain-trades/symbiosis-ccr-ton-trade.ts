@@ -1,17 +1,11 @@
-import { SendTransactionRequest } from '@tonconnect/sdk';
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
-import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
-import { ContractParams } from 'src/features/common/models/contract-params';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
@@ -66,9 +60,11 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
         crossChainTrade: SymbiosisTonCrossChainTradeConstructor,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -86,10 +82,6 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
         this.promotions = crossChainTrade?.promotions || [];
     }
 
-    protected async getContractParams(_options: GetContractParamsOptions): Promise<ContractParams> {
-        throw new Error('Not implemented');
-    }
-
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
@@ -102,70 +94,5 @@ export class SymbiosisCcrTonTrade extends TonCrossChainTrade {
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
-    }
-
-    protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
-    ): Promise<{ config: TonEncodedConfig; amount: string }> {
-        const walletAddress = this.walletAddress;
-
-        const params: SymbiosisSwappingParams = {
-            ...this.swappingParams,
-            from: walletAddress,
-            to: receiverAddress || walletAddress,
-            revertableAddress: SymbiosisUtils.getRevertableAddress(
-                receiverAddress,
-                walletAddress,
-                this.to.blockchain
-            )
-        };
-
-        const tradeData = await SymbiosisApiService.getCrossChainSwapTx(params);
-        const tx = tradeData.tx as SendTransactionRequest;
-        const swapMessage = tx.messages[0];
-        if (!swapMessage || tx.messages.length > 1) {
-            throw new Error('Wrong config');
-        }
-
-        const config = {
-            payload: swapMessage.payload,
-            amount: swapMessage.amount,
-            address: swapMessage.address
-        };
-
-        return { config, amount: tradeData.tokenAmountOut.amount };
-    }
-
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        if (!options?.testMode) {
-            await this.checkTradeErrors();
-        }
-        await this.checkReceiverAddress(options.receiverAddress, true);
-
-        const config = await this.setTransactionConfig(
-            false,
-            options?.useCacheData || false,
-            options?.receiverAddress || this.walletAddress
-        );
-
-        const { onConfirm } = options;
-        let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
-
-        try {
-            await this.web3Private.sendTransaction({ messages: [config], onTransactionHash });
-
-            return transactionHash!;
-        } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
-            }
-            throw err;
-        }
     }
 }

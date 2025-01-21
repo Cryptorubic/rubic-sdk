@@ -3,9 +3,6 @@ import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-cont
 import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
-import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -19,10 +16,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-bridge-params';
 import { ProxySwapParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-swap-params';
-import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
-import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/constants';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/constants/constants';
 import { AbiItem, utf8ToHex } from 'web3-utils';
 
 type BridgeParams = [
@@ -156,71 +150,6 @@ export class ProxyCrossChainEvmTrade {
                 )
             ).toNumber() / 10_000
         );
-    }
-
-    public static async getOnChainTrade(
-        from: PriceTokenAmount,
-        transitToken: TokenBaseStruct,
-        slippageTolerance: number,
-        isCustomWeth = false
-    ): Promise<EvmOnChainTrade | null> {
-        const to = await PriceToken.createToken(transitToken);
-
-        if (compareAddresses(from.address, transitToken.address) && !from.isNative) {
-            return null;
-        }
-
-        const fromBlockchain = from.blockchain as EvmBlockchainName;
-
-        if (from.isNative) {
-            try {
-                const wrapToken = isCustomWeth
-                    ? to.asStruct
-                    : wrappedNativeTokensList[fromBlockchain]!;
-
-                const toWrap = new PriceToken({
-                    ...wrapToken,
-                    price: from.price
-                });
-
-                const trade = OnChainManager.getWrapTrade(from, toWrap, {
-                    slippageTolerance
-                });
-
-                if (trade) {
-                    return trade;
-                }
-            } catch {}
-        }
-
-        const availableDexes = await ProxyCrossChainEvmTrade.getWhitelistedDexes(fromBlockchain);
-
-        const dexes = Object.values(typedTradeProviders[fromBlockchain]);
-
-        const allOnChainTrades = await Promise.allSettled(
-            dexes.map(dex =>
-                dex.calculate(from, to, {
-                    slippageTolerance,
-                    gasCalculation: 'disabled',
-                    useProxy: false,
-                    usedForCrossChain: true
-                })
-            )
-        );
-        const successSortedTrades = allOnChainTrades
-            .filter(value => value.status === 'fulfilled')
-            .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
-            .filter(onChainTrade =>
-                availableDexes.some(availableDex =>
-                    compareAddresses(availableDex, onChainTrade.dexContractAddress)
-                )
-            )
-            .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
-
-        if (!successSortedTrades.length) {
-            return null;
-        }
-        return successSortedTrades[0]!;
     }
 
     public static async getWhitelistedDexes(fromBlockchain: EvmBlockchainName): Promise<string[]> {

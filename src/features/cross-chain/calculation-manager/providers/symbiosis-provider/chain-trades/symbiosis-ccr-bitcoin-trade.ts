@@ -1,7 +1,7 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BitcoinBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BitcoinCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/bitcoin-cross-chain-trade/bitcoin-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
@@ -13,7 +13,6 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-supported-blockchains';
 import { SymbiosisbitcoinCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-cross-chain-trade-constructor';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
-import { BitcoinTx } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { SymbiosisUtils } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-utils';
 
 /**
@@ -70,9 +69,11 @@ export class SymbiosisCcrBitcoinTrade extends BitcoinCrossChainTrade {
         crossChainTrade: SymbiosisbitcoinCrossChainTradeConstructor,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -103,32 +104,5 @@ export class SymbiosisCcrBitcoinTrade extends BitcoinCrossChainTrade {
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
-    }
-
-    protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
-    ): Promise<{ config: { to: string; value: string }; amount: string }> {
-        const walletAddress = this.walletAddress;
-
-        const params: SymbiosisSwappingParams = {
-            ...this.swappingParams,
-            from: walletAddress,
-            to: receiverAddress || walletAddress,
-            revertableAddress: SymbiosisUtils.getRevertableAddress(
-                receiverAddress,
-                walletAddress,
-                this.to.blockchain
-            )
-        };
-
-        const tradeData = await SymbiosisApiService.getCrossChainSwapTx(params);
-        const tx = tradeData.tx as BitcoinTx;
-
-        const config = {
-            value: this.from.stringWeiAmount,
-            to: tx.depositAddress
-        };
-
-        return { config, amount: tradeData.tokenAmountOut.amount };
     }
 }

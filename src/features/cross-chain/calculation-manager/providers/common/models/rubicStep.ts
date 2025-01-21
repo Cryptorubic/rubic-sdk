@@ -1,5 +1,5 @@
 import { Token, TokenAmount } from 'src/common/tokens';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
 import { BridgeType } from './bridge-type';
 

@@ -16,6 +16,7 @@ import { CrossChainSymbiosisManager } from 'src/features/cross-chain/symbiosis-m
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
 import { OnChainStatusManager } from 'src/features/on-chain/status-manager/on-chain-status-manager';
+import { RubicApiService } from 'src/features/ws-api/rubic-api-service';
 
 /**
  * Base class to work with sdk.
@@ -84,12 +85,13 @@ export class SDK {
      * to new configuration (even for entities created with other previous sdk instances).
      */
     public static async createSDK(configuration: Configuration): Promise<SDK> {
-        const [web3PublicService, web3PrivateService, httpClient] = await Promise.all([
+        const [web3PublicService, web3PrivateService, httpClient, apiService] = await Promise.all([
             SDK.createWeb3PublicService(configuration),
             SDK.createWeb3PrivateService(configuration),
-            SDK.createHttpClient(configuration)
+            SDK.createHttpClient(configuration),
+            SDK.createApiService(configuration)
         ]);
-        Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
+        Injector.createInjector(web3PublicService, web3PrivateService, httpClient, apiService);
 
         const { providerAddress } = configuration;
         return new SDK({
@@ -116,6 +118,10 @@ export class SDK {
         return configuration.httpClient;
     }
 
+    private static async createApiService(configuration: Configuration): Promise<RubicApiService> {
+        return new RubicApiService(configuration?.envType || 'prod');
+    }
+
     private constructor(providerAddress: ProviderAddress) {
         this.onChainManager = new OnChainManager(providerAddress);
         this.crossChainManager = new CrossChainManager(providerAddress);
@@ -129,13 +135,14 @@ export class SDK {
      * Updates sdk configuration and sdk entities dependencies.
      */
     public async updateConfiguration(configuration: Configuration): Promise<void> {
-        const [web3PublicService, web3PrivateService, httpClient] = await Promise.all([
+        const [web3PublicService, web3PrivateService, httpClient, apiService] = await Promise.all([
             SDK.createWeb3PublicService(configuration),
             SDK.createWeb3PrivateService(configuration),
-            SDK.createHttpClient(configuration)
+            SDK.createHttpClient(configuration),
+            SDK.createApiService(configuration)
         ]);
 
-        Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
+        Injector.createInjector(web3PublicService, web3PrivateService, httpClient, apiService);
     }
 
     public updateWalletProvider(walletProvider: WalletProvider): void {

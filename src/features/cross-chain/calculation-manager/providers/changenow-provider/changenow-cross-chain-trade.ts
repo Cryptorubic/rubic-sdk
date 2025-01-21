@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -8,7 +9,7 @@ import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/pro
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { CrossChainTransferTrade } from '../common/cross-chain-transfer-trade/cross-chain-transfer-trade';
 import {
@@ -72,7 +73,9 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
         crossChainTrade: ChangenowTrade,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
         super(
             providerAddress,
@@ -84,7 +87,9 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
             crossChainTrade.toTokenAmountMin,
             crossChainTrade.gasData,
             crossChainTrade.feeInfo,
-            crossChainTrade.from.calculatePriceImpactPercent(crossChainTrade.to)
+            crossChainTrade.from.calculatePriceImpactPercent(crossChainTrade.to),
+            apiQuote,
+            apiResponse
         );
         this.fromCurrency = crossChainTrade.fromCurrency;
         this.toCurrency = crossChainTrade.toCurrency;

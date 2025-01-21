@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -24,4 +25,6 @@ export interface RangoCrossChainTradeConstructorParams<T extends BlockchainName>
     providerAddress: string;
     routePath: RubicStep[];
     useProxy: boolean;
+    apiQuote: QuoteRequestInterface;
+    apiResponse: QuoteResponseInterface;
 }

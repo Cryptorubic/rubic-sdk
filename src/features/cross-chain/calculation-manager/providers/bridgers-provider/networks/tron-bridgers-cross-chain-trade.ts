@@ -60,8 +60,8 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     }
 
     constructor(params: BridgersTronCrossChainParams) {
-        const { crossChainTrade, providerAddress, routePath } = params;
-        super(providerAddress, routePath, false);
+        const { crossChainTrade, providerAddress, routePath, apiQuote, apiResponse } = params;
+        super(providerAddress, routePath, false, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

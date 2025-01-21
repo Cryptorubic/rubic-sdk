@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -54,7 +55,9 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
         },
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean
+        useProxy: boolean,
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
         super(
             providerAddress,
@@ -66,13 +69,16 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
             crossChainTrade.to.tokenAmount,
             crossChainTrade.gasData,
             crossChainTrade.feeInfo,
-            crossChainTrade.priceImpact
+            crossChainTrade.priceImpact,
+            apiQuote,
+            apiResponse
         );
 
         this.fromCurrency = crossChainTrade.fromCurrency;
         this.toCurrency = crossChainTrade.toCurrency;
     }
 
+    // TODO API
     protected async getPaymentInfo(receiverAddress: string): Promise<CrossChainTransferData> {
         const walletAddress =
             BlockchainsInfo.isEvmBlockchainName(this.from.blockchain) &&

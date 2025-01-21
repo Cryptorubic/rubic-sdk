@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
@@ -32,4 +33,6 @@ export interface EddyBridgeTradeConstructorParams {
     providerAddress: string;
     routePath: RubicStep[];
     useProxy: boolean;
+    apiQuote: QuoteRequestInterface;
+    apiResponse: QuoteResponseInterface;
 }

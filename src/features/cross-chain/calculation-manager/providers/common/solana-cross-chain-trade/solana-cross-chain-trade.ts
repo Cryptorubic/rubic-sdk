@@ -1,19 +1,18 @@
+import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
+import { FailedToCheckForTransactionReceiptError, TooLowAmountError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { getGasOptions } from 'src/common/utils/options';
+import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
-import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { SolanaWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/solana-web3-private/solana-web3-private';
 import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/solana-web3-public/solana-web3-public';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
-import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
@@ -60,23 +59,42 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
         await this.approve(approveOptions, false);
     }
 
-    protected abstract swapDirect(options?: SwapTransactionOptions): Promise<string | never>;
-
     /**
      *
      * @returns txHash(srcTxHash) | never
      */
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        return this.swapDirect(options);
-        // There is no Rubic proxy contracts in Solana for now
-        // if (!this.isProxyTrade) {
-        //     return this.swapDirect(options);
-        // }
-        // return this.swapWithParams(options);
-    }
+        this.checkWalletConnected();
+        await this.checkAllowanceAndApprove(options);
+        let transactionHash: string;
 
-    private async swapWithParams(_options: SwapTransactionOptions = {}): Promise<string | never> {
-        throw new Error("Method is not supported');");
+        try {
+            const { data } = await this.setTransactionConfig(
+                false,
+                options?.useCacheData || false,
+                options?.receiverAddress
+            );
+
+            const { onConfirm } = options;
+            const onTransactionHash = (hash: string) => {
+                if (onConfirm) {
+                    onConfirm(hash);
+                }
+                transactionHash = hash;
+            };
+
+            await this.web3Private.sendTransaction({ data, onTransactionHash });
+
+            return transactionHash!;
+        } catch (err) {
+            if (err?.error?.errorId === 'ERROR_LOW_GIVE_AMOUNT') {
+                throw new TooLowAmountError();
+            }
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw parseError(err);
+        }
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
@@ -86,39 +104,12 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );
 
-        const { gasLimit } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams({
-                fromAddress: options.fromAddress,
-                receiverAddress: options.receiverAddress || options.fromAddress
-            });
-
-        return EvmWeb3Pure.encodeMethodCall(
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value,
-            {
-                gas: gasLimit || '0',
-                ...getGasOptions(options)
-            }
+        return this.setTransactionConfig(
+            options?.skipAmountCheck || false,
+            options?.useCacheData || false,
+            options?.receiverAddress || this.walletAddress
         );
     }
-
-    public async encodeApprove(
-        _tokenAddress: string,
-        _spenderAddress: string,
-        _value: BigNumber | 'infinity',
-        _options: EvmTransactionOptions = {}
-    ): Promise<TransactionConfig> {
-        throw new Error('Method is not supported');
-    }
-
-    protected abstract getContractParams(
-        options: GetContractParamsOptions
-    ): Promise<ContractParams>;
 
     public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
         let feeSum = new BigNumber(0);
@@ -130,5 +121,23 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
         }
 
         return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
+    }
+
+    protected async getTransactionConfigAndAmount(
+        receiverAddress: string
+    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        const swapRequestParams: SwapRequestInterface = {
+            ...this.apiQuote,
+            fromAddress: this.walletAddress,
+            receiver: receiverAddress,
+            id: this.apiResponse.id
+        };
+
+        const { transaction, estimate } =
+            await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(swapRequestParams);
+
+        const toAmount = estimate.destinationWeiAmount;
+
+        return { config: transaction, amount: toAmount };
     }
 }

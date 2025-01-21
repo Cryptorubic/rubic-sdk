@@ -13,7 +13,7 @@ export interface WrappedCrossChainTrade {
     /**
      * Type of calculated trade.
      */
-    tradeType: CrossChainTradeType;
+    tradeType: Exclude<CrossChainTradeType, 'multichain'>;
 
     /**
      * Error, thrown during calculation.

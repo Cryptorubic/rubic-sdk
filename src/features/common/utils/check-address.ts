@@ -11,7 +11,7 @@ import {
     changenowApiBlockchain,
     ChangenowCrossChainSupportedBlockchain
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
 export async function isAddressCorrect(
     address: string,

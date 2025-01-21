@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import {
@@ -48,8 +47,7 @@ export class BitcoinWeb3Public extends Web3Public {
         _tokensAddresses: string[] | ReadonlyArray<string>,
         _tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
     ): Promise<Partial<Record<SupportedTokenField, string>>[]> {
-        const btc = nativeTokensList[BLOCKCHAIN_NAME.BITCOIN];
-        return [{ decimals: String(btc.decimals), symbol: btc.symbol, name: btc.name }];
+        return [{ decimals: '8', symbol: 'BTC', name: 'Bitcoin' }];
     }
 
     public callContractMethod<T extends Web3PrimitiveType = string>(): Promise<T> {

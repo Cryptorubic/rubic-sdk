@@ -1,2 +1,0 @@
-export const QUICK_SWAP_V3_POLYGON_ZKEVM_ROUTER_CONTRACT_ADDRESS =
-    '0xf6ad3ccf71abb3e12becf6b3d2a74c963859adcd';
