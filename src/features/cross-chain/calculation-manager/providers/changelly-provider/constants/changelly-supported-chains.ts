@@ -65,7 +65,8 @@ export const changellySupportedChains = [
     BLOCKCHAIN_NAME.ZILLIQA,
     BLOCKCHAIN_NAME.FILECOIN,
     BLOCKCHAIN_NAME.EOS,
-    BLOCKCHAIN_NAME.ONTOLOGY
+    BLOCKCHAIN_NAME.ONTOLOGY,
+    BLOCKCHAIN_NAME.APTOS
 ];
 
 export type ChangellySupportedChain = (typeof changellySupportedChains)[number];
