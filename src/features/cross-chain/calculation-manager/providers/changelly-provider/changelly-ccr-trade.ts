@@ -9,6 +9,7 @@ import { CrossChainTransferData } from '../common/cross-chain-transfer-trade/mod
 import { BRIDGE_TYPE } from '../common/models/bridge-type';
 import { TradeInfo } from '../common/models/trade-info';
 import { ChangellyCcrTradeParams } from './models/changelly-ccr-trade-params';
+import { ChangellyEstimateResponse } from './models/changelly-estimate-response';
 import { ChangellyExchangeSendParams } from './models/changelly-exchange-send-params';
 import { ChangellyToken } from './models/changelly-token';
 import { ChangellyApiService } from './services/changelly-api-service';
@@ -27,11 +28,6 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
 
     public readonly bridgeType = BRIDGE_TYPE.CHANGELLY;
 
-    /**
-     * rate id from getFixRateForAmount request
-     */
-    private readonly rateId: string;
-
     protected get fromContractAddress(): string {
         if (this.isProxyTrade) {
             return rubicProxyContractAddress[this.from.blockchain].gateway;
@@ -47,7 +43,6 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
         });
 
         this.changellyTokens = ccrTrade.changellyTokens;
-        this.rateId = ccrTrade.rateId;
     }
 
     protected async getPaymentInfo(
@@ -59,14 +54,19 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             this.feeInfo.rubicProxy?.platformFee?.percent
         );
 
+        const fromWithoutFeeTokenAmount = fromWithoutFee.tokenAmount.toFixed();
+
+        const quote = await this.getFixedRateQuote(fromWithoutFeeTokenAmount);
+
         const refund = refundAddress || this.walletAddress;
+        const rateId = quote.id;
 
         const exchangeParams: ChangellyExchangeSendParams = {
             from: this.changellyTokens.fromToken.ticker,
             to: this.changellyTokens.toToken.ticker,
-            amountFrom: fromWithoutFee.tokenAmount.toFixed(),
+            amountFrom: fromWithoutFeeTokenAmount,
             address: receiverAddress,
-            rateId: this.rateId,
+            rateId: rateId,
             refundAddress: refund
         };
 
@@ -80,6 +80,8 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
 
         const toAmount = new BigNumber(exchange.amountExpectedTo).minus(exchange.networkFee);
 
+        this.actualTokenAmount = toAmount;
+
         return {
             toAmount: toAmount.toFixed(),
             id: exchange.id,
@@ -89,6 +91,28 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
                 depositExtraIdName: this.changellyTokens.fromToken.extraIdName
             })
         };
+    }
+
+    private async getFixedRateQuote(
+        fromWithoutFeeTokenAmount: string
+    ): Promise<ChangellyEstimateResponse> {
+        const fixRateEstimation = await ChangellyApiService.getFixedRateEstimation({
+            from: this.changellyTokens.fromToken.ticker,
+            to: this.changellyTokens.toToken.ticker,
+            amountFrom: fromWithoutFeeTokenAmount
+        });
+
+        if (!fixRateEstimation.result && fixRateEstimation.error) {
+            if (fixRateEstimation.error.message.includes('Invalid amount for')) {
+                throw new RubicSdkError('Calculated rate already unavailable.');
+            }
+
+            throw new RubicSdkError(fixRateEstimation.error.message);
+        }
+
+        const quote = fixRateEstimation.result[0]!;
+
+        return quote;
     }
 
     public getTradeInfo(): TradeInfo {

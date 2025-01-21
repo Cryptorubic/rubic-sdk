@@ -84,6 +84,8 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
 
     public readonly priceImpact: number | null;
 
+    protected actualTokenAmount: BigNumber;
+
     protected get web3Private(): EvmWeb3Private {
         if (!BlockchainsInfo.isEvmBlockchainName(this.from.blockchain)) {
             throw new RubicSdkError('Cannot retrieve web3 private');
@@ -100,6 +102,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.actualTokenAmount = crossChainTrade.to.tokenAmount;
     }
 
     public async getTransferTrade(
@@ -120,6 +123,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         return {
             id: this.paymentInfo.id,
             depositAddress: this.paymentInfo.depositAddress,
+            toAmount: this.actualTokenAmount,
             ...(extraField && { extraField })
         };
     }

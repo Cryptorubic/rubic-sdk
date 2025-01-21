@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.51.0-alpha.changelly-refund.9",
+    "version": "5.51.0-alpha.changelly-refund.10",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
