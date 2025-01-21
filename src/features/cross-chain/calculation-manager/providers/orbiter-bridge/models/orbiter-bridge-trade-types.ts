@@ -1,4 +1,5 @@
 import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
     BlockchainName,
@@ -28,6 +29,7 @@ export interface OrbiterTradeParams<Blockchain extends BlockchainName> {
         feeInfo: FeeInfo;
         priceImpact: number | null;
         quoteConfig: OrbiterQuoteConfig;
+        toTokenAmountMin: BigNumber;
     };
     providerAddress: string;
     routePath: RubicStep[];

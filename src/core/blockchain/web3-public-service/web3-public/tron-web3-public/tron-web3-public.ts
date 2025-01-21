@@ -8,7 +8,6 @@ import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from 'src/core/blockchain/constants/healthcheck';
-import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
@@ -23,21 +22,22 @@ import { TRON_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3
 import { TronBlock } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-block';
 import { TronCall } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-call';
 import { TronMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-multicall-response';
-import { TronTransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-transaction-info';
 import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { TronWeb } from 'tronweb';
+import { ContractAbiInterface, TransactionInfo } from 'tronweb/lib/esm/types';
 import { AbiItem } from 'web3-utils';
 
 export class TronWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = TRC20_CONTRACT_ABI;
 
-    constructor(private readonly tronWeb: typeof TronWeb) {
+    constructor(private readonly tronWeb: TronWeb) {
         super(BLOCKCHAIN_NAME.TRON);
     }
 
-    public setProvider(provider: TronWebProvider): void {
-        this.tronWeb.setProvider(provider);
+    public setProvider(_provider: TronWebProvider): void {
+        throw new Error('Method not implemented.');
     }
 
     public async convertTronAddressToHex(address: string): Promise<string> {
@@ -52,7 +52,7 @@ export class TronWeb3Public extends Web3Public {
 
         this.tronWeb.setAddress(healthcheckData.contractAddress);
         const contract = await this.tronWeb.contract(
-            healthcheckData.contractAbi,
+            healthcheckData.contractAbi as ContractAbiInterface,
             healthcheckData.contractAddress
         );
 
@@ -84,7 +84,10 @@ export class TronWeb3Public extends Web3Public {
 
     public async getTokenBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
         this.tronWeb.setAddress(userAddress);
-        const contract = await this.tronWeb.contract(this.tokenContractAbi, tokenAddress);
+        const contract = await this.tronWeb.contract(
+            this.tokenContractAbi as ContractAbiInterface,
+            tokenAddress
+        );
         const balance: EthersBigNumber = await contract.balanceOf(userAddress).call();
         return new BigNumber(balance?.toString());
     }
@@ -94,7 +97,10 @@ export class TronWeb3Public extends Web3Public {
         ownerAddress: string,
         spenderAddress: string
     ): Promise<BigNumber> {
-        const contract = await this.tronWeb.contract(this.tokenContractAbi, tokenAddress);
+        const contract = await this.tronWeb.contract(
+            this.tokenContractAbi as ContractAbiInterface,
+            tokenAddress
+        );
 
         const allowance: EthersBigNumber = await contract
             .allowance(ownerAddress, spenderAddress)
@@ -153,7 +159,10 @@ export class TronWeb3Public extends Web3Public {
      */
     private async multicall(calls: TronCall[]): Promise<TronMulticallResponse> {
         this.tronWeb.setAddress(this.multicallAddress);
-        const contract = await this.tronWeb.contract(TRON_MULTICALL_ABI, this.multicallAddress);
+        const contract = await this.tronWeb.contract(
+            TRON_MULTICALL_ABI as ContractAbiInterface,
+            this.multicallAddress
+        );
         return contract.aggregateViewCalls(calls).call();
     }
 
@@ -164,7 +173,10 @@ export class TronWeb3Public extends Web3Public {
         methodArguments: unknown[] = []
     ): Promise<T> {
         this.tronWeb.setAddress(contractAddress);
-        const contract = await this.tronWeb.contract(contractAbi, contractAddress);
+        const contract = await this.tronWeb.contract(
+            contractAbi as ContractAbiInterface,
+            contractAddress
+        );
 
         const response = await contract[methodName](...methodArguments).call();
         return TronWeb3Pure.flattenParameterToPrimitive(response) as T;
@@ -174,7 +186,7 @@ export class TronWeb3Public extends Web3Public {
      * Gets mined transaction info.
      * @param hash Transaction hash.
      */
-    public async getTransactionInfo(hash: string): Promise<TronTransactionInfo> {
+    public async getTransactionInfo(hash: string): Promise<TransactionInfo> {
         return this.tronWeb.trx.getTransactionInfo(hash);
     }
 
@@ -245,18 +257,7 @@ export class TronWeb3Public extends Web3Public {
             promises[1] = this.getBalance(userAddress);
         }
 
-        promises[0] = this.multicallContractsMethods<string>(
-            this.tokenContractAbi,
-            tokensAddresses.map(tokenAddress => ({
-                contractAddress: tokenAddress,
-                methodsData: [
-                    {
-                        methodName: 'balanceOf',
-                        methodArguments: [userAddress]
-                    }
-                ]
-            }))
-        );
+        promises[0] = this.batchMulticallTokenBalance(userAddress, tokensAddresses, 10);
 
         const results = await Promise.all(
             promises as [Promise<ContractMulticallResponse<string>[][]>, Promise<BigNumber>]
@@ -319,5 +320,47 @@ export class TronWeb3Public extends Web3Public {
         };
         tokens.splice(nativeTokenIndex, 0, nativeToken);
         return tokens;
+    }
+
+    private async batchMulticallTokenBalance(
+        userAddress: string,
+        tokensAddresses: string[],
+        batchSize: number
+    ) {
+        if (tokensAddresses.length > 100) {
+            const balances = [];
+            for (let i = 0; i < tokensAddresses.length; i += batchSize) {
+                const batchRequest = tokensAddresses.slice(i, i + batchSize);
+                const batchResult = await this.multicallContractsMethods<string>(
+                    this.tokenContractAbi,
+                    batchRequest.map(tokenAddress => ({
+                        contractAddress: tokenAddress,
+                        methodsData: [
+                            {
+                                methodName: 'balanceOf',
+                                methodArguments: [userAddress]
+                            }
+                        ]
+                    }))
+                );
+
+                balances.push(...batchResult);
+            }
+
+            return balances;
+        }
+
+        return this.multicallContractsMethods<string>(
+            this.tokenContractAbi,
+            tokensAddresses.map(tokenAddress => ({
+                contractAddress: tokenAddress,
+                methodsData: [
+                    {
+                        methodName: 'balanceOf',
+                        methodArguments: [userAddress]
+                    }
+                ]
+            }))
+        );
     }
 }

@@ -117,7 +117,7 @@ export class MesonCrossChainTronTrade extends TronCrossChainTrade {
             MESON_ABI,
             methodName,
             methodArgs,
-            value
+            Number(value)
         );
 
         return { config, amount: this.to.stringWeiAmount };
