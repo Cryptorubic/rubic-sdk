@@ -22,7 +22,6 @@ import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
 import { AbiItem } from 'web3-utils';
 
-import { SolanaTokensApiService } from './services/solana-tokens-api-service';
 import { SolanaTokensService } from './services/solana-tokens-service';
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -77,17 +76,14 @@ export class SolanaWeb3Public extends Web3Public {
         const filteredTokenAddresses = tokenAddresses.filter(
             (_, index) => index !== nativeTokenIndex
         );
-        const { preparedTokens, addresses } =
-            SolanaTokensApiService.prepareTokens(filteredTokenAddresses);
 
-        const mints = addresses.map(address => new PublicKey(address));
+        const mints = filteredTokenAddresses.map(address => new PublicKey(address));
         const tokensMint = await this.tokensService.fetchTokensData(mints);
 
-        const fetchedTokens = tokensMint.map(token => {
+        const tokens = tokensMint.map(token => {
             const entries = tokenFields.map(field => [field, token?.[field]]);
             return Object.fromEntries(entries);
         });
-        const tokens = [...fetchedTokens, ...preparedTokens];
 
         if (nativeTokenIndex === -1) {
             return tokens;

@@ -95,7 +95,7 @@ export class SolanaTokensService {
         });
 
         const tokenSDK = new TokenSdk(config);
-        const metaplexTokens = await tokenSDK.getFromMetaplex(mints);
+        const metaplexTokens = await tokenSDK.getFromMetaplex(mints).catch(() => []);
 
         const notSortedTokensList = [...prevTokensList, ...metaplexTokens];
         const notFetchedMints = this.getNotFetchedTokensList(notSortedTokensList);
@@ -113,7 +113,7 @@ export class SolanaTokensService {
     ): Promise<SolanaTokensFetchingResp> {
         const splApiResp = await Promise.all(
             mints.map(mint => getMint(this.connection, mint, 'confirmed'))
-        );
+        ).catch(() => []);
         const splApiTokens = splApiResp.filter(Boolean).map(
             token =>
                 ({
