@@ -66,7 +66,7 @@ export class SolanaTokensService {
             const tokensAddresses = mints.map(mint => mint.toString());
             const { content: notSortedTokensList } = await pTimeout(
                 SolanaTokensApiService.getTokensList(tokensAddresses),
-                1_000,
+                4_000,
                 new Error('Api Timeout!')
             );
             const notFetchedMints = this.getNotFetchedTokensList(notSortedTokensList);

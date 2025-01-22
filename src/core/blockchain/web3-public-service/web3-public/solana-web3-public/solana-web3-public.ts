@@ -66,9 +66,16 @@ export class SolanaWeb3Public extends Web3Public {
         }
     }
 
+    public override async callForTokenInfo(
+        tokenAddress: string,
+        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name', 'image']
+    ): Promise<Partial<Record<SupportedTokenField, string>>> {
+        return (await this.callForTokensInfo([tokenAddress], tokenFields))[0]!;
+    }
+
     public async callForTokensInfo(
         tokenAddresses: string[] | ReadonlyArray<string>,
-        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
+        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name', 'image']
     ): Promise<Partial<Record<SupportedTokenField, string>>[]> {
         const nativeTokenIndex = tokenAddresses.findIndex(address =>
             this.Web3Pure.isNativeAddress(address)
@@ -81,8 +88,14 @@ export class SolanaWeb3Public extends Web3Public {
         const tokensMint = await this.tokensService.fetchTokensData(mints);
 
         const tokens = tokensMint.map(token => {
-            const entries = tokenFields.map(field => [field, token?.[field]]);
-            return Object.fromEntries(entries);
+            const data = tokenFields.reduce(
+                (acc, fieldName) => ({
+                    ...acc,
+                    [fieldName]: fieldName === 'image' ? token.logoURI : token[fieldName]
+                }),
+                {} as Record<SupportedTokenField, string | undefined>
+            );
+            return data;
         });
 
         if (nativeTokenIndex === -1) {
