@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -28,6 +29,11 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
 
     public readonly bridgeType = BRIDGE_TYPE.CHANGELLY;
 
+    /**
+     * rate id from getFixRateForAmount request
+     */
+    private readonly rateId: string;
+
     protected get fromContractAddress(): string {
         if (this.isProxyTrade) {
             return rubicProxyContractAddress[this.from.blockchain].gateway;
@@ -43,6 +49,7 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
         });
 
         this.changellyTokens = ccrTrade.changellyTokens;
+        this.rateId = ccrTrade.rateId;
     }
 
     protected async getPaymentInfo(
@@ -54,19 +61,23 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
             this.feeInfo.rubicProxy?.platformFee?.percent
         );
 
+        const isFromEvm = BlockchainsInfo.isEvmBlockchainName(this.from.blockchain);
         const fromWithoutFeeTokenAmount = fromWithoutFee.tokenAmount.toFixed();
+        let currRateId = this.rateId;
 
-        const quote = await this.getFixedRateQuote(fromWithoutFeeTokenAmount);
+        if (!isFromEvm) {
+            const quote = await this.getFixedRateQuote(fromWithoutFeeTokenAmount);
+            currRateId = quote.id;
+        }
 
         const refund = refundAddress || this.walletAddress;
-        const rateId = quote.id;
 
         const exchangeParams: ChangellyExchangeSendParams = {
             from: this.changellyTokens.fromToken.ticker,
             to: this.changellyTokens.toToken.ticker,
             amountFrom: fromWithoutFeeTokenAmount,
             address: receiverAddress,
-            rateId: rateId,
+            rateId: currRateId,
             refundAddress: refund
         };
 
