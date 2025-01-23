@@ -84,6 +84,17 @@ export class SolanaWeb3Public extends Web3Public {
             (_, index) => index !== nativeTokenIndex
         );
 
+        const blockchainNativeToken = nativeTokensList[this.blockchainName];
+        const nativeToken = {
+            ...blockchainNativeToken,
+            decimals: blockchainNativeToken.decimals.toString()
+        };
+
+        // only native token in array
+        if (!filteredTokenAddresses.length && nativeTokenIndex !== -1) {
+            return [nativeToken];
+        }
+
         const mints = filteredTokenAddresses.map(address => new PublicKey(address));
         const tokensMint = await this.tokensService.fetchTokensData(mints);
 
@@ -101,13 +112,8 @@ export class SolanaWeb3Public extends Web3Public {
         if (nativeTokenIndex === -1) {
             return tokens;
         }
-
-        const blockchainNativeToken = nativeTokensList[this.blockchainName];
-        const nativeToken = {
-            ...blockchainNativeToken,
-            decimals: blockchainNativeToken.decimals.toString()
-        };
         tokens.splice(nativeTokenIndex, 0, nativeToken);
+
         return tokens;
     }
 
