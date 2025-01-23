@@ -5,7 +5,11 @@ import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
 import pTimeout from 'src/common/utils/p-timeout';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
@@ -321,6 +325,7 @@ export class OnChainManager {
     ): EvmOnChainTrade {
         const fromToken = from as PriceTokenAmount<EvmBlockchainName>;
         const toToken = to as PriceToken<EvmBlockchainName>;
+        const isTaikoWrap = from.blockchain === BLOCKCHAIN_NAME.TAIKO;
         return new EvmWrapTrade(
             {
                 from: fromToken,
@@ -331,7 +336,7 @@ export class OnChainManager {
                 slippageTolerance: 0,
                 path: [from, to],
                 gasFeeInfo: null,
-                useProxy: false,
+                useProxy: isTaikoWrap,
                 proxyFeeInfo: undefined,
                 fromWithoutFee: fromToken,
 
@@ -340,7 +345,7 @@ export class OnChainManager {
                     to: { isDeflation: false }
                 }
             },
-            options.providerAddress!
+            isTaikoWrap ? '0xE9d69454f9D63ddA0316d379AB58C9e8b62125C7' : options.providerAddress!
         );
     }
 
