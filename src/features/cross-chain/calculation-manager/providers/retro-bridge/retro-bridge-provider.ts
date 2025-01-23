@@ -8,7 +8,6 @@ import {
 } from 'src/common/errors';
 import { MaxDecimalsError } from 'src/common/errors/swap/max-decimals.error';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { parseError } from 'src/common/utils/errors';
 import {
@@ -118,14 +117,6 @@ export class RetroBridgeProvider extends CrossChainProvider {
             });
 
             const routePath = await this.getRoutePath(from, to);
-            const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
-
-            const totalGas = Web3Pure.toWei(
-                new BigNumber(retroBridgeQuoteConfig.blockchain_fee_in_usd).div(nativeToken.price),
-                nativeToken.decimals
-            );
-
-            const gasData = await this.getGasData(from, { totalGas });
 
             const trade = RetroBridgeFactory.createTrade(
                 fromBlockchain,
@@ -135,7 +126,7 @@ export class RetroBridgeProvider extends CrossChainProvider {
                     feeInfo,
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: options.slippageTolerance,
-                    gasData,
+                    gasData: null,
                     quoteSendParams,
                     hotWalletAddress: retroBridgeQuoteConfig.hot_wallet_address
                 },

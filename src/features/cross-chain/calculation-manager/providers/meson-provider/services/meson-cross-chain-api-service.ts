@@ -41,6 +41,10 @@ export class MesonCcrApiService {
         } catch (e: unknown) {
             const res = this.parseMesonError<ErrorFeeResp>(e);
 
+            if (!res?.fee) {
+                throw e;
+            }
+
             return res.fee;
         }
     }
