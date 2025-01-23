@@ -52,6 +52,8 @@ export interface SwapTransactionOptions {
 
     useCacheData?: boolean;
 
+    skipAmountCheck?: boolean;
+
     referrer?: string;
 
     /**
