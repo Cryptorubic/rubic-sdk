@@ -33,7 +33,8 @@ export class ChangellyCcrProvider extends CrossChainProvider {
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult<EvmEncodeConfig>> {
-        const useProxy = options?.useProxy?.[this.type] || false;
+        // provider doesn't support deposit from proxy contract
+        const useProxy = false;
 
         try {
             const feeInfo = await this.getFeeInfo(
