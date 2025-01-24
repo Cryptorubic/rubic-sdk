@@ -39,4 +39,6 @@ export interface EncodeTransactionOptions {
     skipAmountCheck?: boolean;
 
     useCacheData?: boolean;
+
+    refundAddress?: string;
 }
