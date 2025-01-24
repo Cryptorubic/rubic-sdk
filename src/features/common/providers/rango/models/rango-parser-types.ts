@@ -1,5 +1,4 @@
 export interface RangoSwapQueryParams {
-    apiKey: string;
     from: string;
     to: string;
     amount: string;
@@ -19,7 +18,6 @@ export interface RangoSwapQueryParams {
 }
 
 export interface RangoBestRouteQueryParams {
-    apiKey: string;
     from: string;
     to: string;
     amount: string;
@@ -31,12 +29,10 @@ export interface RangoBestRouteQueryParams {
 }
 
 /**
- * @property {string} apiKey
  * @property {string} requestId Random UUID returned in swap/quote methodes in response
  * @property {string} srcTxHash In Rango-api used as `txId` queryParam in getTxStatus request
  */
 export interface RangoTxStatusQueryParams {
-    apiKey: string;
     requestId: string;
     txId: string;
 }

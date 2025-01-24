@@ -25,6 +25,8 @@ export const retroBridgeSupportedBlockchain = [
     BLOCKCHAIN_NAME.XLAYER,
     BLOCKCHAIN_NAME.GRAVITY,
     BLOCKCHAIN_NAME.TON
+    // Disabled because transactions from Morph to Any chain do not work properly.
+    // BLOCKCHAIN_NAME.MORPH
 ];
 
 export type RetroBridgeSupportedBlockchain = (typeof retroBridgeSupportedBlockchain)[number];

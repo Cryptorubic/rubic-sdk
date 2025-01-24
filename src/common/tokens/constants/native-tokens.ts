@@ -713,5 +713,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'SONIC',
         symbol: 'S',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MORPH]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MORPH,
+        address: '0x5300000000000000000000000000000000000011',
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18
     })
 };

@@ -1,7 +1,10 @@
 import { RubicSdkError } from 'src/common/errors';
 import { Cache } from 'src/common/utils/decorators';
 import { Injector } from 'src/core/injector/injector';
-import { RANGO_API_ENDPOINT } from 'src/features/common/providers/rango/constants/rango-api-common';
+import {
+    RANGO_X_API_ENDPOINT,
+    RANGO_X_API_KEY
+} from 'src/features/common/providers/rango/constants/rango-api-common';
 import { RangoBestRouteResponse } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
 import { HttpClientParams } from 'src/features/common/providers/rango/models/rango-api-common-types';
 import { RangoTxStatusResponse } from 'src/features/common/providers/rango/models/rango-api-status-types';
@@ -17,9 +20,10 @@ export class RangoCrossChainApiService {
         params: RangoBestRouteQueryParams
     ): Promise<RangoBestRouteResponse> {
         const res = await Injector.httpClient.get<RangoBestRouteResponse>(
-            `${RANGO_API_ENDPOINT}/quote`,
+            `${RANGO_X_API_ENDPOINT}/quote`,
             {
-                params: params as unknown as HttpClientParams
+                params: params as unknown as HttpClientParams,
+                headers: { apiKey: RANGO_X_API_KEY }
             }
         );
 
@@ -37,8 +41,8 @@ export class RangoCrossChainApiService {
         params: RangoSwapQueryParams
     ): Promise<RangoSwapTransactionResponse> {
         const res = await Injector.httpClient.get<RangoSwapTransactionResponse>(
-            `${RANGO_API_ENDPOINT}/swap`,
-            { params: params as unknown as HttpClientParams }
+            `${RANGO_X_API_ENDPOINT}/swap`,
+            { params: params as unknown as HttpClientParams, headers: { apiKey: RANGO_X_API_KEY } }
         );
 
         if (!res.route || res.error) {
@@ -55,8 +59,8 @@ export class RangoCrossChainApiService {
         params: RangoTxStatusQueryParams
     ): Promise<RangoTxStatusResponse> {
         const res = await Injector.httpClient.get<RangoTxStatusResponse>(
-            `${RANGO_API_ENDPOINT}/status`,
-            { params: params as unknown as HttpClientParams }
+            `${RANGO_X_API_ENDPOINT}/status`,
+            { params: params as unknown as HttpClientParams, headers: { apiKey: RANGO_X_API_KEY } }
         );
 
         if (res.error || !res.bridgeData || !res.status) {
