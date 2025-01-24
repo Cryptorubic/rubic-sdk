@@ -66,6 +66,7 @@ import { BlazeSwapFlareProvider } from '../../providers/dexes/flare/blaze-swap-f
 import { EnosysFlareProvider } from '../../providers/dexes/flare/enosys-flare/enosys-v2-flare/enosys-flare-provider';
 import { SparkDexFlareProvider } from '../../providers/dexes/flare/spark-dex-flare/spark-dex-v2-flare/spark-dex-flare-provider';
 import { SushiSwapZetachainProvider } from '../../providers/dexes/zetachain/sushi-swap-zetachain/sushi-swap-zetachain-provider';
+import { FraxSwapV2Provider } from '../../providers/dexes/fraxtal/frax-swap-v2/frax-swap-v2-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -172,5 +173,7 @@ export const UniswapV2TradeProviders = [
     SparkDexFlareProvider,
     EnosysFlareProvider,
     // Morph
-    BulbaswapProvider
+    BulbaswapProvider,
+    // Fraxtal
+    FraxSwapV2Provider
 ] as const;
