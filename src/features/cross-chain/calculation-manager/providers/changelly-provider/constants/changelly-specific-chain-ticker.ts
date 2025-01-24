@@ -6,5 +6,6 @@ export const changellySpecificChainTickers: Partial<Record<BlockchainName, strin
     [BLOCKCHAIN_NAME.AVALANCHE]: 'avaxc',
     [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync',
     [BLOCKCHAIN_NAME.ZK_LINK]: 'zklink',
-    [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta'
+    [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta',
+    [BLOCKCHAIN_NAME.APTOS]: 'apt'
 };
