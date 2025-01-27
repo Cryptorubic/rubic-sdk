@@ -27,7 +27,7 @@ export class CoingeckoApi {
         try {
             const backendBlockchain = TO_BACKEND_BLOCKCHAINS[blockchain];
             const result = await this.httpClient.get<TokenPriceFromBackend>(
-                `https://tokens.rubic.exchange/api/v1/tokens/price/${backendBlockchain}/${tokenAddress}`
+                `https://api.rubic.exchange/api/v2/tokens/price/${backendBlockchain}/${tokenAddress}`
             );
 
             return result;
