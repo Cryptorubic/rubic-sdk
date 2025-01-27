@@ -26,10 +26,6 @@ export class PriceToken<T extends BlockchainName = BlockchainName> extends Token
             .getTokenPrice(tokenBaseStruct)
             .catch(_err => new BigNumber(NaN));
         const results = await Promise.all([tokenPromise, pricePromise]);
-        console.log('%ccreateToken ==> ', 'color: yellow; font-size: 20px;', {
-            tokenBaseStruct,
-            token: results[0]
-        });
 
         return new PriceToken({ ...results[0], price: results[1] });
     }

@@ -5,4 +5,6 @@ export interface SolanaTransactionOptions extends BasicTransactionOptions {
      * Encoded data, which will be executed in transaction.
      */
     data?: string;
+
+    fromAddress: string;
 }

@@ -3,8 +3,14 @@ import {
     getAssociatedTokenAddress,
     TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
-import { BlockhashWithExpiryBlockHeight, Connection, PublicKey } from '@solana/web3.js';
+import {
+    BlockhashWithExpiryBlockHeight,
+    Connection,
+    PublicKey,
+    VersionedTransaction
+} from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
+import { base58 } from 'ethers/lib/utils';
 import { catchError, firstValueFrom, from, map, of, timeout } from 'rxjs';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { NATIVE_SOLANA_MINT_ADDRESS } from 'src/core/blockchain/constants/solana/native-solana-mint-address';
@@ -20,6 +26,7 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { AbiItem } from 'web3-utils';
 
 import { SolanaTokensService } from './services/solana-tokens-service';
@@ -28,11 +35,50 @@ import { SolanaTokensService } from './services/solana-tokens-service';
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class SolanaWeb3Public extends Web3Public {
-    private tokensService: SolanaTokensService;
+    private readonly HELIUS_API_URL = 'https://mainnet.helius-rpc.com';
+
+    private readonly MAX_TRANSFER_COST = 10_000;
 
     constructor(private readonly connection: Connection) {
         super(BLOCKCHAIN_NAME.SOLANA);
-        this.tokensService = SolanaTokensService.getInstance(connection);
+    }
+
+    /**
+     * @returns ComputedUnitsLimit - like gasLimit in evm
+     */
+    public async getConsumedUnitsLimit(tx: VersionedTransaction): Promise<number> {
+        const DEFAULT_CU_LIMIT = 600_000;
+        try {
+            const resp = await this.connection.simulateTransaction(tx, {
+                replaceRecentBlockhash: true
+            });
+            return resp.value.unitsConsumed || DEFAULT_CU_LIMIT;
+        } catch (err) {
+            console.error('Solana_simulateTransaction_Error ==> ', err);
+            return DEFAULT_CU_LIMIT;
+        }
+    }
+
+    /**
+     * @returns ComputedUnitsPrice - like gasPrice in evm
+     */
+    public async getConsumedUnitsPrice(tx: VersionedTransaction): Promise<number> {
+        const resp = await Injector.httpClient.post<{ result: { priorityFeeEstimate: number } }>(
+            `${this.HELIUS_API_URL}/?api-key=f6b96e37-e267-4b67-8790-84bdf8748c39`,
+            {
+                jsonrpc: '2.0',
+                id: '1',
+                method: 'getPriorityFeeEstimate',
+                params: [
+                    {
+                        transaction: base58.encode(tx.serialize()), // Pass the serialized transaction in Base58
+                        options: { priorityLevel: 'Medium' }
+                    }
+                ]
+            }
+        );
+
+        return resp.result.priorityFeeEstimate;
     }
 
     public getBlockNumber(): Promise<number> {
@@ -96,7 +142,7 @@ export class SolanaWeb3Public extends Web3Public {
         }
 
         const mints = filteredTokenAddresses.map(address => new PublicKey(address));
-        const tokensMint = await this.tokensService.fetchTokensData(mints);
+        const tokensMint = await new SolanaTokensService(this.connection).fetchTokensData(mints);
 
         const tokens = tokensMint.map(token => {
             const data = tokenFields.reduce(

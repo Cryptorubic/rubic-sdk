@@ -8,8 +8,6 @@ import { SolanaToken, SolanaTokensFetchingResp } from '../models/solana-token';
 import { SolanaTokensApiService } from './solana-tokens-api-service';
 
 export class SolanaTokensService {
-    private static instance: SolanaTokensService | null = null;
-
     private connection!: Connection;
 
     // key - address of token, value - idx of token in initial tokensAddress
@@ -17,16 +15,9 @@ export class SolanaTokensService {
 
     private initialMints: PublicKey[] = [];
 
-    public static getInstance(connection: Connection): SolanaTokensService {
-        if (!this.instance) {
-            this.instance = new SolanaTokensService();
-            this.instance.connection = connection;
-        }
-
-        return this.instance;
+    constructor(connection: Connection) {
+        this.connection = connection;
     }
-
-    private constructor() {}
 
     public async fetchTokensData(mints: PublicKey[]): Promise<SolanaToken[]> {
         const tokensAddresses = mints.map(mint => mint.toString());
