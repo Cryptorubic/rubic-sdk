@@ -52,7 +52,7 @@ export class SolanaWeb3Public extends Web3Public {
             const resp = await this.connection.simulateTransaction(tx, {
                 replaceRecentBlockhash: true
             });
-            return resp.value.unitsConsumed || DEFAULT_CU_LIMIT;
+            return resp.value.unitsConsumed ? resp.value.unitsConsumed * 1.2 : DEFAULT_CU_LIMIT;
         } catch (err) {
             console.error('Solana_simulateTransaction_Error ==> ', err);
             return DEFAULT_CU_LIMIT;
