@@ -55,7 +55,8 @@ export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
                 options.receiverAddress,
-                options.fromAddress
+                options.fromAddress,
+                options.skipAmountCheck
             );
 
             return {

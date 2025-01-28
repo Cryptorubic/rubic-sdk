@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { InsufficientFundsError, RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
-import { Cache } from 'src/common/utils/decorators';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
@@ -79,7 +78,6 @@ export abstract class Web3Public {
      * @param tokenAddress Address of token.
      * @param tokenFields Token's fields to get.
      */
-    @Cache
     public async callForTokenInfo(
         tokenAddress: string,
         tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
