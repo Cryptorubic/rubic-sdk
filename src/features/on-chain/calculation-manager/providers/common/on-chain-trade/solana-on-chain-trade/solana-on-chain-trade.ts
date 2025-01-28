@@ -174,8 +174,7 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         try {
             await this.web3Private.sendTransaction({
                 data: transactionConfig.data,
-                onTransactionHash,
-                fromAddress: this.walletAddress
+                onTransactionHash
             });
 
             return transactionHash!;

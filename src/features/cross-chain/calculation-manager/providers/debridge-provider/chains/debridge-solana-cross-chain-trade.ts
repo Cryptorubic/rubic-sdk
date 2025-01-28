@@ -115,8 +115,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
 
             await this.web3Private.sendTransaction({
                 data,
-                onTransactionHash,
-                fromAddress: this.walletAddress
+                onTransactionHash
             });
 
             return transactionHash!;
