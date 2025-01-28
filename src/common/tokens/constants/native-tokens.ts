@@ -720,5 +720,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Ethereum',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FRAXTAL]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FRAXTAL,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Frax Ether',
+        symbol: 'frxETH',
+        decimals: 18
     })
 };

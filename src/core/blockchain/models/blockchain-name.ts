@@ -75,7 +75,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     BITLAYER: 'BITLAYER',
     GRAVITY: 'GRAVITY',
     SONIC: 'SONIC',
-    MORPH: 'MORPH'
+    MORPH: 'MORPH',
+    FRAXTAL: 'FRAXTAL'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
