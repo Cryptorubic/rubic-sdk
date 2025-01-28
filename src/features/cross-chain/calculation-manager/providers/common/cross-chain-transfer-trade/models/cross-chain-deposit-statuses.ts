@@ -5,6 +5,7 @@ export const CROSS_CHAIN_DEPOSIT_STATUS = {
     SENDING: 'sending',
     FINISHED: 'finished',
     FAILED: 'failed',
+    EXPIRED: 'expired',
     REFUNDED: 'refunded',
     VERIFYING: 'verifying'
 };

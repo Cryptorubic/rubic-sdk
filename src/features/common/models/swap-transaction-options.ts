@@ -60,4 +60,9 @@ export interface SwapTransactionOptions {
      * Use in case of eip-155
      */
     useEip155?: boolean;
+
+    /**
+     * Address for refund assets if error occurs
+     */
+    refundAddress?: string;
 }
