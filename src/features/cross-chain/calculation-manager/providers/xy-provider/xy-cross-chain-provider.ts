@@ -87,7 +87,9 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 dstChainId: blockchainId[toBlockchain],
                 dstQuoteTokenAddress: toToken.isNative ? XY_NATIVE_ADDRESS : toToken.address,
                 slippage: slippageTolerance,
-                affiliate: XY_AFFILIATE_ADDRESS
+                affiliate: XY_AFFILIATE_ADDRESS,
+                bridgeProviders:
+                    'yBridge,XassetBridge,Synapse,Across,Owlto,PolygonPoSEtherBridge,ArbitrumEtherBridge'
             };
 
             const { success, routes, errorCode, errorMsg } =
@@ -104,7 +106,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 bridgeDescription,
                 dstSwapDescription,
                 dstQuoteTokenAmount,
-                estimatedGas
+                estimatedGasFeeAmount
             } = routes[0]!;
 
             const to = new PriceTokenAmount({
@@ -137,12 +139,13 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         from: fromToken,
                         to,
                         transactionRequest: buildTxTransactionRequest,
-                        gasData: await this.getGasData(fromToken, { gasLimit: estimatedGas }),
+                        gasData: null,
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo,
                         onChainTrade: null,
-                        bridgeType: bridgeType
+                        bridgeType: bridgeType,
+                        xyEstimatedGas: new BigNumber(estimatedGasFeeAmount)
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, to, {

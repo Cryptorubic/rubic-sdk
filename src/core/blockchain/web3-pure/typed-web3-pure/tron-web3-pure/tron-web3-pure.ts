@@ -2,7 +2,6 @@ import { BigNumber as EthersBigNumber } from 'ethers';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
 import { InfiniteArray } from 'src/common/utils/types';
-import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import {
     TronWeb3PrimitiveType,
     Web3PrimitiveType
@@ -10,6 +9,7 @@ import {
 import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
+import { TronWeb, utils as TronUtils } from 'tronweb';
 import { AbiInput, AbiItem, AbiOutput } from 'web3-utils';
 
 @staticImplements<TypedWeb3Pure>()
@@ -44,7 +44,7 @@ export class TronWeb3Pure {
         contractAbi: AbiItem[],
         methodName: string,
         methodArguments: TronParameters,
-        callValue?: string,
+        callValue?: number,
         feeLimit?: number
     ): TronTransactionConfig {
         const methodAbi = contractAbi.find(abiItem => abiItem.name === methodName);
@@ -87,8 +87,8 @@ export class TronWeb3Pure {
                 ','
             )})`
         ).slice(0, 10);
-        const encodedParameters = TronWeb.utils.abi.encodeParams(
-            this.flattenTypesToArray(methodSignature.inputs!),
+        const encodedParameters = TronUtils.abi.encodeParams(
+            this.flattenTypesToArray(methodSignature.inputs!) as string[],
             methodArguments
         );
 
@@ -101,8 +101,8 @@ export class TronWeb3Pure {
     ): string {
         const encodedMethodSignature = TronWeb.sha3(methodSignature).slice(0, 10);
         const flattenedParameters = this.flattenParameters(parameters);
-        const encodedParameters = TronWeb.utils.abi.encodeParams(
-            flattenedParameters[0],
+        const encodedParameters = TronUtils.abi.encodeParams(
+            flattenedParameters[0] as string[],
             flattenedParameters[1]
         );
 
@@ -116,9 +116,9 @@ export class TronWeb3Pure {
      * @returns Parsed method output.
      */
     public static decodeMethodOutput(outputAbi: AbiOutput[], response: string): Web3PrimitiveType {
-        const decodedParam: TronWeb3PrimitiveType = TronWeb.utils.abi.decodeParams(
+        const decodedParam: TronWeb3PrimitiveType = TronUtils.abi.decodeParams(
             [],
-            this.flattenTypesToArray(outputAbi),
+            this.flattenTypesToArray(outputAbi) as string[],
             response
         )[0];
         return this.flattenParameterToPrimitive(decodedParam);
@@ -168,7 +168,11 @@ export class TronWeb3Pure {
     }
 
     public static flattenParameterToPrimitive(parameter: TronWeb3PrimitiveType): Web3PrimitiveType {
-        if (typeof parameter === 'number' || parameter instanceof EthersBigNumber) {
+        if (
+            typeof parameter === 'number' ||
+            parameter instanceof EthersBigNumber ||
+            typeof parameter === 'bigint'
+        ) {
             return parameter.toString();
         }
         if (typeof parameter === 'string' || typeof parameter === 'boolean') {

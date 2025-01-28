@@ -7,7 +7,6 @@ import { Injector } from 'src/core/injector/injector';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 
-import { RANGO_API_KEY } from '../constants/rango-api-common';
 import { RangoBestRouteRequestOptions } from '../models/rango-api-best-route-types';
 import { RangoSwapRequestOptions } from '../models/rango-api-swap-types';
 import { RangoTradeType, RUBIC_TO_RANGO_PROVIDERS } from '../models/rango-api-trade-types';
@@ -31,12 +30,10 @@ export class RangoCommonParser {
         const toParam = await RangoUtils.getFromToQueryParam(toToken);
         const disabledProviders = this.getRangoDisabledProviders(from, options.swapperGroups || []);
         const amountParam = Web3Pure.toWei(from.tokenAmount, from.decimals);
-        const apiKey = RANGO_API_KEY;
         const swapperGroups = disabledProviders?.join(',');
         const fromBlockchainType = BlockchainsInfo.getChainType(from.blockchain);
 
         return {
-            apiKey,
             from: fromParam,
             to: toParam,
             amount: amountParam,
@@ -67,12 +64,10 @@ export class RangoCommonParser {
         const fromAddress = options.fromAddress || walletAddress;
         const toAddress = options?.receiverAddress || walletAddress || FAKE_WALLET_ADDRESS;
         const slippage = options.slippageTolerance * 100;
-        const apiKey = RANGO_API_KEY;
         const swapperGroups = disabledProviders?.join(',');
         const fromBlockchainType = BlockchainsInfo.getChainType(fromToken.blockchain);
 
         return {
-            apiKey,
             amount,
             from,
             to,
@@ -89,9 +84,7 @@ export class RangoCommonParser {
         srcTxHash: string,
         requestId: string
     ): RangoTxStatusQueryParams {
-        const apiKey = RANGO_API_KEY;
-
-        return { apiKey, requestId, txId: srcTxHash };
+        return { requestId, txId: srcTxHash };
     }
 
     private static getRangoDisabledProviders(

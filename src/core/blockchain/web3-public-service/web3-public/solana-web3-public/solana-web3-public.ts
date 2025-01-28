@@ -3,13 +3,16 @@ import {
     getAssociatedTokenAddress,
     TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
-import { BlockhashWithExpiryBlockHeight, Connection, PublicKey } from '@solana/web3.js';
-import { Client as TokenSdk, UtlConfig } from '@solflare-wallet/utl-sdk';
+import {
+    BlockhashWithExpiryBlockHeight,
+    Connection,
+    PublicKey,
+    VersionedTransaction
+} from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
+import { base58 } from 'ethers/lib/utils';
 import { catchError, firstValueFrom, from, map, of, timeout } from 'rxjs';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
-import { Cache } from 'src/common/utils/decorators';
 import { NATIVE_SOLANA_MINT_ADDRESS } from 'src/core/blockchain/constants/solana/native-solana-mint-address';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { ReturnValue } from 'src/core/blockchain/models/solana-web3-types';
@@ -23,17 +26,57 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { AbiItem } from 'web3-utils';
 
-import { SolanaToken } from './models/solana-token';
-import { SolanaTokensApiService } from './services/solana-tokens-api-service';
+import { SolanaTokensService } from './services/solana-tokens-service';
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class SolanaWeb3Public extends Web3Public {
+    private readonly HELIUS_API_URL = 'https://mainnet.helius-rpc.com';
+
     constructor(private readonly connection: Connection) {
         super(BLOCKCHAIN_NAME.SOLANA);
+    }
+
+    /**
+     * @returns ComputedUnitsLimit - like gasLimit in evm
+     */
+    public async getConsumedUnitsLimit(tx: VersionedTransaction): Promise<number> {
+        const DEFAULT_CU_LIMIT = 600_000;
+        try {
+            const resp = await this.connection.simulateTransaction(tx, {
+                replaceRecentBlockhash: true
+            });
+            return resp.value.unitsConsumed ? resp.value.unitsConsumed * 1.2 : DEFAULT_CU_LIMIT;
+        } catch (err) {
+            console.error('Solana_simulateTransaction_Error ==> ', err);
+            return DEFAULT_CU_LIMIT;
+        }
+    }
+
+    /**
+     * @returns ComputedUnitsPrice - like gasPrice in evm
+     */
+    public async getConsumedUnitsPrice(tx: VersionedTransaction): Promise<number> {
+        const resp = await Injector.httpClient.post<{ result: { priorityFeeEstimate: number } }>(
+            `${this.HELIUS_API_URL}/?api-key=f6b96e37-e267-4b67-8790-84bdf8748c39`,
+            {
+                jsonrpc: '2.0',
+                id: '1',
+                method: 'getPriorityFeeEstimate',
+                params: [
+                    {
+                        transaction: base58.encode(tx.serialize()), // Pass the serialized transaction in Base58
+                        options: { priorityLevel: 'Medium' }
+                    }
+                ]
+            }
+        );
+
+        return resp.result.priorityFeeEstimate;
     }
 
     public getBlockNumber(): Promise<number> {
@@ -67,10 +110,16 @@ export class SolanaWeb3Public extends Web3Public {
         }
     }
 
-    @Cache
+    public override async callForTokenInfo(
+        tokenAddress: string,
+        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name', 'image']
+    ): Promise<Partial<Record<SupportedTokenField, string>>> {
+        return (await this.callForTokensInfo([tokenAddress], tokenFields))[0]!;
+    }
+
     public async callForTokensInfo(
         tokenAddresses: string[] | ReadonlyArray<string>,
-        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
+        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name', 'image']
     ): Promise<Partial<Record<SupportedTokenField, string>>[]> {
         const nativeTokenIndex = tokenAddresses.findIndex(address =>
             this.Web3Pure.isNativeAddress(address)
@@ -78,28 +127,37 @@ export class SolanaWeb3Public extends Web3Public {
         const filteredTokenAddresses = tokenAddresses.filter(
             (_, index) => index !== nativeTokenIndex
         );
-        const { preparedTokens, addresses } =
-            SolanaTokensApiService.prepareTokens(filteredTokenAddresses);
-
-        const mints = addresses.map(address => new PublicKey(address));
-        const tokensMint = await this.fetchMints(mints);
-
-        const fetchedTokens = tokensMint.map(token => {
-            const entries = tokenFields.map(field => [field, token?.[field]]);
-            return Object.fromEntries(entries);
-        });
-        const tokens = [...fetchedTokens, ...preparedTokens];
-
-        if (nativeTokenIndex === -1) {
-            return tokens;
-        }
 
         const blockchainNativeToken = nativeTokensList[this.blockchainName];
         const nativeToken = {
             ...blockchainNativeToken,
             decimals: blockchainNativeToken.decimals.toString()
         };
+
+        // only native token in array
+        if (!filteredTokenAddresses.length && nativeTokenIndex !== -1) {
+            return [nativeToken];
+        }
+
+        const mints = filteredTokenAddresses.map(address => new PublicKey(address));
+        const tokensMint = await new SolanaTokensService(this.connection).fetchTokensData(mints);
+
+        const tokens = tokensMint.map(token => {
+            const data = tokenFields.reduce(
+                (acc, fieldName) => ({
+                    ...acc,
+                    [fieldName]: fieldName === 'image' ? token.logoURI : token[fieldName]
+                }),
+                {} as Record<SupportedTokenField, string | undefined>
+            );
+            return data;
+        });
+
+        if (nativeTokenIndex === -1) {
+            return tokens;
+        }
         tokens.splice(nativeTokenIndex, 0, nativeToken);
+
         return tokens;
     }
 
@@ -134,32 +192,6 @@ export class SolanaWeb3Public extends Web3Public {
         } = {}
     ): Promise<T> {
         throw new Error('Method call is not supported');
-    }
-
-    private async fetchMints(mints: PublicKey[]): Promise<SolanaToken[]> {
-        const tokensAddresses = mints.map(mint => mint.toString());
-
-        let tokensList: SolanaToken[] = [];
-
-        try {
-            const { content } = await SolanaTokensApiService.getTokensList(tokensAddresses);
-            tokensList = content;
-        } catch {}
-
-        const tokensNotFetched = mints.filter(mint =>
-            tokensList.some(token => !compareAddresses(token.address, mint.toString()))
-        );
-
-        const config = new UtlConfig({
-            connection: this.connection,
-            timeout: 5000
-        });
-
-        const tokenSDK = new TokenSdk(config);
-
-        const metaplexTokens = await tokenSDK.getFromMetaplex(tokensNotFetched);
-
-        return [...tokensList, ...metaplexTokens];
     }
 
     public healthCheck(timeoutMs: number = 4000): Promise<boolean> {
@@ -200,7 +232,7 @@ export class SolanaWeb3Public extends Web3Public {
             }
         )._rpcRequest('getTokenAccountsByOwner', [
             address,
-            { programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' },
+            { programId: TOKEN_PROGRAM_ID },
             { encoding: 'jsonParsed' }
         ]);
 

@@ -9,12 +9,8 @@ export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
     protected async getTxConfigAndCheckAmount(
         receiverAddress?: string,
         fromAddress?: string,
-        directTransaction?: EvmEncodeConfig
+        skipAmountCheck: boolean = false
     ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return directTransaction;
-        }
-
         const { tx, toAmount } = await this.getToAmountAndTxData(receiverAddress, fromAddress);
 
         const evmEncodeConfig = {
@@ -28,7 +24,9 @@ export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
             this.slippageTolerance
         );
 
-        this.checkAmountChange(newToTokenAmountMin, this.toTokenAmountMin.stringWeiAmount);
+        if (!skipAmountCheck) {
+            this.checkAmountChange(newToTokenAmountMin, this.toTokenAmountMin.stringWeiAmount);
+        }
 
         return evmEncodeConfig;
     }

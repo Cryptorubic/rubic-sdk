@@ -4,7 +4,7 @@ import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 
-import { RUBIC_X_API_OKU_APIKEY, RUBIC_X_API_OKU_BASE_URL } from '../constants/okuswap-api';
+import { RUBIC_X_API_APIKEY, RUBIC_X_API_OKU_BASE_URL } from '../constants/okuswap-api';
 import {
     OkuQuoteRequestBody,
     OkuQuoteResponse,
@@ -30,7 +30,7 @@ export class OkuSwapApiService {
                 body,
                 {
                     headers: {
-                        apikey: RUBIC_X_API_OKU_APIKEY
+                        apikey: RUBIC_X_API_APIKEY
                     }
                 }
             );
@@ -49,7 +49,7 @@ export class OkuSwapApiService {
                 body,
                 {
                     headers: {
-                        apikey: RUBIC_X_API_OKU_APIKEY
+                        apikey: RUBIC_X_API_APIKEY
                     }
                 }
             );
@@ -73,7 +73,7 @@ export class OkuSwapApiService {
                 `${RUBIC_X_API_OKU_BASE_URL}/overview`,
                 {
                     headers: {
-                        apikey: RUBIC_X_API_OKU_APIKEY
+                        apikey: RUBIC_X_API_APIKEY
                     }
                 }
             );

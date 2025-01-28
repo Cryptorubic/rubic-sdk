@@ -21,6 +21,7 @@ export type OrbiterStatusResponse = OrbiterResponse<{
 export interface OrbiterReceiveAmountResponse {
     result: {
         receiveAmount: string;
+        tradeFeeAmount: string;
         router: OrbiterQuoteConfig;
     };
 }

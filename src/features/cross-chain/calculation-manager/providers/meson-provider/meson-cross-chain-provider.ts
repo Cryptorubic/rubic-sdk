@@ -141,12 +141,15 @@ export class MesonCrossChainProvider extends CrossChainProvider {
             sourceToken.tokenAmount.toFixed()
         );
 
+        const min = Math.max(Number(sourceTokenInfo.min), Number(targetTokenInfo.min));
+        const max = Math.min(Number(sourceTokenInfo.max), Number(targetTokenInfo.max));
+
         return {
             mesonFee,
             sourceAssetString,
             targetAssetString,
-            min: new BigNumber(sourceTokenInfo.min),
-            max: new BigNumber(sourceTokenInfo.max)
+            min: new BigNumber(min),
+            max: new BigNumber(max)
         };
     }
 

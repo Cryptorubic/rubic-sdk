@@ -11,10 +11,6 @@ import {
     FAKE_WALLET_ADDRESS
 } from 'src/features/common/constants/fake-wallet-address';
 import {
-    RANGO_API_ENDPOINT,
-    RANGO_API_KEY
-} from 'src/features/common/providers/rango/constants/rango-api-common';
-import {
     RangoBestRouteSimulationResult,
     RangoQuotePath,
     RangoSwapFee
@@ -41,10 +37,6 @@ import { RangoCrossChainApiService } from './services/rango-cross-chain-api-serv
 
 export class RangoCrossChainProvider extends CrossChainProvider {
     public type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
-
-    public static readonly apiKey = RANGO_API_KEY;
-
-    public static readonly apiEndpoint = RANGO_API_ENDPOINT;
 
     private rangoSupportedBlockchains = rangoSupportedBlockchains;
 
