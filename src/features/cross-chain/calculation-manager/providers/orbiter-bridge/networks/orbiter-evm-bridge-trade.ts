@@ -51,9 +51,7 @@ export class OrbiterEvmBridgeTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade
-            ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : orbiterContractAddresses[this.fromBlockchain];
+        return orbiterContractAddresses[this.fromBlockchain]!;
     }
 
     protected get methodName(): string {

@@ -26,8 +26,8 @@ export const orbiterSupportedBlockchains = [
     BLOCKCHAIN_NAME.ZK_LINK,
     BLOCKCHAIN_NAME.MERLIN,
     BLOCKCHAIN_NAME.BITLAYER,
-    BLOCKCHAIN_NAME.TRON,
-    BLOCKCHAIN_NAME.MORPH
+    BLOCKCHAIN_NAME.TRON
+    // BLOCKCHAIN_NAME.MORPH
 ] as const;
 
 export type OrbiterSupportedBlockchain = (typeof orbiterSupportedBlockchains)[number];

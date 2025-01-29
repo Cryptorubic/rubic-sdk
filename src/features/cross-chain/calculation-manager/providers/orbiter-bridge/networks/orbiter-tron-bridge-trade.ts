@@ -56,7 +56,7 @@ export class OrbiterTronBridgeTrade extends TronCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return orbiterContractAddresses[this.fromBlockchain];
+        return orbiterContractAddresses[this.fromBlockchain]!;
     }
 
     protected get methodName(): string {
@@ -122,7 +122,7 @@ export class OrbiterTronBridgeTrade extends TronCrossChainTrade {
         const value = this.from.isNative ? transferAmount : '0';
 
         const config = TronWeb3Pure.encodeMethodCall(
-            orbiterContractAddresses[this.fromBlockchain],
+            orbiterContractAddresses[this.fromBlockchain]!,
             ORBITER_ROUTER_V3_ABI,
             methodName,
             methodArgs,

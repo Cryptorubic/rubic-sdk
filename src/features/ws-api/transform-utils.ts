@@ -170,7 +170,9 @@ export class TransformUtils {
                     withDeflation: {
                         from: { isDeflation: false },
                         to: { isDeflation: false }
-                    }
+                    },
+                    apiQuote: quote,
+                    apiResponse: response
                 }
             });
         } else if (chainType === CHAIN_TYPE.TRON) {

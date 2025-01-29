@@ -24,13 +24,13 @@ export class RetroBridgeFactory {
         apiResponse: QuoteResponseInterface
     ): CrossChainTrade<EvmEncodeConfig | { data: string } | TonEncodedConfig> {
         if (BlockchainsInfo.isTonBlockchainName(fromBlockchain)) {
-            return new RetroBridgeTonTrade(
-                constructorParams as RetroBridgeTonConstructorParams,
-                providerAddress,
-                routePath,
-                apiQuote,
-                apiResponse
-            );
+            // return new RetroBridgeTonTrade(
+            //     constructorParams as RetroBridgeTonConstructorParams,
+            //     providerAddress,
+            //     routePath,
+            //     apiQuote,
+            //     apiResponse
+            // );
         }
 
         if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
