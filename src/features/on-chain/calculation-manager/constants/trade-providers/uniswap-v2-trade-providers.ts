@@ -65,6 +65,7 @@ import { SilkSwapBahamutProvider } from '../../providers/dexes/bahamut/silk-swap
 import { BlazeSwapFlareProvider } from '../../providers/dexes/flare/blaze-swap-flare/blaze-swap-flare-provider';
 import { EnosysFlareProvider } from '../../providers/dexes/flare/enosys-flare/enosys-v2-flare/enosys-flare-provider';
 import { SparkDexFlareProvider } from '../../providers/dexes/flare/spark-dex-flare/spark-dex-v2-flare/spark-dex-flare-provider';
+import { FraxSwapV2Provider } from '../../providers/dexes/fraxtal/frax-swap-v2/frax-swap-v2-provider';
 import { SushiSwapZetachainProvider } from '../../providers/dexes/zetachain/sushi-swap-zetachain/sushi-swap-zetachain-provider';
 
 export const UniswapV2TradeProviders = [
@@ -172,5 +173,7 @@ export const UniswapV2TradeProviders = [
     SparkDexFlareProvider,
     EnosysFlareProvider,
     // Morph
-    BulbaswapProvider
+    BulbaswapProvider,
+    // Fraxtal
+    FraxSwapV2Provider
 ] as const;
