@@ -30,55 +30,77 @@ export class SolanaTokensService {
         const fromBackend = await this.fetchTokensFromBackend(mints);
         if (!fromBackend.hasNotFetchedTokens) return this.sortTokensByIdx(fromBackend.tokensList);
 
-        const fromMetaplex = await this.fetchTokensFromMetaplex(
+        const fromOldBackend = await this.fetchTokensFromOldBackend(
             fromBackend.notFetchedMints,
             fromBackend.tokensList
         );
-        const backendWithMetaplexTokens = this.sortTokensByIdx([
+        if (!fromOldBackend.hasNotFetchedTokens) {
+            return this.sortTokensByIdx([...fromBackend.tokensList, ...fromOldBackend.tokensList]);
+        }
+
+        const fromMetaplex = await this.fetchTokensFromMetaplex(fromBackend.notFetchedMints, [
             ...fromBackend.tokensList,
+            ...fromOldBackend.tokensList
+        ]);
+
+        if (!fromMetaplex.hasNotFetchedTokens) {
+            return this.sortTokensByIdx([
+                ...fromBackend.tokensList,
+                ...fromOldBackend.tokensList,
+                ...fromMetaplex.tokensList
+            ]);
+        }
+
+        const fromSplApi = await this.fetchTokensFromSplApi(fromMetaplex.notFetchedMints, [
+            ...fromBackend.tokensList,
+            ...fromOldBackend.tokensList,
             ...fromMetaplex.tokensList
         ]);
-        if (!fromMetaplex.hasNotFetchedTokens) return backendWithMetaplexTokens;
-
-        const fromSplApi = await this.fetchTokensFromSplApi(
-            fromMetaplex.notFetchedMints,
-            backendWithMetaplexTokens
-        );
 
         return this.sortTokensByIdx([
             ...fromBackend.tokensList,
+            ...fromOldBackend.tokensList,
             ...fromMetaplex.tokensList,
             ...fromSplApi.tokensList
         ]);
     }
 
     private async fetchTokensFromBackend(mints: PublicKey[]): Promise<SolanaTokensFetchingResp> {
-        try {
-            const tokensAddresses = mints.map(mint => mint.toString());
-            const { content: notSortedTokensList } = await pTimeout(
-                SolanaTokensApiService.getTokensList(tokensAddresses),
-                4_000,
-                new Error('Api Timeout!')
-            );
-            const notFetchedMints = this.getNotFetchedTokensList(notSortedTokensList);
+        const tokensAddresses = mints.map(mint => mint.toString());
+        const tokensList = await SolanaTokensApiService.getTokensList(tokensAddresses);
+        const notFetchedMints = this.getNotFetchedTokensList(tokensList);
 
-            return {
-                tokensList: notSortedTokensList,
-                notFetchedMints,
-                hasNotFetchedTokens: notFetchedMints.length > 0
-            };
-        } catch {
-            return {
-                tokensList: [],
-                notFetchedMints: [...mints],
-                hasNotFetchedTokens: true
-            };
-        }
+        return {
+            tokensList,
+            notFetchedMints,
+            hasNotFetchedTokens: notFetchedMints.length > 0
+        };
+    }
+
+    private async fetchTokensFromOldBackend(
+        mints: PublicKey[],
+        prevFetchedTokens: SolanaToken[]
+    ): Promise<SolanaTokensFetchingResp> {
+        const tokensAddresses = mints.map(mint => mint.toString());
+        const { content: tokensFromOlbBackend } = await pTimeout(
+            SolanaTokensApiService.getTokensListOld(tokensAddresses),
+            3_000,
+            new Error('Api Timeout!')
+        ).catch(() => ({ content: [] }));
+
+        const notSortedTokensList = [...prevFetchedTokens, ...tokensFromOlbBackend];
+        const notFetchedMints = this.getNotFetchedTokensList(notSortedTokensList);
+
+        return {
+            tokensList: notSortedTokensList,
+            notFetchedMints,
+            hasNotFetchedTokens: notFetchedMints.length > 0
+        };
     }
 
     private async fetchTokensFromMetaplex(
         mints: PublicKey[],
-        prevTokensList: SolanaToken[]
+        prevFetchedTokens: SolanaToken[]
     ): Promise<SolanaTokensFetchingResp> {
         const config = new UtlConfig({
             connection: this.connection,
@@ -88,7 +110,7 @@ export class SolanaTokensService {
         const tokenSDK = new TokenSdk(config);
         const metaplexTokens = await tokenSDK.getFromMetaplex(mints).catch(() => []);
 
-        const notSortedTokensList = [...prevTokensList, ...metaplexTokens];
+        const notSortedTokensList = [...prevFetchedTokens, ...metaplexTokens];
         const notFetchedMints = this.getNotFetchedTokensList(notSortedTokensList);
 
         return {
@@ -100,7 +122,7 @@ export class SolanaTokensService {
 
     private async fetchTokensFromSplApi(
         mints: PublicKey[],
-        prevTokensList: SolanaToken[]
+        prevFetchedTokens: SolanaToken[]
     ): Promise<SolanaTokensFetchingResp> {
         const splApiResp = await Promise.all(
             mints.map(mint => getMint(this.connection, mint, 'confirmed'))
@@ -117,7 +139,7 @@ export class SolanaTokensService {
                 } as SolanaToken)
         );
 
-        const notSortedTokensList = [...prevTokensList, ...splApiTokens];
+        const notSortedTokensList = [...prevFetchedTokens, ...splApiTokens];
         const notFetchedMints = this.getNotFetchedTokensList(notSortedTokensList);
 
         return {
