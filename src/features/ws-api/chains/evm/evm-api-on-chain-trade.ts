@@ -30,10 +30,11 @@ export class EvmApiOnChainTrade extends EvmOnChainTrade {
 
     public readonly isAggregator = false;
 
-    public readonly dexContractAddress = '';
+    public readonly dexContractAddress: string;
 
     constructor(params: EvmApiOnChainConstructor) {
         super(params.tradeStruct);
+        this.dexContractAddress = params.tradeStruct.apiResponse?.transaction.approvalAddress!;
 
         this.type = params.tradeStruct.apiResponse!.providerType as OnChainTradeType;
         this._priceImpact = params.tradeStruct.apiResponse!.estimate.priceImpact;

@@ -5,7 +5,7 @@ import {
 } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -19,6 +19,7 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/on-chain-trade';
@@ -37,7 +38,7 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
 
     public readonly slippageTolerance: number;
 
-    public readonly path: ReadonlyArray<Token>;
+    public readonly path: RubicStep[];
 
     /**
      * Gas fee info, including gas limit and gas price.

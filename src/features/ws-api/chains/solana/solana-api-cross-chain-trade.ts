@@ -33,7 +33,13 @@ export class SolanaApiCrossChainTrade extends SolanaCrossChainTrade {
     public readonly isAggregator = false;
 
     constructor(params: SolanaApiCrossChainConstructor) {
-        super(params.apiQuote.integratorAddress!, [], false, params.apiQuote, params.apiResponse);
+        super(
+            params.apiQuote.integratorAddress!,
+            params.routePath,
+            false,
+            params.apiQuote,
+            params.apiResponse
+        );
 
         this.type = params.apiResponse.providerType as CrossChainTradeType;
         this.bridgeType = this.type;

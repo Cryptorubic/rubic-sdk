@@ -1,17 +1,14 @@
-import { Token, TokenAmount } from 'src/common/tokens';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
-
-import { BridgeType } from './bridge-type';
+import { Token, TokenAmount } from '@cryptorubic/core';
 
 export interface CrossChainStep {
-    provider: BridgeType;
+    provider: string;
     type: 'cross-chain';
     path: (TokenAmount | Token)[];
 }
 
 interface OnChainStep {
     path: Token[];
-    provider: OnChainTradeType;
+    provider: string;
     type: 'on-chain';
 }
 

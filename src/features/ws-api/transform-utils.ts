@@ -27,6 +27,8 @@ import { TonApiOnChainTrade } from 'src/features/ws-api/chains/ton/ton-api-on-ch
 import { TronApiCrossChainTrade } from 'src/features/ws-api/chains/tron/tron-api-cross-chain-trade';
 import { TronApiOnChainTrade } from 'src/features/ws-api/chains/tron/tron-api-on-chain-trade';
 
+import { RubicApiParser } from './utils/rubic-api-parser';
+
 export class TransformUtils {
     public static async transformCrossChain(
         response: QuoteResponseInterface,
@@ -48,6 +50,8 @@ export class TransformUtils {
 
         let trade: CrossChainTrade | null = null;
 
+        const routePath = RubicApiParser.parseRoutingDto(response.routing);
+
         if (chainType === CHAIN_TYPE.EVM) {
             if (response.providerType === CROSS_CHAIN_TRADE_TYPE.ARBITRUM) {
                 trade = new EvmApiCrossChainTrade({
@@ -55,7 +59,8 @@ export class TransformUtils {
                     to: toToken,
                     apiQuote: quote,
                     apiResponse: response,
-                    feeInfo: {}
+                    feeInfo: {},
+                    routePath
                 });
             } else if (tradeType === CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE) {
                 trade = new EddyBridgeTrade({
@@ -63,7 +68,8 @@ export class TransformUtils {
                     to: toToken,
                     apiQuote: quote,
                     apiResponse: response,
-                    feeInfo: {}
+                    feeInfo: {},
+                    routePath
                 });
             } else {
                 trade = new ArbitrumRbcBridgeTrade({
@@ -71,7 +77,8 @@ export class TransformUtils {
                     to: toToken,
                     apiQuote: quote,
                     apiResponse: response,
-                    feeInfo: {}
+                    feeInfo: {},
+                    routePath
                 });
             }
         } else if (chainType === CHAIN_TYPE.TON) {
@@ -80,7 +87,8 @@ export class TransformUtils {
                 to: toToken,
                 apiQuote: quote,
                 apiResponse: response,
-                feeInfo: {}
+                feeInfo: {},
+                routePath
             });
         } else if (chainType === CHAIN_TYPE.TRON) {
             trade = new TronApiCrossChainTrade({
@@ -88,7 +96,8 @@ export class TransformUtils {
                 to: toToken as PriceTokenAmount,
                 apiQuote: quote,
                 apiResponse: response,
-                feeInfo: {}
+                feeInfo: {},
+                routePath
             });
         } else if (chainType === CHAIN_TYPE.BITCOIN) {
             // @TODO API
@@ -99,7 +108,8 @@ export class TransformUtils {
                 to: toToken,
                 apiQuote: quote,
                 apiResponse: response,
-                feeInfo: {}
+                feeInfo: {},
+                routePath
             });
         }
 
@@ -127,6 +137,8 @@ export class TransformUtils {
             tokenAmount: new BigNumber(response.estimate.destinationTokenAmount)
         });
 
+        const routePath = RubicApiParser.parseRoutingDto(response.routing);
+
         let trade: OnChainTrade | null = null;
 
         if (chainType === CHAIN_TYPE.EVM) {
@@ -138,7 +150,7 @@ export class TransformUtils {
                     from: fromToken as PriceTokenAmount<EvmBlockchainName>,
                     to: toToken as PriceTokenAmount<EvmBlockchainName>,
                     slippageTolerance: 0,
-                    path: [],
+                    path: routePath,
                     gasFeeInfo: null,
                     useProxy: false,
                     proxyFeeInfo: undefined,
@@ -164,7 +176,7 @@ export class TransformUtils {
                     slippageTolerance: 0,
                     gasFeeInfo: null,
                     useProxy: false,
-                    routingPath: [],
+                    routingPath: routePath,
                     // @TODO API
                     isChangedSlippage: false,
                     withDeflation: {
@@ -198,7 +210,7 @@ export class TransformUtils {
                     fromWithoutFee: fromToken as PriceTokenAmount<SolanaBlockchainName>,
                     to: toToken as PriceTokenAmount<SolanaBlockchainName>,
                     slippageTolerance: 0,
-                    path: [],
+                    path: routePath,
                     gasFeeInfo: null,
                     useProxy: false,
                     proxyFeeInfo: undefined,
