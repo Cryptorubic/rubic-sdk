@@ -1,4 +1,4 @@
-import { TronBlockchainName } from '@cryptorubic/core';
+import { Token, TronBlockchainName } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -43,7 +43,10 @@ export class TronApiCrossChainTrade extends TronCrossChainTrade {
 
         this.type = params.apiResponse.providerType as CrossChainTradeType;
         this.bridgeType = this.type;
-        this.toTokenAmountMin = new BigNumber(params.apiResponse.estimate.destinationWeiMinAmount);
+        this.toTokenAmountMin = Token.fromWei(
+            params.apiResponse.estimate.destinationWeiMinAmount,
+            params.to.decimals
+        );
         this.priceImpact = params.apiResponse.estimate.priceImpact;
         this.slippage = params.apiResponse.estimate.slippage;
 
@@ -58,7 +61,7 @@ export class TronApiCrossChainTrade extends TronCrossChainTrade {
             estimatedGas: null,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact,
-            slippage: this.slippage,
+            slippage: this.slippage * 100,
             routePath: this.routePath
         };
     }
