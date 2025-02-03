@@ -59,9 +59,7 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade
-            ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : this.contractAddresses.providerGateway;
+        return this.contractAddresses.providerGateway;
     }
 
     protected get methodName(): string {

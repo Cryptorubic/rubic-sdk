@@ -184,7 +184,7 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         const transactionConfig = await this.encode({
             fromAddress,
             receiverAddress,
-            ...(options?.referrer && { referrer: options?.referrer })
+            ...options
         });
 
         try {

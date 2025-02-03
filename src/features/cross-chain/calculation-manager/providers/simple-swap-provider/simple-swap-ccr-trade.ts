@@ -20,6 +20,7 @@ import { SimpleSwapCcrSupportedChain } from './constants/simple-swap-ccr-api-blo
 import { SimpleSwapCurrency } from './models/simple-swap-currency';
 import { SimpleSwapExchangeRequest } from './models/simple-swap-requests';
 import { SimpleSwapApiService } from './services/simple-swap-api-service';
+import BigNumber from 'bignumber.js';
 
 export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
     public get simpleSwapId(): string {
@@ -66,7 +67,7 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
             null,
             crossChainTrade.from,
             crossChainTrade.to,
-            crossChainTrade.to.tokenAmount,
+            new BigNumber(0),
             crossChainTrade.gasData,
             crossChainTrade.feeInfo,
             crossChainTrade.priceImpact,
