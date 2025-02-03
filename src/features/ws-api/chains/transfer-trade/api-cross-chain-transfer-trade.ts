@@ -9,6 +9,7 @@ import { CrossChainTransferData } from 'src/features/cross-chain/calculation-man
 import { Injector } from 'src/core/injector/injector';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { CrossChainTransferConfig } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/models/cross-chain-transfer-config';
+import BigNumber from 'bignumber.js';
 
 export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
     public readonly type: CrossChainTradeType;
@@ -52,17 +53,22 @@ export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
         };
     }
 
-    protected async getPaymentInfo(receiverAddress: string): Promise<CrossChainTransferData> {
+    protected async getPaymentInfo(
+        receiverAddress: string,
+        refundAddress: string
+    ): Promise<CrossChainTransferData> {
         const swapRequestData: SwapRequestInterface = {
             ...this.apiQuote,
-            fromAddress: this.walletAddress,
+            fromAddress: refundAddress,
             receiver: receiverAddress,
             id: this.apiResponse.id
         };
         const { estimate, transaction } =
             await Injector.rubicApiService.fetchSwapData<CrossChainTransferConfig>(swapRequestData);
 
-        const amount = estimate.destinationWeiAmount;
+        const amount = estimate.destinationTokenAmount;
+
+        this.actualTokenAmount = new BigNumber(amount);
 
         return {
             toAmount: amount,
