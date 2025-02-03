@@ -28,6 +28,11 @@ import { TronApiCrossChainTrade } from 'src/features/ws-api/chains/tron/tron-api
 import { TronApiOnChainTrade } from 'src/features/ws-api/chains/tron/tron-api-on-chain-trade';
 
 import { RubicApiParser } from './utils/rubic-api-parser';
+import {
+    TransferTradeSupportedProviders,
+    transferTradeSupportedProviders
+} from '../cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/constans/transfer-trade-supported-providers';
+import { ApiCrossChainTransferTrade } from './chains/transfer-trade/api-cross-chain-transfer-trade';
 
 export class TransformUtils {
     public static async transformCrossChain(
@@ -51,6 +56,11 @@ export class TransformUtils {
         let trade: CrossChainTrade | null = null;
 
         const routePath = RubicApiParser.parseRoutingDto(response.routing);
+
+        const isTransferTrade =
+            transferTradeSupportedProviders.includes(
+                tradeType as TransferTradeSupportedProviders
+            ) && chainType !== CHAIN_TYPE.EVM;
 
         if (chainType === CHAIN_TYPE.EVM) {
             if (response.providerType === CROSS_CHAIN_TRADE_TYPE.ARBITRUM) {
@@ -81,6 +91,15 @@ export class TransformUtils {
                     routePath
                 });
             }
+        } else if (isTransferTrade) {
+            trade = new ApiCrossChainTransferTrade({
+                from: fromToken as PriceTokenAmount<TonBlockchainName>,
+                to: toToken,
+                apiQuote: quote,
+                apiResponse: response,
+                feeInfo: {},
+                routePath
+            });
         } else if (chainType === CHAIN_TYPE.TON) {
             trade = new TonApiCrossChainTrade({
                 from: fromToken as PriceTokenAmount<TonBlockchainName>,
