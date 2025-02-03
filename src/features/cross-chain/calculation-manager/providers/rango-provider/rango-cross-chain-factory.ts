@@ -18,20 +18,20 @@ import { CrossChainTrade } from '../common/cross-chain-trade';
 
 export class RangoCrossChainFactory {
     public static createTrade(
-        fromBlockchain: BlockchainName,
-        constructorParams: RangoCrossChainTradeConstructorParams<BlockchainName>
+        _fromBlockchain: BlockchainName,
+        _constructorParams: RangoCrossChainTradeConstructorParams<BlockchainName>
     ): CrossChainTrade<EvmEncodeConfig | BitcoinEncodedConfig> {
-        if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
-            return new RangoEvmCrossChainTrade(
-                constructorParams as RangoCrossChainTradeConstructorParams<EvmBlockchainName>
-            );
-        }
+        // if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
+        //     return new RangoEvmCrossChainTrade(
+        //         constructorParams as RangoCrossChainTradeConstructorParams<EvmBlockchainName>
+        //     );
+        // }
 
-        if (BlockchainsInfo.isBitcoinBlockchainName(fromBlockchain)) {
-            return new RangoBitcoinCrossChainTrade(
-                constructorParams as RangoCrossChainTradeConstructorParams<BitcoinBlockchainName>
-            );
-        }
+        // if (BlockchainsInfo.isBitcoinBlockchainName(fromBlockchain)) {
+        //     return new RangoBitcoinCrossChainTrade(
+        //         constructorParams as RangoCrossChainTradeConstructorParams<BitcoinBlockchainName>
+        //     );
+        // }
 
         throw new Error('Can not create trade instance');
     }

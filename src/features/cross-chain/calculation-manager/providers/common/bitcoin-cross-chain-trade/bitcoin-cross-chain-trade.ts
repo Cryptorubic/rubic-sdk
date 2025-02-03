@@ -61,6 +61,7 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
             const { data, to, value } = await this.setTransactionConfig(
                 false,
                 options?.useCacheData || false,
+                options.testMode,
                 options?.receiverAddress
             );
 
@@ -120,6 +121,7 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
     }
 
     protected getTransactionConfigAndAmount(
+        _testMode?: boolean,
         _receiverAddress?: string
     ): Promise<{ config: any; amount: string }> {
         // @TODO API

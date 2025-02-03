@@ -124,7 +124,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         receiverAddress: string,
         refundAddress?: string
     ): Promise<CrossChainPaymentInfo> {
-        await this.setTransactionConfig(false, false, receiverAddress, refundAddress);
+        await this.setTransactionConfig(false, false, false, receiverAddress, refundAddress);
         if (!this.paymentInfo) {
             throw new Error('Deposit address is not set');
         }
@@ -144,10 +144,15 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     }
 
     protected async getTransactionConfigAndAmount(
+        testMode?: boolean,
         receiverAddress?: string,
         refundAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        const res = await this.getPaymentInfo(receiverAddress || this.walletAddress, refundAddress);
+        const res = await this.getPaymentInfo(
+            receiverAddress || this.walletAddress,
+            testMode,
+            refundAddress
+        );
 
         const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
         this.paymentInfo = res;
@@ -184,6 +189,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
 
     protected abstract getPaymentInfo(
         receiverAddress: string,
+        testMode?: boolean,
         refundAddress?: string
     ): Promise<CrossChainTransferData>;
 
@@ -220,6 +226,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         return this.setTransactionConfig(
             options?.skipAmountCheck || false,
             options?.useCacheData || false,
+            options.testMode,
             options?.receiverAddress || this.walletAddress
         );
     }
@@ -231,6 +238,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         await this.setTransactionConfig(
             skipAmountChangeCheck || false,
             options.useCacheData || false,
+            options.testMode,
             options.receiverAddress
         );
         if (!this.paymentInfo) {
@@ -328,6 +336,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
             await this.setTransactionConfig(
                 false,
                 options.useCacheData || false,
+                options.testMode || false,
                 options?.receiverAddress || this.walletAddress
             );
             if (!this.paymentInfo) {
@@ -365,6 +374,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     protected async setTransactionConfig(
         skipAmountChangeCheck: boolean,
         useCacheData: boolean,
+        testMode?: boolean,
         receiverAddress?: string,
         refundAddress?: string
     ): Promise<EvmEncodeConfig> {
@@ -373,6 +383,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         }
 
         const { config, amount } = await this.getTransactionConfigAndAmount(
+            testMode,
             receiverAddress || this.walletAddress,
             refundAddress
         );

@@ -41,4 +41,6 @@ export interface EncodeTransactionOptions {
     useCacheData?: boolean;
 
     refundAddress?: string;
+
+    testMode?: boolean;
 }

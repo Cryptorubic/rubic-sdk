@@ -3,4 +3,5 @@ export interface GetContractParamsOptions {
     receiverAddress?: string;
     referrer?: string;
     useCacheData?: boolean;
+    testMode?: boolean;
 }

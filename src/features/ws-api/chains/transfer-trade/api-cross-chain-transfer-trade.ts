@@ -55,13 +55,15 @@ export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
 
     protected async getPaymentInfo(
         receiverAddress: string,
+        testMode: boolean,
         refundAddress: string
     ): Promise<CrossChainTransferData> {
         const swapRequestData: SwapRequestInterface = {
             ...this.apiQuote,
             fromAddress: refundAddress,
             receiver: receiverAddress,
-            id: this.apiResponse.id
+            id: this.apiResponse.id,
+            enableChecks: !testMode
         };
         const { estimate, transaction } =
             await Injector.rubicApiService.fetchSwapData<CrossChainTransferConfig>(swapRequestData);

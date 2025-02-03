@@ -14,18 +14,18 @@ import { CrossChainTrade } from '../common/cross-chain-trade';
 
 export class RouterCrossChainFactory {
     public static createTrade(
-        fromBlockchain: BlockchainName,
-        constructorParams: RouterConstructorParams<BlockchainName>
+        _fromBlockchain: BlockchainName,
+        _constructorParams: RouterConstructorParams<BlockchainName>
     ): CrossChainTrade<EvmEncodeConfig | BitcoinEncodedConfig> {
-        if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
-            return new RouterEvmCrossChainTrade(constructorParams as RouterEvmConstructorParams);
-        }
+        // if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
+        //     return new RouterEvmCrossChainTrade(constructorParams as RouterEvmConstructorParams);
+        // }
 
-        if (BlockchainsInfo.isBitcoinBlockchainName(fromBlockchain)) {
-            return new RouterBitcoinCrossChainTrade(
-                constructorParams as RouterBitcoinConstructorParams
-            );
-        }
+        // if (BlockchainsInfo.isBitcoinBlockchainName(fromBlockchain)) {
+        //     return new RouterBitcoinCrossChainTrade(
+        //         constructorParams as RouterBitcoinConstructorParams
+        //     );
+        // }
 
         throw new Error('Can not create trade instance');
     }

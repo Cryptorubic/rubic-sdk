@@ -70,6 +70,7 @@ export class ChangellyCcrTrade extends CrossChainTransferTrade {
 
     protected async getPaymentInfo(
         receiverAddress: string,
+        _testMode?: boolean,
         refundAddress?: string
     ): Promise<CrossChainTransferData> {
         const fromWithoutFee = getFromWithoutFee(
