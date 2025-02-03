@@ -13,10 +13,11 @@ import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-man
 import { WrappedAsyncTradeOrNull } from 'src/features/ws-api/models/wrapped-async-trade-or-null';
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
 
+import { CrossChainTxStatusConfig } from './models/cross-chain-tx-status-config';
 import { SwapResponseInterface } from './models/swap-response-interface';
 
 export class RubicApiService {
-    public get apiUrl(): string {
+    private get apiUrl(): string {
         const env = this.envType;
         if (env === 'local') {
             return 'http://localhost:3000';
@@ -110,5 +111,9 @@ export class RubicApiService {
                 );
             })
         );
+    }
+
+    public fetchCrossChainTxStatus(srcTxHash: string): Promise<CrossChainTxStatusConfig> {
+        return Injector.httpClient.get(`${this.apiUrl}/api/info/status?srcTxHash=${srcTxHash}`);
     }
 }
