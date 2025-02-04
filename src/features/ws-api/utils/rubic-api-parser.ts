@@ -1,5 +1,13 @@
-import { PriceTokenAmount, PriceTokenAmountStruct, RoutingInterface } from '@cryptorubic/core';
+import {
+    FeesInterface,
+    PriceTokenAmount,
+    PriceTokenAmountStruct,
+    RoutingInterface
+} from '@cryptorubic/core';
+import BigNumber from 'bignumber.js';
+import { PriceToken } from 'src/common/tokens';
 import { Any } from 'src/common/utils/types';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
 export class RubicApiParser {
@@ -27,5 +35,29 @@ export class RubicApiParser {
         }
 
         return steps;
+    }
+
+    public static parseFeeInfoDto(feeInfoDto: FeesInterface): FeeInfo {
+        const nativeToken = new PriceToken({
+            ...feeInfoDto.gasTokenFees.nativeToken,
+            price: new BigNumber(feeInfoDto.gasTokenFees.nativeToken.price!)
+        });
+
+        const protocolFee = feeInfoDto.gasTokenFees.protocol;
+        const providerFee = feeInfoDto.gasTokenFees.provider;
+        return {
+            rubicProxy: {
+                fixedFee: {
+                    amount: new BigNumber(protocolFee.fixedAmount),
+                    token: nativeToken
+                }
+            },
+            provider: {
+                cryptoFee: {
+                    amount: new BigNumber(providerFee.fixedAmount),
+                    token: nativeToken
+                }
+            }
+        };
     }
 }

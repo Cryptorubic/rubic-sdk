@@ -1,3 +1,4 @@
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -14,7 +15,6 @@ import { ChangellyEstimateResponse } from './models/changelly-estimate-response'
 import { ChangellyExchangeSendParams } from './models/changelly-exchange-send-params';
 import { ChangellyToken } from './models/changelly-token';
 import { ChangellyApiService } from './services/changelly-api-service';
-import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 
 export class ChangellyCcrTrade extends CrossChainTransferTrade {
     /**

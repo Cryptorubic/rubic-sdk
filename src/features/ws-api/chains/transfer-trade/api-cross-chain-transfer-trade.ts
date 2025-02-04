@@ -1,15 +1,15 @@
+import { SwapRequestInterface, Token } from '@cryptorubic/core';
+import BigNumber from 'bignumber.js';
+import { Injector } from 'src/core/injector/injector';
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainTransferTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/cross-chain-transfer-trade';
-import { ApiCrossChainTransferConstructor } from './api-cross-chain-transfer-constructor';
-import { SwapRequestInterface, Token } from '@cryptorubic/core';
-import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { CrossChainTransferData } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/models/cross-chain-payment-info';
+import { CrossChainTransferConfig } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/models/cross-chain-transfer-config';
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
-import { CrossChainTransferData } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/models/cross-chain-payment-info';
-import { Injector } from 'src/core/injector/injector';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { CrossChainTransferConfig } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/models/cross-chain-transfer-config';
-import BigNumber from 'bignumber.js';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+
+import { ApiCrossChainTransferConstructor } from './api-cross-chain-transfer-constructor';
 
 export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
     public readonly type: CrossChainTradeType;

@@ -1,11 +1,11 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { GasData } from '../../evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../../models/fee-info';
 import { RubicStep } from '../../models/rubicStep';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export interface CrossChainTransferTradeParams {
     providerAddress: string;

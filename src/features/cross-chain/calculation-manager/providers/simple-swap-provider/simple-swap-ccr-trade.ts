@@ -1,4 +1,5 @@
 import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -20,7 +21,6 @@ import { SimpleSwapCcrSupportedChain } from './constants/simple-swap-ccr-api-blo
 import { SimpleSwapCurrency } from './models/simple-swap-currency';
 import { SimpleSwapExchangeRequest } from './models/simple-swap-requests';
 import { SimpleSwapApiService } from './services/simple-swap-api-service';
-import BigNumber from 'bignumber.js';
 
 export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
     public get simpleSwapId(): string {

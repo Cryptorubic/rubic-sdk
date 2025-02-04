@@ -27,11 +27,10 @@ import { EvmCrossChainTrade } from '../evm-cross-chain-trade/evm-cross-chain-tra
 import { GasData } from '../evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../models/fee-info';
 import { GetContractParamsOptions } from '../models/get-contract-params-options';
+import { RubicStep } from '../models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { transferGasLimit } from './constans/gas-limit-estimation';
 import { CrossChainPaymentInfo, CrossChainTransferData } from './models/cross-chain-payment-info';
-import { CrossChainTransferTradeParams } from './models/cross-chain-transfer-trade-params';
-import { RubicStep } from '../models/rubicStep';
 
 export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     public static async getGasData(from: PriceTokenAmount): Promise<GasData | null> {
