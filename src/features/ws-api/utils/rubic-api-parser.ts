@@ -5,10 +5,13 @@ import {
     RoutingInterface
 } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
+import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken } from 'src/common/tokens';
 import { Any } from 'src/common/utils/types';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
+
+import { RubicApiError } from '../models/rubic-api-error';
 
 export class RubicApiParser {
     public static parseRoutingDto(routingDto: RoutingInterface[]): RubicStep[] {
@@ -59,5 +62,23 @@ export class RubicApiParser {
                 }
             }
         };
+    }
+
+    public static parseRubicApiErrors(err: RubicApiError): RubicSdkError {
+        if (err.code === 205) {
+            const data = err.data as {
+                tokenSymbol: string;
+                minAmount?: string;
+                maxAmount?: string;
+            };
+            if (data.minAmount) {
+                return new MinAmountError(new BigNumber(data.minAmount), data.tokenSymbol);
+            }
+            if (data.maxAmount) {
+                return new MaxAmountError(new BigNumber(data.maxAmount), data.tokenSymbol);
+            }
+        }
+
+        throw new RubicSdkError(err.reason);
     }
 }

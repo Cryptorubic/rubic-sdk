@@ -1,4 +1,5 @@
 import {
+    BitcoinBlockchainName,
     EvmBlockchainName,
     QuoteRequestInterface,
     QuoteResponseInterface,
@@ -31,15 +32,25 @@ import {
     TransferTradeSupportedProviders,
     transferTradeSupportedProviders
 } from '../cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/constans/transfer-trade-supported-providers';
+import { BitcoinApiCrossChainTrade } from './chains/bitcoin/bitcoin-api-cross-chain-trade';
 import { ApiCrossChainTransferTrade } from './chains/transfer-trade/api-cross-chain-transfer-trade';
+import { RubicApiError } from './models/rubic-api-error';
 import { RubicApiParser } from './utils/rubic-api-parser';
+import { RubicApiUtils } from './utils/rubic-api-utils';
 
 export class TransformUtils {
     public static async transformCrossChain(
-        response: QuoteResponseInterface,
+        res: QuoteResponseInterface,
         quote: QuoteRequestInterface,
-        _integratorAddress: string
+        _integratorAddress: string,
+        err?: RubicApiError
     ): Promise<WrappedCrossChainTrade> {
+        let response = res;
+
+        if (!response && err) {
+            response = await RubicApiUtils.getEmptyResponse(quote, err.type);
+        }
+
         const tradeType = response.providerType as WrappedCrossChainTrade['tradeType'];
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
         const fromToken = new PriceTokenAmount({
@@ -121,8 +132,14 @@ export class TransformUtils {
                 routePath
             });
         } else if (chainType === CHAIN_TYPE.BITCOIN) {
-            // @TODO API
-            console.log('btc swap');
+            trade = new BitcoinApiCrossChainTrade({
+                from: fromToken as PriceTokenAmount<BitcoinBlockchainName>,
+                to: toToken,
+                apiQuote: quote,
+                apiResponse: response,
+                feeInfo,
+                routePath
+            });
         } else if (chainType === CHAIN_TYPE.SOLANA) {
             trade = new SolanaApiCrossChainTrade({
                 from: fromToken as PriceTokenAmount<SolanaBlockchainName>,
@@ -136,15 +153,23 @@ export class TransformUtils {
 
         return {
             trade,
-            tradeType
+            tradeType,
+            ...(err && { error: RubicApiParser.parseRubicApiErrors(err) })
         };
     }
 
     public static async transformOnChain(
-        response: QuoteResponseInterface,
+        res: QuoteResponseInterface,
         quote: QuoteRequestInterface,
-        _integratorAddress: string
+        _integratorAddress: string,
+        err?: RubicApiError
     ): Promise<WrappedOnChainTradeOrNull> {
+        let response = res;
+
+        if (!response && err) {
+            response = await RubicApiUtils.getEmptyResponse(quote, err.type);
+        }
+
         const tradeType = response.providerType as OnChainTradeType;
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
         const fromToken = new PriceTokenAmount({
@@ -246,7 +271,8 @@ export class TransformUtils {
 
         return {
             trade,
-            tradeType
+            tradeType,
+            ...(err && { error: RubicApiParser.parseRubicApiErrors(err) })
         };
     }
 }

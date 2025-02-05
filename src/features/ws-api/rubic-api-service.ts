@@ -14,6 +14,7 @@ import { WrappedAsyncTradeOrNull } from 'src/features/ws-api/models/wrapped-asyn
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
 
 import { CrossChainTxStatusConfig } from './models/cross-chain-tx-status-config';
+import { RubicApiErrorDto } from './models/rubic-api-error';
 import { SwapResponseInterface } from './models/swap-response-interface';
 
 export class RubicApiService {
@@ -80,27 +81,40 @@ export class RubicApiService {
     }
 
     public handleQuotesAsync(): Observable<WrappedAsyncTradeOrNull> {
-        return fromEvent<WsQuoteResponseInterface>(this.client, 'events').pipe(
+        return fromEvent<
+            WsQuoteResponseInterface & {
+                data: RubicApiErrorDto;
+                type: string;
+            }
+        >(this.client, 'events').pipe(
             concatMap(wsResponse => {
-                const { trade, total, calculated } = wsResponse;
-
+                const { trade, total, calculated, data } = wsResponse;
                 let promise: Promise<
                     null | WrappedCrossChainTradeOrNull | WrappedOnChainTradeOrNull
                 > = Promise.resolve(null);
-                if (trade) {
-                    promise =
-                        trade.swapType === 'cross-chain'
-                            ? TransformUtils.transformCrossChain(
-                                  trade,
-                                  this.latestQuoteParams!,
-                                  this.latestQuoteParams!.integratorAddress!
-                              )
-                            : TransformUtils.transformOnChain(
-                                  trade,
-                                  this.latestQuoteParams!,
-                                  this.latestQuoteParams!.integratorAddress!
-                              );
-                }
+
+                const rubicApiError = data
+                    ? {
+                          ...data,
+                          type: wsResponse.type
+                      }
+                    : data;
+
+                promise =
+                    this.latestQuoteParams?.srcTokenBlockchain !==
+                    this.latestQuoteParams?.dstTokenBlockchain
+                        ? TransformUtils.transformCrossChain(
+                              trade!,
+                              this.latestQuoteParams!,
+                              this.latestQuoteParams!.integratorAddress!,
+                              rubicApiError
+                          )
+                        : TransformUtils.transformOnChain(
+                              trade!,
+                              this.latestQuoteParams!,
+                              this.latestQuoteParams!.integratorAddress!,
+                              rubicApiError
+                          );
                 return from(promise).pipe(
                     catchError(() => of(null)),
                     map(wrappedTrade => ({
