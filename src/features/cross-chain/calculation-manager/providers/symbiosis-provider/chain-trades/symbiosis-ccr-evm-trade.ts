@@ -5,7 +5,6 @@ import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/b
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -59,9 +58,7 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade
-            ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : this.contractAddresses.providerGateway;
+        return this.contractAddresses.providerGateway;
     }
 
     protected get methodName(): string {

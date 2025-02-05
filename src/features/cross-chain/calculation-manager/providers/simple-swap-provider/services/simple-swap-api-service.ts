@@ -1,6 +1,9 @@
 import { Injector } from 'src/core/injector/injector';
 
-import { CrossChainDepositData } from '../../common/cross-chain-transfer-trade/models/cross-chain-deposit-statuses';
+import {
+    CROSS_CHAIN_DEPOSIT_STATUS,
+    CrossChainDepositData
+} from '../../common/cross-chain-transfer-trade/models/cross-chain-deposit-statuses';
 import { SimpleSwapCurrency } from '../models/simple-swap-currency';
 import {
     SimpleSwapEstimatonRequest,
@@ -68,9 +71,18 @@ export class SimpleSwapApiService {
             }
         );
 
+        const txData = res.result;
+
+        if (txData.status === 'refunded' || txData.status === 'finished') {
+            return {
+                status: CROSS_CHAIN_DEPOSIT_STATUS.FINISHED,
+                dstHash: txData.txTo
+            };
+        }
+
         const depositData: CrossChainDepositData = {
-            status: res.result.status,
-            dstHash: res.result.txTo
+            status: txData.status,
+            dstHash: null
         };
 
         return depositData;

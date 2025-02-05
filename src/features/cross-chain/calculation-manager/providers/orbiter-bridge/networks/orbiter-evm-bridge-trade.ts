@@ -5,7 +5,6 @@ import {
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTradeType
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import {

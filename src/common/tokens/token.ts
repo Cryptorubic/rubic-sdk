@@ -14,6 +14,7 @@ export type TokenStruct<T extends BlockchainName = BlockchainName> = {
     name: string;
     symbol: string;
     decimals: number;
+    image?: string;
 };
 
 /**
@@ -60,7 +61,8 @@ export class Token<T extends BlockchainName = BlockchainName> {
             ...tokenBaseStruct,
             name: tokenInfo.name,
             symbol: tokenInfo.symbol,
-            decimals: parseInt(tokenInfo.decimals)
+            decimals: parseInt(tokenInfo.decimals),
+            ...('image' in tokenInfo && { image: tokenInfo.image })
         });
     }
 
@@ -96,7 +98,8 @@ export class Token<T extends BlockchainName = BlockchainName> {
                 blockchain,
                 name: tokenInfo.name,
                 symbol: tokenInfo.symbol,
-                decimals: parseInt(tokenInfo.decimals)
+                decimals: parseInt(tokenInfo.decimals),
+                ...('image' in tokenInfo && { image: tokenInfo.image })
             });
         });
     }
@@ -118,6 +121,8 @@ export class Token<T extends BlockchainName = BlockchainName> {
 
     public readonly decimals: number;
 
+    public readonly image: string | undefined;
+
     public get isNative(): boolean {
         return this.address === nativeTokensStruct[this.blockchain].address;
     }
@@ -137,6 +142,7 @@ export class Token<T extends BlockchainName = BlockchainName> {
         this.name = tokenStruct.name;
         this.symbol = tokenStruct.symbol;
         this.decimals = tokenStruct.decimals;
+        this.image = tokenStruct.image;
     }
 
     public isEqualTo(token: TokenBaseStruct): boolean {

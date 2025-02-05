@@ -158,7 +158,7 @@ export class OnChainManager {
                 weiAmount: from.weiAmount
             }),
             slippageTolerance: 0,
-            path: [from, to],
+            path: [],
             gasFeeInfo: null,
             useProxy: false,
             proxyFeeInfo: undefined,

@@ -11,7 +11,7 @@ import {
     SwapRequestError,
     UnnecessaryApproveError
 } from 'src/common/errors';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -33,6 +33,7 @@ import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-man
 import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
@@ -58,7 +59,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     public readonly slippageTolerance: number;
 
-    public readonly path: ReadonlyArray<Token>;
+    public readonly path: RubicStep[];
 
     /**
      * Gas fee info, including gas limit and gas price.

@@ -61,6 +61,7 @@ export interface XyRoute extends XyQuote {
     srcQuoteTokenUsdValue: string; // '16.3805'
     dstQuoteTokenUsdValue: string; // '15.0536795'
     transactionCounts: number; // 2
-    estimatedGas: string; // '400000'
+    estimatedGas: string; // '10200000'
+    estimatedGasFeeAmount: string; // '102000000000000'
     estimatedTransferTime: number; // 180
 }

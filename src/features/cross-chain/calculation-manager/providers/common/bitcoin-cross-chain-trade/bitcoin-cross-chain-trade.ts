@@ -1,3 +1,4 @@
+import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
@@ -12,6 +13,7 @@ import { BitcoinEncodedConfig } from 'src/core/blockchain/web3-private-service/w
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { BitcoinWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/bitcoin-web3-public/bitcoin-web3-public';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -61,6 +63,7 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
             const { data, to, value } = await this.setTransactionConfig(
                 false,
                 options?.useCacheData || false,
+                options.testMode,
                 options?.receiverAddress
             );
 
@@ -119,10 +122,28 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
         return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
     }
 
-    protected getTransactionConfigAndAmount(
-        _receiverAddress?: string
-    ): Promise<{ config: any; amount: string }> {
-        // @TODO API
-        throw new Error('NOT IMPLEMENTED');
+    protected async getTransactionConfigAndAmount(
+        testMode?: boolean,
+        receiverAddress?: string
+    ): Promise<{ config: { to: string; value: string }; amount: string }> {
+        const swapRequestData: SwapRequestInterface = {
+            ...this.apiQuote,
+            fromAddress: this.walletAddress,
+            receiver: receiverAddress,
+            id: this.apiResponse.id,
+            enableChecks: !testMode
+        };
+        const swapData = await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(
+            swapRequestData
+        );
+
+        const config = {
+            value: swapData.transaction.value!,
+            to: swapData.transaction.to!
+        };
+
+        const amount = swapData.estimate.destinationWeiAmount;
+
+        return { config, amount };
     }
 }

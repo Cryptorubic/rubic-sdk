@@ -1,4 +1,4 @@
-import { EvmBlockchainName } from '@cryptorubic/core';
+import { EvmBlockchainName, Token } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -33,11 +33,20 @@ export class EvmApiCrossChainTrade extends EvmCrossChainTrade {
     public readonly isAggregator = false;
 
     constructor(params: EvmApiCrossChainConstructor) {
-        super(params.apiQuote.integratorAddress!, [], false, params.apiQuote, params.apiResponse);
+        super(
+            params.apiQuote.integratorAddress!,
+            params.routePath,
+            false,
+            params.apiQuote,
+            params.apiResponse
+        );
 
         this.type = params.apiResponse.providerType as CrossChainTradeType;
         this.bridgeType = this.type;
-        this.toTokenAmountMin = new BigNumber(params.apiResponse.estimate.destinationWeiMinAmount);
+        this.toTokenAmountMin = Token.fromWei(
+            params.apiResponse.estimate.destinationWeiMinAmount,
+            params.to.decimals
+        );
         this.priceImpact = params.apiResponse.estimate.priceImpact;
         this.slippage = params.apiResponse.estimate.slippage;
 
@@ -52,7 +61,7 @@ export class EvmApiCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: null,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact,
-            slippage: this.slippage,
+            slippage: this.slippage * 100,
             routePath: this.routePath
         };
     }

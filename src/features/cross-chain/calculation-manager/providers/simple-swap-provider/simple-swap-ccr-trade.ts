@@ -1,4 +1,5 @@
 import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -66,7 +67,7 @@ export class SimpleSwapCcrTrade extends CrossChainTransferTrade {
             null,
             crossChainTrade.from,
             crossChainTrade.to,
-            crossChainTrade.to.tokenAmount,
+            new BigNumber(0),
             crossChainTrade.gasData,
             crossChainTrade.feeInfo,
             crossChainTrade.priceImpact,

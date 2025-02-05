@@ -137,6 +137,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
         return this.setTransactionConfig(
             options?.skipAmountCheck || false,
             options?.useCacheData || false,
+            options.testMode,
             options?.receiverAddress || this.walletAddress
         );
     }
@@ -161,13 +162,15 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
     }
 
     protected async getTransactionConfigAndAmount(
-        receiverAddress: string
+        testMode?: boolean,
+        receiverAddress?: string
     ): Promise<{ config: TronTransactionConfig; amount: string }> {
         const swapRequestParams: SwapRequestInterface = {
             ...this.apiQuote,
             fromAddress: this.walletAddress,
             receiver: receiverAddress,
-            id: this.apiResponse.id
+            id: this.apiResponse.id,
+            enableChecks: !testMode
         };
 
         const swapData = await Injector.rubicApiService.fetchSwapData<TronTransactionConfig>(

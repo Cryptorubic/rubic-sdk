@@ -168,6 +168,7 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
     }
 
     protected getTransactionConfigAndAmount(
+        _testMode: boolean,
         _receiverAddress?: string
     ): Promise<{ config: any; amount: string }> {
         // @TODO API

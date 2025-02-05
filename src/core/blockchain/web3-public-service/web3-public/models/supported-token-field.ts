@@ -1,1 +1,1 @@
-export type SupportedTokenField = 'decimals' | 'symbol' | 'name' /* | 'totalSupply' */;
+export type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'image' /* | 'totalSupply' */;
