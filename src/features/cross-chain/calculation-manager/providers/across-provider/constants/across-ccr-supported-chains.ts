@@ -10,7 +10,8 @@ export const acrossCcrSupportedChains = [
     BLOCKCHAIN_NAME.OPTIMISM,
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.SCROLL,
-    BLOCKCHAIN_NAME.ZK_SYNC
+    BLOCKCHAIN_NAME.ZK_SYNC,
+    BLOCKCHAIN_NAME.SONEIUM
 ];
 
 export type AccrossCcrSupportedChains = (typeof acrossCcrSupportedChains)[number];

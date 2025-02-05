@@ -73,6 +73,7 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.SONIC]: 146,
     [BLOCKCHAIN_NAME.MORPH]: 2818,
     [BLOCKCHAIN_NAME.FRAXTAL]: 252,
+    [BLOCKCHAIN_NAME.SONEIUM]: 1868,
     // Tesnents
     [BLOCKCHAIN_NAME.GOERLI]: 5,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: 87,

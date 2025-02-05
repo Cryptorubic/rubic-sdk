@@ -513,5 +513,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Frax Ether',
         symbol: 'wfrxETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SONEIUM]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SONEIUM,
+        address: '0x4200000000000000000000000000000000000006',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
     })
 };
