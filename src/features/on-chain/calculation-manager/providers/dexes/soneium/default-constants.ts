@@ -1,5 +1,6 @@
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+
 import { UniswapV2ProviderConfiguration } from '../common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultSoneiumRoutingProvidersAddresses = [
@@ -11,10 +12,10 @@ const defaultSoneiumRoutingProvidersAddresses = [
     '0xc67476893C166c537afd9bc6bc87b3f228b44337' // NSASTR
 ];
 
-const defaultPolygonWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON]!.address;
+const defaultSoneiumWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.SONEIUM]!.address;
 
 export const defaultSoneiumProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 1,
     routingProvidersAddresses: defaultSoneiumRoutingProvidersAddresses,
-    wethAddress: defaultPolygonWethAddress
+    wethAddress: defaultSoneiumWethAddress
 };
