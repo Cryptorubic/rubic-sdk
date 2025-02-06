@@ -7,10 +7,10 @@ export interface RetroBridgeTrade {
     /**
      * Auto wallet on RetroBridge backend
      */
-    authWallet(): Promise<never | void>;
+    // authWallet(): Promise<never | void>;
 
     /**
      * Do wallet need auth or not
      */
-    needAuthWallet(): Promise<boolean>;
+    // needAuthWallet(): Promise<boolean>;
 }

@@ -14,4 +14,5 @@ export interface EvmApiCrossChainConstructor {
     apiQuote: QuoteRequestInterface;
     apiResponse: QuoteResponseInterface;
     routePath: RubicStep[];
+    needAuthWallet: boolean;
 }

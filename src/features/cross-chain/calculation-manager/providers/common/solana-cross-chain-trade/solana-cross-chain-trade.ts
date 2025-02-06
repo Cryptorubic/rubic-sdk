@@ -1,6 +1,10 @@
 import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
-import { FailedToCheckForTransactionReceiptError, TooLowAmountError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
+    TooLowAmountError
+} from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -143,5 +147,9 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
         const toAmount = estimate.destinationWeiAmount;
 
         return { config: transaction, amount: toAmount };
+    }
+
+    public authWallet(): Promise<string> {
+        throw new RubicSdkError('Method not implemented.');
     }
 }

@@ -32,6 +32,12 @@ export class EvmApiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly isAggregator = false;
 
+    protected readonly isWalletAuth: boolean;
+
+    public get needAuthWallet(): boolean {
+        return this.isWalletAuth;
+    }
+
     constructor(params: EvmApiCrossChainConstructor) {
         super(
             params.apiQuote.integratorAddress!,
@@ -54,6 +60,7 @@ export class EvmApiCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = params.feeInfo;
         this.from = params.from;
         this.gasData = null;
+        this.isWalletAuth = params.needAuthWallet;
     }
 
     public getTradeInfo(): TradeInfo {

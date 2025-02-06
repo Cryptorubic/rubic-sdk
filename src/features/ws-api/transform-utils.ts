@@ -51,6 +51,8 @@ export class TransformUtils {
             response = await RubicApiUtils.getEmptyResponse(quote, err.type);
         }
 
+        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
+
         const tradeType = response.providerType as WrappedCrossChainTrade['tradeType'];
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
         const fromToken = new PriceTokenAmount({
@@ -70,6 +72,8 @@ export class TransformUtils {
 
         const feeInfo = RubicApiParser.parseFeeInfoDto(response.fees);
 
+        const parsedWarnings = RubicApiParser.parseRubicApiWarnings(response.warnings);
+
         const isTransferTrade =
             transferTradeSupportedProviders.includes(
                 tradeType as TransferTradeSupportedProviders
@@ -77,13 +81,14 @@ export class TransformUtils {
 
         if (chainType === CHAIN_TYPE.EVM) {
             if (response.providerType === CROSS_CHAIN_TRADE_TYPE.ARBITRUM) {
-                trade = new EvmApiCrossChainTrade({
+                trade = new ArbitrumRbcBridgeTrade({
                     from: fromToken as PriceTokenAmount<EvmBlockchainName>,
                     to: toToken,
                     apiQuote: quote,
                     apiResponse: response,
                     feeInfo,
-                    routePath
+                    routePath,
+                    needAuthWallet: false
                 });
             } else if (tradeType === CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE) {
                 trade = new EddyBridgeTrade({
@@ -92,16 +97,18 @@ export class TransformUtils {
                     apiQuote: quote,
                     apiResponse: response,
                     feeInfo,
-                    routePath
+                    routePath,
+                    needAuthWallet: false
                 });
             } else {
-                trade = new ArbitrumRbcBridgeTrade({
+                trade = new EvmApiCrossChainTrade({
                     from: fromToken as PriceTokenAmount<EvmBlockchainName>,
                     to: toToken,
                     apiQuote: quote,
                     apiResponse: response,
                     feeInfo,
-                    routePath
+                    routePath,
+                    needAuthWallet: parsedWarnings.needAuthWallet
                 });
             }
         } else if (isTransferTrade) {
@@ -154,7 +161,7 @@ export class TransformUtils {
         return {
             trade,
             tradeType,
-            ...(err && { error: RubicApiParser.parseRubicApiErrors(err) })
+            ...(parsedError && { error: parsedError })
         };
     }
 
@@ -169,6 +176,8 @@ export class TransformUtils {
         if (!response && err) {
             response = await RubicApiUtils.getEmptyResponse(quote, err.type);
         }
+
+        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
 
         const tradeType = response.providerType as OnChainTradeType;
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
@@ -272,7 +281,7 @@ export class TransformUtils {
         return {
             trade,
             tradeType,
-            ...(err && { error: RubicApiParser.parseRubicApiErrors(err) })
+            ...(parsedError && { error: parsedError })
         };
     }
 }

@@ -106,26 +106,26 @@ export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBrid
         };
     }
 
-    public async needAuthWallet(): Promise<boolean> {
-        try {
-            const msg = await RetroBridgeApiService.checkWallet(this.walletAddress, this.chainType);
+    // public async needAuthWallet(): Promise<boolean> {
+    //     try {
+    //         const msg = await RetroBridgeApiService.checkWallet(this.walletAddress, this.chainType);
 
-            return msg.toLowerCase() !== 'success';
-        } catch {
-            return true;
-        }
-    }
+    //         return msg.toLowerCase() !== 'success';
+    //     } catch {
+    //         return true;
+    //     }
+    // }
 
-    public async authWallet(): Promise<never | void> {
-        const signData = await RetroBridgeApiService.getMessageToAuthWallet();
+    // public async authWallet(): Promise<never | void> {
+    //     const signData = await RetroBridgeApiService.getMessageToAuthWallet();
 
-        const signMessage = `${signData}\n${this.walletAddress}`;
+    //     const signMessage = `${signData}\n${this.walletAddress}`;
 
-        const signature = await this.web3Private.signMessage(signMessage);
-        await RetroBridgeApiService.sendSignedMessage(
-            this.walletAddress,
-            signature,
-            this.chainType
-        );
-    }
+    //     const signature = await this.web3Private.signMessage(signMessage);
+    //     await RetroBridgeApiService.sendSignedMessage(
+    //         this.walletAddress,
+    //         signature,
+    //         this.chainType
+    //     );
+    // }
 }

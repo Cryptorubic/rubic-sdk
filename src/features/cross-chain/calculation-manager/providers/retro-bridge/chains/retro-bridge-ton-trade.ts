@@ -115,7 +115,7 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
             throw new WrongReceiverAddressError();
         }
 
-        const needAuthWallet = await this.needAuthWallet();
+        const needAuthWallet = false;
         if (needAuthWallet) {
             throw new RubicSdkError('Need to authorize the wallet via authWallet method');
         }
@@ -152,20 +152,20 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
         );
     }
 
-    public async needAuthWallet(): Promise<boolean> {
-        try {
-            const addresses = await TonWeb3Pure.getAllFormatsOfAddress(this.walletAddress);
-            const msg = await RetroBridgeApiService.checkWallet(addresses.raw_form, this.chainType);
+    // public async needAuthWallet(): Promise<boolean> {
+    //     try {
+    //         const addresses = await TonWeb3Pure.getAllFormatsOfAddress(this.walletAddress);
+    //         const msg = await RetroBridgeApiService.checkWallet(addresses.raw_form, this.chainType);
 
-            return msg.toLowerCase() !== 'success';
-        } catch {
-            return true;
-        }
-    }
+    //         return msg.toLowerCase() !== 'success';
+    //     } catch {
+    //         return true;
+    //     }
+    // }
 
-    public async authWallet(): Promise<never | void> {
-        console.error('Wallet should be authenticated on connection stage');
-    }
+    // public async authWallet(): Promise<never | void> {
+    //     console.error('Wallet should be authenticated on connection stage');
+    // }
 
     protected getTransactionConfigAndAmount(
         _testMode: boolean,

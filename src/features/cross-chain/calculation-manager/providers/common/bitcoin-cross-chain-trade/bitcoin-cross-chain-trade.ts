@@ -2,6 +2,7 @@ import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
     TooLowAmountError,
     UserRejectError
 } from 'src/common/errors';
@@ -145,5 +146,9 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
         const amount = swapData.estimate.destinationWeiAmount;
 
         return { config, amount };
+    }
+
+    public authWallet(): Promise<string> {
+        throw new RubicSdkError('Method not implemented.');
     }
 }

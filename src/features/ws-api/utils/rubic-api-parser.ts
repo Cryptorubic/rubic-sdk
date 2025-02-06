@@ -11,7 +11,8 @@ import { Any } from 'src/common/utils/types';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
-import { RubicApiError } from '../models/rubic-api-error';
+import { RubicApiError, RubicApiErrorDto } from '../models/rubic-api-error';
+import { RubicApiWarnings } from '../models/rubic-api-warnings';
 
 export class RubicApiParser {
     public static parseRoutingDto(routingDto: RoutingInterface[]): RubicStep[] {
@@ -80,5 +81,17 @@ export class RubicApiParser {
         }
 
         throw new RubicSdkError(err.reason);
+    }
+
+    public static parseRubicApiWarnings(warnings: RubicApiErrorDto[]): RubicApiWarnings {
+        const parsedWarnings: RubicApiWarnings = { needAuthWallet: false };
+
+        for (const warning of warnings) {
+            if (warning.code === 409) {
+                parsedWarnings.needAuthWallet = true;
+            }
+        }
+
+        return parsedWarnings;
     }
 }
