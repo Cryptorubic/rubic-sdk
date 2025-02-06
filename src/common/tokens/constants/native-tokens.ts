@@ -62,7 +62,7 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         symbol: 'ETH',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+    [BLOCKCHAIN_NAME.BERACHAIN_TESTNET]: new Token({
         blockchain: BLOCKCHAIN_NAME.BERACHAIN,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'BERA',
@@ -726,6 +726,13 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Frax Ether',
         symbol: 'frxETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BERACHAIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'BERA',
+        symbol: 'BERA',
         decimals: 18
     })
 };

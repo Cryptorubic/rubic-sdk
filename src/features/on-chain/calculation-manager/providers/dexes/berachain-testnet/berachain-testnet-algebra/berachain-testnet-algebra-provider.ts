@@ -27,7 +27,7 @@ export class BerachainTestnetAlgebraProvider extends UniswapV3AlgebraAbstractPro
 
     protected readonly contractAbi = BERACHAIN_TESTNET_ALGEBRA_ROUTER_CONTRACT_ABI;
 
-    public readonly blockchain = BLOCKCHAIN_NAME.BERACHAIN;
+    public readonly blockchain = BLOCKCHAIN_NAME.BERACHAIN_TESTNET;
 
     protected readonly OnChainTradeClass = BerachainTestnetAlgebraTrade;
 

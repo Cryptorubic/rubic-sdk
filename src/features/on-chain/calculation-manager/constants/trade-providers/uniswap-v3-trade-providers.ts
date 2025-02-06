@@ -5,6 +5,7 @@ import { FusionXProvider } from 'src/features/on-chain/calculation-manager/provi
 import { UniSwapV3PolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
 import { UniSwapV3ScrollSepoliaProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/uni-swap-v3-scroll-sepolia-provider';
 
+import { KodiakV3Provider } from '../../providers/dexes/berachain/kodiak-v3-provider/kodiak-v3-provider';
 import { EnosysV3FlareProvider } from '../../providers/dexes/flare/enosys-flare/enosys-v3-flare/enosys-v3-flare-provider';
 import { SparkDexV3FlareProvider } from '../../providers/dexes/flare/spark-dex-flare/spark-dex-v3-flare/spark-dex-v3-flare-provider';
 
@@ -17,5 +18,6 @@ export const UniswapV3TradeProviders = [
     FusionXProvider,
     UniSwapV3ScrollSepoliaProvider,
     SparkDexV3FlareProvider,
-    EnosysV3FlareProvider
+    EnosysV3FlareProvider,
+    KodiakV3Provider
 ] as const;
