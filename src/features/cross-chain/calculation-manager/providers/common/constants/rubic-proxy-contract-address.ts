@@ -25,7 +25,8 @@ const ALTERNATIVE_ROUTER1_NETWORKS = [
     BLOCKCHAIN_NAME.SONIC,
     BLOCKCHAIN_NAME.MORPH,
     BLOCKCHAIN_NAME.FRAXTAL,
-    BLOCKCHAIN_NAME.SONEIUM
+    BLOCKCHAIN_NAME.SONEIUM,
+    BLOCKCHAIN_NAME.BERACHAIN
 ] as const;
 
 function isAlternativeRouter1Network(blockchain: BlockchainName): boolean {
