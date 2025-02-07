@@ -71,6 +71,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     KIM: 'KIM',
     KYBER_SWAP: 'KYBER_SWAP',
     KUJATA: 'KUJATA',
+    KODIAK: 'KODIAK',
     KYO_FINANCE: 'KYO_FINANCE',
 
     LUA_SWAP: 'LUA_SWAP',
