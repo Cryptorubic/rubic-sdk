@@ -734,5 +734,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'BERA',
         symbol: 'BERA',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SONEIUM]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SONEIUM,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
