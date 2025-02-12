@@ -158,7 +158,8 @@ export const BLOCKCHAIN_NAME = {
     FILECOIN: 'FILECOIN',
     EOS: 'EOS',
     ONTOLOGY: 'ONTOLOGY',
-    XDC: 'XDC'
+    XDC: 'XDC',
+    SUI: 'SUI'
 } as const;
 
 export type BlockchainName = (typeof BLOCKCHAIN_NAME)[keyof typeof BLOCKCHAIN_NAME];
