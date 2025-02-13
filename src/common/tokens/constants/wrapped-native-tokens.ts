@@ -346,7 +346,7 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WETH',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+    [BLOCKCHAIN_NAME.BERACHAIN_TESTNET]: new Token({
         blockchain: BLOCKCHAIN_NAME.BERACHAIN,
         address: '0x7507c1dc16935B82698e4C63f2746A2fCf994dF8',
         name: 'Wrapped BERA',
@@ -512,6 +512,20 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         address: '0xfc00000000000000000000000000000000000006',
         name: 'Wrapped Frax Ether',
         symbol: 'wfrxETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BERACHAIN,
+        address: '0x6969696969696969696969696969696969696969',
+        name: 'Wrapped BERA',
+        symbol: 'WBERA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SONEIUM]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SONEIUM,
+        address: '0x4200000000000000000000000000000000000006',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
         decimals: 18
     })
 };

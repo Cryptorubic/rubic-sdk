@@ -12,7 +12,8 @@ export const chainsWithoutPoolBalanceMethodOnContract = [
     BLOCKCHAIN_NAME.TAIKO,
     BLOCKCHAIN_NAME.SEI,
     BLOCKCHAIN_NAME.FLARE,
-    BLOCKCHAIN_NAME.GRAVITY
+    BLOCKCHAIN_NAME.GRAVITY,
+    BLOCKCHAIN_NAME.BERACHAIN
 ] as const;
 
 export const stargateV2ContractAddress: StargateV2ContractAddress = {
@@ -24,7 +25,8 @@ export const stargateV2ContractAddress: StargateV2ContractAddress = {
         [stargateV2BridgeToken.METH]: '0x268Ca24DAefF1FaC2ed883c598200CcbB79E931D'
     },
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
-        [stargateV2BridgeToken.USDT]: '0x138EB30f73BC423c6455C53df6D89CB01d9eBc63'
+        [stargateV2BridgeToken.USDT]: '0x138EB30f73BC423c6455C53df6D89CB01d9eBc63',
+        [stargateV2BridgeToken.USDC]: '0x962Bd449E630b0d928f308Ce63f1A21F02576057'
     },
     [BLOCKCHAIN_NAME.AVALANCHE]: {
         [stargateV2BridgeToken.USDC]: '0x5634c4a5FEd09819E3c46D86A965Dd9447d86e47',
@@ -101,5 +103,9 @@ export const stargateV2ContractAddress: StargateV2ContractAddress = {
         [stargateV2BridgeToken.USDC]: '0xC1B8045A6ef2934Cf0f78B0dbD489969Fa9Be7E4',
         [stargateV2BridgeToken.USDT]: '0x0B38e83B86d491735fEaa0a791F65c2B99535396',
         [stargateV2BridgeToken.WETH]: '0x17d65bF79E77B6Ab21d8a0afed3bC8657d8Ee0B2'
+    },
+    [BLOCKCHAIN_NAME.BERACHAIN]: {
+        [stargateV2BridgeToken.WETH]: '0x45f1A95A4D3f3836523F5c83673c797f4d4d263B',
+        [stargateV2BridgeToken.USDC]: '0xAF54BE5B6eEc24d6BFACf1cce4eaF680A8239398'
     }
 };

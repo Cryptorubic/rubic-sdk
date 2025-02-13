@@ -128,7 +128,7 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.SEPOLIA]: 'sepolia',
     [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta-pacific',
     [BLOCKCHAIN_NAME.SCROLL]: 'scroll',
-    [BLOCKCHAIN_NAME.BERACHAIN]: 'berachain-bartio',
+    [BLOCKCHAIN_NAME.BERACHAIN_TESTNET]: 'berachain-bartio',
     [BLOCKCHAIN_NAME.BLAST_TESTNET]: 'blast',
     [BLOCKCHAIN_NAME.BLAST]: 'blast',
     [BLOCKCHAIN_NAME.HOLESKY]: 'holesky',
@@ -150,7 +150,9 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.SONEIUM_TESTNET]: 'soneium-minato',
     [BLOCKCHAIN_NAME.SONIC]: 'sonic',
     [BLOCKCHAIN_NAME.MORPH]: 'morph',
-    [BLOCKCHAIN_NAME.FRAXTAL]: 'fraxtal'
+    [BLOCKCHAIN_NAME.FRAXTAL]: 'fraxtal',
+    [BLOCKCHAIN_NAME.BERACHAIN]: 'berachain',
+    [BLOCKCHAIN_NAME.SONEIUM]: 'soneium'
 } as const;
 
 export const TO_BACKEND_BLOCKCHAINS: Record<BlockchainName, BackendBlockchain> = {
