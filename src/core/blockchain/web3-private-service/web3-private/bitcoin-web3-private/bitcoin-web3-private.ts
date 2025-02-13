@@ -40,8 +40,9 @@ export class BitcoinWeb3Private extends Web3Private {
                     if (error) {
                         reject(error);
                     } else {
-                        options?.onTransactionHash?.(txHash);
-                        resolve(txHash);
+                        const hash = txHash as string;
+                        options?.onTransactionHash?.(hash);
+                        resolve(hash);
                     }
                 }
             );
@@ -55,6 +56,48 @@ export class BitcoinWeb3Private extends Web3Private {
             throw new Error();
         } catch {
             throw new Error('Failed to transfer funds');
+        }
+    }
+
+    public async sendPsbtTransaction(
+        psbt: string,
+        userAddress: string,
+        inputIndexes: number[],
+        options?: BasicTransactionOptions
+    ) {
+        const hashPromise = new Promise<string>((resolve, reject) => {
+            this.wallet.core.request(
+                {
+                    method: 'sign_psbt',
+                    params: {
+                        psbt,
+                        signInputs: {
+                            [userAddress]: inputIndexes
+                        },
+                        allowedSignHash: 1,
+                        broadcast: true
+                    }
+                },
+                (error, txHash) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        const txData = txHash as { psbt: string; txid: string };
+                        options?.onTransactionHash?.(txData.txid);
+                        resolve(txData.txid);
+                    }
+                }
+            );
+        });
+        try {
+            const hash = await hashPromise;
+            if (typeof hash === 'string') {
+                const statusData = await OnChainStatusManager.getBitcoinTransaction(hash);
+                return statusData.hash!;
+            }
+            throw new Error();
+        } catch {
+            throw new Error('Failed to sign psbt transaction');
         }
     }
 
