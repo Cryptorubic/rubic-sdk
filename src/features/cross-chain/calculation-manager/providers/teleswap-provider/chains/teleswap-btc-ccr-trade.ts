@@ -170,7 +170,6 @@ export class TeleSwapBtcCcrTrade extends BitcoinCrossChainTrade {
                 teleSwapNetworkTickers[this.toBlockchain] as SupportedNetwork,
                 Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals)
             );
-            console.log(swapParams);
 
             const inputIndexes = swapParams.inputs.map((_, index) => index);
 
