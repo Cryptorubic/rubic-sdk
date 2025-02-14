@@ -54,7 +54,7 @@ export abstract class UniswapV3AbstractProvider<
         );
     }
 
-    private extractPath(route: UniswapV3Route): ReadonlyArray<Token> {
+    protected extractPath(route: UniswapV3Route): ReadonlyArray<Token> {
         const initialPool = route.poolsPath[0];
         if (!initialPool) {
             throw new RubicSdkError('Initial pool has to be defined');

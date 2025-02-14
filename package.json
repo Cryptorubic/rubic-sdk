@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.53.0-alpha.unichain.11",
+    "version": "5.53.0-alpha.unichain.12",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
