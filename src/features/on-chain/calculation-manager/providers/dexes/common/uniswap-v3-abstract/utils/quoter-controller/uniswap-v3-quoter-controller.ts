@@ -71,7 +71,7 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
      * @param exact Is exact input or output trade.
      * @param weiAmount Amount of tokens to trade.
      */
-    @Cache
+    // @Cache
     protected static getQuoterMethodData(
         poolsPath: LiquidityPool[],
         from: Token,
@@ -140,6 +140,7 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
         routerTokens: Token[];
         routerLiquidityPools: LiquidityPool[];
     }> {
+        // sets this.routerTokens and this.routerLiquidityPools on first page loading when they are undefiined
         if (!this.routerTokens || !this.routerLiquidityPools) {
             const tokens: Token[] = await Token.createTokens(
                 Object.values(this.routerConfiguration.tokens),
@@ -175,9 +176,9 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
     /**
      * Returns all liquidity pools, containing passed tokens addresses, and concatenates with most popular pools.
      */
-    @Cache({
-        maxAge: 1000 * 60 * 10
-    })
+    // @Cache({
+    //     maxAge: 1000 * 60 * 10
+    // })
     protected async getAllLiquidityPools(
         firstToken: Token,
         secondToken: Token
@@ -230,7 +231,7 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
             )
         ).map(result => result.output!);
 
-        return poolsAddresses
+        const fetchedPools = poolsAddresses
             .map((poolAddress, index) => {
                 const poolMethodArguments = getPoolsMethodArguments?.[index];
                 if (!poolMethodArguments) {
@@ -246,8 +247,16 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
                 }
                 return null;
             })
-            .filter(notNull)
-            .concat(routerLiquidityPools);
+            .filter(notNull);
+
+        const allPools = fetchedPools.concat(routerLiquidityPools);
+        console.log('%callPools ==> ', 'color: yellow; font-size:20px;', {
+            allPools,
+            fetchedPools,
+            routerLiquidityPools
+        });
+
+        return allPools;
     }
 
     public async getAllRoutes(

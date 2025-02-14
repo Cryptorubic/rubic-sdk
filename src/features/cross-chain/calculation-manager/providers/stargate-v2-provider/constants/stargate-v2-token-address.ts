@@ -15,6 +15,7 @@ const addresses: StargateV2TokenAddress = {
         '0xdac17f958d2ee523a2206206994597c13d831ec7': stargateV2BridgeToken.USDT,
         '0x9e32b13ce7f2e80a01932b42553652e053d6ed8e': stargateV2BridgeToken.METIS,
         '0xd5f7838f5c461feff7fe49ea5ebaf7728bb0adfa': stargateV2BridgeToken.METH
+        // '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2': stargateV2BridgeToken.WETH
     },
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
         '0x55d398326f99059fF775485246999027B3197955': stargateV2BridgeToken.USDT,
@@ -91,6 +92,10 @@ const addresses: StargateV2TokenAddress = {
     [BLOCKCHAIN_NAME.BERACHAIN]: {
         '0x549943e04f40284185054145c6E4e9568C1D3241': stargateV2BridgeToken.USDC,
         '0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590': stargateV2BridgeToken.WETH
+    },
+    [BLOCKCHAIN_NAME.UNICHAIN]: {
+        // '0x4200000000000000000000000000000000000006': stargateV2BridgeToken.WETH,
+        '0x0000000000000000000000000000000000000000': stargateV2BridgeToken.ETH
     }
 };
 

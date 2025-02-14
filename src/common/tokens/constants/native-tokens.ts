@@ -741,5 +741,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Ethereum',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.UNICHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.UNICHAIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
