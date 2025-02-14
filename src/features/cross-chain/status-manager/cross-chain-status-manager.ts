@@ -6,6 +6,7 @@ import {
     L2TransactionReceipt
 } from '@arbitrum/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { TeleswapSDK } from '@teleportdao/teleswap-sdk';
 import { RubicSdkError } from 'src/common/errors';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import {
@@ -116,7 +117,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.UNIZEN]: this.getUniZenDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.CHANGELLY]: this.getChangellyDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.CHANGELLY]: this.getChangellyDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.TELE_SWAP]: this.getTeleSwapDstSwapStatus
     };
 
     /**
@@ -850,6 +852,50 @@ export class CrossChainStatusManager {
             return { status: TX_STATUS.PENDING, hash: null };
         } catch {
             return { status: TX_STATUS.PENDING, hash: null };
+        }
+    }
+
+    private async getTeleSwapDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const teleSwapSdk = new TeleswapSDK();
+
+        try {
+            const txData = await teleSwapSdk.teleportdao.checkRequestStatusByTxId(data.srcTxHash);
+            if (!txData) {
+                throw new RubicSdkError();
+            }
+
+            const txStatus = txData.status.toLowerCase();
+
+            if (txStatus === 'submitted') {
+                return {
+                    status: TX_STATUS.SUCCESS,
+                    hash: txData.targetEvent?.targetTransaction.txId!
+                };
+            }
+
+            if (txStatus === 'failed') {
+                return {
+                    status: TX_STATUS.FAIL,
+                    hash: null
+                };
+            }
+
+            if (txStatus === 'exchangefailed') {
+                return {
+                    status: TX_STATUS.FALLBACK,
+                    hash: txData.targetEvent?.targetTransaction.txId!
+                };
+            }
+
+            return {
+                status: TX_STATUS.PENDING,
+                hash: null
+            };
+        } catch {
+            return {
+                status: TX_STATUS.PENDING,
+                hash: null
+            };
         }
     }
 }

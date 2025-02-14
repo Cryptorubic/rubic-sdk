@@ -3,8 +3,8 @@ export interface BtcWalletProvider {
     request<T>(
         args: {
             method: string;
-            params: unknown[];
+            params: unknown[] | {};
         },
-        fn: (error: Error, txHash: string) => unknown
+        fn: (error: Error, txHash: string | {}) => unknown
     ): Promise<{ error: null | Error; result: T }>;
 }
