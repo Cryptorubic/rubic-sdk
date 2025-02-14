@@ -6,6 +6,9 @@ export interface ChangenowSwapRequestBody {
     fromAmount: string;
     address: string;
     flow: string;
+    payload?: {
+        integratorAddress: string;
+    };
 }
 
 export interface ChangenowSwapResponse {

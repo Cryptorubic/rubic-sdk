@@ -97,7 +97,10 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
             toNetwork: this.toCurrency.network,
             fromAmount: this.transitToken.tokenAmount.toFixed(),
             address: receiverAddress,
-            flow: 'standard'
+            flow: 'standard',
+            payload: {
+                integratorAddress: this.providerAddress
+            }
         };
         const res = await ChangeNowCrossChainApiService.getSwapTx(params);
 
