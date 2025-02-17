@@ -7,7 +7,6 @@ import {
     TonBlockchainName,
     TronBlockchainName
 } from '@cryptorubic/core';
-import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -55,16 +54,11 @@ export class TransformUtils {
 
         const tradeType = response.providerType as WrappedCrossChainTrade['tradeType'];
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
-        const fromToken = new PriceTokenAmount({
-            ...response.tokens.from,
-            price: new BigNumber(response.tokens.from.price || NaN),
-            tokenAmount: new BigNumber(quote.srcTokenAmount)
-        });
-        const toToken = new PriceTokenAmount({
-            ...response.tokens.to,
-            price: new BigNumber(response.tokens.to.price || NaN),
-            tokenAmount: new BigNumber(response.estimate.destinationTokenAmount)
-        });
+        const { fromToken, toToken } = RubicApiUtils.getFromToTokens(
+            response.tokens,
+            quote.srcTokenAmount,
+            response.estimate.destinationTokenAmount
+        );
 
         let trade: CrossChainTrade | null = null;
 
@@ -181,16 +175,11 @@ export class TransformUtils {
 
         const tradeType = response.providerType as OnChainTradeType;
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
-        const fromToken = new PriceTokenAmount({
-            ...response.tokens.from,
-            price: new BigNumber(response.tokens.from.price || NaN),
-            tokenAmount: new BigNumber(quote.srcTokenAmount)
-        });
-        const toToken = new PriceTokenAmount({
-            ...response.tokens.to,
-            price: new BigNumber(response.tokens.to.price || NaN),
-            tokenAmount: new BigNumber(response.estimate.destinationTokenAmount)
-        });
+        const { fromToken, toToken } = RubicApiUtils.getFromToTokens(
+            response.tokens,
+            quote.srcTokenAmount,
+            response.estimate.destinationTokenAmount
+        );
 
         const routePath = RubicApiParser.parseRoutingDto(response.routing);
         const feeInfo = RubicApiParser.parseFeeInfoDto(response.fees);

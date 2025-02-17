@@ -2,10 +2,16 @@ import {
     blockchainId,
     CrossChainTradeType,
     QuoteRequestInterface,
-    QuoteResponseInterface
+    QuoteResponseInterface,
+    TokenInerface
 } from '@cryptorubic/core';
-import { Token } from 'src/common/tokens';
+import { Address } from '@ton/core';
+import BigNumber from 'bignumber.js';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 export class RubicApiUtils {
     public static async getEmptyResponse(
@@ -106,5 +112,50 @@ export class RubicApiUtils {
         };
 
         return emptyResponse;
+    }
+
+    public static getFromToTokens(
+        tokens: {
+            from: TokenInerface;
+            to: TokenInerface;
+        },
+        fromAmount: string,
+        toAmount: string
+    ): {
+        fromToken: PriceTokenAmount;
+        toToken: PriceTokenAmount;
+    } {
+        const fromTokenAddress = RubicApiUtils.parseTokenAddress(tokens.from);
+        const toTokenAddress = RubicApiUtils.parseTokenAddress(tokens.to);
+
+        const fromToken = new PriceTokenAmount({
+            ...tokens.from,
+            address: fromTokenAddress,
+            price: new BigNumber(tokens.from.price || NaN),
+            tokenAmount: new BigNumber(fromAmount)
+        });
+        const toToken = new PriceTokenAmount({
+            ...tokens.to,
+            address: toTokenAddress,
+            price: new BigNumber(tokens.to.price || NaN),
+            tokenAmount: new BigNumber(toAmount)
+        });
+
+        return { fromToken, toToken };
+    }
+
+    private static parseTokenAddress(token: TokenInerface): string {
+        const chainType = BlockchainsInfo.getChainType(token.blockchain);
+        const isNativeToken = Web3Pure[chainType]?.isNativeAddress(token.address);
+
+        if (isNativeToken) {
+            return token.address;
+        }
+
+        if (chainType === CHAIN_TYPE.TON) {
+            return Address.parseRaw(token.address).toString();
+        }
+
+        return token.address;
     }
 }

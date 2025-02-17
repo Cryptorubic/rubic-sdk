@@ -36,6 +36,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
     protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
+
     /**
      * Signature to auth wallet
      */

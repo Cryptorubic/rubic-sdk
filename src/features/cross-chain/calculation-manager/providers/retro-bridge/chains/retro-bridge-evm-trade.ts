@@ -24,7 +24,6 @@ import { RetroBridgeSupportedBlockchain } from 'src/features/cross-chain/calcula
 import { RetroBridgeEvmConstructorParams } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-constructor-params';
 import { RetroBridgeQuoteSendParams } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-quote-send-params';
 import { RetroBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-trade';
-import { RetroBridgeApiService } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/services/retro-bridge-api-service';
 
 export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBridgeTrade {
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE;

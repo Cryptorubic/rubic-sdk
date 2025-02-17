@@ -5,7 +5,6 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import {
