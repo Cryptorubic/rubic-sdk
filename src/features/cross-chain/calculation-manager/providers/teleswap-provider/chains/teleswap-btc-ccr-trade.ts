@@ -24,6 +24,7 @@ import { TradeInfo } from '../../common/models/trade-info';
 import { TeleSwapCcrSupportedChain } from '../constants/teleswap-ccr-supported-chains';
 import { teleSwapNetworkTickers } from '../constants/teleswap-network-tickers';
 import { TeleSwapBitcoinConstructorParams } from '../models/teleswap-constructor-params';
+import { TeleSwapUtilsService } from '../services/teleswap-utils-service';
 
 export class TeleSwapBtcCcrTrade extends BitcoinCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.TELE_SWAP;
@@ -162,10 +163,12 @@ export class TeleSwapBtcCcrTrade extends BitcoinCrossChainTrade {
         };
 
         try {
+            const toTokenAddress = TeleSwapUtilsService.getTokenAddress(this.to, true);
+
             const swapParams = await this.teleSwapSdk.wrapAndSwapUnsigned(
                 receiverAddress,
                 this.from.tokenAmount.toFixed(),
-                this.to.address,
+                toTokenAddress!,
                 signerInfo,
                 teleSwapNetworkTickers[this.toBlockchain] as SupportedNetwork,
                 Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals)

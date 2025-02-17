@@ -11,3 +11,7 @@ export const teleSwapCcrSupportedChains = [
 ];
 
 export type TeleSwapCcrSupportedChain = (typeof teleSwapCcrSupportedChains)[number];
+
+export const teleSwapBaseChains = [BLOCKCHAIN_NAME.POLYGON, BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN];
+
+export type TeleSwapCcrBaseChain = (typeof teleSwapBaseChains)[number];

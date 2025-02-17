@@ -1,5 +1,8 @@
 import { AbiItem } from 'web3-utils';
 
+/**
+ * Abi for swapAndUnwrap method of base chains.
+ */
 export const teleswapSwapAndUnwrapAbi: AbiItem[] = [
     {
         inputs: [
@@ -17,5 +20,36 @@ export const teleswapSwapAndUnwrapAbi: AbiItem[] = [
         name: 'swapAndUnwrap',
         type: 'function',
         stateMutability: 'nonpayable'
+    }
+];
+
+/**
+ * Abi for swapAndUnwrap method of cross-chain chains.
+ */
+export const teleswapSwapAndUwrapAbiForCcrChains: AbiItem[] = [
+    {
+        inputs: [
+            { internalType: 'address', name: '_token', type: 'address' },
+            { internalType: 'address', name: '_exchangeConnector', type: 'address' },
+            { internalType: 'uint256[]', name: '_amounts', type: 'uint256[]' },
+            { internalType: 'bool', name: '_isInputFixed', type: 'bool' },
+            { internalType: 'address[]', name: '_path', type: 'address[]' },
+            {
+                internalType: 'tuple',
+                name: '_userAndLockerScript',
+                type: 'tuple',
+                components: [
+                    { internalType: 'bytes', name: 'userScript', type: 'bytes' },
+                    { internalType: 'enum ScriptTypes', name: 'scriptType', type: 'uint8' },
+                    { internalType: 'bytes', name: 'lockerLockingScript', type: 'bytes' }
+                ]
+            },
+            { internalType: 'int64', name: '_relayerFeePercentage', type: 'int64' },
+            { internalType: 'uint256', name: '_thirdParty', type: 'uint256' }
+        ],
+        name: 'swapAndUnwrap',
+        type: 'function',
+        stateMutability: 'payable',
+        outputs: []
     }
 ];

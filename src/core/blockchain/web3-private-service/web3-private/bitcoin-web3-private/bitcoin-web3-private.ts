@@ -82,9 +82,9 @@ export class BitcoinWeb3Private extends Web3Private {
                     if (error) {
                         reject(error);
                     } else {
-                        const txData = txHash as { psbt: string; txid: string };
-                        options?.onTransactionHash?.(txData.txid);
-                        resolve(txData.txid);
+                        const txData = txHash as { result: { psbt: string; txid: string } };
+                        options?.onTransactionHash?.(txData.result.txid);
+                        resolve(txData.result.txid);
                     }
                 }
             );

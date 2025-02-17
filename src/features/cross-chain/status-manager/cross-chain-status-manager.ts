@@ -14,6 +14,7 @@ import {
     EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { TonApiTxDataByBocResp } from 'src/core/blockchain/models/ton/tonapi-types';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -864,12 +865,16 @@ export class CrossChainStatusManager {
                 throw new RubicSdkError();
             }
 
+            const isFromEvm = BlockchainsInfo.getChainType(data.fromBlockchain) === CHAIN_TYPE.EVM;
+
             const txStatus = txData.status.toLowerCase();
 
             if (txStatus === 'submitted') {
                 return {
                     status: TX_STATUS.SUCCESS,
-                    hash: txData.targetEvent?.targetTransaction.txId!
+                    hash: isFromEvm
+                        ? txData.targetEvent?.targetTransaction.txId!
+                        : txData.sourceTransaction?.txId!
                 };
             }
 
@@ -883,7 +888,9 @@ export class CrossChainStatusManager {
             if (txStatus === 'exchangefailed') {
                 return {
                     status: TX_STATUS.FALLBACK,
-                    hash: txData.targetEvent?.targetTransaction.txId!
+                    hash: isFromEvm
+                        ? txData.targetEvent?.targetTransaction.txId!
+                        : txData.sourceTransaction?.txId!
                 };
             }
 

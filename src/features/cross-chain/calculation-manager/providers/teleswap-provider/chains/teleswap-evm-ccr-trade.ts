@@ -25,11 +25,19 @@ import { GetContractParamsOptions } from '../../common/models/get-contract-param
 import { OnChainSubtype } from '../../common/models/on-chain-subtype';
 import { TradeInfo } from '../../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { TeleSwapCcrSupportedChain } from '../constants/teleswap-ccr-supported-chains';
+import {
+    teleSwapBaseChains,
+    TeleSwapCcrBaseChain,
+    TeleSwapCcrSupportedChain
+} from '../constants/teleswap-ccr-supported-chains';
 import { teleSwapContractAddresses } from '../constants/teleswap-contract-address';
 import { teleSwapNetworkTickers } from '../constants/teleswap-network-tickers';
-import { teleswapSwapAndUnwrapAbi } from '../constants/teleswap-swap-and-unwrap-abi';
+import {
+    teleswapSwapAndUnwrapAbi,
+    teleswapSwapAndUwrapAbiForCcrChains
+} from '../constants/teleswap-swap-and-unwrap-abi';
 import { TeleSwapEvmConstructorParams } from '../models/teleswap-constructor-params';
+import { TeleSwapUtilsService } from '../services/teleswap-utils-service';
 
 export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.TELE_SWAP;
@@ -152,30 +160,45 @@ export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
     protected async getTransactionConfigAndAmount(
         receiverAddress: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        const fromTokenAddress = TeleSwapUtilsService.getTokenAddress(this.from, false);
+
         const swapParams = await this.teleSwapSdk.swapAndUnwrapInputs(
             {
-                inputToken: this.from.address,
-                inputAmount: this.fromWithoutFee.stringWeiAmount
+                inputAmount: this.fromWithoutFee.stringWeiAmount,
+                ...(fromTokenAddress && { inputToken: fromTokenAddress })
             },
             receiverAddress,
             teleSwapNetworkTickers[this.fromBlockchain] as SupportedNetwork,
             this.toTokenAmountMin.toFixed()
         );
 
-        const args = swapParams.inputs.params as unknown[];
-        const toTokenMinWeiAmount = Web3Pure.toWei((args[1] as string[])[1]!, this.to.decimals);
+        const isFromBaseChain = teleSwapBaseChains.includes(
+            this.fromBlockchain as TeleSwapCcrBaseChain
+        );
 
-        (args[1] as string[])[1] = toTokenMinWeiAmount;
+        const args = this.getTxParams(swapParams.inputs.params, isFromBaseChain);
 
         const evmConfig = EvmWeb3Pure.encodeMethodCall(
             teleSwapContractAddresses[this.fromBlockchain]!,
-            teleswapSwapAndUnwrapAbi,
+            isFromBaseChain ? teleswapSwapAndUnwrapAbi : teleswapSwapAndUwrapAbiForCcrChains,
             'swapAndUnwrap',
             args,
             swapParams.inputs.value
         );
 
         return { config: evmConfig, amount: this.to.stringWeiAmount };
+    }
+
+    private getTxParams(args: unknown[], isFromBaseChain: boolean): unknown[] {
+        const toTokenAmountIndex = isFromBaseChain ? 1 : 2;
+
+        const toTokenMinWeiAmount = Web3Pure.toWei(
+            (args[toTokenAmountIndex] as string[])[1]!,
+            this.to.decimals
+        );
+        (args[toTokenAmountIndex] as string[])[1] = toTokenMinWeiAmount;
+
+        return args;
     }
 
     public getTradeInfo(): TradeInfo {
