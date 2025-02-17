@@ -141,7 +141,6 @@ export class UnichainUniswapV3QuoterController extends UniswapV3QuoterController
             })
         );
 
-        console.log('%cgetAllRoutes_Results ==> ', 'color: aqua; font-size: 20px;', results);
         return results
             .map((result, index) => {
                 const pool = quoterMethodsData?.[index];

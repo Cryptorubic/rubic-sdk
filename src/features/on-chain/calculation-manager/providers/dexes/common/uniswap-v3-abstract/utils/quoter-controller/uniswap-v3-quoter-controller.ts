@@ -250,11 +250,6 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
             .filter(notNull);
 
         const allPools = fetchedPools.concat(routerLiquidityPools);
-        console.log('%callPools ==> ', 'color: yellow; font-size:20px;', {
-            allPools,
-            fetchedPools,
-            routerLiquidityPools
-        });
 
         return allPools;
     }
