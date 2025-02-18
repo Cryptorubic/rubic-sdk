@@ -4,12 +4,12 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
+import { OpenOceanEvmTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/chains/open-ocean-evm-trade';
 import {
     OpenoceanOnChainSupportedBlockchain,
     openoceanOnChainSupportedBlockchains
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
-import { OpenOceanTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/open-ocean-trade';
 import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
@@ -70,7 +70,7 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
                 withDeflation: options.withDeflation
             };
 
-            return new OpenOceanTrade(tradeStruct, options.providerAddress);
+            return new OpenOceanEvmTrade(tradeStruct, options.providerAddress);
         } catch (error) {
             return {
                 type: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,

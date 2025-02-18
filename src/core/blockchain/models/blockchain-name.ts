@@ -173,3 +173,4 @@ export type BitcoinBlockchainName = typeof BLOCKCHAIN_NAME.BITCOIN;
 export type TronBlockchainName = typeof BLOCKCHAIN_NAME.TRON;
 export type IcpBlockchainName = typeof BLOCKCHAIN_NAME.ICP;
 export type TonBlockchainName = typeof BLOCKCHAIN_NAME.TON;
+export type SuiBlockchainName = typeof BLOCKCHAIN_NAME.SUI;

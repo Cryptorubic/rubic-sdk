@@ -9,11 +9,11 @@ import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calcu
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
-import { EvmEncodedConfigAndToAmount } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
-import { OpenOceanApiService } from './services/open-ocean-api-service';
+import { AggregatorEvmOnChainTrade } from '../../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
+import { EvmEncodedConfigAndToAmount } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { OpenOceanApiService } from '../services/open-ocean-api-service';
 
-export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
+export class OpenOceanEvmTrade extends AggregatorEvmOnChainTrade {
     public readonly type = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
 
     protected get spenderAddress(): string {
