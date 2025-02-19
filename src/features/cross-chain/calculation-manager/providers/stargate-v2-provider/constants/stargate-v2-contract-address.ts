@@ -107,5 +107,10 @@ export const stargateV2ContractAddress: StargateV2ContractAddress = {
     [BLOCKCHAIN_NAME.BERACHAIN]: {
         [stargateV2BridgeToken.WETH]: '0x45f1A95A4D3f3836523F5c83673c797f4d4d263B',
         [stargateV2BridgeToken.USDC]: '0xAF54BE5B6eEc24d6BFACf1cce4eaF680A8239398'
+    },
+    [BLOCKCHAIN_NAME.VANA]: {
+        [stargateV2BridgeToken.WETH]: '0xAf5191B0De278C7286d6C7CC6ab6BB8A73bA2Cd6',
+        [stargateV2BridgeToken.USDC]: '0x45A01E4e04F14f7A4a6702c74187c5F6222033cd',
+        [stargateV2BridgeToken.USDT]: '0xF2c0e57f48276112a596e141817D93bE472Ed6c5'
     }
 };

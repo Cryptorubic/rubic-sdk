@@ -91,6 +91,11 @@ const addresses: StargateV2TokenAddress = {
     [BLOCKCHAIN_NAME.BERACHAIN]: {
         '0x549943e04f40284185054145c6E4e9568C1D3241': stargateV2BridgeToken.USDC,
         '0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590': stargateV2BridgeToken.WETH
+    },
+    [BLOCKCHAIN_NAME.VANA]: {
+        '0x88853D410299BCBfE5fCC9Eef93c03115E908279': stargateV2BridgeToken.USDT,
+        '0xF1815bd50389c46847f0Bda824eC8da914045D14': stargateV2BridgeToken.USDC,
+        '0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590': stargateV2BridgeToken.WETH
     }
 };
 

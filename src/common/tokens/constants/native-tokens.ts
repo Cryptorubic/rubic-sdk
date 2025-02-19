@@ -741,5 +741,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Ethereum',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.VANA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.VANA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'VANA',
+        symbol: 'VANA',
+        decimals: 18
     })
 };

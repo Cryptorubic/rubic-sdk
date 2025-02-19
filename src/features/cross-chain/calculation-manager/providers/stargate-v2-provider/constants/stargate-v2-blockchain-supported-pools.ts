@@ -85,5 +85,10 @@ export const stargateV2BlockchainSupportedPools: Record<StargateV2SupportedBlock
         [BLOCKCHAIN_NAME.BERACHAIN]: [
             stargateV2PoolId[stargateV2BridgeToken.WETH],
             stargateV2PoolId[stargateV2BridgeToken.USDC]
+        ],
+        [BLOCKCHAIN_NAME.VANA]: [
+            stargateV2PoolId[stargateV2BridgeToken.WETH],
+            stargateV2PoolId[stargateV2BridgeToken.USDC],
+            stargateV2PoolId[stargateV2BridgeToken.USDT]
         ]
     };

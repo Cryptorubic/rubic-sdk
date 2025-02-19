@@ -527,5 +527,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Ether',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.VANA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.VANA,
+        address: '0x00EDdD9621Fb08436d0331c149D1690909a5906d',
+        name: 'Wrapped Vana',
+        symbol: 'WVANA',
+        decimals: 18
     })
 };

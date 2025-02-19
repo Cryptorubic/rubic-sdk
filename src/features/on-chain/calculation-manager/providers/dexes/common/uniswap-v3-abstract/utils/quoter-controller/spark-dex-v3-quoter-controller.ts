@@ -36,8 +36,8 @@ export class SparkDexV3QuoterController extends UniswapV3QuoterController {
     constructor(
         blockchain: EvmBlockchainName,
         routerConfiguration: UniswapV3RouterConfiguration<string>,
-        contractAddress: string,
-        contractAbi: AbiItem[],
+        contractAddress?: string,
+        contractAbi?: AbiItem[],
         factoryAddress?: string
     ) {
         super(blockchain, routerConfiguration, contractAddress, contractAbi, factoryAddress);

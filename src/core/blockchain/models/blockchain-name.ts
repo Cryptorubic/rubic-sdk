@@ -78,7 +78,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     MORPH: 'MORPH',
     FRAXTAL: 'FRAXTAL',
     BERACHAIN: 'BERACHAIN',
-    SONEIUM: 'SONEIUM'
+    SONEIUM: 'SONEIUM',
+    VANA: 'VANA'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
