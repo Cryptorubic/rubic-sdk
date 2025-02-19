@@ -1,6 +1,7 @@
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { IzumiProvider } from '../../common/izumi-abstract/izumi-provider';
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+
+import { IzumiProvider } from '../../common/izumi-abstract/izumi-provider';
 
 export class IzumiMonadTestnetProvider extends IzumiProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.MONAD_TESTNET;
