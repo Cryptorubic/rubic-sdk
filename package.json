@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.52.8-alpha-monad-testnet.1",
+    "version": "5.52.8",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
