@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.52.7",
+    "version": "5.52.8",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -102,7 +102,7 @@
         "ethers": "^5.6.8",
         "graphql-request": "^6.1.0",
         "grpc-web": "^1.4.2",
-        "iziswap-sdk": "1.5.1",
+        "iziswap-sdk": "3.0.1",
         "lodash.clonedeep": "^4.5.0",
         "rpc-websockets": "7.9.0",
         "rxjs": "7.8.1",
