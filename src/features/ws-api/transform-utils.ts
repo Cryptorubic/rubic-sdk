@@ -194,7 +194,7 @@ export class TransformUtils {
                 tradeStruct: {
                     from: fromToken as PriceTokenAmount<EvmBlockchainName>,
                     to: toToken as PriceTokenAmount<EvmBlockchainName>,
-                    slippageTolerance: 0,
+                    slippageTolerance: quote.slippage || 0,
                     path: routePath,
                     gasFeeInfo: null,
                     useProxy: false,
@@ -218,7 +218,7 @@ export class TransformUtils {
                 tradeStruct: {
                     from: fromToken as PriceTokenAmount<TonBlockchainName>,
                     to: toToken as PriceTokenAmount<TonBlockchainName>,
-                    slippageTolerance: 0,
+                    slippageTolerance: quote.slippage || 0,
                     gasFeeInfo: null,
                     useProxy: false,
                     routingPath: routePath,
@@ -254,7 +254,7 @@ export class TransformUtils {
                     from: fromToken as PriceTokenAmount<SolanaBlockchainName>,
                     fromWithoutFee: fromToken as PriceTokenAmount<SolanaBlockchainName>,
                     to: toToken as PriceTokenAmount<SolanaBlockchainName>,
-                    slippageTolerance: 0,
+                    slippageTolerance: quote.slippage || 0,
                     path: routePath,
                     gasFeeInfo: null,
                     useProxy: false,
