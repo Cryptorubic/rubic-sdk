@@ -16,6 +16,7 @@ import {
     DATA_DEX_FACTORY_CRONTRACT_ADDRESS,
     DATA_DEX_PROVIDER_CONFIGURATION,
     DATA_DEX_QUOTER_CONTRACT_ADDRESS,
+    DATA_DEX_ROUTER_CONTRACT_ABI,
     DATA_DEX_ROUTER_CONTRACT_ADDRESS
 } from './constants/provider-config';
 import { DATA_DEX_ROUTER_CONFIGURATION } from './constants/router-config';
@@ -28,7 +29,7 @@ export class DataDexProvider extends UniswapV3AlgebraAbstractProvider<DataDexTra
 
     public readonly blockchain = BLOCKCHAIN_NAME.VANA;
 
-    protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
+    protected readonly contractAbi = DATA_DEX_ROUTER_CONTRACT_ABI;
 
     protected readonly OnChainTradeClass = DataDexTrade;
 
