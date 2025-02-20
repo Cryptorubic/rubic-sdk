@@ -6,7 +6,7 @@ import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
-import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
+import { OpenOceanEvmTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-evm-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import { AggregatorEvmOnChainTrade } from '../../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -31,7 +31,7 @@ export class OpenOceanEvmTrade extends AggregatorEvmOnChainTrade {
         throw new RubicSdkError('Dex address is unknown before swap is started');
     }
 
-    constructor(tradeStruct: OpenOceanTradeStruct, providerAddress: string) {
+    constructor(tradeStruct: OpenOceanEvmTradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);
     }
 

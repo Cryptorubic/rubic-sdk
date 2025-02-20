@@ -11,6 +11,9 @@ export interface OpenoceanSwapQuoteResponse {
 
 export interface OpenoceanSuiSwapQuoteResponse {
     code: number;
-    transaction: string;
+    data: {
+        data: string;
+        outAmount: string;
+    };
     error?: string;
 }

@@ -122,7 +122,7 @@ export class OpenOceanApiService {
         fromWithoutFee: PriceTokenAmount<OpenoceanOnChainSupportedBlockchain>
     ): Promise<string> {
         if (fromWithoutFee.blockchain === BLOCKCHAIN_NAME.SUI) {
-            return '0';
+            return '5000000000';
         }
         if (fromWithoutFee.blockchain === BLOCKCHAIN_NAME.ARBITRUM) {
             return ARBITRUM_GAS_PRICE;
@@ -143,6 +143,9 @@ export class OpenOceanApiService {
 
     private static getTokenAddress(token: PriceToken): string {
         if (token.isNative) {
+            if (token.blockchain === BLOCKCHAIN_NAME.SUI) {
+                return token.address;
+            }
             if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
                 return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
             }

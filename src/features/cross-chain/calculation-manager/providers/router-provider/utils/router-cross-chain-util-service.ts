@@ -1,3 +1,5 @@
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/solana-web3-public/solana-web3-public';
@@ -33,12 +35,40 @@ export class RouterCrossChainUtilService {
         return address;
     }
 
+    public static async getTokensAddress(
+        fromToken: PriceTokenAmount,
+        toToken: PriceToken
+    ): Promise<[string, string]> {
+        let fromNativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+        let toNativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+        if (fromToken.blockchain === BLOCKCHAIN_NAME.SUI) {
+            fromNativeAddress = nativeTokensList[BLOCKCHAIN_NAME.SUI].address;
+        }
+        if (toToken.blockchain === BLOCKCHAIN_NAME.SUI) {
+            toNativeAddress = nativeTokensList[BLOCKCHAIN_NAME.SUI].address;
+        }
+
+        const srcTokenAddress = fromToken.address;
+        const dstTokenAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
+            toToken.blockchain as RouterCrossChainSupportedBlockchains,
+            toToken.address
+        );
+
+        return [
+            fromToken.isNative ? fromNativeAddress : srcTokenAddress,
+            toToken.isNative ? toNativeAddress : dstTokenAddress
+        ];
+    }
+
     public static getBlockchainId(blockchain: BlockchainName): string {
         if (blockchain === BLOCKCHAIN_NAME.TRON) {
             return '728126428';
         }
         if (blockchain === BLOCKCHAIN_NAME.BITCOIN) {
             return 'bitcoin';
+        }
+        if (blockchain === BLOCKCHAIN_NAME.SUI) {
+            return 'sui';
         }
         // if (blockchain === BLOCKCHAIN_NAME.SOLANA) {
         //     return 'solana';

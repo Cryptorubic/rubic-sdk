@@ -56,14 +56,6 @@ export class RouterCrossChainProvider extends CrossChainProvider {
             const srcChainId = RouterCrossChainUtilService.getBlockchainId(fromBlockchain);
             const dstChainId = RouterCrossChainUtilService.getBlockchainId(toBlockchain);
 
-            const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-
-            const srcTokenAddress = from.address;
-            const dstTokenAddress = await RouterCrossChainUtilService.checkAndConvertAddress(
-                toBlockchain,
-                toToken.address
-            );
-
             const feeInfo = await this.getFeeInfo(
                 from.blockchain,
                 options.providerAddress,
@@ -76,11 +68,14 @@ export class RouterCrossChainProvider extends CrossChainProvider {
                 feeInfo?.rubicProxy?.platformFee?.percent
             );
 
+            const [fromTokenAddress, toTokenAddress] =
+                await RouterCrossChainUtilService.getTokensAddress(from, toToken);
+
             const routerQuoteConfig = await RouterApiService.getQuote({
                 amount: fromWithoutFee.stringWeiAmount,
-                fromTokenAddress: from.isNative ? NATIVE_TOKEN_ADDRESS : srcTokenAddress,
+                fromTokenAddress,
                 fromTokenChainId: srcChainId,
-                toTokenAddress: toToken.isNative ? NATIVE_TOKEN_ADDRESS : dstTokenAddress,
+                toTokenAddress,
                 toTokenChainId: dstChainId,
                 slippageTolerance: options.slippageTolerance * 100
             });

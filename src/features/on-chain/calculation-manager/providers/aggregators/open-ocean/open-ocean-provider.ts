@@ -1,15 +1,18 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { SuiWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/sui-web3-public/sui-web3-public';
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
-import { OpenOceanEvmTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/chains/open-ocean-evm-trade';
 import {
     OpenoceanOnChainSupportedBlockchain,
     openoceanOnChainSupportedBlockchains
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
-import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
+import { OpenOceanEvmTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-evm-trade-struct';
+import { OpenOceanSuiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-sui-trade-struct';
+import { OpenOceanOnChainFactory } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/open-ocean-on-chain-factory';
 import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
@@ -58,7 +61,7 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
                 weiAmount: new BigNumber(quoteResponse.data.outAmount)
             });
 
-            const tradeStruct: OpenOceanTradeStruct = {
+            const tradeStruct: OpenOceanEvmTradeStruct | OpenOceanSuiTradeStruct = {
                 from,
                 to,
                 gasFeeInfo: await this.getGasFeeInfo(from, quoteResponse),
@@ -70,7 +73,11 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
                 withDeflation: options.withDeflation
             };
 
-            return new OpenOceanEvmTrade(tradeStruct, options.providerAddress);
+            return OpenOceanOnChainFactory.createTrade(
+                from.blockchain,
+                tradeStruct,
+                options.providerAddress
+            );
         } catch (error) {
             return {
                 type: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
@@ -97,11 +104,22 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
         const tokenListResponse = await OpenOceanApiService.fetchTokensList(
             from.blockchain as OpenoceanOnChainSupportedBlockchain
         );
-        const tokens = tokenListResponse?.data?.map(token => token.address.toLocaleLowerCase());
+        const tokens = tokenListResponse?.data;
+
         const isSupportedTokens =
             Boolean(tokens.length) &&
-            (from.isNative || tokens.includes(from.address.toLocaleLowerCase())) &&
-            (to.isNative || tokens.includes(to.address.toLocaleLowerCase()));
+            (from.isNative ||
+                tokens?.some(
+                    token =>
+                        compareAddresses(token.address, from.address) ||
+                        SuiWeb3Public.compareSuiAddress(token.customAddress, from.address)
+                )) &&
+            (to.isNative ||
+                tokens.some(
+                    token =>
+                        compareAddresses(token.address, to.address) ||
+                        SuiWeb3Public.compareSuiAddress(token.customAddress, to.address)
+                ));
 
         if (!isSupportedTokens) {
             throw new RubicSdkError('Unsupported token pair');
