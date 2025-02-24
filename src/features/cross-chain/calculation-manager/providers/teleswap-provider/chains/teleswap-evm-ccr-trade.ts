@@ -38,6 +38,7 @@ import {
 } from '../constants/teleswap-swap-and-unwrap-abi';
 import { TeleSwapEvmConstructorParams } from '../models/teleswap-constructor-params';
 import { TeleSwapUtilsService } from '../services/teleswap-utils-service';
+import { TELESWAP_REF_CODE } from '../constants/teleswap-ref-code';
 
 export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.TELE_SWAP;
@@ -160,7 +161,7 @@ export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
     protected async getTransactionConfigAndAmount(
         receiverAddress: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        const fromTokenAddress = TeleSwapUtilsService.getTokenAddress(this.from, false);
+        const fromTokenAddress = TeleSwapUtilsService.getTokenAddress(this.from);
 
         const swapParams = await this.teleSwapSdk.swapAndUnwrapInputs(
             {

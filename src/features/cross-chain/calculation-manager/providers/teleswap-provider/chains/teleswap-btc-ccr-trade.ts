@@ -163,14 +163,14 @@ export class TeleSwapBtcCcrTrade extends BitcoinCrossChainTrade {
         };
 
         try {
-            const toTokenAddress = TeleSwapUtilsService.getTokenAddress(this.to, true);
+            const toTokenAddress = TeleSwapUtilsService.getTokenAddress(this.to);
 
             const swapParams = await this.teleSwapSdk.wrapAndSwapUnsigned(
                 receiverAddress,
                 this.from.tokenAmount.toFixed(),
-                toTokenAddress!,
                 signerInfo,
                 teleSwapNetworkTickers[this.toBlockchain] as SupportedNetwork,
+                toTokenAddress!,
                 Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals)
             );
 

@@ -16,6 +16,7 @@ import {
 } from '../constants/teleswap-ccr-supported-chains';
 import { teleSwapNetworkTickers } from '../constants/teleswap-network-tickers';
 import { TeleSwapEstimateResponse } from '../models/teleswap-estimate-response';
+import { TELESWAP_REF_CODE } from '../constants/teleswap-ref-code';
 
 export class TeleSwapUtilsService {
     public static nativeTokenAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
@@ -34,8 +35,7 @@ export class TeleSwapUtilsService {
 
         await teleSwapSdk.initNetworksConnection();
 
-        // @TODO get thirdPartyId
-        //  teleSwapSdk.setThirdPartyId(10);
+        teleSwapSdk.setThirdPartyId(TELESWAP_REF_CODE);
 
         return teleSwapSdk;
     }
@@ -59,12 +59,12 @@ export class TeleSwapUtilsService {
         toToken: PriceToken<TeleSwapCcrSupportedChain>,
         sdk: TeleswapSDK
     ): Promise<BigNumber> {
-        const toTokenAddress = TeleSwapUtilsService.getTokenAddress(toToken, true);
+        const toTokenAddress = TeleSwapUtilsService.getTokenAddress(toToken);
 
         const estimation = (await sdk.wrapAndSwapEstimate(
             fromToken.tokenAmount.toFixed(),
-            toTokenAddress!,
-            teleSwapNetworkTickers[toToken.blockchain] as SupportedNetwork
+            teleSwapNetworkTickers[toToken.blockchain] as SupportedNetwork,
+            toTokenAddress!
         )) as TeleSwapEstimateResponse;
 
         return new BigNumber(estimation.outputAmount);
@@ -74,7 +74,7 @@ export class TeleSwapUtilsService {
         fromToken: PriceTokenAmount<TeleSwapCcrSupportedChain>,
         sdk: TeleswapSDK
     ): Promise<BigNumber> {
-        const fromTokenAddress = TeleSwapUtilsService.getTokenAddress(fromToken, false);
+        const fromTokenAddress = TeleSwapUtilsService.getTokenAddress(fromToken);
         const estimation = await sdk.swapAndUnwrapEstimate(
             {
                 inputAmount: fromToken.stringWeiAmount,
@@ -86,20 +86,9 @@ export class TeleSwapUtilsService {
         return new BigNumber(Web3Pure.toWei(estimation.outputAmountBTC, 8));
     }
 
-    public static getTokenAddress(
-        token: PriceToken,
-        shouldReturnNativeAddress: boolean
-    ): string | null {
-        const isBaseChain = teleSwapBaseChains.includes(token.blockchain as TeleSwapCcrBaseChain);
-        const chainType = BlockchainsInfo.getChainType(token.blockchain);
-        const isEvmNativeToken = token.isNative && chainType === CHAIN_TYPE.EVM;
-
-        if (isBaseChain && isEvmNativeToken) {
-            return wrappedNativeTokensList[token.blockchain as EvmBlockchainName]?.address!;
-        }
-
-        if (isEvmNativeToken) {
-            return shouldReturnNativeAddress ? TeleSwapUtilsService.nativeTokenAddress : null;
+    public static getTokenAddress(token: PriceToken): string | null {
+        if (token.isNative) {
+            return null;
         }
 
         return token.address;
