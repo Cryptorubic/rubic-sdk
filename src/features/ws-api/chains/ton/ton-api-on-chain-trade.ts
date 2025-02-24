@@ -32,7 +32,18 @@ export class TonApiOnChainTrade extends TonOnChainTrade {
     public readonly dexContractAddress = '';
 
     constructor(params: TonApiOnChainConstructor) {
-        super(params.tradeStruct, params.apiQuote.integratorAddress!);
+        super(
+            {
+                ...params,
+                slippageTolerance: params.apiQuote.slippage || 0,
+                gasFeeInfo: null,
+                useProxy: false,
+                withDeflation: { from: { isDeflation: false }, to: { isDeflation: false } },
+                routingPath: params.routePath,
+                isChangedSlippage: params.isChangedSlippage
+            },
+            params.apiQuote.integratorAddress!
+        );
 
         this.type = params.apiResponse.providerType as OnChainTradeType;
         this._priceImpact = params.apiResponse.estimate.priceImpact;

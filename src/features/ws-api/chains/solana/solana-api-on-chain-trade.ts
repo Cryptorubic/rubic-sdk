@@ -31,7 +31,18 @@ export class SolanaApiOnChainTrade extends SolanaOnChainTrade {
     public readonly dexContractAddress = '';
 
     constructor(params: SolanaApiOnChainConstructor) {
-        super(params.tradeStruct, params.apiQuote.integratorAddress!);
+        super(
+            {
+                ...params,
+                slippageTolerance: params.apiQuote.slippage || 0,
+                fromWithoutFee: params.from,
+                path: params.routePath,
+                useProxy: false,
+                gasFeeInfo: null,
+                withDeflation: { from: { isDeflation: false }, to: { isDeflation: false } }
+            },
+            params.apiQuote.integratorAddress!
+        );
 
         this.type = params.apiResponse.providerType as OnChainTradeType;
         this._priceImpact = params.apiResponse.estimate.priceImpact;

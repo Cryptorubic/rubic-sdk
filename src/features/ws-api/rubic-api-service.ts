@@ -116,7 +116,10 @@ export class RubicApiService {
                               rubicApiError
                           );
                 return from(promise).pipe(
-                    catchError(() => of(null)),
+                    catchError(err => {
+                        console.log(err);
+                        return of(null);
+                    }),
                     map(wrappedTrade => ({
                         total,
                         calculated,

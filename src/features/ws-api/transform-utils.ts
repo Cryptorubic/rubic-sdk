@@ -1,13 +1,5 @@
-import {
-    BitcoinBlockchainName,
-    EvmBlockchainName,
-    QuoteRequestInterface,
-    QuoteResponseInterface,
-    SolanaBlockchainName,
-    TonBlockchainName,
-    TronBlockchainName
-} from '@cryptorubic/core';
-import { PriceTokenAmount } from 'src/common/tokens';
+import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -31,8 +23,17 @@ import {
     TransferTradeSupportedProviders,
     transferTradeSupportedProviders
 } from '../cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/constans/transfer-trade-supported-providers';
+import { BitcoinApiCrossChainConstructor } from './chains/bitcoin/bitcoin-api-cross-chain-constructor';
 import { BitcoinApiCrossChainTrade } from './chains/bitcoin/bitcoin-api-cross-chain-trade';
+import { EvmApiCrossChainConstructor } from './chains/evm/evm-api-cross-chain-constructor';
+import { EvmApiOnChainConstructor } from './chains/evm/evm-api-on-chain-constructor';
+import { SolanaApiCrossChainConstructor } from './chains/solana/solana-api-cross-chain-constructor';
+import { SolanaApiOnChainConstructor } from './chains/solana/solana-api-on-chain-constructor';
+import { TonApiCrossChainConstructor } from './chains/ton/ton-api-cross-chain-constructor';
+import { TonApiOnChainConstructor } from './chains/ton/ton-api-on-chain-constructor';
 import { ApiCrossChainTransferTrade } from './chains/transfer-trade/api-cross-chain-transfer-trade';
+import { TronApiCrossChainConstructor } from './chains/tron/tron-api-cross-chain-constructor';
+import { TronApiOnChainConstructor } from './chains/tron/tron-api-on-chain-constructor';
 import { RubicApiError } from './models/rubic-api-error';
 import { RubicApiParser } from './utils/rubic-api-parser';
 import { RubicApiUtils } from './utils/rubic-api-utils';
@@ -44,29 +45,19 @@ export class TransformUtils {
         _integratorAddress: string,
         err?: RubicApiError
     ): Promise<WrappedCrossChainTrade> {
-        let response = res;
-
-        if (!response && err) {
-            response = await RubicApiUtils.getEmptyResponse(quote, err.type);
+        if (!res && !err) {
+            throw new NotSupportedTokensError();
         }
+        const tradeType = (res?.providerType || err?.type) as WrappedCrossChainTrade['tradeType'];
+        const tradeParams = await RubicApiUtils.getTradeParams(quote, res, tradeType);
 
         const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
 
-        const tradeType = response.providerType as WrappedCrossChainTrade['tradeType'];
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
-        const { fromToken, toToken } = RubicApiUtils.getFromToTokens(
-            response.tokens,
-            quote.srcTokenAmount,
-            response.estimate.destinationTokenAmount
-        );
 
         let trade: CrossChainTrade | null = null;
 
-        const routePath = RubicApiParser.parseRoutingDto(response.routing);
-
-        const feeInfo = RubicApiParser.parseFeeInfoDto(response.fees);
-
-        const parsedWarnings = RubicApiParser.parseRubicApiWarnings(response.warnings);
+        const parsedWarnings = RubicApiParser.parseRubicApiWarnings(res?.warnings || []);
 
         const isTransferTrade =
             transferTradeSupportedProviders.includes(
@@ -74,82 +65,28 @@ export class TransformUtils {
             ) && chainType !== CHAIN_TYPE.EVM;
 
         if (chainType === CHAIN_TYPE.EVM) {
-            if (response.providerType === CROSS_CHAIN_TRADE_TYPE.ARBITRUM) {
-                trade = new ArbitrumRbcBridgeTrade({
-                    from: fromToken as PriceTokenAmount<EvmBlockchainName>,
-                    to: toToken,
-                    apiQuote: quote,
-                    apiResponse: response,
-                    feeInfo,
-                    routePath,
-                    needAuthWallet: false
-                });
+            const params = tradeParams as EvmApiCrossChainConstructor;
+
+            if (tradeType === CROSS_CHAIN_TRADE_TYPE.ARBITRUM) {
+                trade = new ArbitrumRbcBridgeTrade(params);
             } else if (tradeType === CROSS_CHAIN_TRADE_TYPE.EDDY_BRIDGE) {
-                trade = new EddyBridgeTrade({
-                    from: fromToken as PriceTokenAmount<EvmBlockchainName>,
-                    to: toToken,
-                    apiQuote: quote,
-                    apiResponse: response,
-                    feeInfo,
-                    routePath,
-                    needAuthWallet: false
-                });
+                trade = new EddyBridgeTrade(params);
             } else {
                 trade = new EvmApiCrossChainTrade({
-                    from: fromToken as PriceTokenAmount<EvmBlockchainName>,
-                    to: toToken,
-                    apiQuote: quote,
-                    apiResponse: response,
-                    feeInfo,
-                    routePath,
+                    ...params,
                     needAuthWallet: parsedWarnings.needAuthWallet
                 });
             }
         } else if (isTransferTrade) {
-            trade = new ApiCrossChainTransferTrade({
-                from: fromToken as PriceTokenAmount<TonBlockchainName>,
-                to: toToken,
-                apiQuote: quote,
-                apiResponse: response,
-                feeInfo,
-                routePath
-            });
+            trade = new ApiCrossChainTransferTrade(tradeParams);
         } else if (chainType === CHAIN_TYPE.TON) {
-            trade = new TonApiCrossChainTrade({
-                from: fromToken as PriceTokenAmount<TonBlockchainName>,
-                to: toToken,
-                apiQuote: quote,
-                apiResponse: response,
-                feeInfo,
-                routePath
-            });
+            trade = new TonApiCrossChainTrade(tradeParams as TonApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.TRON) {
-            trade = new TronApiCrossChainTrade({
-                from: fromToken as PriceTokenAmount<TronBlockchainName>,
-                to: toToken as PriceTokenAmount,
-                apiQuote: quote,
-                apiResponse: response,
-                feeInfo,
-                routePath
-            });
+            trade = new TronApiCrossChainTrade(tradeParams as TronApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.BITCOIN) {
-            trade = new BitcoinApiCrossChainTrade({
-                from: fromToken as PriceTokenAmount<BitcoinBlockchainName>,
-                to: toToken,
-                apiQuote: quote,
-                apiResponse: response,
-                feeInfo,
-                routePath
-            });
+            trade = new BitcoinApiCrossChainTrade(tradeParams as BitcoinApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.SOLANA) {
-            trade = new SolanaApiCrossChainTrade({
-                from: fromToken as PriceTokenAmount<SolanaBlockchainName>,
-                to: toToken,
-                apiQuote: quote,
-                apiResponse: response,
-                feeInfo,
-                routePath
-            });
+            trade = new SolanaApiCrossChainTrade(tradeParams as SolanaApiCrossChainConstructor);
         }
 
         return {
@@ -160,111 +97,37 @@ export class TransformUtils {
     }
 
     public static async transformOnChain(
-        res: QuoteResponseInterface,
+        response: QuoteResponseInterface,
         quote: QuoteRequestInterface,
         _integratorAddress: string,
         err?: RubicApiError
     ): Promise<WrappedOnChainTradeOrNull> {
-        let response = res;
-
-        if (!response && err) {
-            response = await RubicApiUtils.getEmptyResponse(quote, err.type);
+        if (!response && !err) {
+            throw new NotSupportedTokensError();
         }
+        const tradeType = (response.providerType || err?.type) as OnChainTradeType;
+        const tradeParams = await RubicApiUtils.getTradeParams(quote, response, tradeType);
 
         const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
-
-        const tradeType = response.providerType as OnChainTradeType;
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
-        const { fromToken, toToken } = RubicApiUtils.getFromToTokens(
-            response.tokens,
-            quote.srcTokenAmount,
-            response.estimate.destinationTokenAmount
-        );
-
-        const routePath = RubicApiParser.parseRoutingDto(response.routing);
-        const feeInfo = RubicApiParser.parseFeeInfoDto(response.fees);
 
         let trade: OnChainTrade | null = null;
 
         if (chainType === CHAIN_TYPE.EVM) {
-            trade = new EvmApiOnChainTrade({
-                from: fromToken as PriceTokenAmount<EvmBlockchainName>,
-                to: toToken as PriceTokenAmount<EvmBlockchainName>,
-                feeInfo,
-                tradeStruct: {
-                    from: fromToken as PriceTokenAmount<EvmBlockchainName>,
-                    to: toToken as PriceTokenAmount<EvmBlockchainName>,
-                    slippageTolerance: quote.slippage || 0,
-                    path: routePath,
-                    gasFeeInfo: null,
-                    useProxy: false,
-                    proxyFeeInfo: undefined,
-                    fromWithoutFee: fromToken as PriceTokenAmount<EvmBlockchainName>,
-                    apiQuote: quote,
-                    apiResponse: response,
-                    withDeflation: {
-                        from: { isDeflation: false },
-                        to: { isDeflation: false }
-                    }
-                }
-            });
+            trade = new EvmApiOnChainTrade(tradeParams as EvmApiOnChainConstructor);
+        } else if (chainType === CHAIN_TYPE.TRON) {
+            trade = new TronApiOnChainTrade(tradeParams as TronApiOnChainConstructor);
+        } else if (chainType === CHAIN_TYPE.SOLANA) {
+            trade = new SolanaApiOnChainTrade(tradeParams as SolanaApiOnChainConstructor);
         } else if (chainType === CHAIN_TYPE.TON) {
             trade = new TonApiOnChainTrade({
-                from: fromToken as PriceTokenAmount<TonBlockchainName>,
-                to: toToken as PriceTokenAmount<TonBlockchainName>,
-                apiQuote: quote,
-                apiResponse: response,
-                feeInfo,
-                tradeStruct: {
-                    from: fromToken as PriceTokenAmount<TonBlockchainName>,
-                    to: toToken as PriceTokenAmount<TonBlockchainName>,
-                    slippageTolerance: quote.slippage || 0,
-                    gasFeeInfo: null,
-                    useProxy: false,
-                    routingPath: routePath,
-                    // @TODO API
-                    isChangedSlippage: false,
-                    withDeflation: {
-                        from: { isDeflation: false },
-                        to: { isDeflation: false }
-                    },
-                    apiQuote: quote,
-                    apiResponse: response
-                }
-            });
-        } else if (chainType === CHAIN_TYPE.TRON) {
-            trade = new TronApiOnChainTrade({
-                from: fromToken as PriceTokenAmount<TronBlockchainName>,
-                to: toToken as PriceTokenAmount<TronBlockchainName>,
-                apiQuote: quote,
-                apiResponse: response,
-                feeInfo
+                ...(tradeParams as TonApiOnChainConstructor),
+                // @TODO API
+                isChangedSlippage: false
             });
         } else if (chainType === CHAIN_TYPE.BITCOIN) {
             // @TODO API
             console.log('btc swap');
-        } else if (chainType === CHAIN_TYPE.SOLANA) {
-            trade = new SolanaApiOnChainTrade({
-                from: fromToken as PriceTokenAmount<SolanaBlockchainName>,
-                to: toToken as PriceTokenAmount<SolanaBlockchainName>,
-                apiQuote: quote,
-                apiResponse: response,
-                feeInfo,
-                tradeStruct: {
-                    from: fromToken as PriceTokenAmount<SolanaBlockchainName>,
-                    fromWithoutFee: fromToken as PriceTokenAmount<SolanaBlockchainName>,
-                    to: toToken as PriceTokenAmount<SolanaBlockchainName>,
-                    slippageTolerance: quote.slippage || 0,
-                    path: routePath,
-                    gasFeeInfo: null,
-                    useProxy: false,
-                    proxyFeeInfo: undefined,
-                    withDeflation: {
-                        from: { isDeflation: false },
-                        to: { isDeflation: false }
-                    }
-                }
-            });
         }
 
         return {

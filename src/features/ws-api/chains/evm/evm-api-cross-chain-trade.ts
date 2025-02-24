@@ -60,7 +60,7 @@ export class EvmApiCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = params.feeInfo;
         this.from = params.from;
         this.gasData = null;
-        this.isWalletAuth = params.needAuthWallet;
+        this.isWalletAuth = Boolean(params.needAuthWallet);
     }
 
     public getTradeInfo(): TradeInfo {
