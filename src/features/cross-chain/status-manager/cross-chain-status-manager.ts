@@ -873,8 +873,8 @@ export class CrossChainStatusManager {
                 return {
                     status: TX_STATUS.SUCCESS,
                     hash: isFromEvm
-                        ? txData.targetEvent?.targetTransaction.txId!
-                        : txData.sourceTransaction?.txId!
+                        ? txData.sourceTransaction?.txId!
+                        : txData.targetEvent?.targetTransaction?.txId!
                 };
             }
 
@@ -889,8 +889,8 @@ export class CrossChainStatusManager {
                 return {
                     status: TX_STATUS.FALLBACK,
                     hash: isFromEvm
-                        ? txData.targetEvent?.targetTransaction.txId!
-                        : txData.sourceTransaction?.txId!
+                        ? txData.sourceTransaction?.txId!
+                        : txData.targetEvent?.targetTransaction?.txId!
                 };
             }
 
