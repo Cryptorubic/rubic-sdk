@@ -118,7 +118,7 @@ export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
-            type: `lifi:${this.bridgeType}`,
+            type: `native:${this.bridgeType}`,
             fromAddress: this.walletAddress,
             toAddress: receivingAsset
         });
@@ -184,7 +184,7 @@ export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
             isFromBaseChain ? teleswapSwapAndUnwrapAbi : teleswapSwapAndUwrapAbiForCcrChains,
             'swapAndUnwrap',
             args,
-            swapParams.inputs.value
+            this.from.isNative ? swapParams.inputs.value : '0'
         );
 
         return { config: evmConfig, amount: this.to.stringWeiAmount };
