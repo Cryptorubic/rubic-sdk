@@ -17,6 +17,7 @@ import { IzumiZksyncProvider } from 'src/features/on-chain/calculation-manager/p
 import { IzumiArbitrumProvider } from '../../providers/dexes/arbitrum/izumi-arbitrum/izumi-arbitrum-provider';
 import { IzumiGravityProvider } from '../../providers/dexes/gravity/izumi-gravity/izumi-gravity-provider';
 import { IzumiKromaProvider } from '../../providers/dexes/kroma/izumi-kroma/izumi-kroma-provider';
+import { IzumiMonadTestnetProvider } from '../../providers/dexes/monad-testnet/izumi-monad-testnet/izumi-monad-testnet-provider';
 
 export const izumiTradeProviders = [
     IzumiBscProvider,
@@ -38,5 +39,8 @@ export const izumiTradeProviders = [
     // IzumiMerlinProvider,
     IzumiScrollProvider,
     IzumiXlayerProvider,
-    IzumiGravityProvider
+    IzumiGravityProvider,
+
+    // testnets
+    IzumiMonadTestnetProvider
 ];
