@@ -12,7 +12,6 @@ export const stargateV2BlockchainSupportedPools: Record<StargateV2SupportedBlock
             stargateV2PoolId[stargateV2BridgeToken.ETH],
             // stargateV2PoolId[stargateV2BridgeToken.METIS],
             stargateV2PoolId[stargateV2BridgeToken.METH]
-            // stargateV2PoolId[stargateV2BridgeToken.WETH]
         ],
         [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
             stargateV2PoolId[stargateV2BridgeToken.USDT],
@@ -87,8 +86,5 @@ export const stargateV2BlockchainSupportedPools: Record<StargateV2SupportedBlock
             stargateV2PoolId[stargateV2BridgeToken.WETH],
             stargateV2PoolId[stargateV2BridgeToken.USDC]
         ],
-        [BLOCKCHAIN_NAME.UNICHAIN]: [
-            // stargateV2PoolId[stargateV2BridgeToken.WETH],
-            stargateV2PoolId[stargateV2BridgeToken.ETH]
-        ]
+        [BLOCKCHAIN_NAME.UNICHAIN]: [stargateV2PoolId[stargateV2BridgeToken.ETH]]
     };

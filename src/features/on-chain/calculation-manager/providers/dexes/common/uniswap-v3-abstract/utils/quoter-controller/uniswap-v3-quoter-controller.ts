@@ -71,7 +71,7 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
      * @param exact Is exact input or output trade.
      * @param weiAmount Amount of tokens to trade.
      */
-    // @Cache
+    @Cache
     protected static getQuoterMethodData(
         poolsPath: LiquidityPool[],
         from: Token,
@@ -176,9 +176,9 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
     /**
      * Returns all liquidity pools, containing passed tokens addresses, and concatenates with most popular pools.
      */
-    // @Cache({
-    //     maxAge: 1000 * 60 * 10
-    // })
+    @Cache({
+        maxAge: 1000 * 60 * 10
+    })
     protected async getAllLiquidityPools(
         firstToken: Token,
         secondToken: Token
