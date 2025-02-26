@@ -4,48 +4,6 @@ export const UNICHAIN_UNISWAP_V3_QUOTER_V2_CONTRACT_ABI = [
     {
         inputs: [
             {
-                internalType: 'address',
-                name: '_factory',
-                type: 'address'
-            },
-            {
-                internalType: 'address',
-                name: '_WETH9',
-                type: 'address'
-            }
-        ],
-        stateMutability: 'nonpayable',
-        type: 'constructor'
-    },
-    {
-        inputs: [],
-        name: 'WETH9',
-        outputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address'
-            }
-        ],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [],
-        name: 'factory',
-        outputs: [
-            {
-                internalType: 'address',
-                name: '',
-                type: 'address'
-            }
-        ],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [
-            {
                 internalType: 'bytes',
                 name: 'path',
                 type: 'bytes'
