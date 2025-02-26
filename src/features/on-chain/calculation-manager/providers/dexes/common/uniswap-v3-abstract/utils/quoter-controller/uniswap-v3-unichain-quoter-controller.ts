@@ -7,17 +7,16 @@ import { notNull } from 'src/common/utils/object';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
-import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { UniswapV3RouterConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
+
 import {
-    FeeAmount,
-    LiquidityPool
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
-import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import {
-    HORIZONDEX_QUOTER_V2_CONTRACT_ABI,
-    HORIZONDEX_QUOTER_V2_CONTRACT_ADDRESS
-} from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/utils/quoter-controller/constants/quoter-contract-data';
+    UNICHAIN_UNISWAP_V3_FACTORY_CONTRACT_ADDRESS,
+    UNICHAIN_UNISWAP_V3_QUOTER_V2_CONTRACT_ADDRESS
+} from '../../../../unichain/uni-v3/constants/contract-addresses';
+import { UNICHAIN_UNISWAP_V3_QUOTER_V2_CONTRACT_ABI } from '../../../../unichain/uni-v3/constants/quoter-v2-abi';
+import { UniswapV3Route } from '../../models/uniswap-v3-route';
+import { UniswapV3RouterConfiguration } from '../../models/uniswap-v3-router-configuration';
+import { FeeAmount, LiquidityPool } from './models/liquidity-pool';
+import { UniswapV3QuoterController } from './uniswap-v3-quoter-controller';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -27,8 +26,11 @@ interface GetQuoterMethodsDataOptions {
     weiAmount: string;
     maxTransitTokens: number;
 }
-export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterController {
-    protected readonly feeAmounts: FeeAmount[] = [8, 40, 300, 1000];
+
+type AmountOutWei = string;
+
+export class UnichainUniswapV3QuoterController extends UniswapV3QuoterController {
+    protected readonly feeAmounts: FeeAmount[] = [500, 3000];
 
     constructor(
         blockchain: EvmBlockchainName,
@@ -37,8 +39,9 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
         super(
             blockchain,
             routerConfiguration,
-            HORIZONDEX_QUOTER_V2_CONTRACT_ADDRESS,
-            HORIZONDEX_QUOTER_V2_CONTRACT_ABI
+            UNICHAIN_UNISWAP_V3_QUOTER_V2_CONTRACT_ADDRESS,
+            UNICHAIN_UNISWAP_V3_QUOTER_V2_CONTRACT_ABI,
+            UNICHAIN_UNISWAP_V3_FACTORY_CONTRACT_ADDRESS
         );
     }
 
@@ -61,14 +64,17 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
         poolsPath: LiquidityPool[];
         methodData: MethodData;
     } {
+        if (exact === 'output') {
+            throw new RubicSdkError(
+                'Exact "output" is not supported in UnichainUniswapV3QuoterController!'
+            );
+        }
         if (poolsPath.length === 1 && poolsPath?.[0]) {
-            const methodName =
-                exact === 'input' ? 'quoteExactInputSingle' : 'quoteExactOutputSingle';
             const sqrtPriceLimitX96 = 0;
             return {
                 poolsPath,
                 methodData: {
-                    methodName,
+                    methodName: 'quoteExactInputSingle',
                     methodArguments: [
                         from.address,
                         to.address,
@@ -80,15 +86,12 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
             };
         }
 
-        const methodName = exact === 'input' ? 'quoteExactInput' : 'quoteExactOutput';
-        const tokensPath = exact === 'input' ? poolsPath : poolsPath.reverse();
-        const initialTokenAddress = exact === 'input' ? from.address : to.address;
         return {
             poolsPath,
             methodData: {
-                methodName,
+                methodName: 'quoteExactInput',
                 methodArguments: [
-                    UniswapV3QuoterController.getEncodedPoolsPath(tokensPath, initialTokenAddress),
+                    UniswapV3QuoterController.getEncodedPoolsPath(poolsPath, from.address),
                     weiAmount
                 ]
             }
@@ -123,9 +126,7 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
             )
             .flat();
 
-        const results = await this.web3Public.multicallContractMethods<
-            string | { returnedAmount: string }
-        >(
+        const results = await this.web3Public.multicallContractMethods<AmountOutWei>(
             this.quoterContractAddress,
             this.quoterContractABI,
             quoterMethodsData.map(quoterMethodData => {
@@ -148,11 +149,7 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
                 }
                 if (result.success) {
                     return {
-                        outputAbsoluteAmount: new BigNumber(
-                            result?.output! instanceof Object
-                                ? result?.output?.returnedAmount
-                                : result.output!
-                        ),
+                        outputAbsoluteAmount: new BigNumber(result.output!),
                         poolsPath: pool.poolsPath,
                         initialTokenAddress: from.address
                     };
@@ -177,7 +174,7 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
                 pool.isPoolWithTokens(lastTokenAddress, to.address)
             );
             return pools.map(pool =>
-                HorizondexUniswapV3QuoterController.getQuoterMethodData(
+                UnichainUniswapV3QuoterController.getQuoterMethodData(
                     path.concat(pool),
                     from,
                     to,

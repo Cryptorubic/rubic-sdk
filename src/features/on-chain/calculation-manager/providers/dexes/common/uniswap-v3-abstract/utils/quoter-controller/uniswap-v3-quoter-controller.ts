@@ -140,6 +140,7 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
         routerTokens: Token[];
         routerLiquidityPools: LiquidityPool[];
     }> {
+        // sets this.routerTokens and this.routerLiquidityPools on first page loading when they are undefiined
         if (!this.routerTokens || !this.routerLiquidityPools) {
             const tokens: Token[] = await Token.createTokens(
                 Object.values(this.routerConfiguration.tokens),
@@ -230,7 +231,7 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
             )
         ).map(result => result.output!);
 
-        return poolsAddresses
+        const fetchedPools = poolsAddresses
             .map((poolAddress, index) => {
                 const poolMethodArguments = getPoolsMethodArguments?.[index];
                 if (!poolMethodArguments) {
@@ -246,8 +247,11 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
                 }
                 return null;
             })
-            .filter(notNull)
-            .concat(routerLiquidityPools);
+            .filter(notNull);
+
+        const allPools = fetchedPools.concat(routerLiquidityPools);
+
+        return allPools;
     }
 
     public async getAllRoutes(

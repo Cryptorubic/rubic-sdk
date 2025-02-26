@@ -1,8 +1,8 @@
 import { AbiItem } from 'web3-utils';
 
-export const HORIZONDEX_QUOTER_CONTRACT_ADDRESS = '0x07AceD5690e09935b1c0e6E88B772d9440F64718';
+export const HORIZONDEX_QUOTER_V2_CONTRACT_ADDRESS = '0x07AceD5690e09935b1c0e6E88B772d9440F64718';
 
-export const HORIZONDEX_QUOTER_CONTRACT_ABI = [
+export const HORIZONDEX_QUOTER_V2_CONTRACT_ABI = [
     {
         inputs: [
             { internalType: 'bytes', name: 'path', type: 'bytes' },
