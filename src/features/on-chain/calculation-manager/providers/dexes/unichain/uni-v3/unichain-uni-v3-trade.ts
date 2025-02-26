@@ -1,6 +1,7 @@
 import { RubicSdkError } from 'src/common/errors';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 
 import { UniswapV3AbstractTrade } from '../../common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { UniswapV3QuoterController } from '../../common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
@@ -58,6 +59,38 @@ export class UniswapV3UnichainTrade extends UniswapV3AbstractTrade {
                     ...amountParams
                 ]
             ]
+        };
+    }
+
+    protected getSwapRouterMethodData(receiverAddress?: string): MethodData {
+        if (!this.to.isNative) {
+            const { methodName: exactInputMethodName, methodArguments: exactInputMethodArguments } =
+                this.getSwapRouterExactInputMethodData(receiverAddress || this.walletAddress);
+            return {
+                methodName: exactInputMethodName,
+                methodArguments: exactInputMethodArguments
+            };
+        }
+
+        const { methodName: exactInputMethodName, methodArguments: exactInputMethodArguments } =
+            // recipient is SwapRouterV2 of uniswap
+            this.getSwapRouterExactInputMethodData(this.dexContractAddress);
+        const exactInputMethodEncoded = EvmWeb3Pure.encodeFunctionCall(
+            this.contractAbi,
+            exactInputMethodName,
+            exactInputMethodArguments
+        );
+
+        const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
+        const unwrapWETHMethodEncoded = EvmWeb3Pure.encodeFunctionCall(
+            this.contractAbi,
+            this.unwrapWethMethodName,
+            [amountOutMin, receiverAddress || this.walletAddress]
+        );
+
+        return {
+            methodName: 'multicall',
+            methodArguments: [[exactInputMethodEncoded, unwrapWETHMethodEncoded]]
         };
     }
 }
