@@ -2990,10 +2990,10 @@
   dependencies:
     axios "^0.27.2"
 
-"@teleportdao/teleswap-sdk@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@teleportdao/teleswap-sdk/-/teleswap-sdk-2.2.1.tgz#94d8f5d1580e89e37fcd6b7262ae4507fb284c68"
-  integrity sha512-M6wzYbCpF7GaqXvrvRRnoYBHk3fJwVIfXixbVOJITMCHT6qX0wHuHCYX1vvfdU0UpS35Buao2G22aARGEioxSw==
+"@teleportdao/teleswap-sdk@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@teleportdao/teleswap-sdk/-/teleswap-sdk-2.2.2.tgz#b5ae194e0d6a418c33118a3e2cf6165b56e89f22"
+  integrity sha512-RyWgSMcJiclngVa6ZedLTsjsCN2SjVSUIujWeU+rBWl+46NiDuUlo/NSasTZQqfvOOfl4d2uo4l6I8mSgaKIkg==
   dependencies:
     "@teleportdao/bitcoin" "^2.2.1"
     "@teleportdao/configs" "^2.2.1"

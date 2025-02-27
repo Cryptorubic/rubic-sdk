@@ -12,7 +12,6 @@ import { ContractMulticallResponse } from '../models/contract-multicall-response
 import { SupportedTokenField } from '../models/supported-token-field';
 import { Web3Public } from '../web3-public';
 import { BitcoinUserAddressInfo } from './models/bitcoin-user-address-info';
-
 export class BitcoinWeb3Public extends Web3Public {
     constructor() {
         super(BLOCKCHAIN_NAME.BITCOIN);
@@ -80,14 +79,13 @@ export class BitcoinWeb3Public extends Web3Public {
         const response = await Injector.httpClient.get<BitcoinUserAddressInfo>(url);
 
         const txs = response.txs;
-
         let publicKey = null;
 
         for (const txData of txs) {
             const userInputData = txData.inputs.find(inputData => {
                 const isInputFromUserAddress = inputData.addresses.includes(userAddress);
 
-                const publicKey = inputData.witness[1];
+                const publicKey = inputData.witness?.[1];
 
                 return isInputFromUserAddress && publicKey;
             });

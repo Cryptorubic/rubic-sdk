@@ -1,5 +1,9 @@
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -15,6 +19,7 @@ import {
 } from './constants/teleswap-ccr-supported-chains';
 import { TeleSwapUtilsService } from './services/teleswap-utils-service';
 import { TeleSwapCcrFactory } from './teleswap-ccr-factory';
+import { NotSupportedTokensError } from 'src/common/errors';
 
 export class TeleSwapCcrProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.TELE_SWAP;
@@ -26,15 +31,18 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount<EvmBlockchainName>,
+        from: PriceTokenAmount<BlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const useProxy = options?.useProxy?.[this.type] ?? true;
-
         try {
+            if (from.blockchain === BLOCKCHAIN_NAME.BITCOIN && toToken.isWrapped) {
+                throw new NotSupportedTokensError();
+            }
+
+            const useProxy = options?.useProxy?.[this.type] ?? true;
             const feeInfo = await this.getFeeInfo(
-                from.blockchain,
+                from.blockchain as EvmBlockchainName,
                 options.providerAddress,
                 from,
                 useProxy

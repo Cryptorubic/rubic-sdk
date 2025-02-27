@@ -3,6 +3,7 @@ import { SupportedNetwork } from '@teleportdao/teleswap-sdk/dist/types';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
+    InsufficientFundsGasPriceValueError,
     RubicSdkError,
     TooLowAmountError,
     UserRejectError
@@ -186,7 +187,9 @@ export class TeleSwapBtcCcrTrade extends BitcoinCrossChainTrade {
                 amount: this.to.stringWeiAmount
             };
         } catch (err) {
-            console.error(err);
+            if (err.message?.includes('not enough balance')) {
+                throw new InsufficientFundsGasPriceValueError();
+            }
             throw new RubicSdkError(err);
         }
     }

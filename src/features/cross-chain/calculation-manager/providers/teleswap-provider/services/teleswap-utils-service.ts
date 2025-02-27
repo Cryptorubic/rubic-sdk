@@ -19,7 +19,7 @@ import { TeleSwapEstimateResponse } from '../models/teleswap-estimate-response';
 import { TELESWAP_REF_CODE } from '../constants/teleswap-ref-code';
 
 export class TeleSwapUtilsService {
-    public static nativeTokenAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+    private static bitcoinFeePercent = 0.02;
 
     public static async createTeleSwapSdkConnection(): Promise<TeleswapSDK> {
         const teleSwapSdk = new TeleswapSDK(false);
@@ -67,7 +67,11 @@ export class TeleSwapUtilsService {
             toTokenAddress!
         )) as TeleSwapEstimateResponse;
 
-        return new BigNumber(estimation.outputAmount);
+        const toAmount = new BigNumber(estimation.outputAmount);
+
+        const feeWeiAmount = toAmount.multipliedBy(TeleSwapUtilsService.bitcoinFeePercent);
+
+        return toAmount.minus(feeWeiAmount);
     }
 
     private static async calculateBtcOutputWeiAmount(
