@@ -84,7 +84,7 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
             crossChainTrade.onChainTrade,
             crossChainTrade.from,
             crossChainTrade.to,
-            crossChainTrade.toTokenAmountMin,
+            new BigNumber(0),
             crossChainTrade.gasData,
             crossChainTrade.feeInfo,
             crossChainTrade.from.calculatePriceImpactPercent(crossChainTrade.to),

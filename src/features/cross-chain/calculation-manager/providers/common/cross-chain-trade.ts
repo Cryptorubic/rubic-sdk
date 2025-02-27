@@ -314,19 +314,27 @@ export abstract class CrossChainTrade<T = unknown> {
     public abstract getTradeInfo(): TradeInfo;
 
     protected abstract getTransactionConfigAndAmount(
-        receiverAddress?: string
+        testMode?: boolean,
+        receiverAddress?: string,
+        refundAddress?: string
     ): Promise<{ config: T; amount: string }>;
 
     protected async setTransactionConfig(
         skipAmountChangeCheck: boolean,
         useCacheData: boolean,
-        receiverAddress?: string
+        testMode?: boolean,
+        receiverAddress?: string,
+        refundAddress?: string
     ): Promise<T> {
         if (this.lastTransactionConfig && useCacheData) {
             return this.lastTransactionConfig;
         }
 
-        const { config, amount } = await this.getTransactionConfigAndAmount(receiverAddress);
+        const { config, amount } = await this.getTransactionConfigAndAmount(
+            testMode,
+            receiverAddress,
+            refundAddress
+        );
         this.lastTransactionConfig = config;
         setTimeout(() => {
             this.lastTransactionConfig = null;

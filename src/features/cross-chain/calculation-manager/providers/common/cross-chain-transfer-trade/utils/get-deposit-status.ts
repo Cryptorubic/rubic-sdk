@@ -5,6 +5,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 
+import { ChangellyApiService } from '../../../changelly-provider/services/changelly-api-service';
 import { ChangeNowCrossChainApiService } from '../../../changenow-provider/services/changenow-cross-chain-api-service';
 import { SimpleSwapApiService } from '../../../simple-swap-provider/services/simple-swap-api-service';
 import { CrossChainDepositData } from '../models/cross-chain-deposit-statuses';
@@ -15,7 +16,8 @@ const getDepositStatusFnMap: Partial<
     Record<CrossChainTradeType | OnChainTradeType, getDepositStatusFn>
 > = {
     [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: ChangeNowCrossChainApiService.getTxStatus,
-    [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: SimpleSwapApiService.getTxStatus
+    [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: SimpleSwapApiService.getTxStatus,
+    [CROSS_CHAIN_TRADE_TYPE.CHANGELLY]: ChangellyApiService.getTxStatus
 };
 
 export function getDepositStatus(

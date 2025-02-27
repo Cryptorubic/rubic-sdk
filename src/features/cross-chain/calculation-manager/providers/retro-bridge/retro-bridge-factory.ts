@@ -6,11 +6,9 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { RetroBridgeEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/chains/retro-bridge-evm-trade';
-import { RetroBridgeTonTrade } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/chains/retro-bridge-ton-trade';
 import {
     RetroBridgeConstructorParams,
-    RetroBridgeEvmConstructorParams,
-    RetroBridgeTonConstructorParams
+    RetroBridgeEvmConstructorParams
 } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-constructor-params';
 
 export class RetroBridgeFactory {

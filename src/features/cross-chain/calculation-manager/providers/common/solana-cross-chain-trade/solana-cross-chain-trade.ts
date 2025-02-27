@@ -72,6 +72,7 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
             const { data } = await this.setTransactionConfig(
                 false,
                 options?.useCacheData || false,
+                options.testMode,
                 options?.receiverAddress
             );
 
@@ -107,6 +108,7 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
         return this.setTransactionConfig(
             options?.skipAmountCheck || false,
             options?.useCacheData || false,
+            options.testMode,
             options?.receiverAddress || this.walletAddress
         );
     }
@@ -124,13 +126,15 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
     }
 
     protected async getTransactionConfigAndAmount(
-        receiverAddress: string
+        testMode?: boolean,
+        receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const swapRequestParams: SwapRequestInterface = {
             ...this.apiQuote,
             fromAddress: this.walletAddress,
             receiver: receiverAddress,
-            id: this.apiResponse.id
+            id: this.apiResponse.id,
+            enableChecks: !testMode
         };
 
         const { transaction, estimate } =

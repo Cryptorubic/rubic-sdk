@@ -182,18 +182,22 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         return this.setTransactionConfig(
             options?.skipAmountCheck || false,
             options?.useCacheData || false,
-            options?.receiverAddress || this.walletAddress
+            options.testMode || false,
+            options?.receiverAddress || this.walletAddress,
+            options?.refundAddress
         );
     }
 
     protected async getTransactionConfigAndAmount(
+        testMode?: boolean,
         receiverAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const swapRequestData: SwapRequestInterface = {
             ...this.apiQuote,
             fromAddress: this.walletAddress,
             receiver: receiverAddress,
-            id: this.apiResponse.id
+            id: this.apiResponse.id,
+            enableChecks: !testMode
         };
         const swapData = await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(
             swapRequestData

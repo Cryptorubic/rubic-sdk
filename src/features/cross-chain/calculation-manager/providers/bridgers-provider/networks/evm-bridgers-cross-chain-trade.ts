@@ -97,6 +97,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         } = await this.setTransactionConfig(
             false,
             options?.useCacheData || false,
+            options.testMode,
             options?.receiverAddress
         );
 
@@ -171,6 +172,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected async getTransactionConfigAndAmount(
+        _testMode?: boolean,
         receiverAddress?: string
     ): Promise<{ config: EvmBridgersTransactionData; amount: string }> {
         const fromBlockchain = this.from.blockchain as BridgersCrossChainSupportedBlockchain;

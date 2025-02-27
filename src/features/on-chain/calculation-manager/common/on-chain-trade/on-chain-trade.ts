@@ -6,7 +6,7 @@ import {
     WrongReceiverAddressError
 } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
-import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
@@ -40,7 +40,7 @@ export abstract class OnChainTrade {
 
     protected abstract readonly spenderAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
-    public abstract readonly path: ReadonlyArray<Token>;
+    public abstract readonly path: RubicStep[];
 
     public abstract readonly feeInfo: FeeInfo;
 
@@ -231,25 +231,13 @@ export abstract class OnChainTrade {
         }
     }
 
-    protected getRoutePath(): RubicStep[] {
-        return [
-            {
-                type: 'on-chain',
-                provider: this.type,
-                path: this.path.map(
-                    token => new TokenAmount({ ...token, tokenAmount: new BigNumber(0) })
-                )
-            }
-        ];
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: null,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
             slippage: this.slippageTolerance * 100,
-            routePath: this.getRoutePath()
+            routePath: this.path
         };
     }
 
