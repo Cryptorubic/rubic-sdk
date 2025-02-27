@@ -2,6 +2,7 @@ import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -35,6 +36,11 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
     protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
+
+    /**
+     * Signature to auth wallet
+     */
+    protected signature = '';
 
     protected get gasLimitRatio(): number {
         if (
@@ -124,6 +130,18 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         );
     }
 
+    public async authWallet(): Promise<string> {
+        if (this.needAuthWallet) {
+            const res = await Injector.rubicApiService.getMessageToAuthWallet(this.walletAddress);
+
+            const signature = await this.web3Private.signMessage(res.messageToAuth);
+            this.signature = signature;
+            return signature;
+        }
+
+        throw new RubicSdkError('No need to auth wallet');
+    }
+
     /**
      *
      * @returns txHash(srcTxHash) | never
@@ -197,7 +215,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             fromAddress: this.walletAddress,
             receiver: receiverAddress,
             id: this.apiResponse.id,
-            enableChecks: !testMode
+            enableChecks: !testMode,
+            ...(this.signature && { signature: this.signature })
         };
         const swapData = await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(
             swapRequestData

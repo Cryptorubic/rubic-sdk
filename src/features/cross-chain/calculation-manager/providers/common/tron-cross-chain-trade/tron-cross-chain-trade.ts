@@ -2,6 +2,7 @@ import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -180,5 +181,9 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
         const toAmount = swapData.estimate.destinationWeiAmount;
 
         return { config: swapData.transaction, amount: toAmount };
+    }
+
+    public authWallet(): Promise<string> {
+        throw new RubicSdkError('Method not implemented.');
     }
 }

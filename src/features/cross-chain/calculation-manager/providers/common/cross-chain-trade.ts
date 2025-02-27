@@ -114,6 +114,12 @@ export abstract class CrossChainTrade<T = unknown> {
         return this.to.stringWeiAmount;
     }
 
+    public get needAuthWallet(): boolean {
+        return false;
+    }
+
+    public abstract authWallet(): Promise<string>;
+
     protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);

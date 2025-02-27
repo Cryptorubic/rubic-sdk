@@ -24,7 +24,6 @@ import { RetroBridgeSupportedBlockchain } from 'src/features/cross-chain/calcula
 import { RetroBridgeEvmConstructorParams } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-constructor-params';
 import { RetroBridgeQuoteSendParams } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-quote-send-params';
 import { RetroBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/models/retro-bridge-trade';
-import { RetroBridgeApiService } from 'src/features/cross-chain/calculation-manager/providers/retro-bridge/services/retro-bridge-api-service';
 
 export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBridgeTrade {
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE;
@@ -106,26 +105,26 @@ export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBrid
         };
     }
 
-    public async needAuthWallet(): Promise<boolean> {
-        try {
-            const msg = await RetroBridgeApiService.checkWallet(this.walletAddress, this.chainType);
+    // public async needAuthWallet(): Promise<boolean> {
+    //     try {
+    //         const msg = await RetroBridgeApiService.checkWallet(this.walletAddress, this.chainType);
 
-            return msg.toLowerCase() !== 'success';
-        } catch {
-            return true;
-        }
-    }
+    //         return msg.toLowerCase() !== 'success';
+    //     } catch {
+    //         return true;
+    //     }
+    // }
 
-    public async authWallet(): Promise<never | void> {
-        const signData = await RetroBridgeApiService.getMessageToAuthWallet();
+    // public async authWallet(): Promise<never | void> {
+    //     const signData = await RetroBridgeApiService.getMessageToAuthWallet();
 
-        const signMessage = `${signData}\n${this.walletAddress}`;
+    //     const signMessage = `${signData}\n${this.walletAddress}`;
 
-        const signature = await this.web3Private.signMessage(signMessage);
-        await RetroBridgeApiService.sendSignedMessage(
-            this.walletAddress,
-            signature,
-            this.chainType
-        );
-    }
+    //     const signature = await this.web3Private.signMessage(signMessage);
+    //     await RetroBridgeApiService.sendSignedMessage(
+    //         this.walletAddress,
+    //         signature,
+    //         this.chainType
+    //     );
+    // }
 }

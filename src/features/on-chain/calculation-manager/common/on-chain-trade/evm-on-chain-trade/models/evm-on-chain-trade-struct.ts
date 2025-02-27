@@ -26,7 +26,7 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
 
 export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainName> {
     permit2ApproveAddress?: string;
-    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    proxyFeeInfo?: OnChainProxyFeeInfo;
     fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
     path: RubicStep[];
     apiQuote: QuoteRequestInterface | null;

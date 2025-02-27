@@ -5,7 +5,6 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import {
@@ -115,7 +114,7 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
             throw new WrongReceiverAddressError();
         }
 
-        const needAuthWallet = await this.needAuthWallet();
+        const needAuthWallet = false;
         if (needAuthWallet) {
             throw new RubicSdkError('Need to authorize the wallet via authWallet method');
         }
@@ -152,20 +151,20 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
         );
     }
 
-    public async needAuthWallet(): Promise<boolean> {
-        try {
-            const addresses = await TonWeb3Pure.getAllFormatsOfAddress(this.walletAddress);
-            const msg = await RetroBridgeApiService.checkWallet(addresses.raw_form, this.chainType);
+    // public async needAuthWallet(): Promise<boolean> {
+    //     try {
+    //         const addresses = await TonWeb3Pure.getAllFormatsOfAddress(this.walletAddress);
+    //         const msg = await RetroBridgeApiService.checkWallet(addresses.raw_form, this.chainType);
 
-            return msg.toLowerCase() !== 'success';
-        } catch {
-            return true;
-        }
-    }
+    //         return msg.toLowerCase() !== 'success';
+    //     } catch {
+    //         return true;
+    //     }
+    // }
 
-    public async authWallet(): Promise<never | void> {
-        console.error('Wallet should be authenticated on connection stage');
-    }
+    // public async authWallet(): Promise<never | void> {
+    //     console.error('Wallet should be authenticated on connection stage');
+    // }
 
     protected getTransactionConfigAndAmount(
         _testMode: boolean,

@@ -33,12 +33,20 @@ export class EvmApiOnChainTrade extends EvmOnChainTrade {
     public readonly dexContractAddress: string;
 
     constructor(params: EvmApiOnChainConstructor) {
-        super(params.tradeStruct);
-        this.dexContractAddress = params.tradeStruct.apiResponse?.transaction.approvalAddress!;
+        super({
+            ...params,
+            path: params.routePath,
+            gasFeeInfo: null,
+            useProxy: false,
+            slippageTolerance: params.apiResponse!.estimate.slippage,
+            withDeflation: { from: { isDeflation: false }, to: { isDeflation: false } },
+            fromWithoutFee: params.from
+        });
+        this.dexContractAddress = params.apiResponse?.transaction.approvalAddress!;
 
-        this.type = params.tradeStruct.apiResponse!.providerType as OnChainTradeType;
-        this._priceImpact = params.tradeStruct.apiResponse!.estimate.priceImpact;
-        this.slippage = params.tradeStruct.apiResponse!.estimate.slippage;
+        this.type = params.apiResponse!.providerType as OnChainTradeType;
+        this._priceImpact = params.apiResponse!.estimate.priceImpact;
+        this.slippage = params.apiResponse!.estimate.slippage;
 
         this.to = params.to;
         this.feeInfo = params.feeInfo;

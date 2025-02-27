@@ -1,6 +1,6 @@
 import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
-import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
+import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TonWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/ton-web3-private';
@@ -102,5 +102,9 @@ export abstract class TonCrossChainTrade extends CrossChainTrade<TonTransactionC
         }
 
         return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
+    }
+
+    public authWallet(): Promise<string> {
+        throw new RubicSdkError('Method not implemented.');
     }
 }

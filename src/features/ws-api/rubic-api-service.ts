@@ -116,7 +116,10 @@ export class RubicApiService {
                               rubicApiError
                           );
                 return from(promise).pipe(
-                    catchError(() => of(null)),
+                    catchError(err => {
+                        console.log(err);
+                        return of(null);
+                    }),
                     map(wrappedTrade => ({
                         total,
                         calculated,
@@ -129,5 +132,11 @@ export class RubicApiService {
 
     public fetchCrossChainTxStatus(srcTxHash: string): Promise<CrossChainTxStatusConfig> {
         return Injector.httpClient.get(`${this.apiUrl}/api/info/status?srcTxHash=${srcTxHash}`);
+    }
+
+    public getMessageToAuthWallet(walletAddress: string): Promise<{ messageToAuth: string }> {
+        return Injector.httpClient.get(
+            `${this.apiUrl}/api/utility/authWalletMessage?walletAddress=${walletAddress}`
+        );
     }
 }
