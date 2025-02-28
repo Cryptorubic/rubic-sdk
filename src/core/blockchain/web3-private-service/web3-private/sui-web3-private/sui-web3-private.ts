@@ -1,4 +1,5 @@
 import { WalletAdapter } from '@suiet/wallet-sdk/dist/wallet-standard/WalletAdapter';
+import { UserRejectError } from 'src/common/errors';
 import { Any } from 'src/common/utils/types';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -37,6 +38,9 @@ export class SuiWeb3Private extends Web3Private {
 
             return tx.digest;
         } catch (err) {
+            if (err?.message.inculdes('User rejected the request.')) {
+                throw new UserRejectError();
+            }
             console.error(`Send transaction error. ${err}`);
             throw EvmWeb3Private.parseError(err as Web3Error);
         }

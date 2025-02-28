@@ -114,13 +114,14 @@ export class SuiWeb3Public extends Web3Public {
     public async getBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
         const isToken = tokenAddress && !SuiWeb3Pure.isNativeAddress(tokenAddress);
         if (isToken) {
-            const balance = await this.client.getBalance({ owner: userAddress });
+            const balance = await this.client.getBalance({
+                owner: userAddress,
+                coinType: tokenAddress
+            });
+
             return new BigNumber(balance.totalBalance);
         }
-        const balance = await this.client.getBalance({
-            owner: userAddress,
-            coinType: tokenAddress
-        });
+        const balance = await this.client.getBalance({ owner: userAddress });
         return new BigNumber(balance.totalBalance);
     }
 
