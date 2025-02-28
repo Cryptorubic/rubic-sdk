@@ -29,7 +29,7 @@ export class RubicApiService {
         if (env === 'dev2') {
             return 'https://dev2-api-v2.rubic.exchange';
         }
-        return 'https://api-v2.rubic.exchange';
+        return 'https://rubic-api-v2.rubic.exchange';
     }
 
     private readonly client = this.getSocket();
