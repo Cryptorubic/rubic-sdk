@@ -83,7 +83,8 @@ export class OpenOceanApiService {
         fromWithoutFee: PriceTokenAmount<SuiBlockchainName>,
         to: PriceTokenAmount,
         walletAddress: string,
-        slippageTolerance: number
+        slippageTolerance: number,
+        senderAddress: string
     ): Promise<OpenoceanSuiSwapQuoteResponse> {
         const gasPriceNonWei = await this.getGasPriceNonWei(fromWithoutFee);
 
@@ -99,6 +100,7 @@ export class OpenOceanApiService {
                     gasPrice: gasPriceNonWei,
                     slippage: slippageTolerance * 100,
                     account: walletAddress,
+                    sender: senderAddress,
                     referrer: '0x429A3A1a2623DFb520f1D93F64F38c0738418F1f'
                 }
             }

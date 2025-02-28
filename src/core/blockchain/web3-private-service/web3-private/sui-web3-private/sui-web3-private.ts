@@ -38,7 +38,10 @@ export class SuiWeb3Private extends Web3Private {
 
             return tx.digest;
         } catch (err) {
-            if (err?.message.includes('User rejected the request.')) {
+            if (
+                err?.message.includes('User rejected the request.') ||
+                err?.message.includes('User rejection | (UserRejectionError:-4005)')
+            ) {
                 throw new UserRejectError();
             }
             console.error(`Send transaction error. ${err}`);

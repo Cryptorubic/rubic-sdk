@@ -69,6 +69,11 @@ export interface OnChainCalculationOptions {
         from: IsDeflationToken;
         to: IsDeflationToken;
     };
+
+    /**
+     * Receiver wallet address.
+     */
+    readonly receiverAddress?: string;
 }
 
 export type RequiredOnChainCalculationOptions = MarkRequired<

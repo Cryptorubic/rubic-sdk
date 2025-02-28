@@ -54,7 +54,8 @@ export class OpenOceanSuiTrade extends AggregatorSuiOnChainTrade {
             this.fromWithoutFee as PriceTokenAmount<SuiBlockchainName>,
             this.to,
             receiverAddress || fromAddress || this.walletAddress,
-            this.slippageTolerance
+            this.slippageTolerance,
+            this.walletAddress
         );
         const tx = swapQuoteResponse.data;
         return { tx: { transaction: tx.data }, toAmount: tx.outAmount };

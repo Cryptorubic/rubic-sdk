@@ -38,6 +38,13 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
             await this.checkIsSupportedTokens(from, toToken);
+            // Uncomment after OO answer
+            // if (from.blockchain === BLOCKCHAIN_NAME.SUI) {
+            //     checkUnsupportedReceiverAddress(
+            //         options?.receiverAddress,
+            //         options?.fromAddress || this.getWalletAddress(from.blockchain)
+            //     );
+            // }
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
 
             const quoteResponse = await pTimeout(
