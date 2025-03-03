@@ -8,3 +8,12 @@ export interface OpenoceanSwapQuoteResponse {
     };
     error?: string;
 }
+
+export interface OpenoceanSuiSwapQuoteResponse {
+    code: number;
+    data: {
+        data: string;
+        outAmount: string;
+    };
+    error?: string;
+}
