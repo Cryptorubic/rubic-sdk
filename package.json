@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.52.7-alpha-1163.22",
+    "version": "5.54.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -14,7 +14,7 @@
     },
     "homepage": "https://github.com/Cryptorubic/rubic-sdk",
     "bugs": {
-        "url": "https://github.com/cryptorubic/rubic-sdk/issues"
+        "url": "https://github.com/Cryptorubic/rubic-sdk/issues"
     },
     "keywords": [
         "Ethereum",
@@ -105,7 +105,7 @@
         "ethers": "^5.6.8",
         "graphql-request": "^6.1.0",
         "grpc-web": "^1.4.2",
-        "iziswap-sdk": "1.5.1",
+        "iziswap-sdk": "3.0.1",
         "lodash.clonedeep": "^4.5.0",
         "rpc-websockets": "7.9.0",
         "rxjs": "7.8.1",

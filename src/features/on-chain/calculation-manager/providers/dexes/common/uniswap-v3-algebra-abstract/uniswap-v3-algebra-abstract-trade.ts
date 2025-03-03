@@ -231,10 +231,10 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         return { tx: config, toAmount: this.to.stringWeiAmount };
     }
 
-    private getSwapRouterMethodData(fromAddress?: string): MethodData {
+    protected getSwapRouterMethodData(receiverAddress?: string): MethodData {
         if (!this.to.isNative) {
             const { methodName: exactInputMethodName, methodArguments: exactInputMethodArguments } =
-                this.getSwapRouterExactInputMethodData(fromAddress || this.walletAddress);
+                this.getSwapRouterExactInputMethodData(receiverAddress || this.walletAddress);
             return {
                 methodName: exactInputMethodName,
                 methodArguments: exactInputMethodArguments
@@ -253,7 +253,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         const unwrapWETHMethodEncoded = EvmWeb3Pure.encodeFunctionCall(
             this.contractAbi,
             this.unwrapWethMethodName,
-            [amountOutMin, fromAddress || this.walletAddress]
+            [amountOutMin, receiverAddress || this.walletAddress]
         );
 
         return {

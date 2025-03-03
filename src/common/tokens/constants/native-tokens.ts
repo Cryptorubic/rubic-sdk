@@ -97,6 +97,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Ether',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MONAD_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MONAD_TESTNET,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Monad',
+        symbol: 'MON',
+        decimals: 18
     })
 };
 
@@ -738,6 +745,13 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
     }),
     [BLOCKCHAIN_NAME.SONEIUM]: new Token({
         blockchain: BLOCKCHAIN_NAME.SONEIUM,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.UNICHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.UNICHAIN,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Ethereum',
         symbol: 'ETH',

@@ -98,7 +98,7 @@ export class DeflationTokenManager {
         try {
             await this.simulateTransferWithSwap(bestTrade, evmToken);
         } catch (error) {
-            if (error?.data?.includes(ERROR_SELECTOR)) {
+            if (typeof error?.data === 'string' && error?.data?.includes?.(ERROR_SELECTOR)) {
                 return this.parseError(error.data);
             }
         }
