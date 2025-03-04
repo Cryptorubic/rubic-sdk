@@ -104,4 +104,23 @@ export class BitcoinWeb3Private extends Web3Private {
     constructor(private readonly wallet: BitcoinWalletProviderCore) {
         super(wallet.address);
     }
+
+    public async getPublicKeyFromWallet(): Promise<string> {
+        const res = await this.wallet.core.request<{ publicKey: string }[]>(
+            {
+                method: 'request_accounts_and_keys',
+                params: {
+                    purposes: ['payment']
+                }
+            },
+            () => {}
+        );
+
+        if (res.error) {
+            console.error(res.error);
+            throw res.error;
+        }
+
+        return res.result[0]?.publicKey!;
+    }
 }

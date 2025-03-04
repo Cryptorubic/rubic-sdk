@@ -38,7 +38,6 @@ import {
 } from '../constants/teleswap-swap-and-unwrap-abi';
 import { TeleSwapEvmConstructorParams } from '../models/teleswap-constructor-params';
 import { TeleSwapUtilsService } from '../services/teleswap-utils-service';
-import { TELESWAP_REF_CODE } from '../constants/teleswap-ref-code';
 
 export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.TELE_SWAP;
@@ -118,7 +117,7 @@ export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
-            type: `native:${this.bridgeType}`,
+            type: 'teleswap',
             fromAddress: this.walletAddress,
             toAddress: receivingAsset
         });

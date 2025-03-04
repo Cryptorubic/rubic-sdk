@@ -1,3 +1,4 @@
+import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import {
     BLOCKCHAIN_NAME,
@@ -19,7 +20,6 @@ import {
 } from './constants/teleswap-ccr-supported-chains';
 import { TeleSwapUtilsService } from './services/teleswap-utils-service';
 import { TeleSwapCcrFactory } from './teleswap-ccr-factory';
-import { NotSupportedTokensError } from 'src/common/errors';
 
 export class TeleSwapCcrProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.TELE_SWAP;

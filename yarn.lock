@@ -2946,14 +2946,14 @@
   dependencies:
     defer-to-connect "^2.0.1"
 
-"@teleportdao/bitcoin@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@teleportdao/bitcoin/-/bitcoin-2.2.1.tgz#b0d81e81902678297f8a4f00fde5d06aaa995ecb"
-  integrity sha512-oMO+LDxBAYBPkkT51Z0KNEVFJ1WUSFimP5rwndJvczNYiaIzNhBczyW6sMYxu5Z+nV/o+yFiFmi75a2osMZLcw==
+"@teleportdao/bitcoin@^2.2.3":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@teleportdao/bitcoin/-/bitcoin-2.2.3.tgz#ccb6c3f60b41cd46bb34080cec02cbc8cdeabd43"
+  integrity sha512-3Vc4kF8CTAwT/rVDsmZNHd8Jj2pfsEX464cRP58FM+YS5AoUMoynTk2CgDZRwLpTNyfwWbzoNOedA27DWKhhLQ==
   dependencies:
     "@bitcoinerlab/secp256k1" "^1.0.5"
-    "@teleportdao/configs" "^2.2.1"
-    "@teleportdao/providers" "^2.2.1"
+    "@teleportdao/configs" "^2.2.3"
+    "@teleportdao/providers" "^2.2.3"
     axios "^0.27.2"
     bignumber.js "^9.1.1"
     bip32 "^4.0.0"
@@ -2966,39 +2966,39 @@
     tiny-secp256k1 "^2.2.3"
     varuint-bitcoin "^1.1.2"
 
-"@teleportdao/configs@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@teleportdao/configs/-/configs-2.2.1.tgz#510de342e550b9c49a19bfe14f0b6ac40663857f"
-  integrity sha512-35C2YGV4IgS6VeDUDupaVdF9xUqDy/gBbSuWUqULICbhsJ9zzTHyi2rY4ITyUeqyGMbCXLTuYLQ0cevnhdp7MQ==
+"@teleportdao/configs@^2.2.3":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@teleportdao/configs/-/configs-2.2.3.tgz#bfb0f0cbad7e5a7b577970a2cbed413a86253ac8"
+  integrity sha512-bZbxmsS8jCRjDYuxVO2j8wIDOfbXk7RGaUcok/vLN145rGldBW7qnv+GVP20M3wzOteD78SMV7V45y96hdSY5g==
 
-"@teleportdao/contracts-helper@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@teleportdao/contracts-helper/-/contracts-helper-2.2.1.tgz#2071728069d68ff8a1f1a50d29c79f2eaafdd9b3"
-  integrity sha512-kM6FVp9EyTO2OIK7OXEfSGr8yN9Hebjj1Lm2gUWVP0z26Fyhat2rCbEx2yIJm14rXaO80HVNAZdtKTUZFk2vsw==
+"@teleportdao/contracts-helper@^2.2.3":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@teleportdao/contracts-helper/-/contracts-helper-2.2.3.tgz#e7388fdde7a2ae65ce3055d587e2405fb66342d6"
+  integrity sha512-aZKzHoNx0kbNZB3qp7yAc6a5NMONDf9qWmotPojiX3p18K+THrPBxR4PRP0Qat7H/iGC+hI/GrvA8iFcZs4AuQ==
   dependencies:
-    "@teleportdao/bitcoin" "^2.2.1"
-    "@teleportdao/configs" "^2.2.1"
+    "@teleportdao/bitcoin" "^2.2.3"
+    "@teleportdao/configs" "^2.2.3"
     bignumber.js "^9.1.1"
     bip32 "^2.0.6"
     bip39 "^3.0.4"
     web3 "4.10.0"
 
-"@teleportdao/providers@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@teleportdao/providers/-/providers-2.2.1.tgz#1fda0d4b201eee9b4c853ae68f5f91502c677190"
-  integrity sha512-FiDFqj6qi9aOvtjH/UJNMitK2bOOcikh4bjDPeaAzdqYlEdmA4mJQYiQzOoVdFLHc1L0RXyzpi+BdMk2mbd7/g==
+"@teleportdao/providers@^2.2.3":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@teleportdao/providers/-/providers-2.2.3.tgz#0f159e1a10311ffa8cf355522d9eaa2c064976c0"
+  integrity sha512-oaNS4xYyHA1jIrA6J+zm8/d6fkOeMyUFjkZp4V5MTzW1B9TRm0kiXECb6PLm0R+RUZ6/+L97mrP+/3h7Qad/yQ==
   dependencies:
     axios "^0.27.2"
 
-"@teleportdao/teleswap-sdk@^2.2.2":
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/@teleportdao/teleswap-sdk/-/teleswap-sdk-2.2.2.tgz#b5ae194e0d6a418c33118a3e2cf6165b56e89f22"
-  integrity sha512-RyWgSMcJiclngVa6ZedLTsjsCN2SjVSUIujWeU+rBWl+46NiDuUlo/NSasTZQqfvOOfl4d2uo4l6I8mSgaKIkg==
+"@teleportdao/teleswap-sdk@^2.2.3":
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/@teleportdao/teleswap-sdk/-/teleswap-sdk-2.2.3.tgz#49d2e6d2fefbd347b7ba83e5ce56305d22a3b9a0"
+  integrity sha512-nQL4D1yNmcwrQjCqH9yIWqctWrFXiTUrRMGGN5cpzNyFQRJdxX9/JpcolWNxRuEs1drd+50jj6FsQdJ9CtsFcA==
   dependencies:
-    "@teleportdao/bitcoin" "^2.2.1"
-    "@teleportdao/configs" "^2.2.1"
-    "@teleportdao/contracts-helper" "^2.2.1"
-    "@teleportdao/providers" "^2.2.1"
+    "@teleportdao/bitcoin" "^2.2.3"
+    "@teleportdao/configs" "^2.2.3"
+    "@teleportdao/contracts-helper" "^2.2.3"
+    "@teleportdao/providers" "^2.2.3"
     bignumber.js "^9.1.2"
 
 "@ton/core@0.59.0", "@ton/core@^0.59.0":

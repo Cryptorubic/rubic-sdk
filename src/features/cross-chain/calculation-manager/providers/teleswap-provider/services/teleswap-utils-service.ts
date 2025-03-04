@@ -2,21 +2,16 @@ import { TeleswapSDK } from '@teleportdao/teleswap-sdk';
 import { SupportedNetwork } from '@teleportdao/teleswap-sdk/dist/types';
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
-import {
-    teleSwapBaseChains,
-    TeleSwapCcrBaseChain,
-    TeleSwapCcrSupportedChain
-} from '../constants/teleswap-ccr-supported-chains';
+import { TeleSwapCcrSupportedChain } from '../constants/teleswap-ccr-supported-chains';
 import { teleSwapNetworkTickers } from '../constants/teleswap-network-tickers';
-import { TeleSwapEstimateResponse } from '../models/teleswap-estimate-response';
 import { TELESWAP_REF_CODE } from '../constants/teleswap-ref-code';
+import { TeleSwapEstimateResponse } from '../models/teleswap-estimate-response';
 
 export class TeleSwapUtilsService {
     private static bitcoinFeePercent = 0.02;

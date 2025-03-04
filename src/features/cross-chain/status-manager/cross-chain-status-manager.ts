@@ -885,7 +885,7 @@ export class CrossChainStatusManager {
                 };
             }
 
-            if (txStatus === 'exchangefailed') {
+            if (txStatus === 'exchangefailed' || txStatus === 'withdrawn') {
                 return {
                     status: TX_STATUS.FALLBACK,
                     hash: isFromEvm
