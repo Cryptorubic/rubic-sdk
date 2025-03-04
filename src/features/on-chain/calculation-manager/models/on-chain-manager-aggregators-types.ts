@@ -1,4 +1,5 @@
 import { OneInchProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/one-inch-provider';
+import { CetusProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/cetus/cetus-provider';
 import { DlnOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/dln-on-chain-provider';
 import { PiteasProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-provider';
 
@@ -34,5 +35,6 @@ export const AGGREGATORS_ON_CHAIN = {
     COFFEE_SWAP: CoffeeSwapProvider,
     SQUIDROUTER: SquidRouterOnChainProvider,
     UNIZEN: UniZenOnChainProvider,
-    TONCO_DEX: ToncoOnChainProvider
+    TONCO_DEX: ToncoOnChainProvider,
+    CETUS: CetusProvider
 } as const;
