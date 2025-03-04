@@ -4,6 +4,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import {
@@ -159,7 +160,7 @@ export class MesonCrossChainEvmTrade extends EvmCrossChainTrade {
             this.feeInfo.rubicProxy?.platformFee?.percent
         );
 
-        const { encoded, initiator } = await MesonCcrApiService.fetchInfoForTx({
+        const { encoded, initiator, fee } = await MesonCcrApiService.fetchInfoForTx({
             sourceAssetString: this.sourceAssetString,
             targetAssetString: this.targetAssetString,
             amount: fromWithoutFee.tokenAmount.toFixed(),
@@ -172,6 +173,7 @@ export class MesonCrossChainEvmTrade extends EvmCrossChainTrade {
         const methodName = 'postSwapFromContract';
         const methodArgs = [encoded, postingValue, rubicMultiProxyAddress];
         const value = this.from.isNative ? fromWithoutFee.stringWeiAmount : '0';
+        const toAmount = this.from.tokenAmount.minus(fee.totalFee);
 
         const config = EvmWeb3Pure.encodeMethodCall(
             mesonContractAddresses[this.fromBlockchain],
@@ -181,7 +183,7 @@ export class MesonCrossChainEvmTrade extends EvmCrossChainTrade {
             value
         );
 
-        return { config, amount: this.to.stringWeiAmount };
+        return { config, amount: Web3Pure.toWei(toAmount, this.to.decimals) };
     }
 
     public getTradeInfo(): TradeInfo {
