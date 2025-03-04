@@ -8,12 +8,12 @@ import {
 /**
  * Most popular tokens in uni v3 to use in a route.
  */
-const tokensSymbols = ['WMATIC', 'WETH', 'DAI', 'USDT', 'USDC'] as const;
+const tokensSymbols = ['WPOL', 'WETH', 'DAI', 'USDT', 'USDC'] as const;
 
 type TokenSymbol = (typeof tokensSymbols)[number];
 
 const routerTokens: Record<TokenSymbol, string> = {
-    WMATIC: wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON]!.address,
+    WPOL: wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON]!.address,
     WETH: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
     DAI: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
     USDT: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
@@ -23,7 +23,7 @@ const routerTokens: Record<TokenSymbol, string> = {
 const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
     {
         poolAddress: '0x167384319B41F7094e62f7506409Eb38079AbfF8',
-        tokenSymbolA: 'WMATIC',
+        tokenSymbolA: 'WPOL',
         tokenSymbolB: 'WETH',
         fee: 3000
     },
@@ -47,13 +47,13 @@ const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
     },
     {
         poolAddress: '0x88f3C15523544835fF6c738DDb30995339AD57d6',
-        tokenSymbolA: 'WMATIC',
+        tokenSymbolA: 'WPOL',
         tokenSymbolB: 'USDC',
         fee: 3000
     },
     {
         poolAddress: '0x86f1d8390222A3691C28938eC7404A1661E618e0',
-        tokenSymbolA: 'WMATIC',
+        tokenSymbolA: 'WPOL',
         tokenSymbolB: 'WETH',
         fee: 500
     }
