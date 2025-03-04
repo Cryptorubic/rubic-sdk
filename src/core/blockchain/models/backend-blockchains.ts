@@ -152,7 +152,10 @@ const BLOCKCHAINS_MAPPING = {
     [BLOCKCHAIN_NAME.MORPH]: 'morph',
     [BLOCKCHAIN_NAME.FRAXTAL]: 'fraxtal',
     [BLOCKCHAIN_NAME.BERACHAIN]: 'berachain',
-    [BLOCKCHAIN_NAME.SONEIUM]: 'soneium'
+    [BLOCKCHAIN_NAME.SONEIUM]: 'soneium',
+    [BLOCKCHAIN_NAME.UNICHAIN]: 'unichain',
+    [BLOCKCHAIN_NAME.MONAD_TESTNET]: 'monad-testnet',
+    [BLOCKCHAIN_NAME.SUI]: 'sui'
 } as const;
 
 export const TO_BACKEND_BLOCKCHAINS: Record<BlockchainName, BackendBlockchain> = {

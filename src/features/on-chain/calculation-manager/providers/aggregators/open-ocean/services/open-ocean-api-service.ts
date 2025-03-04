@@ -1,13 +1,20 @@
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    EvmBlockchainName,
+    SuiBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
 import { ARBITRUM_GAS_PRICE } from '../constants/arbitrum-gas-price';
 import { openOceanBlockchainName } from '../constants/open-ocean-blockchain';
 import { OpenoceanOnChainSupportedBlockchain } from '../constants/open-ocean-on-chain-supported-blockchain';
-import { OpenoceanSwapQuoteResponse } from '../models/open-cean-swap-quote-response';
+import {
+    OpenoceanSuiSwapQuoteResponse,
+    OpenoceanSwapQuoteResponse
+} from '../models/open-cean-swap-quote-response';
 import { OpenOceanQuoteResponse } from '../models/open-ocean-quote-response';
 import { OpenOceanTokenListResponse } from '../models/open-ocean-token-list-response';
 
@@ -72,6 +79,36 @@ export class OpenOceanApiService {
         return swapResponse;
     }
 
+    public static async fetchSuiSwapData(
+        fromWithoutFee: PriceTokenAmount<SuiBlockchainName>,
+        to: PriceTokenAmount,
+        walletAddress: string,
+        slippageTolerance: number,
+        senderAddress: string
+    ): Promise<OpenoceanSuiSwapQuoteResponse> {
+        const gasPriceNonWei = await this.getGasPriceNonWei(fromWithoutFee);
+
+        const swapResponse = await Injector.httpClient.get<OpenoceanSuiSwapQuoteResponse>(
+            `${this.xApiUrl}/v4/${openOceanBlockchainName[fromWithoutFee.blockchain]}/swap`,
+            {
+                headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' },
+                params: {
+                    chain: openOceanBlockchainName[fromWithoutFee.blockchain],
+                    inTokenAddress: this.getTokenAddress(fromWithoutFee),
+                    outTokenAddress: this.getTokenAddress(to),
+                    amount: fromWithoutFee.tokenAmount.toString(),
+                    gasPrice: gasPriceNonWei,
+                    slippage: slippageTolerance * 100,
+                    account: walletAddress,
+                    sender: senderAddress,
+                    referrer: '0x429A3A1a2623DFb520f1D93F64F38c0738418F1f'
+                }
+            }
+        );
+
+        return swapResponse;
+    }
+
     public static async fetchTokensList(
         blockchain: OpenoceanOnChainSupportedBlockchain
     ): Promise<OpenOceanTokenListResponse> {
@@ -86,6 +123,9 @@ export class OpenOceanApiService {
     private static async getGasPriceNonWei(
         fromWithoutFee: PriceTokenAmount<OpenoceanOnChainSupportedBlockchain>
     ): Promise<string> {
+        if (fromWithoutFee.blockchain === BLOCKCHAIN_NAME.SUI) {
+            return '5000000000';
+        }
         if (fromWithoutFee.blockchain === BLOCKCHAIN_NAME.ARBITRUM) {
             return ARBITRUM_GAS_PRICE;
         }
@@ -105,6 +145,9 @@ export class OpenOceanApiService {
 
     private static getTokenAddress(token: PriceToken): string {
         if (token.isNative) {
+            if (token.blockchain === BLOCKCHAIN_NAME.SUI) {
+                return token.address;
+            }
             if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
                 return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
             }

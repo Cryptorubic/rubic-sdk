@@ -527,5 +527,19 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Ether',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.UNICHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.UNICHAIN,
+        address: '0x4200000000000000000000000000000000000006',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MONAD_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MONAD_TESTNET,
+        address: '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701',
+        name: 'Wrapped Monad',
+        symbol: 'WMON',
+        decimals: 18
     })
 };

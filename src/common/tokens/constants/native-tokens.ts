@@ -9,6 +9,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { IcpWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/icp-web3-pure';
 import { KavaCosmosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/kava-cosmos-web3-pure';
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
+import { SuiWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/sui-web3-pure/sui-web3-pure';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
@@ -95,6 +96,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Ether',
         symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MONAD_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MONAD_TESTNET,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Monad',
+        symbol: 'MON',
         decimals: 18
     })
 };
@@ -741,5 +749,19 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Ethereum',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.UNICHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.UNICHAIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SUI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SUI,
+        address: SuiWeb3Pure.nativeTokenAddress,
+        name: 'Sui',
+        symbol: 'SUI',
+        decimals: 9
     })
 };

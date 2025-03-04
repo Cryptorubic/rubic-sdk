@@ -10,7 +10,8 @@ export const TEST_EVM_BLOCKCHAIN_NAME = {
     BLAST_TESTNET: 'BLAST_TESTNET',
     HOLESKY: 'HOLESKY',
     UNICHAIN_SEPOLIA_TESTNET: 'UNICHAIN_SEPOLIA_TESTNET',
-    SONEIUM_TESTNET: 'SONEIUM_TESTNET'
+    SONEIUM_TESTNET: 'SONEIUM_TESTNET',
+    MONAD_TESTNET: 'MONAD_TESTNET'
 } as const;
 
 export const EVM_BLOCKCHAIN_NAME = {
@@ -78,7 +79,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     MORPH: 'MORPH',
     FRAXTAL: 'FRAXTAL',
     BERACHAIN: 'BERACHAIN',
-    SONEIUM: 'SONEIUM'
+    SONEIUM: 'SONEIUM',
+    UNICHAIN: 'UNICHAIN'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
@@ -158,7 +160,8 @@ export const BLOCKCHAIN_NAME = {
     FILECOIN: 'FILECOIN',
     EOS: 'EOS',
     ONTOLOGY: 'ONTOLOGY',
-    XDC: 'XDC'
+    XDC: 'XDC',
+    SUI: 'SUI'
 } as const;
 
 export type BlockchainName = (typeof BLOCKCHAIN_NAME)[keyof typeof BLOCKCHAIN_NAME];
@@ -172,3 +175,4 @@ export type BitcoinBlockchainName = typeof BLOCKCHAIN_NAME.BITCOIN;
 export type TronBlockchainName = typeof BLOCKCHAIN_NAME.TRON;
 export type IcpBlockchainName = typeof BLOCKCHAIN_NAME.ICP;
 export type TonBlockchainName = typeof BLOCKCHAIN_NAME.TON;
+export type SuiBlockchainName = typeof BLOCKCHAIN_NAME.SUI;

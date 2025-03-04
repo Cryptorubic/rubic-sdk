@@ -2,6 +2,7 @@ import {
     BitcoinBlockchainName,
     EvmBlockchainName,
     SolanaBlockchainName,
+    SuiBlockchainName,
     TonBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
@@ -22,5 +23,6 @@ export type RpcProviders = Partial<
         Record<TronBlockchainName, RpcProvider<TronWebProvider>> &
         Record<SolanaBlockchainName, RpcProvider<string>> &
         Record<TonBlockchainName, RpcProvider<string>> &
-        Record<BitcoinBlockchainName, RpcProvider<string>>
+        Record<BitcoinBlockchainName, RpcProvider<string>> &
+        Record<SuiBlockchainName, RpcProvider<string>>
 >;

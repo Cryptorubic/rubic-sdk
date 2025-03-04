@@ -97,7 +97,7 @@ export class RouterEvmCrossChainTrade extends EvmCrossChainTrade {
         );
         try {
             const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
-            const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
+            const receivingAsset = isEvmDestination ? this.to.address : EvmWeb3Pure.EMPTY_ADDRESS;
             const toBlockchain = this.to.blockchain as RouterCrossChainSupportedBlockchains;
             let receiverAddress = '';
             if (!isEvmDestination && options.receiverAddress) {

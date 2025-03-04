@@ -15,8 +15,8 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
 import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import {
-    HORIZONDEX_QUOTER_CONTRACT_ABI,
-    HORIZONDEX_QUOTER_CONTRACT_ADDRESS
+    HORIZONDEX_QUOTER_V2_CONTRACT_ABI,
+    HORIZONDEX_QUOTER_V2_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/utils/quoter-controller/constants/quoter-contract-data';
 
 interface GetQuoterMethodsDataOptions {
@@ -37,8 +37,8 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
         super(
             blockchain,
             routerConfiguration,
-            HORIZONDEX_QUOTER_CONTRACT_ADDRESS,
-            HORIZONDEX_QUOTER_CONTRACT_ABI
+            HORIZONDEX_QUOTER_V2_CONTRACT_ADDRESS,
+            HORIZONDEX_QUOTER_V2_CONTRACT_ABI
         );
     }
 
