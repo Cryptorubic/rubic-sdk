@@ -35,26 +35,25 @@ export class Injector {
     public static createInjector(
         web3PublicService: Web3PublicService,
         web3PrivateService: Web3PrivateService,
-        httpClient: HttpClient
+        httpClient: HttpClient,
+        teleSwapSdk: TeleswapSDK
     ): void {
         // eslint-disable-next-line no-new
-        new Injector(web3PublicService, web3PrivateService, httpClient);
+        new Injector(web3PublicService, web3PrivateService, httpClient, teleSwapSdk);
     }
 
     private readonly coingeckoApi: CoingeckoApi;
 
     private readonly gasPriceApi: GasPriceApi;
 
-    private readonly teleSwapSdk: TeleswapSDK;
-
     private constructor(
         private readonly web3PublicService: Web3PublicService,
         private readonly web3PrivateService: Web3PrivateService,
-        private readonly httpClient: HttpClient
+        private readonly httpClient: HttpClient,
+        private readonly teleSwapSdk: TeleswapSDK
     ) {
         this.coingeckoApi = new CoingeckoApi(httpClient);
         this.gasPriceApi = new GasPriceApi(httpClient);
-        this.teleSwapSdk = new TeleswapSDK();
         Injector.injector = this;
     }
 }

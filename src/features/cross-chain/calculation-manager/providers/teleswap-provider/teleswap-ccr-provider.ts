@@ -1,5 +1,3 @@
-import { TeleswapSDK } from '@teleportdao/teleswap-sdk';
-import { SupportedNetwork } from '@teleportdao/teleswap-sdk/dist/types';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import {
@@ -21,8 +19,6 @@ import {
     TeleSwapCcrSupportedChain,
     teleSwapCcrSupportedChains
 } from './constants/teleswap-ccr-supported-chains';
-import { teleSwapNetworkTickers } from './constants/teleswap-network-tickers';
-import { TELESWAP_REF_CODE } from './constants/teleswap-ref-code';
 import { TeleSwapUtilsService } from './services/teleswap-utils-service';
 import { TeleSwapCcrFactory } from './teleswap-ccr-factory';
 
@@ -57,7 +53,7 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const teleSwapSdk = await this.getTeleSwapSdkAndSetConnection();
+            const teleSwapSdk = await Injector.teleSwapSdkInstance;
 
             await teleSwapSdk.initNetworksConnection();
 
@@ -127,22 +123,5 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
                 path: [from, to]
             }
         ];
-    }
-
-    private async getTeleSwapSdkAndSetConnection(): Promise<TeleswapSDK> {
-        const teleSwapSdk = Injector.teleSwapSdkInstance;
-
-        teleSwapSdk.setDefaultNetwork({
-            networkName: teleSwapNetworkTickers[BLOCKCHAIN_NAME.POLYGON] as SupportedNetwork,
-            web3: {
-                url: Injector.web3PublicService.rpcProvider[BLOCKCHAIN_NAME.POLYGON]?.rpcList[0]!
-            },
-            web3Eth: Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON).web3Provider
-                .eth
-        });
-
-        teleSwapSdk.setThirdPartyId(TELESWAP_REF_CODE);
-
-        return teleSwapSdk;
     }
 }
