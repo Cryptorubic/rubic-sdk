@@ -13,6 +13,7 @@ import { ContractMulticallResponse } from '../models/contract-multicall-response
 import { SupportedTokenField } from '../models/supported-token-field';
 import { Web3Public } from '../web3-public';
 import { BitcoinUserAddressInfo } from './models/bitcoin-user-address-info';
+
 export class BitcoinWeb3Public extends Web3Public {
     constructor() {
         super(BLOCKCHAIN_NAME.BITCOIN);

@@ -53,9 +53,7 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const teleSwapSdk = await Injector.teleSwapSdkInstance;
-
-            await teleSwapSdk.initNetworksConnection();
+            const teleSwapSdk = Injector.teleSwapSdkInstance;
 
             const toWeiAmount = await TeleSwapUtilsService.calculateOutputWeiAmount(
                 fromWithoutFee as PriceTokenAmount<TeleSwapCcrSupportedChain>,
