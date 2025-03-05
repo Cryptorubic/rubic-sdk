@@ -24,7 +24,8 @@ export const openoceanOnChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ROOTSTOCK,
     BLOCKCHAIN_NAME.MANTLE,
     BLOCKCHAIN_NAME.SONIC,
-    BLOCKCHAIN_NAME.SUI
+    BLOCKCHAIN_NAME.SUI,
+    BLOCKCHAIN_NAME.FLARE
 ] as const;
 
 export type OpenoceanOnChainSupportedBlockchain =
