@@ -1,3 +1,5 @@
+import { TeleswapSDK } from '@teleportdao/teleswap-sdk';
+import { SupportedNetwork } from '@teleportdao/teleswap-sdk/dist/types';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import {
@@ -5,6 +7,7 @@ import {
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -18,6 +21,8 @@ import {
     TeleSwapCcrSupportedChain,
     teleSwapCcrSupportedChains
 } from './constants/teleswap-ccr-supported-chains';
+import { teleSwapNetworkTickers } from './constants/teleswap-network-tickers';
+import { TELESWAP_REF_CODE } from './constants/teleswap-ref-code';
 import { TeleSwapUtilsService } from './services/teleswap-utils-service';
 import { TeleSwapCcrFactory } from './teleswap-ccr-factory';
 
@@ -52,7 +57,9 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const teleSwapSdk = await TeleSwapUtilsService.createTeleSwapSdkConnection();
+            const teleSwapSdk = await this.getTeleSwapSdkAndSetConnection();
+
+            await teleSwapSdk.initNetworksConnection();
 
             const toWeiAmount = await TeleSwapUtilsService.calculateOutputWeiAmount(
                 fromWithoutFee as PriceTokenAmount<TeleSwapCcrSupportedChain>,
@@ -120,5 +127,22 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
                 path: [from, to]
             }
         ];
+    }
+
+    private async getTeleSwapSdkAndSetConnection(): Promise<TeleswapSDK> {
+        const teleSwapSdk = Injector.teleSwapSdkInstance;
+
+        teleSwapSdk.setDefaultNetwork({
+            networkName: teleSwapNetworkTickers[BLOCKCHAIN_NAME.POLYGON] as SupportedNetwork,
+            web3: {
+                url: Injector.web3PublicService.rpcProvider[BLOCKCHAIN_NAME.POLYGON]?.rpcList[0]!
+            },
+            web3Eth: Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON).web3Provider
+                .eth
+        });
+
+        teleSwapSdk.setThirdPartyId(TELESWAP_REF_CODE);
+
+        return teleSwapSdk;
     }
 }

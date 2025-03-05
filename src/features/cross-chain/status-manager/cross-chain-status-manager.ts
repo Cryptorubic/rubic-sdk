@@ -6,7 +6,6 @@ import {
     L2TransactionReceipt
 } from '@arbitrum/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { TeleswapSDK } from '@teleportdao/teleswap-sdk';
 import { RubicSdkError } from 'src/common/errors';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import {
@@ -857,7 +856,7 @@ export class CrossChainStatusManager {
     }
 
     private async getTeleSwapDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const teleSwapSdk = new TeleswapSDK();
+        const teleSwapSdk = Injector.teleSwapSdkInstance;
 
         try {
             const txData = await teleSwapSdk.teleportdao.checkRequestStatusByTxId(data.srcTxHash);
