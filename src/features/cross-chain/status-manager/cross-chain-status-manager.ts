@@ -13,6 +13,7 @@ import {
     EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { TonApiTxDataByBocResp } from 'src/core/blockchain/models/ton/tonapi-types';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -116,7 +117,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.UNIZEN]: this.getUniZenDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.CHANGELLY]: this.getChangellyDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.CHANGELLY]: this.getChangellyDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.TELE_SWAP]: this.getTeleSwapDstSwapStatus
     };
 
     /**
@@ -850,6 +852,56 @@ export class CrossChainStatusManager {
             return { status: TX_STATUS.PENDING, hash: null };
         } catch {
             return { status: TX_STATUS.PENDING, hash: null };
+        }
+    }
+
+    private async getTeleSwapDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const teleSwapSdk = Injector.teleSwapSdkInstance;
+
+        try {
+            const txData = await teleSwapSdk.teleportdao.checkRequestStatusByTxId(data.srcTxHash);
+            if (!txData) {
+                throw new RubicSdkError();
+            }
+
+            const isFromEvm = BlockchainsInfo.getChainType(data.fromBlockchain) === CHAIN_TYPE.EVM;
+
+            const txStatus = txData.status.toLowerCase();
+
+            if (txStatus === 'submitted') {
+                return {
+                    status: TX_STATUS.SUCCESS,
+                    hash: isFromEvm
+                        ? txData.sourceTransaction?.txId!
+                        : txData.targetEvent?.targetTransaction?.txId!
+                };
+            }
+
+            if (txStatus === 'failed') {
+                return {
+                    status: TX_STATUS.FAIL,
+                    hash: null
+                };
+            }
+
+            if (txStatus === 'exchangefailed' || txStatus === 'withdrawn') {
+                return {
+                    status: TX_STATUS.FALLBACK,
+                    hash: isFromEvm
+                        ? txData.sourceTransaction?.txId!
+                        : txData.targetEvent?.targetTransaction?.txId!
+                };
+            }
+
+            return {
+                status: TX_STATUS.PENDING,
+                hash: null
+            };
+        } catch {
+            return {
+                status: TX_STATUS.PENDING,
+                hash: null
+            };
         }
     }
 }

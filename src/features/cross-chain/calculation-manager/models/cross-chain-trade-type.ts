@@ -26,7 +26,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     ACROSS: 'across',
     UNIZEN: 'unizen',
     SIMPLE_SWAP: 'simple_swap',
-    CHANGELLY: 'changelly'
+    CHANGELLY: 'changelly',
+    TELE_SWAP: 'tele_swap'
 } as const;
 
 export type CrossChainTradeType =

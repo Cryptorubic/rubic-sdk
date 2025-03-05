@@ -1,3 +1,5 @@
+import { TeleswapSDK } from '@teleportdao/teleswap-sdk';
+import { SupportedNetwork } from '@teleportdao/teleswap-sdk/dist/types';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
@@ -11,11 +13,16 @@ import { Configuration } from 'src/core/sdk/models/configuration';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { WalletProvider, WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { CrossChainManager } from 'src/features/cross-chain/calculation-manager/cross-chain-manager';
+import { teleSwapNetworkTickers } from 'src/features/cross-chain/calculation-manager/providers/teleswap-provider/constants/teleswap-network-tickers';
+import { TELESWAP_REF_CODE } from 'src/features/cross-chain/calculation-manager/providers/teleswap-provider/constants/teleswap-ref-code';
 import { CrossChainStatusManager } from 'src/features/cross-chain/status-manager/cross-chain-status-manager';
 import { CrossChainSymbiosisManager } from 'src/features/cross-chain/symbiosis-manager/cross-chain-symbiosis-manager';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
 import { OnChainStatusManager } from 'src/features/on-chain/status-manager/on-chain-status-manager';
+import Web3 from 'web3';
+
+import { BLOCKCHAIN_NAME } from '../blockchain/models/blockchain-name';
 
 /**
  * Base class to work with sdk.
@@ -84,12 +91,14 @@ export class SDK {
      * to new configuration (even for entities created with other previous sdk instances).
      */
     public static async createSDK(configuration: Configuration): Promise<SDK> {
-        const [web3PublicService, web3PrivateService, httpClient] = await Promise.all([
+        const [web3PublicService, web3PrivateService, httpClient, teleswapSdk] = await Promise.all([
             SDK.createWeb3PublicService(configuration),
             SDK.createWeb3PrivateService(configuration),
-            SDK.createHttpClient(configuration)
+            SDK.createHttpClient(configuration),
+            SDK.createTeleSwapSdkInstance(configuration)
         ]);
-        Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
+
+        Injector.createInjector(web3PublicService, web3PrivateService, httpClient, teleswapSdk);
 
         const { providerAddress } = configuration;
         return new SDK({
@@ -116,6 +125,30 @@ export class SDK {
         return configuration.httpClient;
     }
 
+    private static async createTeleSwapSdkInstance(
+        configuration: Configuration
+    ): Promise<TeleswapSDK> {
+        const teleSwapSdk = new TeleswapSDK();
+        const rpcUrl = configuration.rpcProviders[BLOCKCHAIN_NAME.POLYGON]?.rpcList[0]!;
+
+        try {
+            //Optional step, may remove
+            teleSwapSdk.setDefaultNetwork({
+                networkName: teleSwapNetworkTickers[BLOCKCHAIN_NAME.POLYGON] as SupportedNetwork,
+                web3: {
+                    url: rpcUrl
+                },
+                web3Eth: new Web3(rpcUrl).eth
+            });
+
+            await teleSwapSdk.initNetworksConnection();
+        } catch {}
+
+        teleSwapSdk.setThirdPartyId(TELESWAP_REF_CODE);
+
+        return teleSwapSdk;
+    }
+
     private constructor(providerAddress: ProviderAddress) {
         this.onChainManager = new OnChainManager(providerAddress);
         this.crossChainManager = new CrossChainManager(providerAddress);
@@ -129,13 +162,14 @@ export class SDK {
      * Updates sdk configuration and sdk entities dependencies.
      */
     public async updateConfiguration(configuration: Configuration): Promise<void> {
-        const [web3PublicService, web3PrivateService, httpClient] = await Promise.all([
+        const [web3PublicService, web3PrivateService, httpClient, teleSwapSdk] = await Promise.all([
             SDK.createWeb3PublicService(configuration),
             SDK.createWeb3PrivateService(configuration),
-            SDK.createHttpClient(configuration)
+            SDK.createHttpClient(configuration),
+            SDK.createTeleSwapSdkInstance(configuration)
         ]);
 
-        Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
+        Injector.createInjector(web3PublicService, web3PrivateService, httpClient, teleSwapSdk);
     }
 
     public updateWalletProvider(walletProvider: WalletProvider): void {
