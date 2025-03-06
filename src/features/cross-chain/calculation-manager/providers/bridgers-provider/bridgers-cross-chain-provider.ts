@@ -12,6 +12,7 @@ import {
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
@@ -55,6 +56,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         toBlockchain: BlockchainName
     ): boolean {
         return (
+            (this.isSupportedBlockchain(fromBlockchain) && toBlockchain === BLOCKCHAIN_NAME.TON) ||
+            (fromBlockchain === BLOCKCHAIN_NAME.TON && this.isSupportedBlockchain(toBlockchain)) ||
             (fromBlockchain === BLOCKCHAIN_NAME.TRON && this.isSupportedBlockchain(toBlockchain)) ||
             (this.isSupportedBlockchain(fromBlockchain) && toBlockchain === BLOCKCHAIN_NAME.TRON)
         );
@@ -64,7 +67,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult<EvmEncodeConfig | TronTransactionConfig>> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as BridgersCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as BridgersCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -166,7 +169,11 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 useProxy
             });
 
-            return this.getCalculationResponse(from, transactionData, trade);
+            return this.getCalculationResponse(
+                from,
+                transactionData,
+                trade as CrossChainTrade<EvmEncodeConfig | TronTransactionConfig | TonEncodedConfig>
+            );
         } catch (err: unknown) {
             return {
                 trade: null,
@@ -179,8 +186,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
     private getCalculationResponse(
         from: PriceTokenAmount,
         transactionData: BridgersQuoteResponse['data']['txData'],
-        trade: CrossChainTrade<EvmEncodeConfig | TronTransactionConfig>
-    ): CalculationResult<EvmEncodeConfig | TronTransactionConfig> {
+        trade: CrossChainTrade<EvmEncodeConfig | TronTransactionConfig | TonEncodedConfig>
+    ): CalculationResult {
         if (from.tokenAmount.lt(transactionData.depositMin)) {
             return {
                 trade,

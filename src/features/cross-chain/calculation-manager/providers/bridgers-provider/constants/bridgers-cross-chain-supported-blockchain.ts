@@ -5,7 +5,8 @@ export const bridgersCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.FANTOM,
-    BLOCKCHAIN_NAME.TRON
+    BLOCKCHAIN_NAME.TRON,
+    BLOCKCHAIN_NAME.TON
 ] as const;
 
 export type BridgersCrossChainSupportedBlockchain =

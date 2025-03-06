@@ -1,5 +1,6 @@
 import { BridgersSourceFlag } from 'src/features/common/providers/bridgers/models/bridgers-source-flag';
 import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/evm-bridgers-transaction-data';
+import { TonBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/ton-bridgers-transaction-data';
 import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/tron-bridgers-transaction-data';
 
 export interface BridgersSwapRequest {
@@ -16,7 +17,7 @@ export interface BridgersSwapRequest {
 }
 
 export interface BridgersSwapResponse<
-    T extends EvmBridgersTransactionData | TronBridgersTransactionData
+    T extends EvmBridgersTransactionData | TronBridgersTransactionData | TonBridgersTransactionData
 > {
     data: {
         txData: T;

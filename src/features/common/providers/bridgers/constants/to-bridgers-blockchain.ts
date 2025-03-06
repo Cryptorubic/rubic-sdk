@@ -6,5 +6,6 @@ export const toBridgersBlockchain: Record<BridgersCrossChainSupportedBlockchain,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'BSC',
     [BLOCKCHAIN_NAME.POLYGON]: 'POLYGON',
     [BLOCKCHAIN_NAME.FANTOM]: 'FANTOM',
-    [BLOCKCHAIN_NAME.TRON]: 'TRX'
+    [BLOCKCHAIN_NAME.TRON]: 'TRX',
+    [BLOCKCHAIN_NAME.TON]: 'TON'
 };
