@@ -10,18 +10,20 @@ import { DlnOnChainEstimateRequest } from 'src/features/on-chain/calculation-man
 import { DlnOnChainEstimateResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-estimate-response';
 import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-swap-request';
 import { DlnOnChainSwapResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-swap-response';
+import { RUBIC_X_API_APIKEY } from 'src/features/on-chain/calculation-manager/providers/aggregators/okuswap/constants/okuswap-api';
 
 export class DlnApiService {
-    public static apiEndpoint = 'https://api.dln.trade/v1.0';
+    private static xApiEndpoint = 'https://x-api.rubic.exchange/dln/v1.0';
 
     public static fetchCrossChainQuote<T>(requestParams: EstimationRequest): Promise<T> {
-        return Injector.httpClient.get<T>(`${DlnApiService.apiEndpoint}/dln/order/quote`, {
-            params: requestParams as unknown as {}
+        return Injector.httpClient.get<T>(`${DlnApiService.xApiEndpoint}/dln/order/quote`, {
+            params: requestParams as unknown as {},
+            headers: { apiKey: RUBIC_X_API_APIKEY }
         });
     }
 
     public static fetchCrossChainSwapData<T>(requestParams: TransactionRequest): Promise<T> {
-        return Injector.httpClient.get<T>(`${DlnApiService.apiEndpoint}/dln/order/create-tx`, {
+        return Injector.httpClient.get<T>(`${DlnApiService.xApiEndpoint}/dln/order/create-tx`, {
             params: requestParams as unknown as {}
         });
     }
@@ -30,9 +32,10 @@ export class DlnApiService {
         requestParams: DlnOnChainEstimateRequest
     ): Promise<DlnOnChainEstimateResponse> {
         return Injector.httpClient.get<DlnOnChainEstimateResponse>(
-            `${DlnApiService.apiEndpoint}/chain/estimation`,
+            `${DlnApiService.xApiEndpoint}/chain/estimation`,
             {
-                params: requestParams as unknown as {}
+                params: requestParams as unknown as {},
+                headers: { apiKey: RUBIC_X_API_APIKEY }
             }
         );
     }
@@ -41,9 +44,10 @@ export class DlnApiService {
         requestParams: DlnOnChainSwapRequest
     ): Promise<DlnOnChainSwapResponse<T>> {
         return Injector.httpClient.get<DlnOnChainSwapResponse<T>>(
-            `${DlnApiService.apiEndpoint}/chain/transaction`,
+            `${DlnApiService.xApiEndpoint}/chain/transaction`,
             {
-                params: requestParams as unknown as {}
+                params: requestParams as unknown as {},
+                headers: { apiKey: RUBIC_X_API_APIKEY }
             }
         );
     }
@@ -56,7 +60,8 @@ export class DlnApiService {
 
     public static fetchCrossChainStatus(orderId: string): Promise<DeBridgeOrderApiStatusResponse> {
         return Injector.httpClient.get<DeBridgeOrderApiStatusResponse>(
-            `${DlnApiService.apiEndpoint}/dln/order/${orderId}/status`
+            `${DlnApiService.xApiEndpoint}/dln/order/${orderId}/status`,
+            { headers: { apiKey: RUBIC_X_API_APIKEY } }
         );
     }
 
@@ -64,7 +69,8 @@ export class DlnApiService {
         sourceTransactionHash: string
     ): Promise<DeBridgeFilteredListApiResponse> {
         return Injector.httpClient.get<DeBridgeFilteredListApiResponse>(
-            `${DlnApiService.apiEndpoint}/dln/tx/${sourceTransactionHash}/order-ids`
+            `${DlnApiService.xApiEndpoint}/dln/tx/${sourceTransactionHash}/order-ids`,
+            { headers: { apiKey: RUBIC_X_API_APIKEY } }
         );
     }
 }

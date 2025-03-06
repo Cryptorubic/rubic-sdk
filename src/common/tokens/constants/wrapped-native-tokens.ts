@@ -346,7 +346,7 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WETH',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+    [BLOCKCHAIN_NAME.BERACHAIN_TESTNET]: new Token({
         blockchain: BLOCKCHAIN_NAME.BERACHAIN,
         address: '0x7507c1dc16935B82698e4C63f2746A2fCf994dF8',
         name: 'Wrapped BERA',
@@ -498,6 +498,48 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         address: '0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38',
         name: 'Wrapped Sonic',
         symbol: 'WS',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MORPH]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MORPH,
+        address: '0x5300000000000000000000000000000000000011',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FRAXTAL]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FRAXTAL,
+        address: '0xfc00000000000000000000000000000000000006',
+        name: 'Wrapped Frax Ether',
+        symbol: 'wfrxETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BERACHAIN,
+        address: '0x6969696969696969696969696969696969696969',
+        name: 'Wrapped BERA',
+        symbol: 'WBERA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SONEIUM]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SONEIUM,
+        address: '0x4200000000000000000000000000000000000006',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.UNICHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.UNICHAIN,
+        address: '0x4200000000000000000000000000000000000006',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MONAD_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MONAD_TESTNET,
+        address: '0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701',
+        name: 'Wrapped Monad',
+        symbol: 'WMON',
         decimals: 18
     })
 };

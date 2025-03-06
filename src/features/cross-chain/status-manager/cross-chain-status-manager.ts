@@ -13,6 +13,7 @@ import {
     EvmBlockchainName,
     TEST_EVM_BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { TonApiTxDataByBocResp } from 'src/core/blockchain/models/ton/tonapi-types';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -70,7 +71,9 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
 
 import { acrossFundsDepositedInputs } from '../calculation-manager/providers/across-provider/constants/across-deposit-abi';
 import { AcrossApiService } from '../calculation-manager/providers/across-provider/services/across-api-service';
+import { ChangellyApiService } from '../calculation-manager/providers/changelly-provider/services/changelly-api-service';
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
+import { CROSS_CHAIN_DEPOSIT_STATUS } from '../calculation-manager/providers/common/cross-chain-transfer-trade/models/cross-chain-deposit-statuses';
 import { getEddyBridgeDstSwapStatus } from '../calculation-manager/providers/eddy-bridge/utils/get-eddy-bridge-dst-status';
 import { MesonCcrApiService } from '../calculation-manager/providers/meson-provider/services/meson-cross-chain-api-service';
 import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
@@ -113,7 +116,9 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.RETRO_BRIDGE]: this.getRetroBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ACROSS]: this.getAcrossDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.UNIZEN]: this.getUniZenDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP]: this.getSimpleSwapDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.CHANGELLY]: this.getChangellyDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.TELE_SWAP]: this.getTeleSwapDstSwapStatus
     };
 
     /**
@@ -808,17 +813,95 @@ export class CrossChainStatusManager {
         try {
             const { status, dstHash } = await SimpleSwapApiService.getTxStatus(data.simpleSwapId);
             if (
-                status === CHANGENOW_API_STATUS.FINISHED ||
-                status === CHANGENOW_API_STATUS.REFUNDED
+                status === CROSS_CHAIN_DEPOSIT_STATUS.FINISHED ||
+                status === CROSS_CHAIN_DEPOSIT_STATUS.REFUNDED
             ) {
                 return { status: TX_STATUS.SUCCESS, hash: dstHash };
             }
-            if (status === CHANGENOW_API_STATUS.FAILED) {
+            if (
+                status === CROSS_CHAIN_DEPOSIT_STATUS.FAILED ||
+                status === CROSS_CHAIN_DEPOSIT_STATUS.EXPIRED
+            ) {
                 return { status: TX_STATUS.FAIL, hash: null };
             }
             return { status: TX_STATUS.PENDING, hash: null };
         } catch {
             return { status: TX_STATUS.PENDING, hash: null };
+        }
+    }
+
+    private async getChangellyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.changellySwapId) {
+            throw new RubicSdkError('Must provide Changelly trade ID');
+        }
+
+        try {
+            const { status, dstHash } = await ChangellyApiService.getTxStatus(data.changellySwapId);
+            if (
+                status === CROSS_CHAIN_DEPOSIT_STATUS.FINISHED ||
+                status === CROSS_CHAIN_DEPOSIT_STATUS.REFUNDED
+            ) {
+                return { status: TX_STATUS.SUCCESS, hash: dstHash };
+            }
+            if (
+                status === CROSS_CHAIN_DEPOSIT_STATUS.FAILED ||
+                status === CROSS_CHAIN_DEPOSIT_STATUS.EXPIRED
+            ) {
+                return { status: TX_STATUS.FAIL, hash: null };
+            }
+            return { status: TX_STATUS.PENDING, hash: null };
+        } catch {
+            return { status: TX_STATUS.PENDING, hash: null };
+        }
+    }
+
+    private async getTeleSwapDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const teleSwapSdk = Injector.teleSwapSdkInstance;
+
+        try {
+            const txData = await teleSwapSdk.teleportdao.checkRequestStatusByTxId(data.srcTxHash);
+            if (!txData) {
+                throw new RubicSdkError();
+            }
+
+            const isFromEvm = BlockchainsInfo.getChainType(data.fromBlockchain) === CHAIN_TYPE.EVM;
+
+            const txStatus = txData.status.toLowerCase();
+
+            if (txStatus === 'submitted') {
+                return {
+                    status: TX_STATUS.SUCCESS,
+                    hash: isFromEvm
+                        ? txData.sourceTransaction?.txId!
+                        : txData.targetEvent?.targetTransaction?.txId!
+                };
+            }
+
+            if (txStatus === 'failed') {
+                return {
+                    status: TX_STATUS.FAIL,
+                    hash: null
+                };
+            }
+
+            if (txStatus === 'exchangefailed' || txStatus === 'withdrawn') {
+                return {
+                    status: TX_STATUS.FALLBACK,
+                    hash: isFromEvm
+                        ? txData.sourceTransaction?.txId!
+                        : txData.targetEvent?.targetTransaction?.txId!
+                };
+            }
+
+            return {
+                status: TX_STATUS.PENDING,
+                hash: null
+            };
+        } catch {
+            return {
+                status: TX_STATUS.PENDING,
+                hash: null
+            };
         }
     }
 }

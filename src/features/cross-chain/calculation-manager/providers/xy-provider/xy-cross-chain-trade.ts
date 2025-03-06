@@ -66,6 +66,17 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             : xyContractAddress[this.fromBlockchain].providerGateway;
     }
 
+    /**
+     * Gets gas fee in source blockchain.
+     */
+    public get estimatedGas(): BigNumber | null {
+        if (!this.xyEstimatedGas) {
+            return null;
+        }
+
+        return this.xyEstimatedGas;
+    }
+
     public readonly feeInfo: FeeInfo;
 
     private readonly slippage: number;
@@ -75,6 +86,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     }
 
     private readonly onChainTrade: EvmOnChainTrade | null;
+
+    private readonly xyEstimatedGas: BigNumber;
 
     constructor(
         crossChainTrade: {
@@ -87,6 +100,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             feeInfo: FeeInfo;
             onChainTrade: EvmOnChainTrade | null;
             bridgeType: BridgeType;
+            xyEstimatedGas: BigNumber;
         },
         providerAddress: string,
         routePath: RubicStep[],
@@ -104,6 +118,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.onChainTrade = crossChainTrade.onChainTrade;
         this.bridgeType = crossChainTrade.bridgeType;
+        this.xyEstimatedGas = crossChainTrade.xyEstimatedGas;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {

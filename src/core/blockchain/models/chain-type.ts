@@ -75,7 +75,8 @@ export const CHAIN_TYPE = {
     XDC: 'XDC',
     ONTOLOGY: 'ONTOLOGY',
     EOS: 'EOS',
-    FILECOIN: 'FILECOIN'
+    FILECOIN: 'FILECOIN',
+    SUI: 'SUI'
 } as const;
 
 export type ChainType = (typeof CHAIN_TYPE)[keyof typeof CHAIN_TYPE];

@@ -74,18 +74,13 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
         routePath: RubicStep[],
         useProxy: boolean
     ) {
-        super(
+        super({
+            ...crossChainTrade,
             providerAddress,
-            routePath,
             useProxy,
-            crossChainTrade.onChainTrade,
-            crossChainTrade.from,
-            crossChainTrade.to,
-            crossChainTrade.toTokenAmountMin,
-            crossChainTrade.gasData,
-            crossChainTrade.feeInfo,
-            crossChainTrade.from.calculatePriceImpactPercent(crossChainTrade.to)
-        );
+            routePath,
+            priceImpact: null
+        });
         this.fromCurrency = crossChainTrade.fromCurrency;
         this.toCurrency = crossChainTrade.toCurrency;
         this.onChainSubtype = crossChainTrade.onChainTrade
@@ -102,7 +97,10 @@ export class ChangenowCrossChainTrade extends CrossChainTransferTrade {
             toNetwork: this.toCurrency.network,
             fromAmount: this.transitToken.tokenAmount.toFixed(),
             address: receiverAddress,
-            flow: 'standard'
+            flow: 'standard',
+            payload: {
+                integratorAddress: this.providerAddress
+            }
         };
         const res = await ChangeNowCrossChainApiService.getSwapTx(params);
 

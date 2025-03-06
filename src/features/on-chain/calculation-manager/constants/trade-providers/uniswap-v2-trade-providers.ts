@@ -42,6 +42,7 @@ import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/provi
 import { EddyFinanceModeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mode/eddy-finance-mode/eddy-finance-mode-provider';
 import { SolarbeamProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/solarbeam-provider';
 import { SushiSwapMoonriverProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { BulbaswapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/morph/bulbaswap/bulbaswap-provider';
 import { QuickSwapMumbaiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mumbai/quick-swap-mumbai/quick-swap-mumbai-provider';
 import { YuzuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/oasis/yuzu-swap/yuzu-swap-provider';
 import { QuickSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap/quick-swap-provider';
@@ -64,6 +65,8 @@ import { SilkSwapBahamutProvider } from '../../providers/dexes/bahamut/silk-swap
 import { BlazeSwapFlareProvider } from '../../providers/dexes/flare/blaze-swap-flare/blaze-swap-flare-provider';
 import { EnosysFlareProvider } from '../../providers/dexes/flare/enosys-flare/enosys-v2-flare/enosys-flare-provider';
 import { SparkDexFlareProvider } from '../../providers/dexes/flare/spark-dex-flare/spark-dex-v2-flare/spark-dex-flare-provider';
+import { FraxSwapV2Provider } from '../../providers/dexes/fraxtal/frax-swap-v2/frax-swap-v2-provider';
+import { KyoFinanceProvider } from '../../providers/dexes/soneium/kyo-finance/kyo-finance-provider';
 import { SushiSwapZetachainProvider } from '../../providers/dexes/zetachain/sushi-swap-zetachain/sushi-swap-zetachain-provider';
 
 export const UniswapV2TradeProviders = [
@@ -169,5 +172,11 @@ export const UniswapV2TradeProviders = [
     // Flare
     BlazeSwapFlareProvider,
     SparkDexFlareProvider,
-    EnosysFlareProvider
+    EnosysFlareProvider,
+    // Morph
+    BulbaswapProvider,
+    // Fraxtal
+    FraxSwapV2Provider,
+    // Soneium
+    KyoFinanceProvider
 ] as const;

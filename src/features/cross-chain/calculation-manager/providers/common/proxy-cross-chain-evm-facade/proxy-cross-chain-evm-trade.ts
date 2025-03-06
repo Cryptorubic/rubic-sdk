@@ -383,7 +383,8 @@ export class ProxyCrossChainEvmTrade {
         if (
             toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN] ||
             toChainId === blockchainId[BLOCKCHAIN_NAME.SOLANA] ||
-            toChainId === blockchainId[BLOCKCHAIN_NAME.TON]
+            toChainId === blockchainId[BLOCKCHAIN_NAME.TON] ||
+            toChainId === blockchainId[BLOCKCHAIN_NAME.SUI]
         ) {
             return walletAddress;
         }
