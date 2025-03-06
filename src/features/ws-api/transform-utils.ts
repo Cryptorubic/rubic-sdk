@@ -51,13 +51,14 @@ export class TransformUtils {
         const tradeType = (res?.providerType || err?.type) as WrappedCrossChainTrade['tradeType'];
         const tradeParams = await RubicApiUtils.getTradeParams(quote, res, tradeType);
 
-        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
+        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : null;
+        const parsedWarnings = RubicApiParser.parseRubicApiWarnings(res?.warnings || []);
+
+        const error = parsedError || parsedWarnings.error;
 
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
 
         let trade: CrossChainTrade | null = null;
-
-        const parsedWarnings = RubicApiParser.parseRubicApiWarnings(res?.warnings || []);
 
         const isTransferTrade =
             transferTradeSupportedProviders.includes(
@@ -92,7 +93,7 @@ export class TransformUtils {
         return {
             trade,
             tradeType,
-            ...(parsedError && { error: parsedError })
+            ...(error && { error })
         };
     }
 
@@ -105,10 +106,16 @@ export class TransformUtils {
         if (!response && !err) {
             throw new NotSupportedTokensError();
         }
-        const tradeType = (response.providerType || err?.type) as OnChainTradeType;
+        const tradeType = (response?.providerType || err?.type) as OnChainTradeType;
         const tradeParams = await RubicApiUtils.getTradeParams(quote, response, tradeType);
 
-        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
+        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : null;
+        const parsedWarningsError = RubicApiParser.parseRubicApiWarnings(
+            response?.warnings || []
+        ).error;
+
+        const error = parsedError || parsedWarningsError;
+
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
 
         let trade: OnChainTrade | null = null;
@@ -133,7 +140,7 @@ export class TransformUtils {
         return {
             trade,
             tradeType,
-            ...(parsedError && { error: parsedError })
+            ...(error && { error })
         };
     }
 }
