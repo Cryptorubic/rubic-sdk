@@ -11,7 +11,6 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { bridgersContractAddresses } from 'src/features/common/providers/bridgers/models/bridgers-contract-addresses';
 import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
@@ -60,14 +59,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     public readonly priceImpact: number | null;
 
     private readonly slippage: number;
-
-    protected get fromContractAddress(): string {
-        return this.isProxyTrade
-            ? rubicProxyContractAddress[this.from.blockchain].gateway
-            : bridgersContractAddresses[
-                  this.from.blockchain as BridgersCrossChainSupportedBlockchain
-              ];
-    }
 
     protected get methodName(): string {
         return 'startBridgeTokensViaGenericCrossChain';

@@ -150,7 +150,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         const res = await this.getPaymentInfo(
             receiverAddress || this.walletAddress,
             testMode,
-            refundAddress
+            refundAddress || this.walletAddress
         );
 
         const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
@@ -303,7 +303,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         throw new RubicSdkError(`Cannot encode approve for ${this.type}`);
     }
 
-    public async needApprove(): Promise<boolean> {
+    public override async needApprove(): Promise<boolean> {
         if (this.isProxyTrade) {
             return super.needApprove();
         }

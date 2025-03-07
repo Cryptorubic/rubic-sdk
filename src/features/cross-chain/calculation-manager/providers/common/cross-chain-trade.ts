@@ -1,4 +1,5 @@
 import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import { UniqueProviderInfoInterface } from '@cryptorubic/core/src/lib/models/api/unique-provider-info.interface';
 import BigNumber from 'bignumber.js';
 import {
     RubicSdkError,
@@ -31,6 +32,12 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
  */
 export abstract class CrossChainTrade<T = unknown> {
     protected lastTransactionConfig: T | null = null;
+
+    protected _uniqueInfo: UniqueProviderInfoInterface = {};
+
+    public get uniqueInfo(): UniqueProviderInfoInterface {
+        return this._uniqueInfo;
+    }
 
     /**
      * Type of calculated cross-chain trade.

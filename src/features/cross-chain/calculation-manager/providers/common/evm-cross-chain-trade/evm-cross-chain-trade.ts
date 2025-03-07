@@ -21,6 +21,8 @@ import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/pr
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { TransactionReceipt } from 'web3-eth';
 
+import { transferTradeSupportedProviders } from '../cross-chain-transfer-trade/constans/transfer-trade-supported-providers';
+
 export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig> {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -82,6 +84,12 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
         if (this.from.isNative && this.from.blockchain !== BLOCKCHAIN_NAME.METIS) {
             return false;
         }
+
+        const isTransferTrade = transferTradeSupportedProviders.some(
+            transferTradeType => transferTradeType === this.type
+        );
+
+        if (!this.isProxyTrade && isTransferTrade) return false;
 
         const fromTokenAddress =
             this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
@@ -222,13 +230,14 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             swapRequestData
         );
 
+        this._uniqueInfo = swapData.uniqueInfo ?? {};
+        const amount = swapData.estimate.destinationWeiAmount;
+
         const config = {
             data: swapData.transaction.data!,
             value: swapData.transaction.value!,
             to: swapData.transaction.to!
         };
-
-        const amount = swapData.estimate.destinationWeiAmount;
 
         return { config, amount };
     }

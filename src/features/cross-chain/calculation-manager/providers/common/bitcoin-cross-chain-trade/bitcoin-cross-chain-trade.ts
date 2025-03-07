@@ -138,6 +138,8 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
             swapRequestData
         );
 
+        this._uniqueInfo = swapData.uniqueInfo ?? {};
+
         const config = {
             value: swapData.transaction.value!,
             to: swapData.transaction.to!

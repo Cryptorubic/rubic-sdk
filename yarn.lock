@@ -976,29 +976,29 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@^0.3.3", "@cryptorubic/core@v0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.3.4.tgz#be3761485b36a255c0307149614c5525f82889fe"
-  integrity sha512-Ux8k3MPyDCNBwzzTYuHdrivn+HJU6xqz3T0nfKfOdgnPNFOsJumevu8XtHo39/DlniohXnFt1Q2PuRFne4tQcQ==
+"@cryptorubic/core@0.6.0", "@cryptorubic/core@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.6.0.tgz#39d73fc6807c63fa903d1ea83c3d4cd6692c074d"
+  integrity sha512-zFIAh1uUDsOKpWqCCcAZ5XdzKtdh2pXjMJp3R4EFjke5+KIX3dGebkjmClTpdbltn9ehro/Kq5TTsgZ2EMzRWw==
   dependencies:
     bignumber.js "9.1.2"
     jest-mock-promise "^2.0.2"
     tslib "^2.3.0"
 
-"@cryptorubic/tron-types@v0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.3.4.tgz#687766436707fa1aba3e18d94cae50189edac874"
-  integrity sha512-G38cWNGz7jDWBmXF3OuFBTO9UDKE6PXP+M8ulF2S2u1LNIjV3AP1YQ16IK+5gZAlNGcVA8NvbKIilMLumDLvTQ==
+"@cryptorubic/tron-types@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.6.0.tgz#080ced83217c7d6f5a6d754e0200337a8cef3640"
+  integrity sha512-YAe0ANAYxJcBV/CL3f9BU6qjrkyQebK3FZMc1EGH1PqclIj8l6F8UeAvu2rVx5xRtC/2Yo3GEpDgLHJDtY5AFQ==
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@^0.3.3":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.3.4.tgz#b89b516b7bf0094eea4cd358932ebe5d57562f17"
-  integrity sha512-TMMNkzRjbwc8jo+D7bnONJRH1ibxtWLABdOGQJYE08/Yt7Gfcj5laKtqRnFCx+63WZ6hYNs3m1a8UORCHoVxSw==
+"@cryptorubic/web3@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.6.0.tgz#1759af0fb24b4722086d109c9bd2dab6c2482f09"
+  integrity sha512-QEDr1mf9UzbP66xVo/9EgpxbqO1/F9mU8PVFhvsTwJEqJNQ3PwlQYMrS1mtZy6LoRCpCjOfnm+7TU5D035ItNA==
   dependencies:
-    "@cryptorubic/core" v0.3.4
-    "@cryptorubic/tron-types" v0.3.4
+    "@cryptorubic/core" "0.6.0"
+    "@cryptorubic/tron-types" "0.6.0"
     "@ethersproject/bignumber" "^5.7.0"
     "@solana/web3.js" "1.95.3"
     "@solflare-wallet/utl-sdk" "^1.4.0"
