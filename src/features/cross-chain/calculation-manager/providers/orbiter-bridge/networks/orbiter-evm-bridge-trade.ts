@@ -100,22 +100,11 @@ export class OrbiterEvmBridgeTrade extends EvmCrossChainTrade {
             options?.receiverAddress
         );
 
-        const percentFee = (this.feeInfo.rubicProxy?.platformFee?.percent || 0) / 100;
-        const fromWeiAmountWithHiddenCode = new BigNumber(
-            OrbiterUtils.getFromAmountWithoutFeeWithCode(this.from, this.feeInfo, this.quoteConfig)
-        )
-            .dividedBy(1 - percentFee)
-            .decimalPlaces(0, 1);
-        const fromWithCode = new PriceTokenAmount({
-            ...this.from.asStruct,
-            weiAmount: fromWeiAmountWithHiddenCode
-        });
-
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
             { ...options, receiverAddress: proxyReceiver },
             {
                 walletAddress: receiverAddress,
-                fromTokenAmount: fromWithCode,
+                fromTokenAmount: this.from,
                 toTokenAmount: this.to,
                 srcChainTrade: null,
                 providerAddress: this.providerAddress,
