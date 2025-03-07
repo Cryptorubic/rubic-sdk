@@ -1,3 +1,4 @@
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import {
     TX_STATUS,
     TxStatus
@@ -14,6 +15,7 @@ import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/mod
  */
 export class CrossChainStatusManager {
     /**
+     * @deprecated Use
      * Returns cross-chain trade statuses on the source and target networks.
      * The result consists of statuses of the source and target transactions and destination tx hash.
      * @example
@@ -54,7 +56,73 @@ export class CrossChainStatusManager {
         };
     }
 
+    public async getCrossChainStatusExtended(
+        rubicId: string,
+        srcHash: string,
+        fromBlockchain: Web3PublicSupportedBlockchain
+    ): Promise<CrossChainStatus> {
+        let srcTxStatus = await getSrcTxStatus(fromBlockchain, srcHash);
+
+        const dstTxData = await this.getDstTxDataExtended(srcTxStatus, rubicId, fromBlockchain);
+        if (dstTxData.status === TX_STATUS.FAIL && srcTxStatus === TX_STATUS.PENDING) {
+            srcTxStatus = TX_STATUS.FAIL;
+        }
+
+        return {
+            srcTxStatus,
+            dstTxStatus: dstTxData.status,
+            dstTxHash: dstTxData.hash,
+            ...(dstTxData.extraInfo && { extraInfo: dstTxData.extraInfo })
+        };
+    }
+
+    private async getDstTxDataExtended(
+        srcTxStatus: TxStatus,
+        rubicId: string,
+        srcHash: string
+    ): Promise<TxStatusData> {
+        if (srcTxStatus === TX_STATUS.FAIL) {
+            return { hash: null, status: TX_STATUS.FAIL };
+        }
+
+        if (srcTxStatus === TX_STATUS.PENDING) {
+            return { hash: null, status: TX_STATUS.PENDING };
+        }
+
+        const txStatusData = await Injector.rubicApiService.fetchCrossChainTxStatusExtended(
+            srcHash,
+            rubicId
+        );
+
+        if (txStatusData.status === TX_STATUS.SUCCESS) {
+            return {
+                status: TX_STATUS.SUCCESS,
+                hash: txStatusData.destinationTxHash
+            };
+        }
+
+        if (txStatusData.status === 'REVERTED') {
+            return {
+                status: TX_STATUS.FALLBACK,
+                hash: txStatusData.destinationTxHash
+            };
+        }
+
+        if (txStatusData.status === 'NOT_FOUND' || txStatusData.status === 'LONG_PENDING') {
+            return {
+                status: TX_STATUS.PENDING,
+                hash: null
+            };
+        }
+
+        return {
+            status: txStatusData.status,
+            hash: txStatusData.destinationTxHash
+        };
+    }
+
     /**
+     * @deprecated
      * Get destination transaction status and hash based on source transaction status,
      * source transaction receipt, trade data and type.
      * @param srcTxStatus Source transaction status.
