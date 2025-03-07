@@ -23,6 +23,8 @@ import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 import { OpenOceanQuoteResponse } from './models/open-ocean-quote-response';
 import { OpenOceanApiService } from './services/open-ocean-api-service';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 export class OpenOceanProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
@@ -115,21 +117,31 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
 
         const isSupportedTokens =
             Boolean(tokens.length) &&
-            (from.isNative ||
-                tokens?.some(
-                    token =>
-                        compareAddresses(token.address, from.address) ||
-                        SuiWeb3Public.compareSuiAddress(token.customAddress, from.address)
-                )) &&
-            (to.isNative ||
-                tokens.some(
-                    token =>
-                        compareAddresses(token.address, to.address) ||
-                        SuiWeb3Public.compareSuiAddress(token.customAddress, to.address)
-                ));
+            (from.isNative || tokens?.some(token => this.compareTokenAddresses(from, token))) &&
+            (to.isNative || tokens.some(token => this.compareTokenAddresses(to, token)));
 
         if (!isSupportedTokens) {
             throw new RubicSdkError('Unsupported token pair');
         }
+    }
+
+    private compareTokenAddresses(
+        tokenA: PriceToken,
+        tokenB: {
+            address: string;
+            customAddress: string;
+        }
+    ): boolean {
+        const chainType = BlockchainsInfo.getChainType(tokenA.blockchain);
+
+        if (chainType === CHAIN_TYPE.EVM) {
+            return compareAddresses(tokenB.address, tokenA.address);
+        }
+
+        if (chainType === CHAIN_TYPE.SUI) {
+            return SuiWeb3Public.compareSuiAddress(tokenB.customAddress, tokenA.address);
+        }
+
+        throw new RubicSdkError('Unsupported token');
     }
 }
