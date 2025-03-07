@@ -4,6 +4,8 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { SuiWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/sui-web3-public/sui-web3-public';
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
 import {
@@ -23,8 +25,6 @@ import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 import { OpenOceanQuoteResponse } from './models/open-ocean-quote-response';
 import { OpenOceanApiService } from './services/open-ocean-api-service';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 export class OpenOceanProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
