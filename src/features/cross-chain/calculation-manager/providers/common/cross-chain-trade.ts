@@ -145,6 +145,8 @@ export abstract class CrossChainTrade<T = unknown> {
         this._apiFromAddress = value;
     }
 
+    public readonly rubicId: string;
+
     protected constructor(
         protected readonly providerAddress: string,
         protected readonly routePath: RubicStep[],
@@ -154,6 +156,7 @@ export abstract class CrossChainTrade<T = unknown> {
     ) {
         this.isProxyTrade = useProxy;
         this.contractSpender = apiResponse.transaction.approvalAddress!;
+        this.rubicId = apiResponse.id;
     }
 
     /**
