@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.55.1-alpha-flare-openocean.0",
+    "version": "5.55.1-alpha-flare-openocean.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
