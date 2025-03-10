@@ -976,29 +976,29 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@^0.3.3", "@cryptorubic/core@v0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.3.4.tgz#be3761485b36a255c0307149614c5525f82889fe"
-  integrity sha512-Ux8k3MPyDCNBwzzTYuHdrivn+HJU6xqz3T0nfKfOdgnPNFOsJumevu8XtHo39/DlniohXnFt1Q2PuRFne4tQcQ==
+"@cryptorubic/core@0.5.1-alpha-fraxtal.1":
+  version "0.5.1-alpha-fraxtal.1"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.5.1-alpha-fraxtal.1.tgz#f99d4c10346188d3c64737bc43c89b1ccdf794a0"
+  integrity sha512-6+SVL29mCb1A6UgPLqdHARpYhBXlnqHrGMCNcESROnNMvg9FziSmFU29P2ieS649AGfZlpBwY3XIOyjYAGFXsA==
   dependencies:
     bignumber.js "9.1.2"
     jest-mock-promise "^2.0.2"
     tslib "^2.3.0"
 
-"@cryptorubic/tron-types@v0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.3.4.tgz#687766436707fa1aba3e18d94cae50189edac874"
-  integrity sha512-G38cWNGz7jDWBmXF3OuFBTO9UDKE6PXP+M8ulF2S2u1LNIjV3AP1YQ16IK+5gZAlNGcVA8NvbKIilMLumDLvTQ==
+"@cryptorubic/tron-types@0.5.1-alpha-fraxtal.1":
+  version "0.5.1-alpha-fraxtal.1"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.5.1-alpha-fraxtal.1.tgz#575bd4935395191a6a6c26316e487782283af17a"
+  integrity sha512-q8SOKUxXWYNlugWeJrLxDsyCqB3NDENjbRe6tVWRxTo4mmOrz7yS66N5TddEGQyerB1D/y+EfOd9fpm1UP9gtQ==
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@^0.3.3":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.3.4.tgz#b89b516b7bf0094eea4cd358932ebe5d57562f17"
-  integrity sha512-TMMNkzRjbwc8jo+D7bnONJRH1ibxtWLABdOGQJYE08/Yt7Gfcj5laKtqRnFCx+63WZ6hYNs3m1a8UORCHoVxSw==
+"@cryptorubic/web3@0.5.1-alpha-fraxtal.1":
+  version "0.5.1-alpha-fraxtal.1"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.5.1-alpha-fraxtal.1.tgz#638b680ee2b318920a530b528dd913fb3afb9e55"
+  integrity sha512-EehpzZAXGi0WUaK1IXWe2Ri2mtMRP1QemlTfocu125G/NM6H0ao9z7Xrz19s6mJfNtyPOZbWWnj3biiMbKBtbw==
   dependencies:
-    "@cryptorubic/core" v0.3.4
-    "@cryptorubic/tron-types" v0.3.4
+    "@cryptorubic/core" "0.5.1-alpha-fraxtal.1"
+    "@cryptorubic/tron-types" "0.5.1-alpha-fraxtal.1"
     "@ethersproject/bignumber" "^5.7.0"
     "@solana/web3.js" "1.95.3"
     "@solflare-wallet/utl-sdk" "^1.4.0"
