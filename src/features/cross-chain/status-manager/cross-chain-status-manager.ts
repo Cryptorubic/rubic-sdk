@@ -63,7 +63,7 @@ export class CrossChainStatusManager {
     ): Promise<CrossChainStatus> {
         let srcTxStatus = await getSrcTxStatus(fromBlockchain, srcHash);
 
-        const dstTxData = await this.getDstTxDataExtended(srcTxStatus, rubicId, fromBlockchain);
+        const dstTxData = await this.getDstTxDataExtended(srcTxStatus, rubicId, srcHash);
         if (dstTxData.status === TX_STATUS.FAIL && srcTxStatus === TX_STATUS.PENDING) {
             srcTxStatus = TX_STATUS.FAIL;
         }
