@@ -37,6 +37,8 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.BITCOIN);
     }
 
+    protected abstract needProvidePubKey: boolean;
+
     /**
      * Gets gas fee in source blockchain.
      */
@@ -137,13 +139,21 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<
         config: BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig;
         amount: string;
     }> {
+        let publicKey: string | null = null;
+        if (this.needProvidePubKey) {
+            const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.BITCOIN);
+            publicKey = await web3Public.getPublicKey(this.walletAddress);
+        }
+
         const swapRequestData: SwapRequestInterface = {
             ...this.apiQuote,
             fromAddress: this.walletAddress,
             receiver: receiverAddress,
             id: this.apiResponse.id,
-            enableChecks: !testMode
+            enableChecks: !testMode,
+            ...(publicKey && { publicKey })
         };
+
         const swapData = await Injector.rubicApiService.fetchSwapData<
             BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig
         >(swapRequestData);

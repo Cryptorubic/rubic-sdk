@@ -1,4 +1,3 @@
-import { BlockchainAdapterFactoryService } from '@cryptorubic/web3';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
 import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
@@ -15,10 +14,6 @@ export class Injector {
 
     public static get web3PrivateService(): Web3PrivateService {
         return Injector.injector.web3PrivateService;
-    }
-
-    public static get adapterFactory(): BlockchainAdapterFactoryService {
-        return Injector.injector.adapterFactory;
     }
 
     public static get httpClient(): HttpClient {
@@ -41,17 +36,10 @@ export class Injector {
         web3PublicService: Web3PublicService,
         web3PrivateService: Web3PrivateService,
         httpClient: HttpClient,
-        rubicApiService: RubicApiService,
-        adapterFactory: BlockchainAdapterFactoryService
+        rubicApiService: RubicApiService
     ): void {
         // eslint-disable-next-line no-new
-        new Injector(
-            web3PublicService,
-            web3PrivateService,
-            httpClient,
-            rubicApiService,
-            adapterFactory
-        );
+        new Injector(web3PublicService, web3PrivateService, httpClient, rubicApiService);
     }
 
     private readonly coingeckoApi: CoingeckoApi;
@@ -62,8 +50,7 @@ export class Injector {
         private readonly web3PublicService: Web3PublicService,
         private readonly web3PrivateService: Web3PrivateService,
         private readonly httpClient: HttpClient,
-        private readonly rubicApiService: RubicApiService,
-        private readonly adapterFactory: BlockchainAdapterFactoryService
+        private readonly rubicApiService: RubicApiService
     ) {
         this.coingeckoApi = new CoingeckoApi(httpClient);
         this.gasPriceApi = new GasPriceApi(httpClient);

@@ -1,8 +1,6 @@
-import { BitcoinAdapter } from '@cryptorubic/web3';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { BitcoinWalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { OnChainStatusManager } from 'src/features/on-chain/status-manager/on-chain-status-manager';
 
@@ -17,22 +15,40 @@ export class BitcoinWeb3Private extends Web3Private {
         return Promise.resolve(BLOCKCHAIN_NAME.BITCOIN);
     }
 
-    protected get bitcoinAdapter(): BitcoinAdapter {
-        return Injector.adapterFactory.getAdapter(BLOCKCHAIN_NAME.BITCOIN);
-    }
-
     public async transfer(
         txConfig: BitcoinTransferEncodedConfig,
         options?: BasicTransactionOptions
     ): Promise<string> {
-        try {
-            const hash = await this.bitcoinAdapter.transfer(
-                txConfig.to,
-                txConfig.value,
-                this.address,
-                txConfig.data,
-                options
+        const hashPromise = new Promise<string>((resolve, reject) => {
+            this.wallet.core.request(
+                {
+                    method: 'transfer',
+                    params: [
+                        {
+                            feeRate: 10,
+                            from: this.wallet.address,
+                            recipient: txConfig.to,
+                            amount: {
+                                amount: txConfig.value,
+                                decimals: 8
+                            },
+                            ...(txConfig.data && { memo: txConfig.data })
+                        }
+                    ]
+                },
+                (error, txHash) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        const hash = txHash as string;
+                        options?.onTransactionHash?.(hash);
+                        resolve(hash);
+                    }
+                }
             );
+        });
+        try {
+            const hash = await hashPromise;
             if (typeof hash === 'string') {
                 const statusData = await OnChainStatusManager.getBitcoinTransaction(hash);
                 return statusData.hash!;
@@ -46,14 +62,33 @@ export class BitcoinWeb3Private extends Web3Private {
     public async sendPsbtTransaction(
         txConfig: BitcoinPsbtEncodedConfig,
         options?: BasicTransactionOptions
-    ): Promise<string> {
-        try {
-            const hash = await this.bitcoinAdapter.sendPsbtTransaction(
-                txConfig.psbt,
-                this.address,
-                txConfig.signInputs,
-                options
+    ) {
+        const hashPromise = new Promise<string>((resolve, reject) => {
+            this.wallet.core.request(
+                {
+                    method: 'sign_psbt',
+                    params: {
+                        psbt: txConfig.psbt,
+                        signInputs: {
+                            [this.address]: txConfig.signInputs
+                        },
+                        allowedSignHash: 1,
+                        broadcast: true
+                    }
+                },
+                (error, txHash) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        const txData = txHash as { result: { psbt: string; txId: string } };
+                        options?.onTransactionHash?.(txData.result.txId);
+                        resolve(txData.result.txId);
+                    }
+                }
             );
+        });
+        try {
+            const hash = await hashPromise;
             if (typeof hash === 'string') {
                 const statusData = await OnChainStatusManager.getBitcoinTransaction(hash);
                 return statusData.hash!;
@@ -66,5 +101,24 @@ export class BitcoinWeb3Private extends Web3Private {
 
     constructor(private readonly wallet: BitcoinWalletProviderCore) {
         super(wallet.address);
+    }
+
+    public async getPublicKeyFromWallet(): Promise<string> {
+        const res = await this.wallet.core.request<{ publicKey: string }[]>(
+            {
+                method: 'request_accounts_and_keys',
+                params: {
+                    purposes: ['payment']
+                }
+            },
+            () => {}
+        );
+
+        if (res.error) {
+            console.error(res.error);
+            throw res.error;
+        }
+
+        return res.result[0]?.publicKey!;
     }
 }

@@ -1,4 +1,4 @@
-import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import { BLOCKCHAIN_NAME, QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -57,6 +57,10 @@ export class TransformUtils {
 
         let trade: CrossChainTrade | null = null;
 
+        const needProvidePubKey =
+            tradeType === CROSS_CHAIN_TRADE_TYPE.TELE_SWAP &&
+            tradeParams.from.blockchain === BLOCKCHAIN_NAME.BITCOIN;
+
         const parsedWarnings = RubicApiParser.parseRubicApiWarnings(res?.warnings || []);
 
         const isTransferTrade =
@@ -84,7 +88,10 @@ export class TransformUtils {
         } else if (chainType === CHAIN_TYPE.TRON) {
             trade = new TronApiCrossChainTrade(tradeParams as TronApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.BITCOIN) {
-            trade = new BitcoinApiCrossChainTrade(tradeParams as BitcoinApiCrossChainConstructor);
+            trade = new BitcoinApiCrossChainTrade({
+                ...tradeParams,
+                needProvidePubKey
+            } as BitcoinApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.SOLANA) {
             trade = new SolanaApiCrossChainTrade(tradeParams as SolanaApiCrossChainConstructor);
         }
