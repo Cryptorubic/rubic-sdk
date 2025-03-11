@@ -1,5 +1,6 @@
 import { RubicSdkError } from 'src/common/errors';
-import { BitcoinEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-encoded-config';
+import { BitcoinPsbtEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-psbt-encoded-config';
+import { BitcoinTransferEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-transfer-encoded-config';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
@@ -13,7 +14,8 @@ export type CalculationResult<
         | TronTransactionConfig
         | { data: string }
         | TonEncodedConfig
-        | BitcoinEncodedConfig
+        | BitcoinTransferEncodedConfig
+        | BitcoinPsbtEncodedConfig
 > =
     | { trade: CrossChainTrade<T>; error?: RubicSdkError; tradeType: CrossChainTradeType }
     | { trade: null; error: RubicSdkError; tradeType: CrossChainTradeType };

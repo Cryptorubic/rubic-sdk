@@ -29,6 +29,8 @@ export class BitcoinApiCrossChainTrade extends BitcoinCrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
+    protected readonly needProvidePubKey: boolean;
+
     public readonly isAggregator = false;
 
     //@TODO API
@@ -55,6 +57,7 @@ export class BitcoinApiCrossChainTrade extends BitcoinCrossChainTrade {
         this.priceImpact = tradeParams.apiResponse.estimate.priceImpact;
         this.slippage = tradeParams.apiResponse.estimate.slippage;
         this.feeInfo = tradeParams.feeInfo;
+        this.needProvidePubKey = tradeParams.needProvidePubKey;
     }
 
     public getTradeInfo(): TradeInfo {
