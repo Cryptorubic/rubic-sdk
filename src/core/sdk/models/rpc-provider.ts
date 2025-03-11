@@ -4,7 +4,7 @@ import {
     SolanaBlockchainName,
     TonBlockchainName,
     TronBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+} from '@cryptorubic/core';
 import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 
 /**

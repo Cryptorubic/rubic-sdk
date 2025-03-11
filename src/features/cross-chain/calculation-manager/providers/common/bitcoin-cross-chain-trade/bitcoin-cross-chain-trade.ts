@@ -10,11 +10,11 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BitcoinBlockchainName, BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BitcoinWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/bitcoin-web3-private';
-import { BitcoinEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-encoded-config';
+import { BitcoinPsbtEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-psbt-encoded-config';
+import { BitcoinTransferEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/bitcoin-web3-private/models/bitcoin-transfer-encoded-config';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { BitcoinWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/bitcoin-web3-public/bitcoin-web3-public';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -22,7 +22,9 @@ import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/pr
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
-export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEncodedConfig> {
+export abstract class BitcoinCrossChainTrade extends CrossChainTrade<
+    BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig
+> {
     public abstract readonly from: PriceTokenAmount<BitcoinBlockchainName>;
 
     public abstract readonly memo: string;
@@ -61,7 +63,7 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
         let transactionHash: string;
 
         try {
-            const { data, to, value } = await this.setTransactionConfig(
+            const txConfig = await this.setTransactionConfig(
                 false,
                 options?.useCacheData || false,
                 options.testMode,
@@ -75,8 +77,13 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
                 }
                 transactionHash = hash;
             };
+            const isPsbtTrade = 'psbt' in txConfig;
 
-            await this.web3Private.transfer(to, value, data, { onTransactionHash });
+            if (isPsbtTrade) {
+                await this.web3Private.sendPsbtTransaction(txConfig, { onTransactionHash });
+            } else {
+                await this.web3Private.transfer(txConfig, { onTransactionHash });
+            }
 
             return transactionHash!;
         } catch (err) {
@@ -126,7 +133,10 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
     protected async getTransactionConfigAndAmount(
         testMode?: boolean,
         receiverAddress?: string
-    ): Promise<{ config: { to: string; value: string }; amount: string }> {
+    ): Promise<{
+        config: BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig;
+        amount: string;
+    }> {
         const swapRequestData: SwapRequestInterface = {
             ...this.apiQuote,
             fromAddress: this.walletAddress,
@@ -134,18 +144,12 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<BitcoinEnco
             id: this.apiResponse.id,
             enableChecks: !testMode
         };
-        const swapData = await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(
-            swapRequestData
-        );
-
-        const config = {
-            value: swapData.transaction.value!,
-            to: swapData.transaction.to!
-        };
-
+        const swapData = await Injector.rubicApiService.fetchSwapData<
+            BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig
+        >(swapRequestData);
         const amount = swapData.estimate.destinationWeiAmount;
 
-        return { config, amount };
+        return { config: swapData.transaction, amount };
     }
 
     public authWallet(): Promise<string> {

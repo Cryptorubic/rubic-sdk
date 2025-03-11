@@ -1,3 +1,5 @@
+import { EvmBlockchainName } from '@cryptorubic/core';
+import { BlockchainAdapterFactoryService } from '@cryptorubic/web3';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
@@ -85,13 +87,21 @@ export class SDK {
      * to new configuration (even for entities created with other previous sdk instances).
      */
     public static async createSDK(configuration: Configuration): Promise<SDK> {
-        const [web3PublicService, web3PrivateService, httpClient, apiService] = await Promise.all([
-            SDK.createWeb3PublicService(configuration),
-            SDK.createWeb3PrivateService(configuration),
-            SDK.createHttpClient(configuration),
-            SDK.createApiService(configuration)
-        ]);
-        Injector.createInjector(web3PublicService, web3PrivateService, httpClient, apiService);
+        const [web3PublicService, web3PrivateService, httpClient, apiService, adapterFactory] =
+            await Promise.all([
+                SDK.createWeb3PublicService(configuration),
+                SDK.createWeb3PrivateService(configuration),
+                SDK.createHttpClient(configuration),
+                SDK.createApiService(configuration),
+                SDK.createAdapterFactory(configuration)
+            ]);
+        Injector.createInjector(
+            web3PublicService,
+            web3PrivateService,
+            httpClient,
+            apiService,
+            adapterFactory
+        );
 
         const { providerAddress } = configuration;
         return new SDK({
@@ -122,6 +132,24 @@ export class SDK {
         return new RubicApiService(configuration?.envType || 'prod');
     }
 
+    private static async createAdapterFactory(
+        configuration: Configuration
+    ): Promise<BlockchainAdapterFactoryService> {
+        const rpc = configuration.rpcProviders as Partial<Record<EvmBlockchainName, string[]>>;
+
+        const factory = await BlockchainAdapterFactoryService.createFactory(
+            rpc,
+            configuration.httpClient
+        );
+
+        if (configuration.walletProvider) {
+            //@ts-ignore
+            factory.connectWallet(configuration.walletProvider);
+        }
+
+        return factory;
+    }
+
     private constructor(providerAddress: ProviderAddress) {
         this.onChainManager = new OnChainManager(providerAddress);
         this.crossChainManager = new CrossChainManager(providerAddress);
@@ -135,14 +163,22 @@ export class SDK {
      * Updates sdk configuration and sdk entities dependencies.
      */
     public async updateConfiguration(configuration: Configuration): Promise<void> {
-        const [web3PublicService, web3PrivateService, httpClient, apiService] = await Promise.all([
-            SDK.createWeb3PublicService(configuration),
-            SDK.createWeb3PrivateService(configuration),
-            SDK.createHttpClient(configuration),
-            SDK.createApiService(configuration)
-        ]);
+        const [web3PublicService, web3PrivateService, httpClient, apiService, adapterFactory] =
+            await Promise.all([
+                SDK.createWeb3PublicService(configuration),
+                SDK.createWeb3PrivateService(configuration),
+                SDK.createHttpClient(configuration),
+                SDK.createApiService(configuration),
+                SDK.createAdapterFactory(configuration)
+            ]);
 
-        Injector.createInjector(web3PublicService, web3PrivateService, httpClient, apiService);
+        Injector.createInjector(
+            web3PublicService,
+            web3PrivateService,
+            httpClient,
+            apiService,
+            adapterFactory
+        );
     }
 
     public updateWalletProvider(walletProvider: WalletProvider): void {
@@ -154,6 +190,7 @@ export class SDK {
         walletProviderCore: WalletProviderCore
     ): void {
         Injector.web3PrivateService.updateWeb3Private(chainType, walletProviderCore);
+        Injector.adapterFactory.connectWallet({ [chainType]: walletProviderCore });
     }
 
     public updateWalletAddress(chainType: keyof WalletProvider, address: string): void {
