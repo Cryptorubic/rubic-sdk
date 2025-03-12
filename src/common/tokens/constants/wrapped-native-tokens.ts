@@ -20,8 +20,8 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
     [BLOCKCHAIN_NAME.POLYGON]: new Token({
         blockchain: BLOCKCHAIN_NAME.POLYGON,
         address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-        name: 'Wrapped Matic',
-        symbol: 'WMATIC',
+        name: 'Wrapped Polygon',
+        symbol: 'WPOL',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: new Token({

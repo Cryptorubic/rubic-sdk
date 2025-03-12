@@ -130,8 +130,8 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
     [BLOCKCHAIN_NAME.POLYGON]: new Token({
         blockchain: BLOCKCHAIN_NAME.POLYGON,
         address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'Matic Network',
-        symbol: 'MATIC',
+        name: 'Polygon',
+        symbol: 'POL',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: new Token({
