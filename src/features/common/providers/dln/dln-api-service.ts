@@ -24,7 +24,8 @@ export class DlnApiService {
 
     public static fetchCrossChainSwapData<T>(requestParams: TransactionRequest): Promise<T> {
         return Injector.httpClient.get<T>(`${DlnApiService.xApiEndpoint}/dln/order/create-tx`, {
-            params: requestParams as unknown as {}
+            params: requestParams as unknown as {},
+            headers: { apiKey: RUBIC_X_API_APIKEY }
         });
     }
 
