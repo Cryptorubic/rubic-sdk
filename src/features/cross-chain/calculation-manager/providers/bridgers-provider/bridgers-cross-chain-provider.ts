@@ -12,6 +12,7 @@ import {
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -55,12 +56,24 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
     ): boolean {
-        return (
-            (this.isSupportedBlockchain(fromBlockchain) && toBlockchain === BLOCKCHAIN_NAME.TON) ||
-            (fromBlockchain === BLOCKCHAIN_NAME.TON && this.isSupportedBlockchain(toBlockchain)) ||
-            (fromBlockchain === BLOCKCHAIN_NAME.TRON && this.isSupportedBlockchain(toBlockchain)) ||
-            (this.isSupportedBlockchain(fromBlockchain) && toBlockchain === BLOCKCHAIN_NAME.TRON)
-        );
+        const isTonEvm =
+            fromBlockchain === BLOCKCHAIN_NAME.TON &&
+            this.isSupportedBlockchain(toBlockchain) &&
+            BlockchainsInfo.isEvmBlockchainName(toBlockchain);
+        const isEvmTon =
+            this.isSupportedBlockchain(fromBlockchain) &&
+            BlockchainsInfo.isEvmBlockchainName(fromBlockchain) &&
+            toBlockchain === BLOCKCHAIN_NAME.TON;
+        const isTronEvm =
+            fromBlockchain === BLOCKCHAIN_NAME.TRON &&
+            this.isSupportedBlockchain(toBlockchain) &&
+            BlockchainsInfo.isEvmBlockchainName(toBlockchain);
+        const isEvmTron =
+            this.isSupportedBlockchain(fromBlockchain) &&
+            BlockchainsInfo.isEvmBlockchainName(fromBlockchain) &&
+            toBlockchain === BLOCKCHAIN_NAME.TRON;
+
+        return isEvmTon || isTonEvm || isEvmTron || isTronEvm;
     }
 
     public async calculate(

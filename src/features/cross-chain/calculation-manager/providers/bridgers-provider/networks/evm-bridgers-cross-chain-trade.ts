@@ -5,6 +5,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -109,6 +110,10 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             receiverAddress = TronWeb3Pure.addressToHex(receiverAddress);
             toAddress = TronWeb3Pure.addressToHex(toAddress);
         }
+        if (this.to.blockchain === BLOCKCHAIN_NAME.TON) {
+            receiverAddress = TonWeb3Pure.addressToHex(receiverAddress);
+            toAddress = TonWeb3Pure.addressToHex(toAddress);
+        }
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
             { ...options, receiverAddress },
@@ -187,10 +192,11 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             true
         ).address;
 
+        const useLowerCase = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
         const toTokenAddress = createTokenNativeAddressProxy(
             this.to,
             bridgersNativeAddress,
-            this.to.blockchain !== BLOCKCHAIN_NAME.TRON
+            useLowerCase
         ).address;
 
         const fromAddress = this.walletAddress;
