@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "6.0.1-alpha-fraxtal-api.1",
+    "version": "6.0.1-alpha-fraxtal-api.2",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
