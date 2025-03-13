@@ -230,14 +230,21 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             toTokenAddress,
             fromTokenAmount: fromWithoutFee.stringWeiAmount,
             fromTokenChain: toBridgersBlockchain[fromBlockchain],
-            toTokenChain: toBridgersBlockchain[toBlockchain]
+            toTokenChain: toBridgersBlockchain[toBlockchain],
+            sourceFlag: 'rubic'
         };
         const quoteResponse = await Injector.httpClient.post<BridgersQuoteResponse>(
             'https://sswap.swft.pro/api/sswap/quote',
             quoteRequest
         );
-        const amount = quoteResponse.data?.txData?.amountOutMin;
+        const amountMinWei = Web3Pure.toWei(
+            new BigNumber(this.from.tokenAmount)
+                .minus(quoteResponse.data.txData.serviceFee)
+                .multipliedBy(quoteResponse.data.txData.instantRate)
+                .minus(quoteResponse.data.txData.chainFee),
+            this.from.decimals
+        );
 
-        return { config, amount };
+        return { config, amount: amountMinWei };
     }
 }

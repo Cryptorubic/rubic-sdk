@@ -17,7 +17,6 @@ import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import {
@@ -120,7 +119,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 toTokenAddress,
                 fromTokenAmount: fromWithoutFee.stringWeiAmount,
                 fromTokenChain: toBridgersBlockchain[fromBlockchain],
-                toTokenChain: toBridgersBlockchain[toBlockchain]
+                toTokenChain: toBridgersBlockchain[toBlockchain],
+                sourceFlag: 'rubic'
             };
             const quoteResponse = await this.httpClient.post<BridgersQuoteResponse>(
                 'https://sswap.swft.pro/api/sswap/quote',
@@ -161,10 +161,10 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 blockchain: toBlockchain,
                 tokenAmount: new BigNumber(transactionData.toTokenAmount)
             });
-            const toTokenAmountMin = Web3Pure.fromWei(
-                transactionData.amountOutMin,
-                toToken.decimals
-            );
+            const toTokenAmountMin = new BigNumber(from.tokenAmount)
+                .minus(transactionData.serviceFee)
+                .multipliedBy(transactionData.instantRate)
+                .minus(transactionData.chainFee);
 
             const trade = BridgersCrossChainProviderFactory.createTrade({
                 crossChainTrade: {

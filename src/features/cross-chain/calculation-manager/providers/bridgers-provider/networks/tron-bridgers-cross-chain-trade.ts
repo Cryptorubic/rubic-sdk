@@ -146,7 +146,8 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             toTokenAddress,
             fromTokenAmount: fromWithoutFee.stringWeiAmount,
             fromTokenChain: toBridgersBlockchain[fromBlockchain],
-            toTokenChain: toBridgersBlockchain[toBlockchain]
+            toTokenChain: toBridgersBlockchain[toBlockchain],
+            sourceFlag: 'rubic'
         };
         const quoteResponse = await Injector.httpClient.post<BridgersQuoteResponse>(
             'https://sswap.swft.pro/api/sswap/quote',
