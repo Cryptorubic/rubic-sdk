@@ -2,7 +2,6 @@ import { TeleswapSDK } from '@teleportdao/teleswap-sdk';
 import { SupportedNetwork } from '@teleportdao/teleswap-sdk/dist/types';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -39,9 +38,6 @@ import {
 } from '../constants/teleswap-swap-and-unwrap-abi';
 import { TeleSwapEvmConstructorParams } from '../models/teleswap-constructor-params';
 import { TeleSwapUtilsService } from '../services/teleswap-utils-service';
-
-const ONE_PERCENT_FEE_ADDR = '0xC095e57dDfa5924BC56bEAcf1D515F154ac44e94';
-const ZERO_PERCENT_FEE_ADDR = '0x51c276f1392E87D4De6203BdD80c83f5F62724d4';
 
 export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
     public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.TELE_SWAP;
@@ -86,10 +82,7 @@ export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
 
     constructor(params: TeleSwapEvmConstructorParams) {
         const { routePath, useProxy, crossChainTrade, providerAddress } = params;
-        const percentFeeAddress = compareAddresses(providerAddress, ZERO_PERCENT_FEE_ADDR)
-            ? ZERO_PERCENT_FEE_ADDR
-            : ONE_PERCENT_FEE_ADDR;
-        super(percentFeeAddress, routePath, useProxy);
+        super(providerAddress, routePath, useProxy);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

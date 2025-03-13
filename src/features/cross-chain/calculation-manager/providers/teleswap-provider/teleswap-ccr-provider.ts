@@ -1,5 +1,6 @@
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -22,6 +23,8 @@ import {
 import { TeleSwapUtilsService } from './services/teleswap-utils-service';
 import { TeleSwapCcrFactory } from './teleswap-ccr-factory';
 
+const ONE_PERCENT_FEE_ADDR = '0xC095e57dDfa5924BC56bEAcf1D515F154ac44e94';
+const ZERO_PERCENT_FEE_ADDR = '0x51c276f1392E87D4De6203BdD80c83f5F62724d4';
 export class TeleSwapCcrProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.TELE_SWAP;
 
@@ -42,9 +45,16 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
             }
 
             const useProxy = options?.useProxy?.[this.type] ?? true;
+            const percentFeeAddress = compareAddresses(
+                options.providerAddress,
+                ZERO_PERCENT_FEE_ADDR
+            )
+                ? ZERO_PERCENT_FEE_ADDR
+                : ONE_PERCENT_FEE_ADDR;
+
             const feeInfo = await this.getFeeInfo(
                 from.blockchain as EvmBlockchainName,
-                options.providerAddress,
+                percentFeeAddress,
                 from,
                 useProxy
             );
