@@ -73,7 +73,14 @@ export class TeleSwapUtilsService {
         return token.address;
     }
 
-    public static getFeePercentAddressEVM(from: PriceTokenAmount<EvmBlockchainName>): string {
+    public static getFeePercentAddressEVM(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        providerAddress: string
+    ): string {
+        if (!Object.values(percentAddress).includes(providerAddress)) {
+            return providerAddress;
+        }
+
         const usdAmount = from.tokenAmount.multipliedBy(from.price || 1);
 
         return usdAmount.lte(100) ? percentAddress.zeroFee : percentAddress.onePercent;
