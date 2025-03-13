@@ -2,11 +2,9 @@ import { TeleswapSDK } from '@teleportdao/teleswap-sdk';
 import { SupportedNetwork } from '@teleportdao/teleswap-sdk/dist/types';
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { percentAddress } from 'src/core/proxy/constants/fee-type-address-mapping';
 
 import { TeleSwapCcrSupportedChain } from '../constants/teleswap-ccr-supported-chains';
 import { teleSwapNetworkTickers } from '../constants/teleswap-network-tickers';
@@ -71,18 +69,5 @@ export class TeleSwapUtilsService {
         }
 
         return token.address;
-    }
-
-    public static getFeePercentAddressEVM(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        providerAddress: string
-    ): string {
-        if (!Object.values(percentAddress).includes(providerAddress)) {
-            return providerAddress;
-        }
-
-        const usdAmount = from.tokenAmount.multipliedBy(from.price || 1);
-
-        return usdAmount.lte(100) ? percentAddress.zeroFee : percentAddress.onePercent;
     }
 }
