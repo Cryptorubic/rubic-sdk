@@ -110,7 +110,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             receiverAddress = TronWeb3Pure.addressToHex(receiverAddress);
             toAddress = TronWeb3Pure.addressToHex(toAddress);
         }
-        if (this.to.blockchain === BLOCKCHAIN_NAME.TON) {
+        if (this.to.blockchain === BLOCKCHAIN_NAME.TON && !this.to.isNative) {
             receiverAddress = TonWeb3Pure.addressToHex(receiverAddress);
             toAddress = TonWeb3Pure.addressToHex(toAddress);
         }
