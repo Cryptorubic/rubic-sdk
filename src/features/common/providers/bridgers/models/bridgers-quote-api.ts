@@ -12,6 +12,8 @@ export interface BridgersQuoteResponse {
     resCode: number;
     data: {
         txData: {
+            /* wei */
+            fromTokenAmount: string;
             toTokenAmount: number;
             amountOutMin: string;
             fee: number;
