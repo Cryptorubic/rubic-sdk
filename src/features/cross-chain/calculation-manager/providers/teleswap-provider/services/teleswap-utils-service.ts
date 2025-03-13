@@ -42,9 +42,9 @@ export class TeleSwapUtilsService {
 
         const toAmount = new BigNumber(estimation.outputAmount);
 
-        const feeWeiAmount = toAmount.multipliedBy(TeleSwapUtilsService.bitcoinFeePercent);
+        // const feeWeiAmount = toAmount.multipliedBy(TeleSwapUtilsService.bitcoinFeePercent);
 
-        return toAmount.minus(feeWeiAmount);
+        return toAmount;
     }
 
     private static async calculateBtcOutputWeiAmount(
