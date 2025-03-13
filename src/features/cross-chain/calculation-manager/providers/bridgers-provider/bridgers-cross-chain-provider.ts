@@ -135,7 +135,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            const outputAmount = new BigNumber(from.tokenAmount)
+            const outputAmount = from.tokenAmount
                 .minus(transactionData.serviceFee)
                 .multipliedBy(transactionData.instantRate)
                 .minus(transactionData.chainFee);

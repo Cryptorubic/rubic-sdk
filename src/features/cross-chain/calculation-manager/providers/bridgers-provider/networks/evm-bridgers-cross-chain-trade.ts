@@ -238,11 +238,11 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             quoteRequest
         );
         const amountMinWei = Web3Pure.toWei(
-            new BigNumber(this.from.tokenAmount)
+            this.from.tokenAmount
                 .minus(quoteResponse.data.txData.serviceFee)
                 .multipliedBy(quoteResponse.data.txData.instantRate)
                 .minus(quoteResponse.data.txData.chainFee),
-            this.from.decimals
+            this.to.decimals
         );
 
         return { config, amount: amountMinWei };
