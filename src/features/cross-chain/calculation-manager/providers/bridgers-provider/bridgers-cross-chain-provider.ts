@@ -135,36 +135,17 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            if (from.tokenAmount.lt(transactionData.depositMin)) {
-                return {
-                    trade: null,
-                    error: new MinAmountError(
-                        new BigNumber(transactionData.depositMin),
-                        from.symbol
-                    ),
-                    tradeType: this.type
-                };
-            }
-            if (from.tokenAmount.gt(transactionData.depositMax)) {
-                return {
-                    trade: null,
-                    error: new MaxAmountError(
-                        new BigNumber(transactionData.depositMax),
-                        from.symbol
-                    ),
-                    tradeType: this.type
-                };
-            }
+            const outputAmount = new BigNumber(from.tokenAmount)
+                .minus(transactionData.serviceFee)
+                .multipliedBy(transactionData.instantRate)
+                .minus(transactionData.chainFee);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 blockchain: toBlockchain,
-                tokenAmount: new BigNumber(transactionData.toTokenAmount)
+                tokenAmount: outputAmount
             });
-            const toTokenAmountMin = new BigNumber(from.tokenAmount)
-                .minus(transactionData.serviceFee)
-                .multipliedBy(transactionData.instantRate)
-                .minus(transactionData.chainFee);
+            const toTokenAmountMin = outputAmount;
 
             const trade = BridgersCrossChainProviderFactory.createTrade({
                 crossChainTrade: {
