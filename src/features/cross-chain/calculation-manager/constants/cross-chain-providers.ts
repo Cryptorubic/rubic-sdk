@@ -23,6 +23,7 @@ import { RouterCrossChainProvider } from '../providers/router-provider/router-cr
 import { SimpleSwapCcrProvider } from '../providers/simple-swap-provider/simple-swap-ccr-provider';
 import { StargateV2CrossChainProvider } from '../providers/stargate-v2-provider/stargate-v2-cross-chain-provider';
 import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-provider';
+import { TeleSwapCcrProvider } from '../providers/teleswap-provider/teleswap-ccr-provider';
 import { UniZenCcrProvider } from '../providers/unizen-provider/unizen-ccr-provider';
 
 const proxyProviders = [
@@ -42,7 +43,8 @@ const proxyProviders = [
     RouterCrossChainProvider,
     RetroBridgeProvider,
     AcrossCrossChainProvider,
-    UniZenCcrProvider
+    UniZenCcrProvider,
+    TeleSwapCcrProvider
 ] as const;
 
 const nonProxyProviders = [

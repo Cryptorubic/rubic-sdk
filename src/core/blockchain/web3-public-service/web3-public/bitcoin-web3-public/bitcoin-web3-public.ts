@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import {
     TX_STATUS,
@@ -11,6 +12,7 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractMulticallResponse } from '../models/contract-multicall-response';
 import { SupportedTokenField } from '../models/supported-token-field';
 import { Web3Public } from '../web3-public';
+import { BitcoinUserAddressInfo } from './models/bitcoin-user-address-info';
 
 export class BitcoinWeb3Public extends Web3Public {
     constructor() {
@@ -72,5 +74,38 @@ export class BitcoinWeb3Public extends Web3Public {
         ContractMulticallResponse<Output>[][]
     > {
         throw new Error('Method not implemented.');
+    }
+
+    public async getPublicKey(userAddress: string): Promise<string | null> {
+        try {
+            const url = `https://api.blockcypher.com/v1/btc/main/addrs/${userAddress}/full`;
+            const response = await Injector.httpClient.get<BitcoinUserAddressInfo>(url);
+
+            const txs = response.txs;
+            let publicKey = null;
+
+            for (const txData of txs) {
+                const userInputData = txData.inputs.find(inputData => {
+                    const isInputFromUserAddress = inputData.addresses.includes(userAddress);
+
+                    const publicKey = inputData.witness?.[1];
+
+                    return isInputFromUserAddress && publicKey;
+                });
+
+                if (userInputData) {
+                    publicKey = userInputData.witness[1]!;
+                    break;
+                }
+            }
+            if (!publicKey) {
+                throw new Error();
+            }
+
+            return publicKey;
+        } catch {
+            const web3Private = Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.BITCOIN);
+            return web3Private.getPublicKeyFromWallet();
+        }
     }
 }
