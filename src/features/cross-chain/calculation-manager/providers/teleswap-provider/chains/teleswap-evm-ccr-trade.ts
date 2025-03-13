@@ -81,8 +81,12 @@ export class TeleSwapEvmCcrTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: TeleSwapEvmConstructorParams) {
-        const { providerAddress, routePath, useProxy, crossChainTrade } = params;
+        const { routePath, useProxy, crossChainTrade } = params;
+        const providerAddress = TeleSwapUtilsService.getFeePercentAddressEVM(
+            params.crossChainTrade.from
+        );
         super(providerAddress, routePath, useProxy);
+
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.feeInfo = crossChainTrade.feeInfo;
