@@ -16,7 +16,6 @@ import {
     OpenoceanSwapQuoteResponse
 } from '../models/open-cean-swap-quote-response';
 import { OpenOceanQuoteResponse } from '../models/open-ocean-quote-response';
-import { OpenOceanTokenListResponse } from '../models/open-ocean-token-list-response';
 
 export class OpenOceanApiService {
     private static apiV4Url = 'https://open-api.openocean.finance/v4';
@@ -107,17 +106,6 @@ export class OpenOceanApiService {
         );
 
         return swapResponse;
-    }
-
-    public static async fetchTokensList(
-        blockchain: OpenoceanOnChainSupportedBlockchain
-    ): Promise<OpenOceanTokenListResponse> {
-        const tokenListResponse = await Injector.httpClient.get<OpenOceanTokenListResponse>(
-            `${this.xApiUrl}/token_list/${openOceanBlockchainName[blockchain]}`,
-            { headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' } }
-        );
-
-        return tokenListResponse;
     }
 
     private static async getGasPriceNonWei(

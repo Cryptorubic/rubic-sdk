@@ -5,6 +5,7 @@ import {
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
@@ -37,7 +38,13 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
         try {
-            if (from.blockchain === BLOCKCHAIN_NAME.BITCOIN && toToken.isWrapped) {
+            const isSameChainTypes =
+                BlockchainsInfo.getChainType(from.blockchain) ===
+                BlockchainsInfo.getChainType(toToken.blockchain);
+            if (
+                (from.blockchain === BLOCKCHAIN_NAME.BITCOIN && toToken.isWrapped) ||
+                isSameChainTypes
+            ) {
                 throw new NotSupportedTokensError();
             }
 
