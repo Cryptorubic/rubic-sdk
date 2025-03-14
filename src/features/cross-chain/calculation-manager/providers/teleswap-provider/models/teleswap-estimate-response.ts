@@ -15,3 +15,16 @@ export interface TeleSwapEstimateResponse {
         outputAmount: string;
     };
 }
+
+export interface TeleSwapEstimateNativeResponse {
+    minInputAmountBTC: string;
+    inputAmountBTC: string | number;
+    outputAmountBTC: string;
+    teleswapFee: {
+        networkFeeBTC: string;
+        protocolFeeBTC: string;
+        lockerFeeBTC: string;
+        thirdPartyFeeBTC: string;
+        totalFeeBTC: string;
+    };
+}
