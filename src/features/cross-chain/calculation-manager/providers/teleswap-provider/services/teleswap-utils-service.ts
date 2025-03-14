@@ -44,7 +44,9 @@ export class TeleSwapUtilsService {
         )) as TeleSwapEstimateResponse | TeleSwapEstimateNativeResponse;
 
         const toAmount = new BigNumber(
-            'outputAmount' in estimation ? estimation.outputAmount : estimation.outputAmountBTC
+            'outputAmount' in estimation
+                ? estimation.outputAmount
+                : Web3Pure.toWei(estimation.outputAmountBTC, toToken.decimals)
         );
 
         // const feeWeiAmount = toAmount.multipliedBy(TeleSwapUtilsService.bitcoinFeePercent);

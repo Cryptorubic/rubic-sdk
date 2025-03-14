@@ -1,6 +1,7 @@
 export interface TeleSwapEstimateResponse {
     minInputAmountBTC: string;
     inputAmountBTC: string | number;
+    /* wei (8500000) */
     outputAmount: string;
     teleswapFee: {
         networkFeeBTC: string;
@@ -19,6 +20,7 @@ export interface TeleSwapEstimateResponse {
 export interface TeleSwapEstimateNativeResponse {
     minInputAmountBTC: string;
     inputAmountBTC: string | number;
+    /* non wei (0.000085) */
     outputAmountBTC: string;
     teleswapFee: {
         networkFeeBTC: string;
