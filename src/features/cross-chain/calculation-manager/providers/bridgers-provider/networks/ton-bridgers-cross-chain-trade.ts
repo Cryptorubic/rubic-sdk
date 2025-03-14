@@ -1,14 +1,18 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    NotSupportedTokensError
+} from 'src/common/errors';
 import { NotSupportedRegionError } from 'src/common/errors/swap/not-supported-region';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BLOCKCHAIN_NAME, TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
+import { BLOCKCHAIN_NAME, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { bridgersContractAddresses } from 'src/features/common/providers/bridgers/models/bridgers-contract-addresses';
 import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
@@ -19,23 +23,22 @@ import {
 } from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
-import { BridgersTronCrossChainParams } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/bridgers-cross-chain-trade-types';
-import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/models/tron-bridgers-transaction-data';
-import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { TronContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-contract-params';
-import { TronGetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
-import { TronCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/tron-cross-chain-trade';
 
-export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
+import { CROSS_CHAIN_TRADE_TYPE } from '../../../models/cross-chain-trade-type';
+import { BRIDGE_TYPE } from '../../common/models/bridge-type';
+import { FeeInfo } from '../../common/models/fee-info';
+import { TradeInfo } from '../../common/models/trade-info';
+import { TonCrossChainTrade } from '../../common/ton-cross-chain-trade/ton-cross-chain-trade';
+import { BridgersCrossChainSupportedBlockchain } from '../constants/bridgers-cross-chain-supported-blockchain';
+import { BridgersTonCrossChainParams } from '../models/bridgers-cross-chain-trade-types';
+import { TonBridgersTransactionData } from '../models/ton-bridgers-transaction-data';
+
+export class TonBridgersCrossChainTrade extends TonCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
 
     public readonly isAggregator = false;
 
-    public readonly from: PriceTokenAmount<TronBlockchainName>;
+    public readonly from: PriceTokenAmount<TonBlockchainName>;
 
     public readonly to: PriceTokenAmount;
 
@@ -52,33 +55,59 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     private readonly slippage: number;
 
     protected get fromContractAddress(): string {
-        return bridgersContractAddresses.TRON;
+        throw new Error('Not implemented');
     }
 
     protected get methodName(): string {
-        return '';
+        throw new Error('Not implemented');
     }
 
-    constructor(params: BridgersTronCrossChainParams) {
-        const { crossChainTrade, providerAddress, routePath } = params;
-        super(providerAddress, routePath, false);
+    constructor(params: BridgersTonCrossChainParams) {
+        super(params.providerAddress, params.routePath, params.useProxy);
 
-        this.from = crossChainTrade.from;
-        this.to = crossChainTrade.to;
-        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.feeInfo = crossChainTrade.feeInfo;
+        this.from = params.crossChainTrade.from;
+        this.to = params.crossChainTrade.to;
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
-        this.slippage = crossChainTrade.slippage;
+        this.toTokenAmountMin = params.crossChainTrade.toTokenAmountMin;
+        this.feeInfo = params.crossChainTrade.feeInfo;
+        this.slippage = params.crossChainTrade.slippage;
     }
 
-    protected async getContractParams(
-        _options: TronGetContractParamsOptions
-    ): Promise<TronContractParams> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        if (!options?.testMode) {
+            await this.checkTradeErrors();
+        }
+        await this.checkReceiverAddress(options.receiverAddress, true);
+
+        const config = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress || this.walletAddress
+        );
+
+        const { onConfirm } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        try {
+            await this.web3Private.sendTransaction({ messages: [config], onTransactionHash });
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw err;
+        }
+    }
+
+    protected getContractParams(): Promise<ContractParams> {
         throw new Error('Not implemeted');
-    }
-
-    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
-        return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
     public getTradeInfo(): TradeInfo {
@@ -93,7 +122,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
 
     protected async getTransactionConfigAndAmount(
         receiverAddress?: string
-    ): Promise<{ config: TronTransactionConfig; amount: string }> {
+    ): Promise<{ config: TonEncodedConfig; amount: string }> {
         const fromBlockchain = this.from.blockchain as BridgersCrossChainSupportedBlockchain;
         const toBlockchain = this.to.blockchain as BridgersCrossChainSupportedBlockchain;
 
@@ -130,16 +159,11 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         };
 
         const swapData = await Injector.httpClient.post<
-            BridgersSwapResponse<TronBridgersTransactionData>
+            BridgersSwapResponse<TonBridgersTransactionData>
         >('https://sswap.swft.pro/api/sswap/swap', swapRequest);
-        if (swapData.resCode === 1146) {
-            throw new NotSupportedRegionError();
-        }
-        if (!swapData.data?.txData) {
-            throw new NotSupportedTokensError();
-        }
 
-        const config = swapData.data?.txData;
+        if (swapData.resCode === 1146) throw new NotSupportedRegionError();
+        if (!swapData.data?.txData) throw new NotSupportedTokensError();
 
         const quoteRequest: BridgersQuoteRequest = {
             fromTokenAddress,
@@ -156,14 +180,12 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         const amount = quoteResponse.data?.txData?.amountOutMin;
 
         return {
-            amount,
             config: {
-                signature: config.functionName,
-                arguments: config.parameter,
-                to: config.to,
-                feeLimit: config?.options?.feeLimit,
-                callValue: config?.options?.callValue
-            }
+                address: swapData.data?.txData.address,
+                amount: swapData.data?.txData.amount,
+                payload: swapData.data?.txData.payload
+            },
+            amount
         };
     }
 }

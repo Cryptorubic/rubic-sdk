@@ -54,7 +54,8 @@ export class BridgersProvider extends TronOnChainProvider {
             toTokenAddress,
             fromTokenAmount: from.stringWeiAmount,
             fromTokenChain: toBridgersBlockchain[from.blockchain],
-            toTokenChain: toBridgersBlockchain[toToken.blockchain]
+            toTokenChain: toBridgersBlockchain[toToken.blockchain],
+            sourceFlag: 'rubic'
         };
         const quoteResponse = await this.httpClient.post<BridgersQuoteResponse>(
             'https://sswap.swft.pro/api/sswap/quote',
