@@ -4,6 +4,7 @@ export interface BridgersQuoteRequest {
     fromTokenAmount: string;
     fromTokenChain: string;
     toTokenChain: string;
+    sourceFlag: 'rubic';
 }
 
 export interface BridgersQuoteResponse {
@@ -11,6 +12,8 @@ export interface BridgersQuoteResponse {
     resCode: number;
     data: {
         txData: {
+            /* wei */
+            fromTokenAmount: string;
             toTokenAmount: number;
             amountOutMin: string;
             fee: number;
@@ -18,6 +21,10 @@ export interface BridgersQuoteResponse {
             depositMin: string;
             depositMax: string;
             contractAddress: string;
+            /* ex.: "0.50000" */
+            serviceFee: string;
+            /* number of dst tokens you'll got after swapping 1 src token  */
+            instantRate: string;
         };
     };
 }

@@ -1,4 +1,5 @@
 import { Address, beginCell, Cell } from '@ton/core';
+import { keccak256 } from 'ethers/lib/utils';
 import { RubicSdkError } from 'src/common/errors';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
@@ -64,6 +65,15 @@ export class TonWeb3Pure {
         }
 
         return res;
+    }
+
+    public static addressToHex(friendlyTonAddress: string): string {
+        const rawAddress = Address.parse(friendlyTonAddress).toRawString();
+        const addressBuffer = Buffer.from(rawAddress.slice(2), 'hex');
+        const addressHashed = keccak256(addressBuffer);
+        const hexAddress = '0x' + addressHashed.slice(-40);
+
+        return hexAddress;
     }
 
     public static async getWalletAddress(
