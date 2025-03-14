@@ -8,7 +8,10 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 import { TeleSwapCcrSupportedChain } from '../constants/teleswap-ccr-supported-chains';
 import { teleSwapNetworkTickers } from '../constants/teleswap-network-tickers';
-import { TeleSwapEstimateResponse } from '../models/teleswap-estimate-response';
+import {
+    TeleSwapEstimateNativeResponse,
+    TeleSwapEstimateResponse
+} from '../models/teleswap-estimate-response';
 
 export class TeleSwapUtilsService {
     private static readonly bitcoinFeePercent = 0.02;
@@ -38,13 +41,17 @@ export class TeleSwapUtilsService {
             fromToken.tokenAmount.toFixed(),
             teleSwapNetworkTickers[toToken.blockchain] as SupportedNetwork,
             toTokenAddress!
-        )) as TeleSwapEstimateResponse;
+        )) as TeleSwapEstimateResponse | TeleSwapEstimateNativeResponse;
 
-        const toAmount = new BigNumber(estimation.outputAmount);
+        const toAmount = new BigNumber(
+            'outputAmount' in estimation
+                ? estimation.outputAmount
+                : Web3Pure.toWei(estimation.outputAmountBTC, toToken.decimals)
+        );
 
-        const feeWeiAmount = toAmount.multipliedBy(TeleSwapUtilsService.bitcoinFeePercent);
+        // const feeWeiAmount = toAmount.multipliedBy(TeleSwapUtilsService.bitcoinFeePercent);
 
-        return toAmount.minus(feeWeiAmount);
+        return toAmount;
     }
 
     private static async calculateBtcOutputWeiAmount(
