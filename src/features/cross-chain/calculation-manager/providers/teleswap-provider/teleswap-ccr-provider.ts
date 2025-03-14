@@ -88,7 +88,7 @@ export class TeleSwapCcrProvider extends CrossChainProvider {
                     priceImpact: from.calculatePriceImpactPercent(to),
                     slippage: options.slippageTolerance
                 },
-                providerAddress: options.providerAddress,
+                providerAddress: percentFeeAddress,
                 useProxy,
                 routePath
             });
