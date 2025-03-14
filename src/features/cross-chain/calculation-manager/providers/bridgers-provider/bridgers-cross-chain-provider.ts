@@ -12,10 +12,11 @@ import {
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import {
@@ -54,17 +55,31 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
     ): boolean {
-        return (
-            (fromBlockchain === BLOCKCHAIN_NAME.TRON && this.isSupportedBlockchain(toBlockchain)) ||
-            (this.isSupportedBlockchain(fromBlockchain) && toBlockchain === BLOCKCHAIN_NAME.TRON)
-        );
+        const isTonEvm =
+            fromBlockchain === BLOCKCHAIN_NAME.TON &&
+            this.isSupportedBlockchain(toBlockchain) &&
+            BlockchainsInfo.isEvmBlockchainName(toBlockchain);
+        const isEvmTon =
+            this.isSupportedBlockchain(fromBlockchain) &&
+            BlockchainsInfo.isEvmBlockchainName(fromBlockchain) &&
+            toBlockchain === BLOCKCHAIN_NAME.TON;
+        const isTronEvm =
+            fromBlockchain === BLOCKCHAIN_NAME.TRON &&
+            this.isSupportedBlockchain(toBlockchain) &&
+            BlockchainsInfo.isEvmBlockchainName(toBlockchain);
+        const isEvmTron =
+            this.isSupportedBlockchain(fromBlockchain) &&
+            BlockchainsInfo.isEvmBlockchainName(fromBlockchain) &&
+            toBlockchain === BLOCKCHAIN_NAME.TRON;
+
+        return isEvmTon || isTonEvm || isEvmTron || isTronEvm;
     }
 
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult<EvmEncodeConfig | TronTransactionConfig>> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as BridgersCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as BridgersCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -104,7 +119,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 toTokenAddress,
                 fromTokenAmount: fromWithoutFee.stringWeiAmount,
                 fromTokenChain: toBridgersBlockchain[fromBlockchain],
-                toTokenChain: toBridgersBlockchain[toBlockchain]
+                toTokenChain: toBridgersBlockchain[toBlockchain],
+                sourceFlag: 'rubic'
             };
             const quoteResponse = await this.httpClient.post<BridgersQuoteResponse>(
                 'https://sswap.swft.pro/api/sswap/quote',
@@ -119,36 +135,17 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            if (from.tokenAmount.lt(transactionData.depositMin)) {
-                return {
-                    trade: null,
-                    error: new MinAmountError(
-                        new BigNumber(transactionData.depositMin),
-                        from.symbol
-                    ),
-                    tradeType: this.type
-                };
-            }
-            if (from.tokenAmount.gt(transactionData.depositMax)) {
-                return {
-                    trade: null,
-                    error: new MaxAmountError(
-                        new BigNumber(transactionData.depositMax),
-                        from.symbol
-                    ),
-                    tradeType: this.type
-                };
-            }
+            const outputAmount = fromWithoutFee.tokenAmount
+                .minus(transactionData.serviceFee)
+                .multipliedBy(transactionData.instantRate)
+                .minus(transactionData.chainFee);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 blockchain: toBlockchain,
-                tokenAmount: new BigNumber(transactionData.toTokenAmount)
+                tokenAmount: outputAmount
             });
-            const toTokenAmountMin = Web3Pure.fromWei(
-                transactionData.amountOutMin,
-                toToken.decimals
-            );
+            const toTokenAmountMin = outputAmount;
 
             const trade = BridgersCrossChainProviderFactory.createTrade({
                 crossChainTrade: {
@@ -166,7 +163,11 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 useProxy
             });
 
-            return this.getCalculationResponse(from, transactionData, trade);
+            return this.getCalculationResponse(
+                from,
+                transactionData,
+                trade as CrossChainTrade<EvmEncodeConfig | TronTransactionConfig | TonEncodedConfig>
+            );
         } catch (err: unknown) {
             return {
                 trade: null,
@@ -179,8 +180,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
     private getCalculationResponse(
         from: PriceTokenAmount,
         transactionData: BridgersQuoteResponse['data']['txData'],
-        trade: CrossChainTrade<EvmEncodeConfig | TronTransactionConfig>
-    ): CalculationResult<EvmEncodeConfig | TronTransactionConfig> {
+        trade: CrossChainTrade<EvmEncodeConfig | TronTransactionConfig | TonEncodedConfig>
+    ): CalculationResult {
         if (from.tokenAmount.lt(transactionData.depositMin)) {
             return {
                 trade,
