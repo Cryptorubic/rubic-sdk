@@ -10,6 +10,8 @@ import { EvmEncodedConfigAndToAmount } from 'src/features/on-chain/calculation-m
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 
+const ZERO_FEE_ADDRESS = '0x51c276f1392E87D4De6203BdD80c83f5F62724d4';
+
 export class EvmWrapTrade extends EvmOnChainTrade {
     public get dexContractAddress(): string {
         return this.from.isNative ? this.to.address : this.from.address;
@@ -37,8 +39,8 @@ export class EvmWrapTrade extends EvmOnChainTrade {
         return { tx: config, toAmount: this.to.stringWeiAmount };
     }
 
-    public constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
-        super(evmOnChainTradeStruct, providerAddress);
+    public constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, _providerAddress: string) {
+        super(evmOnChainTradeStruct, ZERO_FEE_ADDRESS);
     }
 
     public static isSupportedBlockchain(blockchain: EvmBlockchainName): boolean {
@@ -61,9 +63,5 @@ export class EvmWrapTrade extends EvmOnChainTrade {
             (compareAddresses(toAddress, EvmWeb3Pure.EMPTY_ADDRESS) &&
                 compareAddresses(fromAddress, wethAddress))
         );
-    }
-
-    public async needApprove(_fromAddress?: string): Promise<boolean> {
-        return false;
     }
 }

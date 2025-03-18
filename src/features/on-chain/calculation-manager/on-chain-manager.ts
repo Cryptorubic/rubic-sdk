@@ -1,4 +1,4 @@
-import { forkJoin, from, map, merge, Observable, of, startWith, switchMap } from 'rxjs';
+import { catchError, forkJoin, from, map, merge, Observable, of, startWith, switchMap } from 'rxjs';
 import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
@@ -8,6 +8,7 @@ import pTimeout from 'src/common/utils/p-timeout';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
 import { defaultProviderAddresses } from 'src/features/cross-chain/calculation-manager/constants/default-provider-addresses';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
@@ -38,12 +39,15 @@ import { OnChainProvider } from 'src/features/on-chain/calculation-manager/provi
 
 import { AGGREGATORS_ON_CHAIN } from './models/on-chain-manager-aggregators-types';
 import { AggregatorOnChainProvider } from './providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { assertEvmToken } from './utils/assert-evm-token';
 
 /**
  * Contains methods to calculate on-chain trades.
  */
 export class OnChainManager {
     private static readonly defaultCalculationTimeout = 20_000;
+
+    private static readonly onChainProxyService = new OnChainProxyService();
 
     /**
      * List of all on-chain trade providers, combined by blockchains.
@@ -220,9 +224,10 @@ export class OnChainManager {
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<WrappedOnChainTradeOrNull[]> {
         if ((from.isNative && to.isWrapped) || (from.isWrapped && to.isNative)) {
+            assertEvmToken(from);
             return [
                 {
-                    trade: OnChainManager.getWrapTrade(from, to, options),
+                    trade: await OnChainManager.getWrapTrade(from, to, options),
                     tradeType: ON_CHAIN_TRADE_TYPE.WRAPPED
                 }
             ];
@@ -314,13 +319,21 @@ export class OnChainManager {
         }
     }
 
-    public static getWrapTrade(
-        from: PriceTokenAmount,
+    public static async getWrapTrade(
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken,
         options: OnChainCalculationOptions
-    ): EvmOnChainTrade {
+    ): Promise<EvmOnChainTrade> {
         const fromToken = from as PriceTokenAmount<EvmBlockchainName>;
         const toToken = to as PriceToken<EvmBlockchainName>;
+        const ZERO_FEE_ADDRESS = '0x51c276f1392E87D4De6203BdD80c83f5F62724d4';
+
+        const proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
+            from as PriceTokenAmount<EvmBlockchainName>,
+            ZERO_FEE_ADDRESS
+        );
+        const fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFee.percent);
+
         return new EvmWrapTrade(
             {
                 from: fromToken,
@@ -331,10 +344,9 @@ export class OnChainManager {
                 slippageTolerance: 0,
                 path: [from, to],
                 gasFeeInfo: null,
-                useProxy: false,
-                proxyFeeInfo: undefined,
-                fromWithoutFee: fromToken,
-
+                useProxy: true,
+                proxyFeeInfo,
+                fromWithoutFee,
                 withDeflation: {
                     from: { isDeflation: false },
                     to: { isDeflation: false }
@@ -452,21 +464,29 @@ export class OnChainManager {
         fromToken: PriceTokenAmount,
         toToken: PriceToken,
         fullOptions: RequiredOnChainManagerCalculationOptions
-    ) {
-        const wrappedTrade: WrappedOnChainTradeOrNull = {
-            error: undefined,
-            trade: null,
-            tradeType: ON_CHAIN_TRADE_TYPE.WRAPPED
-        };
-        try {
-            wrappedTrade.trade = OnChainManager.getWrapTrade(fromToken, toToken, fullOptions);
-        } catch (err: unknown) {
-            wrappedTrade.error = err as RubicSdkError;
-        }
-        return of({
-            total: 1,
-            calculated: 1,
-            wrappedTrade
-        });
+    ): Observable<OnChainReactivelyCalculatedTradeData> {
+        assertEvmToken(fromToken);
+        return from(OnChainManager.getWrapTrade(fromToken, toToken, fullOptions)).pipe(
+            map(wrapTrade => ({
+                total: 1,
+                calculated: 1,
+                wrappedTrade: {
+                    error: undefined,
+                    tradeType: ON_CHAIN_TRADE_TYPE.WRAPPED,
+                    trade: wrapTrade
+                } as WrappedOnChainTradeOrNull
+            })),
+            catchError(err =>
+                of({
+                    total: 1,
+                    calculated: 1,
+                    wrappedTrade: {
+                        error: err,
+                        tradeType: ON_CHAIN_TRADE_TYPE.WRAPPED,
+                        trade: null
+                    } as WrappedOnChainTradeOrNull
+                })
+            )
+        );
     }
 }
