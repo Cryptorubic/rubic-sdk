@@ -26,7 +26,7 @@ import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manag
 import { UniswapV2AbstractTrade } from '../on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { simulatorContractAbi } from './constants/simulator-contract-abi';
 import { simulatorContractAddress } from './constants/simulator-contract-address';
-import { customDeflationTokeList } from './models/custom-deflation-token-list';
+import { customDeflationTokenList } from './models/custom-deflation-token-list';
 
 const DEADLINE = 9999999999;
 const SIMULATOR_CALLER = '0x0000000000000000000000000000000000000001';
@@ -79,7 +79,7 @@ export class DeflationTokenManager {
             blockchain: token.blockchain as EvmBlockchainName
         });
 
-        const deflationTokenList = customDeflationTokeList[evmToken.blockchain];
+        const deflationTokenList = customDeflationTokenList[evmToken.blockchain];
 
         if (
             deflationTokenList &&
