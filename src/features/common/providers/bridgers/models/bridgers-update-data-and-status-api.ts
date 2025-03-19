@@ -13,6 +13,7 @@ export interface BridgersUpdateDataAndStatusRequest {
     amountOutMin?: string;
     fromCoinCode?: string;
     toCoinCode?: string;
+    slippage?: string;
 }
 
 export interface BridgersUpdateDataAndStatusResponse {
