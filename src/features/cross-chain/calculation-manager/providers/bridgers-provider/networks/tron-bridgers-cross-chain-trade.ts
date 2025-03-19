@@ -153,10 +153,16 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             'https://sswap.swft.pro/api/sswap/quote',
             quoteRequest
         );
-        const amount = quoteResponse.data?.txData?.amountOutMin;
+        const amountMinWei = Web3Pure.toWei(
+            fromWithoutFee.tokenAmount
+                .minus(quoteResponse.data.txData.serviceFee)
+                .multipliedBy(quoteResponse.data.txData.instantRate)
+                .minus(quoteResponse.data.txData.chainFee),
+            this.to.decimals
+        );
 
         return {
-            amount,
+            amount: amountMinWei,
             config: {
                 signature: config.functionName,
                 arguments: config.parameter,
