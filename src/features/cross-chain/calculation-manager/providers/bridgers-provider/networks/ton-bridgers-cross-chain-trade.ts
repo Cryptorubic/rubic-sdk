@@ -155,7 +155,8 @@ export class TonBridgersCrossChainTrade extends TonCrossChainTrade {
             fromTokenAmount: fromWithoutFee.stringWeiAmount,
             amountOutMin,
             equipmentNo: fromAddress.slice(0, 32),
-            sourceFlag: 'rubic'
+            sourceFlag: 'rubic',
+            slippage: this.slippage.toString()
         };
 
         const swapData = await Injector.httpClient.post<

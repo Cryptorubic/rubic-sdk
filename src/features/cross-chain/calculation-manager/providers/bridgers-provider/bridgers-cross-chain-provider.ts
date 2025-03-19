@@ -145,7 +145,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 blockchain: toBlockchain,
                 tokenAmount: outputAmount
             });
-            const toTokenAmountMin = outputAmount;
+            const toTokenAmountMin = to.tokenAmount.multipliedBy(1 - options.slippageTolerance);
 
             const trade = BridgersCrossChainProviderFactory.createTrade({
                 crossChainTrade: {

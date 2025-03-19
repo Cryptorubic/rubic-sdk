@@ -210,7 +210,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             fromTokenAmount: fromWithoutFee.stringWeiAmount,
             amountOutMin,
             equipmentNo: fromAddress.slice(0, 32),
-            sourceFlag: 'rubic'
+            sourceFlag: 'rubic',
+            slippage: this.slippage.toString()
         };
 
         const swapData = await Injector.httpClient.post<
