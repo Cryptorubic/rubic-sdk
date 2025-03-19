@@ -344,7 +344,7 @@ export class OnChainManager {
                 slippageTolerance: 0,
                 path: [from, to],
                 gasFeeInfo: null,
-                useProxy: true,
+                useProxy: options.useProxy ?? true,
                 proxyFeeInfo,
                 fromWithoutFee,
                 withDeflation: {
@@ -352,7 +352,7 @@ export class OnChainManager {
                     to: { isDeflation: false }
                 }
             },
-            options.providerAddress!
+            ZERO_FEE_ADDRESS
         );
     }
 
