@@ -65,6 +65,8 @@ export class SymbiosisCcrBitcoinTrade extends BitcoinCrossChainTrade {
 
     public readonly memo = '';
 
+    protected readonly needProvidePubKey = false;
+
     constructor(
         crossChainTrade: SymbiosisbitcoinCrossChainTradeConstructor,
         providerAddress: string,
