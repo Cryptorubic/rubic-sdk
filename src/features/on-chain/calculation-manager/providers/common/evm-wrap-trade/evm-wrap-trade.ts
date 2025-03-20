@@ -63,7 +63,8 @@ export class EvmWrapTrade extends EvmOnChainTrade {
         );
     }
 
-    public async needApprove(_fromAddress?: string): Promise<boolean> {
-        return false;
+    public override async needApprove(fromAddress?: string): Promise<boolean> {
+        if (!this.useProxy) return false;
+        return super.needApprove(fromAddress);
     }
 }
