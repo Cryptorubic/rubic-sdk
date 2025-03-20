@@ -62,4 +62,9 @@ export class EvmWrapTrade extends EvmOnChainTrade {
                 compareAddresses(fromAddress, wethAddress))
         );
     }
+
+    public override async needApprove(fromAddress?: string): Promise<boolean> {
+        if (!this.useProxy) return false;
+        return super.needApprove(fromAddress);
+    }
 }
