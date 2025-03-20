@@ -38,6 +38,7 @@ import { providerDefaultOptions } from 'src/features/on-chain/calculation-manage
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 
 import { AGGREGATORS_ON_CHAIN } from './models/on-chain-manager-aggregators-types';
+import { OnChainProxyFeeInfo } from './providers/common/models/on-chain-proxy-fee-info';
 import { AggregatorOnChainProvider } from './providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { assertEvmToken } from './utils/assert-evm-token';
 
@@ -322,17 +323,25 @@ export class OnChainManager {
     public static async getWrapTrade(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken,
-        options: OnChainCalculationOptions
+        _options: OnChainCalculationOptions
     ): Promise<EvmOnChainTrade> {
         const fromToken = from as PriceTokenAmount<EvmBlockchainName>;
         const toToken = to as PriceToken<EvmBlockchainName>;
         const ZERO_FEE_ADDRESS = '0x51c276f1392E87D4De6203BdD80c83f5F62724d4';
 
-        const proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
-            from as PriceTokenAmount<EvmBlockchainName>,
-            ZERO_FEE_ADDRESS
-        );
-        const fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFee.percent);
+        let hasProxyContract: boolean;
+        let proxyFeeInfo: OnChainProxyFeeInfo | undefined = undefined;
+        try {
+            proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
+                from as PriceTokenAmount<EvmBlockchainName>,
+                ZERO_FEE_ADDRESS
+            );
+            hasProxyContract = true;
+        } catch {
+            hasProxyContract = false;
+        }
+
+        const fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo?.platformFee.percent);
 
         return new EvmWrapTrade(
             {
@@ -344,7 +353,7 @@ export class OnChainManager {
                 slippageTolerance: 0,
                 path: [from, to],
                 gasFeeInfo: null,
-                useProxy: options.useProxy ?? true,
+                useProxy: hasProxyContract,
                 proxyFeeInfo,
                 fromWithoutFee,
                 withDeflation: {
