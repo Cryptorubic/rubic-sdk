@@ -23,6 +23,7 @@ import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/c
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/constants';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { assertEvmToken } from 'src/features/on-chain/calculation-manager/utils/assert-evm-token';
 import { AbiItem, utf8ToHex } from 'web3-utils';
 
 type BridgeParams = [
@@ -183,6 +184,7 @@ export class ProxyCrossChainEvmTrade {
                     price: from.price
                 });
 
+                assertEvmToken(from);
                 const trade = OnChainManager.getWrapTrade(from, toWrap, {
                     slippageTolerance
                 });
