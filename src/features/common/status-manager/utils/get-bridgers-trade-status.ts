@@ -15,13 +15,15 @@ import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/
 export async function getBridgersTradeStatus(
     srcTxHash: string,
     fromBlockchain: BridgersCrossChainSupportedBlockchain,
-    sourceFlag: 'rubic' | 'rubic_widget'
+    sourceFlag: 'rubic' | 'rubic_widget',
+    slippage?: number
 ): Promise<TxStatusData> {
     try {
         const updateDataAndStatusRequest: BridgersUpdateDataAndStatusRequest = {
             hash: srcTxHash,
             fromTokenChain: toBridgersBlockchain[fromBlockchain],
-            sourceFlag
+            sourceFlag,
+            ...(slippage && { slippage: slippage.toString() })
         };
         const updateDataAndStatusResponse =
             await Injector.httpClient.post<BridgersUpdateDataAndStatusResponse>(

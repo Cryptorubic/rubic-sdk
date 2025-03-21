@@ -79,4 +79,9 @@ export interface CrossChainTradeData {
      * Changelly trade id.
      */
     changellySwapId?: string;
+
+    /**
+     * Takes value from 0 to 1.
+     */
+    slippage?: number;
 }

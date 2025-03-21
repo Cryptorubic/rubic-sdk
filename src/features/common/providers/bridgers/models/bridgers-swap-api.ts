@@ -14,6 +14,7 @@ export interface BridgersSwapRequest {
     amountOutMin: string;
     equipmentNo: string;
     sourceFlag: BridgersSourceFlag;
+    slippage?: string;
 }
 
 export interface BridgersSwapResponse<
