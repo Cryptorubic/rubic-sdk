@@ -91,40 +91,50 @@ export class OnChainProxyService {
         platformFeePercent: number;
         isIntegrator: boolean;
     }> {
-        const integratorToFeeInfo = await web3Public.callContractMethod<{
-            isIntegrator: boolean;
-            fixedFeeAmount: string;
-            tokenFee: string;
-        }>(contractAddress, evmCommonCrossChainAbi, 'integratorToFeeInfo', [providerAddress]);
+        try {
+            const integratorToFeeInfo = await web3Public.callContractMethod<{
+                isIntegrator: boolean;
+                fixedFeeAmount: string;
+                tokenFee: string;
+            }>(contractAddress, evmCommonCrossChainAbi, 'integratorToFeeInfo', [providerAddress]);
 
-        return {
-            fixedCryptoFeeWei: integratorToFeeInfo.fixedFeeAmount,
-            platformFeePercent: parseInt(integratorToFeeInfo.tokenFee) / 10_000,
-            isIntegrator: integratorToFeeInfo.isIntegrator
-        };
+            return {
+                fixedCryptoFeeWei: integratorToFeeInfo.fixedFeeAmount,
+                platformFeePercent: parseInt(integratorToFeeInfo.tokenFee) / 10_000,
+                isIntegrator: integratorToFeeInfo.isIntegrator
+            };
+        } catch (err) {
+            console.log('%chandleIntegratorFee_err ==> ', 'color: orange;', err);
+            throw err;
+        }
     }
 
     private static async handleRubicFee(
         web3Public: EvmWeb3Public,
         contractAddress: string
     ): Promise<{ fixedCryptoFeeWei: string; platformFeePercent: number }> {
-        const feeInfo = await Promise.all([
-            web3Public.callContractMethod<string>(
-                contractAddress,
-                evmCommonCrossChainAbi,
-                'fixedNativeFee',
-                []
-            ),
-            web3Public.callContractMethod<string>(
-                contractAddress,
-                evmCommonCrossChainAbi,
-                'RubicPlatformFee',
-                []
-            )
-        ]);
-        return {
-            fixedCryptoFeeWei: feeInfo[0],
-            platformFeePercent: parseInt(feeInfo[1]) / 10_000
-        };
+        try {
+            const feeInfo = await Promise.all([
+                web3Public.callContractMethod<string>(
+                    contractAddress,
+                    evmCommonCrossChainAbi,
+                    'fixedNativeFee',
+                    []
+                ),
+                web3Public.callContractMethod<string>(
+                    contractAddress,
+                    evmCommonCrossChainAbi,
+                    'RubicPlatformFee',
+                    []
+                )
+            ]);
+            return {
+                fixedCryptoFeeWei: feeInfo[0],
+                platformFeePercent: parseInt(feeInfo[1]) / 10_000
+            };
+        } catch (err) {
+            console.log('%chandleRubicFee_err ==> ', 'color: orange;', err);
+            throw err;
+        }
     }
 }
