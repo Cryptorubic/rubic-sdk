@@ -130,7 +130,6 @@ export class TonBridgersCrossChainTrade extends TonCrossChainTrade {
             this.from,
             this.feeInfo.rubicProxy?.platformFee?.percent
         );
-        const amountOutMin = Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals);
 
         const fromTokenAddress = createTokenNativeAddressProxy(
             fromWithoutFee,
@@ -143,28 +142,6 @@ export class TonBridgersCrossChainTrade extends TonCrossChainTrade {
             bridgersNativeAddress,
             this.to.blockchain !== BLOCKCHAIN_NAME.TRON
         ).address;
-
-        const fromAddress = this.walletAddress;
-        const swapRequest: BridgersSwapRequest = {
-            fromTokenAddress,
-            toTokenAddress,
-            fromAddress,
-            toAddress: receiverAddress!,
-            fromTokenChain: toBridgersBlockchain[fromBlockchain],
-            toTokenChain: toBridgersBlockchain[toBlockchain],
-            fromTokenAmount: fromWithoutFee.stringWeiAmount,
-            amountOutMin,
-            equipmentNo: fromAddress.slice(0, 32),
-            sourceFlag: 'rubic',
-            slippage: this.slippage.toString()
-        };
-
-        const swapData = await Injector.httpClient.post<
-            BridgersSwapResponse<TonBridgersTransactionData>
-        >('https://sswap.swft.pro/api/sswap/swap', swapRequest);
-
-        if (swapData.resCode === 1146) throw new NotSupportedRegionError();
-        if (!swapData.data?.txData) throw new NotSupportedTokensError();
 
         const quoteRequest: BridgersQuoteRequest = {
             fromTokenAddress,
@@ -179,6 +156,28 @@ export class TonBridgersCrossChainTrade extends TonCrossChainTrade {
             quoteRequest
         );
         const amount = quoteResponse.data?.txData?.amountOutMin;
+
+        const fromAddress = this.walletAddress;
+        const swapRequest: BridgersSwapRequest = {
+            fromTokenAddress,
+            toTokenAddress,
+            fromAddress,
+            toAddress: receiverAddress!,
+            fromTokenChain: toBridgersBlockchain[fromBlockchain],
+            toTokenChain: toBridgersBlockchain[toBlockchain],
+            fromTokenAmount: fromWithoutFee.stringWeiAmount,
+            amountOutMin: amount,
+            equipmentNo: fromAddress.slice(0, 32),
+            sourceFlag: 'rubic',
+            slippage: this.slippage.toString()
+        };
+
+        const swapData = await Injector.httpClient.post<
+            BridgersSwapResponse<TonBridgersTransactionData>
+        >('https://sswap.swft.pro/api/sswap/swap', swapRequest);
+
+        if (swapData.resCode === 1146) throw new NotSupportedRegionError();
+        if (!swapData.data?.txData) throw new NotSupportedTokensError();
 
         return {
             config: {
