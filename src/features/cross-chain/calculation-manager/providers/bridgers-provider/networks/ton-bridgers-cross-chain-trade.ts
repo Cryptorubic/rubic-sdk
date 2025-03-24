@@ -1,4 +1,4 @@
-import { beginCell, Cell } from '@ton/core';
+import { beginCell } from '@ton/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
@@ -180,14 +180,14 @@ export class TonBridgersCrossChainTrade extends TonCrossChainTrade {
         if (swapData.resCode === 1146) throw new NotSupportedRegionError();
         if (!swapData.data?.txData) throw new NotSupportedTokensError();
 
-        const newPayloadCell = new Cell();
+        // const newPayloadCell = new Cell();
         const bridgersTxCell = TonWeb3Pure.fromBase64ToCell(swapData.data?.txData.payload);
         const cellWithIntegratorId = beginCell().storeStringTail(this.providerAddress).endCell();
 
-        // const newPayloadCell = bridgersTxCell.asBuilder().storeRef(cellWithIntegratorId).endCell();
+        const newPayloadCell = bridgersTxCell.asBuilder().storeRef(cellWithIntegratorId).endCell();
 
-        newPayloadCell.refs.push(bridgersTxCell); // Reference the original payload
-        newPayloadCell.refs.push(cellWithIntegratorId); // Add the "Rubic" parameter
+        // newPayloadCell.refs.push(bridgersTxCell); // Reference the original payload
+        // newPayloadCell.refs.push(cellWithIntegratorId); // Add the "Rubic" parameter
 
         return {
             config: {
