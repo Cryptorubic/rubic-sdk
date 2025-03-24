@@ -46,6 +46,10 @@ export class TonWeb3Pure {
         return inMsgHashBase64Url;
     }
 
+    public static fromBase64ToCell(tonPayload: string): Cell {
+        return Cell.fromBoc(Buffer.from(tonPayload, 'base64'))[0]!;
+    }
+
     /**
      * @param walletAddress in any format: raw or friendly
      */

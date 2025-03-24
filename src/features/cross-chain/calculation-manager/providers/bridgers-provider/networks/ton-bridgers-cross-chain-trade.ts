@@ -1,3 +1,4 @@
+import { beginCell } from '@ton/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
@@ -7,6 +8,7 @@ import { NotSupportedRegionError } from 'src/common/errors/swap/not-supported-re
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TonEncodedConfig } from 'src/core/blockchain/web3-private-service/web3-private/ton-web3-private/models/ton-types';
+import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -178,11 +180,20 @@ export class TonBridgersCrossChainTrade extends TonCrossChainTrade {
         if (swapData.resCode === 1146) throw new NotSupportedRegionError();
         if (!swapData.data?.txData) throw new NotSupportedTokensError();
 
+        // const newPayloadCell = new Cell();
+        const bridgersTxCell = TonWeb3Pure.fromBase64ToCell(swapData.data?.txData.payload);
+        const cellWithIntegratorId = beginCell().storeStringTail(this.providerAddress).endCell();
+
+        const newPayloadCell = bridgersTxCell.asBuilder().storeRef(cellWithIntegratorId).endCell();
+
+        // newPayloadCell.refs.push(bridgersTxCell); // Reference the original payload
+        // newPayloadCell.refs.push(cellWithIntegratorId); // Add the "Rubic" parameter
+
         return {
             config: {
                 address: swapData.data?.txData.address,
                 amount: swapData.data?.txData.amount,
-                payload: swapData.data?.txData.payload
+                payload: newPayloadCell.toBoc().toString('base64')
             },
             amount
         };
