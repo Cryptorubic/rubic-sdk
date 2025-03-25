@@ -47,7 +47,7 @@ export class RouterBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade
+        return this.useProxy
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
             : this.routerQuoteConfig.allowanceTo;
     }
@@ -59,9 +59,8 @@ export class RouterBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
     public readonly memo: string = '';
 
     constructor(params: RouterBitcoinConstructorParams) {
-        const { providerAddress, routePath, useProxy, crossChainTrade, apiQuote, apiResponse } =
-            params;
-        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
+        const { providerAddress, routePath, crossChainTrade, apiQuote, apiResponse } = params;
+        super(providerAddress, routePath, apiQuote, apiResponse);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.feeInfo = crossChainTrade.feeInfo;

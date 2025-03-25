@@ -36,7 +36,6 @@ export class TronApiCrossChainTrade extends TronCrossChainTrade {
         super(
             params.apiQuote.integratorAddress!,
             params.routePath,
-            false,
             params.apiQuote,
             params.apiResponse
         );

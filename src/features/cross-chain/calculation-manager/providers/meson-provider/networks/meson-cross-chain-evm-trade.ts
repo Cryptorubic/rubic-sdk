@@ -49,13 +49,7 @@ export class MesonCrossChainEvmTrade extends EvmCrossChainTrade {
     }
 
     constructor(params: MesonCrossChainEvmTradeConstructorParams) {
-        super(
-            params.providerAddress,
-            params.routePath,
-            params.useProxy,
-            params.apiQuote,
-            params.apiResponse
-        );
+        super(params.providerAddress, params.routePath, params.apiQuote, params.apiResponse);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.feeInfo = params.crossChainTrade.feeInfo;

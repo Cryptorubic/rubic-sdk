@@ -89,7 +89,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             transferTradeType => transferTradeType === this.type
         );
 
-        if (!this.isProxyTrade && isTransferTrade) return false;
+        if (!this.useProxy && isTransferTrade) return false;
 
         const fromTokenAddress =
             this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS

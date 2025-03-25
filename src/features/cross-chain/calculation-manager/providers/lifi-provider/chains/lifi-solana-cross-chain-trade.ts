@@ -47,7 +47,7 @@ export class LifiSolanaCrossChainTrade extends SolanaCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        if (this.isProxyTrade) {
+        if (this.useProxy) {
             throw new Error('Solana contract is not implemented yet');
         }
         return rubicProxyContractAddress[this.fromBlockchain].gateway;
@@ -65,11 +65,10 @@ export class LifiSolanaCrossChainTrade extends SolanaCrossChainTrade {
         crossChainTrade: LifiCrossChainTradeConstructor<SolanaBlockchainName>,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean,
         apiQuote: QuoteRequestInterface,
         apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
+        super(providerAddress, routePath, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

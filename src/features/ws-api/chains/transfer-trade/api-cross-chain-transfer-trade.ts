@@ -22,7 +22,6 @@ export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
         super(
             tradeParams.apiQuote.integratorAddress!,
             tradeParams.routePath,
-            false,
             null,
             tradeParams.from,
             tradeParams.to,
