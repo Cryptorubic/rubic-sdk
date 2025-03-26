@@ -1,3 +1,4 @@
+import { WalletAdapter } from '@suiet/wallet-sdk';
 import { TonConnectUI } from '@tonconnect/ui';
 import { Any } from 'src/common/utils/types';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -24,6 +25,7 @@ export type TronWalletProviderCore = WalletProviderCore<TronWeb>;
 export type SolanaWalletProviderCore = WalletProviderCore<SolanaWeb3>;
 export type TonWalletProviderCore = WalletProviderCore<TonConnectUI>;
 export type BitcoinWalletProviderCore = WalletProviderCore<BtcWalletProvider>;
+export type SuiWalletProviderCore = WalletProviderCore<WalletAdapter>;
 
 /**
  * Stores wallet core and information about current user, used to make `send` transactions.
@@ -34,6 +36,7 @@ interface IWalletProvider {
     readonly [CHAIN_TYPE.SOLANA]?: SolanaWalletProviderCore;
     readonly [CHAIN_TYPE.TON]?: TonWalletProviderCore;
     readonly [CHAIN_TYPE.BITCOIN]?: BitcoinWalletProviderCore;
+    readonly [CHAIN_TYPE.SUI]?: SuiWalletProviderCore;
 }
 
 export type WalletProvider = Partial<IWalletProvider>;

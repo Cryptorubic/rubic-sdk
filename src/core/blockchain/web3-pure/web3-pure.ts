@@ -38,6 +38,7 @@ import { WaxWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-e
 import { ZilliqaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/zilliqa-web3-pure';
 import { OntologyWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ontology-web3-pure';
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
+import { SuiWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/sui-web3-pure/sui-web3-pure';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-web3-pure/ton-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { XdcWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/xdc-web3-pure';
@@ -204,6 +205,8 @@ export class Web3Pure {
     public static [CHAIN_TYPE.HORIZEN] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.BITCOIN_CASH] = BitcoinWeb3Pure;
+
+    public static [CHAIN_TYPE.SUI] = SuiWeb3Pure;
 
     /**
      * Increases the gas limit value by the specified percentage and rounds to the nearest integer.
