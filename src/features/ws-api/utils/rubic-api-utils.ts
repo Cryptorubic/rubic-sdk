@@ -126,8 +126,6 @@ export class RubicApiUtils {
 
     private static parseTokenAddress(token: TokenInerface): string {
         const chainType = BlockchainsInfo.getChainType(token.blockchain);
-        // @TODO remove
-        //@ts-ignore
         const isNativeToken = Web3Pure[chainType]?.isNativeAddress(token.address);
 
         if (isNativeToken) {
