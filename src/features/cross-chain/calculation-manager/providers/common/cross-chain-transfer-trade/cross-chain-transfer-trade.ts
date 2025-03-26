@@ -107,7 +107,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         apiQuote: QuoteRequestInterface,
         apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, apiResponse.useRubicContract, apiQuote, apiResponse);
+        super(providerAddress, routePath, apiQuote, apiResponse);
         this.onChainTrade = onChainTrade;
         this.from = from as PriceTokenAmount<EvmBlockchainName>;
         this.to = to;

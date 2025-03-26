@@ -131,7 +131,7 @@ export abstract class CrossChainTrade<T = unknown> {
 
     public readonly rubicId: string;
 
-    protected readonly useProxy: boolean;
+    public readonly useProxy: boolean;
 
     protected constructor(
         protected readonly providerAddress: string,

@@ -42,6 +42,8 @@ import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-w
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { XdcWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/xdc-web3-pure';
 
+import { SuiWeb3Pure } from './typed-web3-pure/sui-web3-pure';
+
 /**
  * Contains common methods, connected with web3, e.g. wei conversion, encoding data, etc.
  */
@@ -132,6 +134,8 @@ export class Web3Pure {
     public static [CHAIN_TYPE.CASPER] = CasperWeb3Pure;
 
     // @TODO create web3pure file before release
+
+    public static [CHAIN_TYPE.SUI] = SuiWeb3Pure;
 
     public static [CHAIN_TYPE.AION] = SolanaWeb3Pure;
 
