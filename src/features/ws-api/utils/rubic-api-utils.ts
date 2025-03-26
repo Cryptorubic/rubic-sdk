@@ -163,6 +163,7 @@ export class RubicApiUtils {
             transaction: {},
             id: '0',
             warnings: [],
+            useRubicContract: false,
             routing: [
                 {
                     path: [
