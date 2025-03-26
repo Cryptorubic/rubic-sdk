@@ -231,7 +231,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             transitToken.stringWeiAmount,
             blockchainId[this.to.blockchain],
             Date.now(),
-            500
+            this.slippage * 100
             // this.maxSlippage
         );
         const encode = EvmWeb3Pure.encodeMethodCall(
