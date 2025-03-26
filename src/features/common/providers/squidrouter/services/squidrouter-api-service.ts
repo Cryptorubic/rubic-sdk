@@ -18,7 +18,7 @@ export class SquidRouterApiService {
         requestParams: SquidrouterTransactionRequest
     ): Promise<SquidrouterTransactionResponse> {
         const res = await Injector.httpClient.post<SquidrouterTransactionResponse>(
-            'https://x-api.rubic.exchange/squidrouter/api/route',
+            'https://x-api.rubic.exchange/test_squidrouter/api/route',
             requestParams,
             {
                 headers: {
