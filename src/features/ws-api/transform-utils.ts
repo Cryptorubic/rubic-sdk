@@ -14,6 +14,8 @@ import { EvmApiCrossChainTrade } from 'src/features/ws-api/chains/evm/evm-api-cr
 import { EvmApiOnChainTrade } from 'src/features/ws-api/chains/evm/evm-api-on-chain-trade';
 import { SolanaApiCrossChainTrade } from 'src/features/ws-api/chains/solana/solana-api-cross-chain-trade';
 import { SolanaApiOnChainTrade } from 'src/features/ws-api/chains/solana/solana-api-on-chain-trade';
+import { SuiApiOnChainTrade } from 'src/features/ws-api/chains/sui/sui-api-on-chain-trade';
+import { SuiApiOnChainConstructor } from 'src/features/ws-api/chains/sui/sui-api-on-chain-trade-constructor';
 import { TonApiCrossChainTrade } from 'src/features/ws-api/chains/ton/ton-api-cross-chain-trade';
 import { TonApiOnChainTrade } from 'src/features/ws-api/chains/ton/ton-api-on-chain-trade';
 import { TronApiCrossChainTrade } from 'src/features/ws-api/chains/tron/tron-api-cross-chain-trade';
@@ -125,9 +127,8 @@ export class TransformUtils {
                 // @TODO API
                 isChangedSlippage: false
             });
-        } else if (chainType === CHAIN_TYPE.BITCOIN) {
-            // @TODO API
-            console.log('btc swap');
+        } else if (chainType === CHAIN_TYPE.SUI) {
+            trade = new SuiApiOnChainTrade(tradeParams as SuiApiOnChainConstructor);
         }
 
         return {

@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "6.0.0-alpha.cn-use-proxy.0",
+    "version": "6.0.0-alpha.cn-use-proxy.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -88,6 +88,7 @@
         "@solflare-wallet/utl-sdk": "^1.4.0",
         "@ston-fi/api": "^0.12.1",
         "@ston-fi/sdk": "2.0.1",
+        "@suiet/wallet-sdk": "^0.3.3",
         "@ton/core": "0.59.0",
         "@ton/crypto": "^3.3.0",
         "@ton/ton": "15.1.0",

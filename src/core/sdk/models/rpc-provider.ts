@@ -1,3 +1,4 @@
+import { SuiBlockchainName } from '@cryptorubic/core';
 import {
     BitcoinBlockchainName,
     EvmBlockchainName,
@@ -22,5 +23,6 @@ export type RpcProviders = Partial<
         Record<TronBlockchainName, RpcProvider<TronWebProvider>> &
         Record<SolanaBlockchainName, RpcProvider<string>> &
         Record<TonBlockchainName, RpcProvider<string>> &
-        Record<BitcoinBlockchainName, RpcProvider<string>>
+        Record<BitcoinBlockchainName, RpcProvider<string>> &
+        Record<SuiBlockchainName, RpcProvider<string>>
 >;
