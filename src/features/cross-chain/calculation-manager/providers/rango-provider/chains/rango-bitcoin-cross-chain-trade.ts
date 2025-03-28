@@ -39,6 +39,8 @@ export class RangoBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
 
     private readonly slippage: number;
 
+    protected readonly needProvidePubKey = false;
+
     /**
      * @description UUID returned by rango-api to track transaction status in getRangoDstSwapStatus
      */

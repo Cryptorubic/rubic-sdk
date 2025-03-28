@@ -58,6 +58,8 @@ export class RouterBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
 
     public readonly memo: string = '';
 
+    protected readonly needProvidePubKey = false;
+
     constructor(params: RouterBitcoinConstructorParams) {
         const { providerAddress, routePath, crossChainTrade, apiQuote, apiResponse } = params;
         super(providerAddress, routePath, apiQuote, apiResponse);

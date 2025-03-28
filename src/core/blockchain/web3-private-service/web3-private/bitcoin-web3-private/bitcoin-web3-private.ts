@@ -5,6 +5,8 @@ import { BitcoinWalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { OnChainStatusManager } from 'src/features/on-chain/status-manager/on-chain-status-manager';
 
 import { Web3Private } from '../web3-private';
+import { BitcoinPsbtEncodedConfig } from './models/bitcoin-psbt-encoded-config';
+import { BitcoinTransferEncodedConfig } from './models/bitcoin-transfer-encoded-config';
 
 export class BitcoinWeb3Private extends Web3Private {
     protected readonly Web3Pure = BitcoinWeb3Pure;
@@ -14,9 +16,7 @@ export class BitcoinWeb3Private extends Web3Private {
     }
 
     public async transfer(
-        recipient: string,
-        amount: string,
-        memo?: string,
+        txConfig: BitcoinTransferEncodedConfig,
         options?: BasicTransactionOptions
     ): Promise<string> {
         const hashPromise = new Promise<string>((resolve, reject) => {
@@ -27,12 +27,12 @@ export class BitcoinWeb3Private extends Web3Private {
                         {
                             feeRate: 10,
                             from: this.wallet.address,
-                            recipient,
+                            recipient: txConfig.to,
                             amount: {
-                                amount,
+                                amount: txConfig.value,
                                 decimals: 8
                             },
-                            ...(memo && { memo })
+                            ...(txConfig.data && { memo: txConfig.data })
                         }
                     ]
                 },
@@ -40,8 +40,9 @@ export class BitcoinWeb3Private extends Web3Private {
                     if (error) {
                         reject(error);
                     } else {
-                        options?.onTransactionHash?.(txHash);
-                        resolve(txHash);
+                        const hash = txHash as string;
+                        options?.onTransactionHash?.(hash);
+                        resolve(hash);
                     }
                 }
             );
@@ -58,7 +59,66 @@ export class BitcoinWeb3Private extends Web3Private {
         }
     }
 
+    public async sendPsbtTransaction(
+        txConfig: BitcoinPsbtEncodedConfig,
+        options?: BasicTransactionOptions
+    ) {
+        const hashPromise = new Promise<string>((resolve, reject) => {
+            this.wallet.core.request(
+                {
+                    method: 'sign_psbt',
+                    params: {
+                        psbt: txConfig.psbt,
+                        signInputs: {
+                            [this.address]: txConfig.signInputs
+                        },
+                        allowedSignHash: 1,
+                        broadcast: true
+                    }
+                },
+                (error, txHash) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        const txData = txHash as { result: { psbt: string; txId: string } };
+                        options?.onTransactionHash?.(txData.result.txId);
+                        resolve(txData.result.txId);
+                    }
+                }
+            );
+        });
+        try {
+            const hash = await hashPromise;
+            if (typeof hash === 'string') {
+                const statusData = await OnChainStatusManager.getBitcoinTransaction(hash);
+                return statusData.hash!;
+            }
+            throw new Error();
+        } catch {
+            throw new Error('Failed to sign psbt transaction');
+        }
+    }
+
     constructor(private readonly wallet: BitcoinWalletProviderCore) {
         super(wallet.address);
+    }
+
+    public async getPublicKeyFromWallet(): Promise<string> {
+        const res = await this.wallet.core.request<{ publicKey: string }[]>(
+            {
+                method: 'request_accounts_and_keys',
+                params: {
+                    purposes: ['payment']
+                }
+            },
+            () => {}
+        );
+
+        if (res.error) {
+            console.error(res.error);
+            throw res.error;
+        }
+
+        return res.result[0]?.publicKey!;
     }
 }
