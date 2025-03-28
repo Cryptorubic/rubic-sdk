@@ -104,6 +104,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Monad',
         symbol: 'MON',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MEGAETH_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MEGAETH_TESTNET,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'MEGA Testnet Ether',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
 

@@ -8,6 +8,7 @@ import { UniSwapV3ScrollSepoliaProvider } from 'src/features/on-chain/calculatio
 import { KodiakV3Provider } from '../../providers/dexes/berachain/kodiak-v3-provider/kodiak-v3-provider';
 import { EnosysV3FlareProvider } from '../../providers/dexes/flare/enosys-flare/enosys-v3-flare/enosys-v3-flare-provider';
 import { SparkDexV3FlareProvider } from '../../providers/dexes/flare/spark-dex-flare/spark-dex-v3-flare/spark-dex-v3-flare-provider';
+import { BrontoFinanceProvider } from '../../providers/dexes/megaeth-testnet/bronto-finance/bronto-finance-provider';
 import { UniSwapV3UnichainProvider } from '../../providers/dexes/unichain/uni-v3/unichain-uni-v3-provider';
 
 export const UniswapV3TradeProviders = [
@@ -21,5 +22,8 @@ export const UniswapV3TradeProviders = [
     UniSwapV3ScrollSepoliaProvider,
     SparkDexV3FlareProvider,
     EnosysV3FlareProvider,
-    KodiakV3Provider
+    KodiakV3Provider,
+
+    //testnets
+    BrontoFinanceProvider
 ] as const;
