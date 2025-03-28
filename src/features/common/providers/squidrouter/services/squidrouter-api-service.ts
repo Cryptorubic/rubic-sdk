@@ -12,15 +12,18 @@ export class SquidRouterApiService {
 
     private static apiKey = 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4';
 
+    private static readonly coralId = 'rubic-api-test';
+
     public static async getRoute(
         requestParams: SquidrouterTransactionRequest
     ): Promise<SquidrouterTransactionResponse> {
         const res = await Injector.httpClient.post<SquidrouterTransactionResponse>(
-            'https://x-api.rubic.exchange/squidrouter/api/route',
+            'https://x-api.rubic.exchange/test_squidrouter/api/route',
             requestParams,
             {
                 headers: {
-                    apikey: SquidRouterApiService.apiKey
+                    apikey: SquidRouterApiService.apiKey,
+                    'x-integrator-id': this.coralId
                 }
             }
         );
@@ -36,7 +39,7 @@ export class SquidRouterApiService {
                     ...params
                 },
                 headers: {
-                    'x-integrator-id': 'rubic-api'
+                    'x-integrator-id': this.coralId
                 }
             }
         );

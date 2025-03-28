@@ -125,6 +125,10 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
+    // private readonly creationTimestamp: number;
+
+    // private readonly timeLimitMs: number = 25 * 1_000;
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -145,6 +149,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     ) {
         super(providerAddress, routePath, useProxy);
 
+        // this.creationTimestamp = Date.now();
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.gasData = crossChainTrade.gasData;
@@ -274,6 +279,16 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     protected async getTransactionConfigAndAmount(
         receiverAddress: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        // const currentTimestamp = Date.now();
+        // const spentTime = currentTimestamp - this.creationTimestamp;
+        // if (spentTime > this.timeLimitMs) {
+        //     throw new TimeoutError(
+        //         `Coral trade lives only 25 seconds from creation. Already spent ${
+        //             spentTime / 1000
+        //         } seconds.`
+        //     );
+        // }
+
         const requestParams: SquidrouterTransactionRequest = {
             ...this.transactionRequest,
             toAddress: receiverAddress
