@@ -86,7 +86,7 @@ const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
         tokenSymbolA: 'USDC',
         tokenSymbolB: 'BRONTO',
         poolAddress: '0x86c87F29e20B1ECD6A178b1ae2D01fa08f5168ac',
-        fee: 500
+        fee: 100
     },
     {
         tokenSymbolA: 'WETH',

@@ -61,27 +61,27 @@ export class BrontoFinanceQuoterController extends UniswapV3QuoterController {
         poolsPath: LiquidityPool[];
         methodData: MethodData;
     } {
-        if (poolsPath.length === 1 && poolsPath?.[0]) {
-            const methodName =
-                exact === 'input' ? 'quoteExactInputSingle' : 'quoteExactOutputSingle';
-            const sqrtPriceLimitX96 = 0;
-            //const tickSpacing = feeToTickSpacing[poolsPath[0].fee!];
-            return {
-                poolsPath,
-                methodData: {
-                    methodName,
-                    methodArguments: [
-                        {
-                            tokenIn: from.address,
-                            tokenOut: to.address,
-                            amountIn: weiAmount,
-                            tickSpacing: poolsPath[0].fee,
-                            sqrtPriceLimitX96
-                        }
-                    ] as QuoteExactInputSingleParams[]
-                }
-            };
-        }
+        // if (poolsPath.length === 1 && poolsPath?.[0]) {
+        //     const methodName =
+        //         exact === 'input' ? 'quoteExactInputSingle' : 'quoteExactOutputSingle';
+        //     const sqrtPriceLimitX96 = 0;
+        //     //const tickSpacing = feeToTickSpacing[poolsPath[0].fee!];
+        //     return {
+        //         poolsPath,
+        //         methodData: {
+        //             methodName,
+        //             methodArguments: [
+        //                 {
+        //                     tokenIn: from.address,
+        //                     tokenOut: to.address,
+        //                     amountIn: weiAmount,
+        //                     tickSpacing: poolsPath[0].fee,
+        //                     sqrtPriceLimitX96
+        //                 }
+        //             ] as QuoteExactInputSingleParams[]
+        //         }
+        //     };
+        // }
 
         const methodName = exact === 'input' ? 'quoteExactInput' : 'quoteExactOutput';
         const tokensPath = exact === 'input' ? poolsPath : poolsPath.reverse();
@@ -170,7 +170,8 @@ export class BrontoFinanceQuoterController extends UniswapV3QuoterController {
                     from.address
                 )
             )
-            .flat();
+            .flat()
+            .slice(0, 40);
 
         const results = await this.web3Public.multicallContractMethods<
             string | { amountOut: string }
