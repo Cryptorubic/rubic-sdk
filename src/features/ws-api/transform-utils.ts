@@ -112,7 +112,7 @@ export class TransformUtils {
         if (!response && !err) {
             throw new NotSupportedTokensError();
         }
-        const tradeType = (response.providerType || err?.type) as OnChainTradeType;
+        const tradeType = (response?.providerType || err?.type) as OnChainTradeType;
         const tradeParams = await RubicApiUtils.getTradeParams(quote, response, tradeType);
 
         const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
