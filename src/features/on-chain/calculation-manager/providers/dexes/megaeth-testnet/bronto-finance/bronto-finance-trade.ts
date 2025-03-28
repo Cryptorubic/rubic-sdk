@@ -1,12 +1,10 @@
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
+
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../../common/models/on-chain-trade-type';
+import { BrontoFinanceQuoterController } from '../../common/uniswap-v3-abstract/bronto-finance-quoter-controller';
 import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from '../../common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 import { UniswapV3AbstractTrade } from '../../common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { MEGAETH_TESTNET_ROUTER_CONTRACT_ADDRESS } from './constants/provider-config';
-import { RubicSdkError } from 'src/common/errors';
-import { BrontoFinanceQuoterController } from '../../common/uniswap-v3-abstract/bronto-finance-quoter-controller';
-import { feeToTickSpacing } from './constants/router-config';
-import { compareAddresses } from 'src/common/utils/blockchain';
 
 export class BrontoFinanceTrade extends UniswapV3AbstractTrade {
     public get type(): OnChainTradeType {

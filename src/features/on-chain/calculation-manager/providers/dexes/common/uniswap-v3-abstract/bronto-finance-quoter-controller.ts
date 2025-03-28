@@ -8,10 +8,10 @@ import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { AbiItem } from 'web3-utils';
+
+import { UniswapV3RouterConfiguration } from './models/uniswap-v3-router-configuration';
 import { FeeAmount, LiquidityPool } from './utils/quoter-controller/models/liquidity-pool';
 import { UniswapV3QuoterController } from './utils/quoter-controller/uniswap-v3-quoter-controller';
-import { UniswapV3RouterConfiguration } from './models/uniswap-v3-router-configuration';
-import { feeToTickSpacing } from '../../megaeth-testnet/bronto-finance/constants/router-config';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -20,14 +20,6 @@ interface GetQuoterMethodsDataOptions {
     exact: Exact;
     weiAmount: string;
     maxTransitTokens: number;
-}
-
-interface QuoteExactInputSingleParams {
-    tokenIn: string;
-    tokenOut: string;
-    amountIn: string;
-    tickSpacing: number;
-    sqrtPriceLimitX96: number;
 }
 
 export class BrontoFinanceQuoterController extends UniswapV3QuoterController {

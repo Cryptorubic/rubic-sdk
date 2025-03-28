@@ -1,26 +1,26 @@
 import { RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../../common/models/on-chain-trade-type';
+import { BrontoFinanceQuoterController } from '../../common/uniswap-v3-abstract/bronto-finance-quoter-controller';
 import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from '../../common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 import { UniswapV3Route } from '../../common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { UniswapV3AlgebraTradeStructOmitPath } from '../../common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 import { UniswapV3AlgebraAbstractProvider } from '../../common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
 import { BrontoFinanceTrade } from './bronto-finance-trade';
 import {
+    BRONTO_FINANCE_QUOTER_CONTRACT_ABI,
+    BRONTO_FINANCE_QUOTER_CONTRACT_ADDRESS
+} from './constants/bronto-finance-quoter-data';
+import {
     MEGAETH_TESTNET_PROVIDER_CONFIGURATION,
     MEGAETH_TESTNET_ROUTER_CONTRACT_ADDRESS
 } from './constants/provider-config';
 import { MEGAETH_TESTNET_ROUTER_CONFIGURATION } from './constants/router-config';
-import { BrontoFinanceQuoterController } from '../../common/uniswap-v3-abstract/bronto-finance-quoter-controller';
-import {
-    BRONTO_FINANCE_QUOTER_CONTRACT_ABI,
-    BRONTO_FINANCE_QUOTER_CONTRACT_ADDRESS
-} from './constants/bronto-finance-quoter-data';
-import { compareAddresses } from 'src/common/utils/blockchain';
 
 export class BrontoFinanceProvider extends UniswapV3AlgebraAbstractProvider<BrontoFinanceTrade> {
     public get type(): OnChainTradeType {
