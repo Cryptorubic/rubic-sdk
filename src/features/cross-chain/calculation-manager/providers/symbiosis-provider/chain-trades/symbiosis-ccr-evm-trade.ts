@@ -73,11 +73,10 @@ export class SymbiosisEvmCcrTrade extends EvmCrossChainTrade {
         crossChainTrade: SymbiosisEvmCrossChainTradeConstructor,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean,
         apiQuote: QuoteRequestInterface,
         apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
+        super(providerAddress, routePath, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

@@ -66,7 +66,9 @@ export class TransformUtils {
                 tradeType as TransferTradeSupportedProviders
             ) && chainType !== CHAIN_TYPE.EVM;
 
-        if (chainType === CHAIN_TYPE.EVM) {
+        if (isTransferTrade) {
+            trade = new ApiCrossChainTransferTrade(tradeParams);
+        } else if (chainType === CHAIN_TYPE.EVM) {
             const params = tradeParams as EvmApiCrossChainConstructor;
 
             if (tradeType === CROSS_CHAIN_TRADE_TYPE.ARBITRUM) {
@@ -79,8 +81,6 @@ export class TransformUtils {
                     needAuthWallet: parsedWarnings.needAuthWallet
                 });
             }
-        } else if (isTransferTrade) {
-            trade = new ApiCrossChainTransferTrade(tradeParams);
         } else if (chainType === CHAIN_TYPE.TON) {
             trade = new TonApiCrossChainTrade(tradeParams as TonApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.TRON) {

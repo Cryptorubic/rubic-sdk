@@ -38,7 +38,6 @@ export class BitcoinApiCrossChainTrade extends BitcoinCrossChainTrade {
         super(
             tradeParams.apiQuote.integratorAddress!,
             tradeParams.routePath,
-            false,
             tradeParams.apiQuote,
             tradeParams.apiResponse
         );

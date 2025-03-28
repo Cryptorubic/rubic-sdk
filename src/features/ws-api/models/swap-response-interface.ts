@@ -23,4 +23,5 @@ export interface SwapResponseInterface<T> {
     routing: RoutingInterface[];
     providerType: CrossChainTradeType | OnChainTradeType;
     swapType: SwapType;
+    useRubicContract: boolean;
 }
