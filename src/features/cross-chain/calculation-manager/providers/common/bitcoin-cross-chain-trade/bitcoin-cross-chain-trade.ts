@@ -157,6 +157,9 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<
         const swapData = await Injector.rubicApiService.fetchSwapData<
             BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig
         >(swapRequestData);
+
+        this._uniqueInfo = swapData.uniqueInfo ?? {};
+
         const amount = swapData.estimate.destinationWeiAmount;
 
         return { config: swapData.transaction, amount };

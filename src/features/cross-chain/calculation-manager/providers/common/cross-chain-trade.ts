@@ -1,4 +1,5 @@
 import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import { UniqueProviderInfoInterface } from '@cryptorubic/core/src/lib/models/api/unique-provider-info.interface';
 import BigNumber from 'bignumber.js';
 import {
     RubicSdkError,
@@ -31,6 +32,12 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
  */
 export abstract class CrossChainTrade<T = unknown> {
     protected lastTransactionConfig: T | null = null;
+
+    protected _uniqueInfo: UniqueProviderInfoInterface = {};
+
+    public get uniqueInfo(): UniqueProviderInfoInterface {
+        return this._uniqueInfo;
+    }
 
     /**
      * Type of calculated cross-chain trade.
@@ -108,35 +115,12 @@ export abstract class CrossChainTrade<T = unknown> {
         );
     }
 
-    protected isProxyTrade: boolean;
-
     protected get amountToCheck(): string {
         return this.to.stringWeiAmount;
     }
 
     public get needAuthWallet(): boolean {
         return false;
-    }
-
-    public abstract authWallet(): Promise<string>;
-
-    protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
-        const oldAmount = new BigNumber(oldWeiAmount);
-        const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.5;
-        const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
-
-        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
-        const amountMinusPercent = oldAmount.multipliedBy(
-            new BigNumber(1).minus(acceptablePercentPriceChange)
-        );
-
-        const shouldThrowError =
-            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
-
-        if (shouldThrowError) {
-            throw new UpdatedRatesError(oldWeiAmount, newWeiAmount);
-        }
     }
 
     private _apiFromAddress: string | null = null;
@@ -147,14 +131,15 @@ export abstract class CrossChainTrade<T = unknown> {
 
     public readonly rubicId: string;
 
+    public readonly useProxy: boolean;
+
     protected constructor(
         protected readonly providerAddress: string,
         protected readonly routePath: RubicStep[],
-        protected readonly useProxy: boolean,
         protected readonly apiQuote: QuoteRequestInterface,
         protected readonly apiResponse: QuoteResponseInterface
     ) {
-        this.isProxyTrade = useProxy;
+        this.useProxy = apiResponse.useRubicContract;
         this.contractSpender = apiResponse.transaction.approvalAddress!;
         this.rubicId = apiResponse.id;
     }
@@ -199,6 +184,27 @@ export abstract class CrossChainTrade<T = unknown> {
      * @param options Encode transaction options.
      */
     public abstract encode(options: EncodeTransactionOptions): Promise<unknown>;
+
+    public abstract authWallet(): Promise<string>;
+
+    protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
+        const oldAmount = new BigNumber(oldWeiAmount);
+        const newAmount = new BigNumber(newWeiAmount);
+        const changePercent = 0.5;
+        const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
+
+        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
+        const amountMinusPercent = oldAmount.multipliedBy(
+            new BigNumber(1).minus(acceptablePercentPriceChange)
+        );
+
+        const shouldThrowError =
+            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
+
+        if (shouldThrowError) {
+            throw new UpdatedRatesError(oldWeiAmount, newWeiAmount);
+        }
+    }
 
     protected async checkTradeErrors(): Promise<void | never> {
         this.checkWalletConnected();

@@ -21,7 +21,6 @@ export class SymbiosisCrossChainFactory {
         constructorParams: SymbiosisCrossChainTradeConstructor<BlockchainName>,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean,
         apiQuote: QuoteRequestInterface,
         apiResponse: QuoteResponseInterface
     ):
@@ -34,7 +33,6 @@ export class SymbiosisCrossChainFactory {
                 constructorParams as SymbiosisTonCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
-                useProxy,
                 apiQuote,
                 apiResponse
             );
@@ -45,7 +43,6 @@ export class SymbiosisCrossChainFactory {
                 constructorParams as SymbiosisEvmCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
-                useProxy,
                 apiQuote,
                 apiResponse
             );
@@ -56,7 +53,6 @@ export class SymbiosisCrossChainFactory {
                 constructorParams as SymbiosisTronCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
-                useProxy,
                 apiQuote,
                 apiResponse
             );
@@ -66,7 +62,6 @@ export class SymbiosisCrossChainFactory {
                 constructorParams as SymbiosisbitcoinCrossChainTradeConstructor,
                 providerAddress,
                 routePath,
-                useProxy,
                 apiQuote,
                 apiResponse
             );

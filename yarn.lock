@@ -989,7 +989,7 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@0.7.6", "@cryptorubic/core@^0.7.6":
+"@cryptorubic/core@0.7.6":
   version "0.7.6"
   resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.7.6.tgz#5ef1a7d39a97ebe95f1de18fa30f203b4fc577d1"
   integrity sha512-w4hF6qKuRBPdC+SFHEKLHsxphDH5MQCpZC0FhEyLOcAqBO7SsuvshlUhb6HnGXHHMYxmf1I/p1Am2yDq5gxabA==
@@ -1005,7 +1005,7 @@
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@^0.7.6":
+"@cryptorubic/web3@0.7.6":
   version "0.7.6"
   resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.7.6.tgz#542228e9ee64477f2afc77cce3eafda70fc7b7b9"
   integrity sha512-PZsngXw6Wx9Q3tbFVE3K8htWaazKFC5iVLvxCroYa2OZt0q20gcYFgzeawBwmiIdYEw7WdmMjcDUNS+QZtq7xQ==
@@ -1964,9 +1964,9 @@
     valibot "^0.36.0"
 
 "@mysten/sui@^1.24.0":
-  version "1.25.0"
-  resolved "https://registry.yarnpkg.com/@mysten/sui/-/sui-1.25.0.tgz#bd7c11e0579b86ae112bea5bb705d258918333f2"
-  integrity sha512-oyncm8WKJ6RZPltJTcCOgdQbOIg6+7XYekMMhU5NDVYNnIhstRXX0axaSwZTR+kON17T92qcXntCN4AszEpH8w==
+  version "1.24.0"
+  resolved "https://registry.yarnpkg.com/@mysten/sui/-/sui-1.24.0.tgz#22b334e6f8f638d18e13e9b97d11ef2df647bc77"
+  integrity sha512-lmJJLM7eMrxM6Qpr6cdLr07UBXlxCM7SJjfcDO7NGrqZTx7/3TD2QhhRpDx0fS2tODxrNwQxCoHPApLVPjokIA==
   dependencies:
     "@graphql-typed-document-node/core" "^3.2.0"
     "@mysten/bcs" "1.5.0"

@@ -1,3 +1,4 @@
+import { SuiBlockchainName } from '@cryptorubic/core';
 import {
     BitcoinBlockchainName,
     BLOCKCHAIN_NAME,
@@ -10,6 +11,7 @@ import {
 import { BitcoinWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/bitcoin-web3-public/bitcoin-web3-public';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/solana-web3-public/solana-web3-public';
+import { SuiWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/sui-web3-public/sui-web3-public';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 
 import { TonWeb3Public } from '../web3-public/ton-web3-public/ton-web3-public';
@@ -19,7 +21,8 @@ export const web3PublicSupportedBlockchains = [
     BLOCKCHAIN_NAME.TRON,
     BLOCKCHAIN_NAME.SOLANA,
     BLOCKCHAIN_NAME.TON,
-    BLOCKCHAIN_NAME.BITCOIN
+    BLOCKCHAIN_NAME.BITCOIN,
+    BLOCKCHAIN_NAME.SUI
 ] as const;
 
 export type Web3PublicSupportedBlockchain = (typeof web3PublicSupportedBlockchains)[number];
@@ -28,4 +31,5 @@ export type Web3PublicStorage = Record<EvmBlockchainName, EvmWeb3Public> &
     Record<TronBlockchainName, TronWeb3Public> &
     Record<SolanaBlockchainName, SolanaWeb3Public> &
     Record<TonBlockchainName, TonWeb3Public> &
-    Record<BitcoinBlockchainName, BitcoinWeb3Public>;
+    Record<BitcoinBlockchainName, BitcoinWeb3Public> &
+    Record<SuiBlockchainName, SuiWeb3Public>;

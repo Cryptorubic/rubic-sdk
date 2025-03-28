@@ -160,6 +160,7 @@ export class RubicApiUtils {
         const emptyResponse: QuoteResponseInterface = {
             providerType: providerType as CrossChainTradeType,
             swapType,
+            useRubicContract: false,
             transaction: {},
             id: '0',
             warnings: [],
