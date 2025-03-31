@@ -5,7 +5,6 @@ import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { SquidrouterTransactionRequest } from 'src/features/common/providers/squidrouter/models/transaction-request';
@@ -24,9 +23,7 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { SquidrouterContractAddress } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-contract-address';
 import { SquidrouterCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
-import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 /**
@@ -43,48 +40,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     private readonly transactionRequest: SquidrouterTransactionRequest;
 
     public squidrouterRequestId: string | undefined;
-
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: SquidrouterTransactionRequest,
-        feeInfo: FeeInfo,
-        receiverAddress: string,
-        providerAddress: string
-    ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as SquidrouterCrossChainSupportedBlockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
-        try {
-            const trade = new SquidrouterCrossChainTrade(
-                {
-                    from,
-                    to: toToken,
-                    gasData: null,
-                    priceImpact: 0,
-                    allowanceTarget: '',
-                    slippage: 0,
-                    feeInfo,
-                    cryptoFeeToken: from,
-                    onChainTrade: null,
-                    onChainSubtype: { from: undefined, to: undefined },
-                    transactionRequest
-                },
-                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                [],
-                false
-            );
-
-            return getCrossChainGasData(trade, receiverAddress);
-        } catch (_err) {
-            return null;
-        }
-    }
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER;
 
@@ -116,7 +71,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     protected get fromContractAddress(): string {
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : SquidrouterContractAddress[this.fromBlockchain].providerGateway;
+            : this.allowanceTarget;
     }
 
     public readonly feeInfo: FeeInfo;
