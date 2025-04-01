@@ -46,9 +46,19 @@ export class RubicApiService {
         return ioClient;
     }
 
-    public calculateAsync(params: WsQuoteRequestInterface): void {
+    public calculateAsync(params: WsQuoteRequestInterface, attempt = 0): void {
         this.latestQuoteParams = params;
-        this.client.emit('calculate', params);
+        if (attempt > 2) {
+            return;
+        }
+        if (this.client.connected) {
+            this.client.emit('calculate', params);
+        } else {
+            const repeatInterval = 3_000;
+            setTimeout(() => {
+                this.calculateAsync(params, attempt + 1);
+            }, repeatInterval);
+        }
     }
 
     public fetchSwapData<T>(body: SwapRequestInterface): Promise<SwapResponseInterface<T>> {
