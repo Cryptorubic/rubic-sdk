@@ -6,12 +6,13 @@ import {
 } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import { MaxDecimalsError } from 'src/common/errors/swap/max-decimals.error';
 import { PriceToken } from 'src/common/tokens';
 import { Any } from 'src/common/utils/types';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 
-import { RubicApiError, RubicApiErrorDto } from '../models/rubic-api-error';
+import { RubicApiErrorDto } from '../models/rubic-api-error';
 import { RubicApiWarnings } from '../models/rubic-api-warnings';
 
 export class RubicApiParser {
@@ -65,7 +66,7 @@ export class RubicApiParser {
         };
     }
 
-    public static parseRubicApiErrors(err: RubicApiError): RubicSdkError {
+    public static parseRubicApiErrors(err: RubicApiErrorDto): RubicSdkError {
         if (err.code === 205) {
             const data = err.data as {
                 tokenSymbol: string;
@@ -80,6 +81,11 @@ export class RubicApiParser {
             }
         }
 
+        if (err.code === 206) {
+            const decimals = err.reason.match(/\d+/)?.[0];
+            return new MaxDecimalsError(Number(decimals));
+        }
+
         throw new RubicSdkError(err.reason);
     }
 
@@ -89,7 +95,10 @@ export class RubicApiParser {
         for (const warning of warnings) {
             if (warning.code === 409) {
                 parsedWarnings.needAuthWallet = true;
+                continue;
             }
+
+            parsedWarnings.error = RubicApiParser.parseRubicApiErrors(warning);
         }
 
         return parsedWarnings;
