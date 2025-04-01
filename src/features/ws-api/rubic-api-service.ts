@@ -24,12 +24,15 @@ export class RubicApiService {
             return 'http://localhost:3000';
         }
         if (env === 'dev') {
-            return 'https://dev-api-v2.rubic.exchange';
+            return 'https://dev1-api-v2.rubic.exchange';
         }
         if (env === 'dev2') {
             return 'https://dev2-api-v2.rubic.exchange';
         }
-        return 'https://rubic-api-v2.rubic.exchange';
+        if (env === 'rubic') {
+            return 'https://rubic-api-v2.rubic.exchange';
+        }
+        return 'https://api-v2.rubic.exchange';
     }
 
     private readonly client = this.getSocket();
@@ -41,7 +44,8 @@ export class RubicApiService {
     private getSocket(): Socket {
         const ioClient = io(this.apiUrl, {
             reconnectionDelayMax: 10000,
-            path: '/api/routes/ws/'
+            path: '/api/routes/ws/',
+            transports: ['websocket']
         });
         return ioClient;
     }
