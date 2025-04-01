@@ -37,7 +37,7 @@ export class EvmApiOnChainTrade extends EvmOnChainTrade {
             ...params,
             path: params.routePath,
             gasFeeInfo: null,
-            useProxy: false,
+            useProxy: params.useProxy,
             slippageTolerance: params.apiResponse!.estimate.slippage,
             withDeflation: { from: { isDeflation: false }, to: { isDeflation: false } },
             fromWithoutFee: params.from

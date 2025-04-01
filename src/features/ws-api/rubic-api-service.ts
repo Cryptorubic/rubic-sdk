@@ -134,6 +134,15 @@ export class RubicApiService {
         return Injector.httpClient.get(`${this.apiUrl}/api/info/status?srcTxHash=${srcTxHash}`);
     }
 
+    public fetchCrossChainTxStatusExtended(
+        srcTxHash: string,
+        rubicId: string
+    ): Promise<CrossChainTxStatusConfig> {
+        return Injector.httpClient.get(
+            `${this.apiUrl}/api/info/statusExtended?srcTxHash=${srcTxHash}&rubicId=${rubicId}`
+        );
+    }
+
     public getMessageToAuthWallet(walletAddress: string): Promise<{ messageToAuth: string }> {
         return Injector.httpClient.get(
             `${this.apiUrl}/api/utility/authWalletMessage?walletAddress=${walletAddress}`

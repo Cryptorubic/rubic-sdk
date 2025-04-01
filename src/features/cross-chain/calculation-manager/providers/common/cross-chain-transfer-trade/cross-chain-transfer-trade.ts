@@ -97,7 +97,6 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     constructor(
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean,
         onChainTrade: EvmOnChainTrade | null,
         from: PriceTokenAmount<BlockchainName>,
         to: PriceTokenAmount<BlockchainName>,
@@ -108,7 +107,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         apiQuote: QuoteRequestInterface,
         apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
+        super(providerAddress, routePath, apiQuote, apiResponse);
         this.onChainTrade = onChainTrade;
         this.from = from as PriceTokenAmount<EvmBlockchainName>;
         this.to = to;
@@ -150,7 +149,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         const res = await this.getPaymentInfo(
             receiverAddress || this.walletAddress,
             testMode,
-            refundAddress
+            refundAddress || this.walletAddress
         );
 
         const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
@@ -204,7 +203,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
             this.type
         );
 
-        if (this.isProxyTrade) {
+        if (this.useProxy) {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
                 await this.getContractParams({
                     fromAddress: options.fromAddress,
@@ -303,8 +302,8 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         throw new RubicSdkError(`Cannot encode approve for ${this.type}`);
     }
 
-    public async needApprove(): Promise<boolean> {
-        if (this.isProxyTrade) {
+    public override async needApprove(): Promise<boolean> {
+        if (this.useProxy) {
             return super.needApprove();
         }
         return false;

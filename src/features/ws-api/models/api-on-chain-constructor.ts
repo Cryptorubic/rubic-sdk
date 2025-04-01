@@ -10,4 +10,5 @@ export interface ApiOnChainConstructor<T extends BlockchainName> {
     apiQuote: QuoteRequestInterface;
     apiResponse: QuoteResponseInterface;
     routePath: RubicStep[];
+    useProxy: boolean;
 }
