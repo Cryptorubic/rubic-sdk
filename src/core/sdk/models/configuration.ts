@@ -35,5 +35,5 @@ export interface Configuration {
     /**
      * Api env type
      */
-    readonly envType?: 'local' | 'dev' | 'dev2' | 'prod';
+    readonly envType?: 'local' | 'dev' | 'dev2' | 'prod' | 'rubic';
 }
