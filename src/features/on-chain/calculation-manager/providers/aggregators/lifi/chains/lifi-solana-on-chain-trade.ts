@@ -1,8 +1,14 @@
-import { RubicSdkError, SwapRequestError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
+    SwapRequestError
+} from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { parseError } from 'src/common/utils/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { getSolanaFee } from 'src/features/common/utils/get-solana-fee';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { Route } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-route';
@@ -73,6 +79,46 @@ export class LifiSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
                 throw err;
             }
             throw new RubicSdkError('Can not encode trade');
+        }
+    }
+
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkWalletState(options?.testMode);
+
+        const { onConfirm } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        const fromAddress = this.walletAddress;
+        const receiverAddress = options.receiverAddress || this.walletAddress;
+
+        const transactionConfig = await this.encode({
+            fromAddress,
+            receiverAddress,
+            ...options
+        });
+
+        try {
+            await this.web3Private.sendTransaction(
+                {
+                    data: transactionConfig.data,
+                    onTransactionHash
+                },
+                false
+            );
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+
+            throw parseError(err);
         }
     }
 

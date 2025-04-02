@@ -16,7 +16,10 @@ export class SolanaWeb3Private extends Web3Private {
         return BLOCKCHAIN_NAME.SOLANA;
     }
 
-    public async sendTransaction(options: SolanaTransactionOptions): Promise<string> {
+    public async sendTransaction(
+        options: SolanaTransactionOptions,
+        calculateConsumedParams: boolean = true
+    ): Promise<string> {
         try {
             const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SOLANA);
             const decodedData = options.data!.startsWith('0x')
@@ -26,12 +29,14 @@ export class SolanaWeb3Private extends Web3Private {
 
             const tx = VersionedTransaction.deserialize(decodedData);
             tx.message.recentBlockhash = blockhash;
-            const [computedUnitsPrice, computedUnitsLimit] = await Promise.all([
-                web3Public.getConsumedUnitsPrice(tx),
-                web3Public.getConsumedUnitsLimit(tx)
-            ]);
+            if (calculateConsumedParams) {
+                const [computedUnitsPrice, computedUnitsLimit] = await Promise.all([
+                    web3Public.getConsumedUnitsPrice(tx),
+                    web3Public.getConsumedUnitsLimit(tx)
+                ]);
 
-            this.updatePriorityFee(tx, computedUnitsPrice, computedUnitsLimit);
+                this.updatePriorityFee(tx, computedUnitsPrice, computedUnitsLimit);
+            }
 
             const { signature } = await this.solanaWeb3.signAndSendTransaction(tx);
             options.onTransactionHash?.(signature);

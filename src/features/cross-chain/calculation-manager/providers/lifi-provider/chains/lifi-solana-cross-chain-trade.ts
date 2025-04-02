@@ -114,10 +114,13 @@ export class LifiSolanaCrossChainTrade extends SolanaCrossChainTrade {
                 transactionHash = hash;
             };
 
-            await this.web3Private.sendTransaction({
-                data,
-                onTransactionHash
-            });
+            await this.web3Private.sendTransaction(
+                {
+                    data,
+                    onTransactionHash
+                },
+                false
+            );
 
             return transactionHash!;
         } catch (err) {
