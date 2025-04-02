@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.57.4-alpha.solana.1",
+    "version": "5.57.4-alpha.solana.2",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",

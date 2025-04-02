@@ -11,7 +11,7 @@ const REFFERAL_TOKENS = [
 
 export function getSolanaFee(from: PriceTokenAmount): number {
     if (REFFERAL_TOKENS.some(addr => compareAddresses(addr, from.address))) {
-        return 0.07;
+        return 0.007;
     }
 
     if (!from.price) {
