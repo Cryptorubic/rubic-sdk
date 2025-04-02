@@ -314,7 +314,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             if (feePercent) {
                 return {
                     affiliateFeeRecipient: '4juPxgyQapaKdgxuCS7N8pRxjttXGRZsS5WTVZ42rNjn',
-                    affiliateFeePercent: feePercent * 100
+                    affiliateFeePercent: new BigNumber(100).multipliedBy(feePercent).toNumber()
                 };
             }
         }
