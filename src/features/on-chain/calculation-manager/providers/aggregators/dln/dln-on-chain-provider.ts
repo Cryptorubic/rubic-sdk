@@ -114,7 +114,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
             if (feePercent) {
                 return {
                     affiliateFeeRecipient: '6pvJfh73w1HT3b9eKRMX3EfrKH5AihVqRhasyhN5qtfP',
-                    affiliateFeePercent: feePercent * 100
+                    affiliateFeePercent: new BigNumber(100).multipliedBy(feePercent).toNumber()
                 };
             }
         }
