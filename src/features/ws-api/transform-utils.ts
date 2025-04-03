@@ -1,4 +1,4 @@
-import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import { BLOCKCHAIN_NAME, QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -14,6 +14,8 @@ import { EvmApiCrossChainTrade } from 'src/features/ws-api/chains/evm/evm-api-cr
 import { EvmApiOnChainTrade } from 'src/features/ws-api/chains/evm/evm-api-on-chain-trade';
 import { SolanaApiCrossChainTrade } from 'src/features/ws-api/chains/solana/solana-api-cross-chain-trade';
 import { SolanaApiOnChainTrade } from 'src/features/ws-api/chains/solana/solana-api-on-chain-trade';
+import { SuiApiOnChainTrade } from 'src/features/ws-api/chains/sui/sui-api-on-chain-trade';
+import { SuiApiOnChainConstructor } from 'src/features/ws-api/chains/sui/sui-api-on-chain-trade-constructor';
 import { TonApiCrossChainTrade } from 'src/features/ws-api/chains/ton/ton-api-cross-chain-trade';
 import { TonApiOnChainTrade } from 'src/features/ws-api/chains/ton/ton-api-on-chain-trade';
 import { TronApiCrossChainTrade } from 'src/features/ws-api/chains/tron/tron-api-cross-chain-trade';
@@ -51,20 +53,27 @@ export class TransformUtils {
         const tradeType = (res?.providerType || err?.type) as WrappedCrossChainTrade['tradeType'];
         const tradeParams = await RubicApiUtils.getTradeParams(quote, res, tradeType);
 
-        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
+        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : null;
+        const parsedWarnings = RubicApiParser.parseRubicApiWarnings(res?.warnings || []);
+
+        const error = parsedError || parsedWarnings.error;
 
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
 
         let trade: CrossChainTrade | null = null;
 
-        const parsedWarnings = RubicApiParser.parseRubicApiWarnings(res?.warnings || []);
+        const needProvidePubKey =
+            tradeType === CROSS_CHAIN_TRADE_TYPE.TELE_SWAP &&
+            tradeParams.from.blockchain === BLOCKCHAIN_NAME.BITCOIN;
 
         const isTransferTrade =
             transferTradeSupportedProviders.includes(
                 tradeType as TransferTradeSupportedProviders
             ) && chainType !== CHAIN_TYPE.EVM;
 
-        if (chainType === CHAIN_TYPE.EVM) {
+        if (isTransferTrade) {
+            trade = new ApiCrossChainTransferTrade(tradeParams);
+        } else if (chainType === CHAIN_TYPE.EVM) {
             const params = tradeParams as EvmApiCrossChainConstructor;
 
             if (tradeType === CROSS_CHAIN_TRADE_TYPE.ARBITRUM) {
@@ -77,14 +86,15 @@ export class TransformUtils {
                     needAuthWallet: parsedWarnings.needAuthWallet
                 });
             }
-        } else if (isTransferTrade) {
-            trade = new ApiCrossChainTransferTrade(tradeParams);
         } else if (chainType === CHAIN_TYPE.TON) {
             trade = new TonApiCrossChainTrade(tradeParams as TonApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.TRON) {
             trade = new TronApiCrossChainTrade(tradeParams as TronApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.BITCOIN) {
-            trade = new BitcoinApiCrossChainTrade(tradeParams as BitcoinApiCrossChainConstructor);
+            trade = new BitcoinApiCrossChainTrade({
+                ...tradeParams,
+                needProvidePubKey
+            } as BitcoinApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.SOLANA) {
             trade = new SolanaApiCrossChainTrade(tradeParams as SolanaApiCrossChainConstructor);
         }
@@ -92,7 +102,7 @@ export class TransformUtils {
         return {
             trade,
             tradeType,
-            ...(parsedError && { error: parsedError })
+            ...(error && { error })
         };
     }
 
@@ -105,10 +115,16 @@ export class TransformUtils {
         if (!response && !err) {
             throw new NotSupportedTokensError();
         }
-        const tradeType = (response.providerType || err?.type) as OnChainTradeType;
+        const tradeType = (response?.providerType || err?.type) as OnChainTradeType;
         const tradeParams = await RubicApiUtils.getTradeParams(quote, response, tradeType);
 
-        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : err;
+        const parsedError = err ? RubicApiParser.parseRubicApiErrors(err) : null;
+        const parsedWarningsError = RubicApiParser.parseRubicApiWarnings(
+            response?.warnings || []
+        ).error;
+
+        const error = parsedError || parsedWarningsError;
+
         const chainType = BlockchainsInfo.getChainType(quote.srcTokenBlockchain);
 
         let trade: OnChainTrade | null = null;
@@ -125,15 +141,14 @@ export class TransformUtils {
                 // @TODO API
                 isChangedSlippage: false
             });
-        } else if (chainType === CHAIN_TYPE.BITCOIN) {
-            // @TODO API
-            console.log('btc swap');
+        } else if (chainType === CHAIN_TYPE.SUI) {
+            trade = new SuiApiOnChainTrade(tradeParams as SuiApiOnChainConstructor);
         }
 
         return {
             trade,
             tradeType,
-            ...(parsedError && { error: parsedError })
+            ...(error && { error })
         };
     }
 }

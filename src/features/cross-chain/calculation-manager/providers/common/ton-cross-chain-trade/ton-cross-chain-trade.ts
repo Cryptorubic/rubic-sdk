@@ -87,6 +87,7 @@ export abstract class TonCrossChainTrade extends CrossChainTrade<TonTransactionC
             swapRequestParams
         );
 
+        this._uniqueInfo = swapData.uniqueInfo ?? {};
         const toAmount = swapData.estimate.destinationWeiAmount;
 
         return { config: swapData.transaction, amount: toAmount };

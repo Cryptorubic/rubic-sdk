@@ -61,7 +61,7 @@ export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBrid
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade
+        return this.useProxy
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
             : retroBridgeContractAddresses[this.fromBlockchain];
     }
@@ -78,11 +78,10 @@ export class RetroBridgeEvmTrade extends EvmCrossChainTrade implements RetroBrid
         crossChainTrade: RetroBridgeEvmConstructorParams,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean,
         apiQuote: QuoteRequestInterface,
         apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
+        super(providerAddress, routePath, apiQuote, apiResponse);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.feeInfo = crossChainTrade.feeInfo;

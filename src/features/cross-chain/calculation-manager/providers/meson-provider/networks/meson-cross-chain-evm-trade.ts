@@ -5,7 +5,6 @@ import {
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTradeType
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import {
@@ -15,8 +14,6 @@ import {
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { mesonContractAddresses } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/constants/meson-contract-addresses';
-import { MesonSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/constants/meson-cross-chain-supported-chains';
 import { MesonCrossChainEvmTradeConstructorParams } from 'src/features/cross-chain/calculation-manager/providers/meson-provider/models/meson-trade-types';
 
 export class MesonCrossChainEvmTrade extends EvmCrossChainTrade {
@@ -47,28 +44,12 @@ export class MesonCrossChainEvmTrade extends EvmCrossChainTrade {
 
     private readonly targetAssetString: string;
 
-    private get fromBlockchain(): MesonSupportedBlockchain {
-        return this.from.blockchain as MesonSupportedBlockchain;
-    }
-
-    protected get fromContractAddress(): string {
-        return this.isProxyTrade
-            ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : mesonContractAddresses[this.fromBlockchain];
-    }
-
     protected get methodName(): string {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
     constructor(params: MesonCrossChainEvmTradeConstructorParams) {
-        super(
-            params.providerAddress,
-            params.routePath,
-            params.useProxy,
-            params.apiQuote,
-            params.apiResponse
-        );
+        super(params.providerAddress, params.routePath, params.apiQuote, params.apiResponse);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.feeInfo = params.crossChainTrade.feeInfo;

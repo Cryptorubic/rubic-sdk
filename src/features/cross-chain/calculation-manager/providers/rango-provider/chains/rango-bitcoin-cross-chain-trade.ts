@@ -39,6 +39,8 @@ export class RangoBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
 
     private readonly slippage: number;
 
+    protected readonly needProvidePubKey = false;
+
     /**
      * @description UUID returned by rango-api to track transaction status in getRangoDstSwapStatus
      */
@@ -61,13 +63,7 @@ export class RangoBitcoinCrossChainTrade extends BitcoinCrossChainTrade {
     public readonly memo: string;
 
     constructor(params: RangoCrossChainTradeConstructorParams<BitcoinBlockchainName>) {
-        super(
-            params.providerAddress,
-            params.routePath,
-            params.useProxy,
-            params.apiQuote,
-            params.apiResponse
-        );
+        super(params.providerAddress, params.routePath, params.apiQuote, params.apiResponse);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
         this.toTokenAmountMin = params.crossChainTrade.toTokenAmountMin;

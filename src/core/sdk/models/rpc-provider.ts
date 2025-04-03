@@ -1,10 +1,11 @@
+import { SuiBlockchainName } from '@cryptorubic/core';
 import {
     BitcoinBlockchainName,
     EvmBlockchainName,
     SolanaBlockchainName,
     TonBlockchainName,
     TronBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+} from '@cryptorubic/core';
 import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 
 /**
@@ -22,5 +23,6 @@ export type RpcProviders = Partial<
         Record<TronBlockchainName, RpcProvider<TronWebProvider>> &
         Record<SolanaBlockchainName, RpcProvider<string>> &
         Record<TonBlockchainName, RpcProvider<string>> &
-        Record<BitcoinBlockchainName, RpcProvider<string>>
+        Record<BitcoinBlockchainName, RpcProvider<string>> &
+        Record<SuiBlockchainName, RpcProvider<string>>
 >;

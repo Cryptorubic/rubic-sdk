@@ -65,15 +65,16 @@ export class SymbiosisCcrBitcoinTrade extends BitcoinCrossChainTrade {
 
     public readonly memo = '';
 
+    protected readonly needProvidePubKey = false;
+
     constructor(
         crossChainTrade: SymbiosisbitcoinCrossChainTradeConstructor,
         providerAddress: string,
         routePath: RubicStep[],
-        useProxy: boolean,
         apiQuote: QuoteRequestInterface,
         apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, useProxy, apiQuote, apiResponse);
+        super(providerAddress, routePath, apiQuote, apiResponse);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;

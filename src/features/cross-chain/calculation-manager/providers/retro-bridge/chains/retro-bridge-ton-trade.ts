@@ -2,6 +2,7 @@ import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, WrongReceiverAddressError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { Any } from 'src/common/utils/types';
 import { BlockchainName, TonBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -84,7 +85,7 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
         apiQuote: QuoteRequestInterface,
         apiResponse: QuoteResponseInterface
     ) {
-        super(providerAddress, routePath, false, apiQuote, apiResponse);
+        super(providerAddress, routePath, apiQuote, apiResponse);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.feeInfo = crossChainTrade.feeInfo;
@@ -169,7 +170,7 @@ export class RetroBridgeTonTrade extends TonCrossChainTrade implements RetroBrid
     protected getTransactionConfigAndAmount(
         _testMode: boolean,
         _receiverAddress?: string
-    ): Promise<{ config: any; amount: string }> {
+    ): Promise<{ config: Any; amount: string }> {
         // @TODO API
         throw new Error('NOT IMPLEMENTED');
     }
