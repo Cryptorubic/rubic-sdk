@@ -10,6 +10,7 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 import { ApiCrossChainTransferConstructor } from './api-cross-chain-transfer-constructor';
+import { TransferSwapRequestInterface } from './models/transfer-swap-request-interface';
 
 export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
     public readonly type: CrossChainTradeType;
@@ -55,11 +56,12 @@ export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
     protected async getPaymentInfo(
         receiverAddress: string,
         testMode: boolean,
-        refundAddress: string
+        refundAddress?: string
     ): Promise<CrossChainTransferData> {
-        const swapRequestData: SwapRequestInterface = {
+        const swapRequestData: TransferSwapRequestInterface = {
             ...this.apiQuote,
-            fromAddress: refundAddress,
+            //@TODO API add refundAddress field for swap requests
+            fromAddress: refundAddress ? refundAddress : undefined,
             receiver: receiverAddress,
             id: this.apiResponse.id,
             enableChecks: !testMode
