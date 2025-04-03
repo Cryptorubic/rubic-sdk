@@ -16,6 +16,7 @@ import { TransformUtils } from 'src/features/ws-api/transform-utils';
 import { CrossChainTxStatusConfig } from './models/cross-chain-tx-status-config';
 import { RubicApiErrorDto } from './models/rubic-api-error';
 import { SwapResponseInterface } from './models/swap-response-interface';
+import { TransferSwapRequestInterface } from './chains/transfer-trade/models/transfer-swap-request-interface';
 
 export class RubicApiService {
     private get apiUrl(): string {
@@ -65,7 +66,9 @@ export class RubicApiService {
         }
     }
 
-    public fetchSwapData<T>(body: SwapRequestInterface): Promise<SwapResponseInterface<T>> {
+    public fetchSwapData<T>(
+        body: SwapRequestInterface | TransferSwapRequestInterface
+    ): Promise<SwapResponseInterface<T>> {
         return Injector.httpClient.post<SwapResponseInterface<T>>(
             `${this.apiUrl}/api/routes/swap`,
             body
