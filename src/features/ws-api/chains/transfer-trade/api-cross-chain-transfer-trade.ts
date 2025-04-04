@@ -1,4 +1,4 @@
-import { SwapRequestInterface, Token } from '@cryptorubic/core';
+import { Token } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import { Injector } from 'src/core/injector/injector';
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -56,15 +56,16 @@ export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
     protected async getPaymentInfo(
         receiverAddress: string,
         testMode: boolean,
+        fromAddress?: string,
         refundAddress?: string
     ): Promise<CrossChainTransferData> {
         const swapRequestData: TransferSwapRequestInterface = {
             ...this.apiQuote,
-            //@TODO API add refundAddress field for swap requests
-            fromAddress: refundAddress ? refundAddress : undefined,
             receiver: receiverAddress,
             id: this.apiResponse.id,
-            enableChecks: !testMode
+            enableChecks: !testMode,
+            ...(fromAddress && { fromAddress }),
+            ...(refundAddress && { refundAddress })
         };
         const { estimate, transaction } =
             await Injector.rubicApiService.fetchSwapData<CrossChainTransferConfig>(swapRequestData);

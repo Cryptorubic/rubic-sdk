@@ -146,13 +146,13 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         receiverAddress?: string,
         refundAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
-        const isEvmTrade =
-            BlockchainsInfo.isEvmBlockchainName(this.to.blockchain) &&
-            BlockchainsInfo.isEvmBlockchainName(this.from.blockchain);
+        const isFromEvm = BlockchainsInfo.isEvmBlockchainName(this.from.blockchain);
+        const isEvmTrade = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain) && isFromEvm;
 
         const res = await this.getPaymentInfo(
             receiverAddress || this.walletAddress,
             testMode,
+            isFromEvm ? this.walletAddress : '',
             isEvmTrade ? refundAddress || this.walletAddress : refundAddress
         );
 
@@ -192,6 +192,7 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
     protected abstract getPaymentInfo(
         receiverAddress: string,
         testMode?: boolean,
+        fromAddress?: string,
         refundAddress?: string
     ): Promise<CrossChainTransferData>;
 
