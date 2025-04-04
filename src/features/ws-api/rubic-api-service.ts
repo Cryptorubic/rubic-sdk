@@ -5,7 +5,7 @@ import {
     WsQuoteRequestInterface,
     WsQuoteResponseInterface
 } from '@cryptorubic/core';
-import { catchError, concatMap, from, fromEvent, map, Observable, of } from 'rxjs';
+import { catchError, concatMap, from, fromEvent, map, Observable, of, switchMap } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { Injector } from 'src/core/injector/injector';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
@@ -92,6 +92,21 @@ export class RubicApiService {
 
     public closetSocket(): void {
         this.client.close();
+    }
+
+    public handleError(): Observable<null> {
+        return fromEvent<
+            WsQuoteResponseInterface & {
+                data: RubicApiErrorDto;
+                type: string;
+            }
+        >(this.client, 'exception').pipe(
+            switchMap(err => {
+                console.log(err);
+                this.disconnectSocket();
+                return of(null);
+            })
+        );
     }
 
     public handleQuotesAsync(): Observable<WrappedAsyncTradeOrNull> {
