@@ -147,13 +147,12 @@ export abstract class CrossChainTransferTrade extends EvmCrossChainTrade {
         refundAddress?: string
     ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const isFromEvm = BlockchainsInfo.isEvmBlockchainName(this.from.blockchain);
-        const isEvmTrade = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain) && isFromEvm;
 
         const res = await this.getPaymentInfo(
             receiverAddress || this.walletAddress,
             testMode,
             isFromEvm ? this.walletAddress : '',
-            isEvmTrade ? refundAddress || this.walletAddress : refundAddress
+            isFromEvm ? refundAddress || this.walletAddress : refundAddress
         );
 
         const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
