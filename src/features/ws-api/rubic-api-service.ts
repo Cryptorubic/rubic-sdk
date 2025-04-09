@@ -13,10 +13,10 @@ import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-man
 import { WrappedAsyncTradeOrNull } from 'src/features/ws-api/models/wrapped-async-trade-or-null';
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
 
+import { TransferSwapRequestInterface } from './chains/transfer-trade/models/transfer-swap-request-interface';
 import { CrossChainTxStatusConfig } from './models/cross-chain-tx-status-config';
 import { RubicApiErrorDto } from './models/rubic-api-error';
 import { SwapResponseInterface } from './models/swap-response-interface';
-import { TransferSwapRequestInterface } from './chains/transfer-trade/models/transfer-swap-request-interface';
 
 export class RubicApiService {
     private get apiUrl(): string {
