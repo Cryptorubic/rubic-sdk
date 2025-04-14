@@ -39,7 +39,7 @@ export class TronApiOnChainTrade extends TronOnChainTrade {
     public readonly spenderAddress = '';
 
     constructor(params: TronApiOnChainConstructor) {
-        super(params.apiQuote.integratorAddress!);
+        super(params.apiQuote.integratorAddress!, params.apiQuote, params.apiResponse);
 
         this.type = params.apiResponse.providerType as OnChainTradeType;
         this._priceImpact = params.apiResponse.estimate.priceImpact;
