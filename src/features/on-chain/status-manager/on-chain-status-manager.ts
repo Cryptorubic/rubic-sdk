@@ -10,7 +10,10 @@ export class OnChainStatusManager {
     /**
      * Get Bridgers trade transaction status.
      */
-    public async getBridgersSwapStatus(srcTxHash: string): Promise<TxStatusData> {
+    public async getBridgersSwapStatus(
+        srcTxHash: string,
+        slippage?: number
+    ): Promise<TxStatusData> {
         const srcTxStatus = await getSrcTxStatus(BLOCKCHAIN_NAME.TRON, srcTxHash);
         if (srcTxStatus === TX_STATUS.FAIL) {
             return {
@@ -19,7 +22,7 @@ export class OnChainStatusManager {
             };
         }
 
-        return getBridgersTradeStatus(srcTxHash, BLOCKCHAIN_NAME.TRON, 'rubic_widget');
+        return getBridgersTradeStatus(srcTxHash, BLOCKCHAIN_NAME.TRON, 'rubic', slippage);
     }
 
     public static async getBitcoinTransaction(srcTxHash: string): Promise<TxStatusData> {
