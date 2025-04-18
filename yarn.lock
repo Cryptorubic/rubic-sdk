@@ -989,29 +989,29 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@0.7.11-alpha.wanchain.1":
-  version "0.7.11-alpha.wanchain.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.7.11-alpha.wanchain.1.tgz#c1fa856baea3b7224e5e1857e2181080d1991e21"
-  integrity sha512-9YWBPeiOgm7n2mAGWwmZ0PxPeL14+88DCqE9jaUW/gzaHusbtaej4ZhQ3GSXhyFuxnkmCK8v1lrW5DFsvRrz8w==
+"@cryptorubic/core@0.7.11-alpha.wanchain.3":
+  version "0.7.11-alpha.wanchain.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.7.11-alpha.wanchain.3.tgz#b9e0c2b55a3674b0eb1ce72dd5240a3ae51907b7"
+  integrity sha512-9VDIOynenwal+Qg8XCYq9STKveCyJTloJAOcVHzF102NLfx7At+UFs+KyuNMJgHaqucYKwphHc5NjWpWHz4DZQ==
   dependencies:
     bignumber.js "9.1.2"
     jest-mock-promise "^2.0.2"
     tslib "^2.3.0"
 
-"@cryptorubic/tron-types@0.7.11-alpha.wanchain.1":
-  version "0.7.11-alpha.wanchain.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.7.11-alpha.wanchain.1.tgz#0bb3afa5da896ab9d807b63e61114756b02f8a47"
-  integrity sha512-riTA75w2Om3jwz+1ck7b+jg5i7fCt+1/NyrZJ6iMOBdc4c7khS/nJ8/3HIQk4/F7RWvRqpt3iCzuXCbqaS10nw==
+"@cryptorubic/tron-types@0.7.11-alpha.wanchain.3":
+  version "0.7.11-alpha.wanchain.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.7.11-alpha.wanchain.3.tgz#5295619a6eb70ea8f849155a5280d1f939e48d4c"
+  integrity sha512-K6rCs+fCGF53d90nqBbfglCqacandoziiUvsEic4I95hW4tOQcD9H3BJ2ZMH2elwwdPZgrEaDcFI/K4EZ6YE0g==
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@0.7.11-alpha.wanchain.1":
-  version "0.7.11-alpha.wanchain.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.7.11-alpha.wanchain.1.tgz#a87e2dc547bfdf933609701947054921bedd21cb"
-  integrity sha512-hQ84X8U48jxG2KMKqK75yNtaHNGXxf83lwoW+lXKebRT6HlLhkHGSXoxnesj378a99XQmDhA6DmnLw6iAq4bPA==
+"@cryptorubic/web3@0.7.11-alpha.wanchain.3":
+  version "0.7.11-alpha.wanchain.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.7.11-alpha.wanchain.3.tgz#0a6f84982d6b5db8ade29c376265a35f6c7ec2a8"
+  integrity sha512-JYB0urSq5Wv7QgNN+ish8ucCXzYAYGml727f+q/wGlKaKg1uB6z0fMfpCg8jcgZXgf/u1BbeWk+Xj0CW87aJGw==
   dependencies:
-    "@cryptorubic/core" "0.7.11-alpha.wanchain.1"
-    "@cryptorubic/tron-types" "0.7.11-alpha.wanchain.1"
+    "@cryptorubic/core" "0.7.11-alpha.wanchain.3"
+    "@cryptorubic/tron-types" "0.7.11-alpha.wanchain.3"
     "@ethersproject/bignumber" "^5.7.0"
     "@mysten/sui" "^1.24.0"
     "@solana/spl-token" "0.2.0"
