@@ -67,7 +67,7 @@ export class RubicApiParser {
     }
 
     public static parseRubicApiErrors(err: RubicApiErrorDto): RubicSdkError {
-        if (err.code === 205) {
+        if (err.code === 205 || err.code === 204) {
             const data = err.data as {
                 tokenSymbol: string;
                 minAmount?: string;
