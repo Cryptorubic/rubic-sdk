@@ -3,6 +3,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/evm-cross-chain-trade/models/gas-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TronOnChainTrade } from 'src/features/on-chain/calculation-manager/common/on-chain-trade/tron-on-chain-trade/tron-on-chain-trade';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
 import { TronApiOnChainConstructor } from 'src/features/ws-api/chains/tron/tron-api-on-chain-constructor';
@@ -32,14 +33,12 @@ export class TronApiOnChainTrade extends TronOnChainTrade {
 
     public readonly dexContractAddress = '';
 
-    // @TODO API
-    public readonly path = [];
+    public readonly path: RubicStep[];
 
-    // @TODO API
-    public readonly spenderAddress = '';
+    public readonly spenderAddress: string;
 
     constructor(params: TronApiOnChainConstructor) {
-        super(params.apiQuote.integratorAddress!);
+        super(params.apiQuote.integratorAddress!, params.apiQuote, params.apiResponse);
 
         this.type = params.apiResponse.providerType as OnChainTradeType;
         this._priceImpact = params.apiResponse.estimate.priceImpact;
@@ -49,5 +48,7 @@ export class TronApiOnChainTrade extends TronOnChainTrade {
         this.feeInfo = params.feeInfo;
         this.from = params.from;
         this.gasData = null;
+        this.path = params.routePath;
+        this.spenderAddress = params.apiResponse.transaction.approvalAddress || '';
     }
 }
