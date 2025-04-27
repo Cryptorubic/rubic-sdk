@@ -37,7 +37,8 @@ export class SolanaApiCrossChainTrade extends SolanaCrossChainTrade {
             params.apiQuote.integratorAddress!,
             params.routePath,
             params.apiQuote,
-            params.apiResponse
+            params.apiResponse,
+            params.shouldCalculateConsumedParams
         );
 
         this.type = params.apiResponse.providerType as CrossChainTradeType;

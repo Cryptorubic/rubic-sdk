@@ -81,7 +81,13 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
 
     private readonly apiResponse: QuoteResponseInterface | null = null;
 
-    protected constructor(tradeStruct: SolanaOnChainTradeStruct, providerAddress: string) {
+    private readonly shouldCalculateConsumedParams: boolean;
+
+    protected constructor(
+        tradeStruct: SolanaOnChainTradeStruct,
+        providerAddress: string,
+        shouldCalculateConsumedParams: boolean
+    ) {
         super(providerAddress);
 
         this.from = tradeStruct.from;
@@ -116,6 +122,8 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
             }
         };
         this.withDeflation = tradeStruct.withDeflation;
+
+        this.shouldCalculateConsumedParams = shouldCalculateConsumedParams;
     }
 
     public async approve(
@@ -188,10 +196,13 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         });
 
         try {
-            await this.web3Private.sendTransaction({
-                data: transactionConfig.data,
-                onTransactionHash
-            });
+            await this.web3Private.sendTransaction(
+                {
+                    data: transactionConfig.data,
+                    onTransactionHash
+                },
+                this.shouldCalculateConsumedParams
+            );
 
             return transactionHash!;
         } catch (err) {
