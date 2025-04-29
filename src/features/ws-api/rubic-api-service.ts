@@ -7,11 +7,20 @@ import {
 } from '@cryptorubic/core';
 import { catchError, concatMap, from, fromEvent, map, Observable, of } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import {
+    InsufficientFundsError,
+    InsufficientFundsGasPriceValueError,
+    RubicSdkError,
+    UnsupportedReceiverAddressError
+} from 'src/common/errors';
+import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
+import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
 import { Injector } from 'src/core/injector/injector';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
 import { WrappedAsyncTradeOrNull } from 'src/features/ws-api/models/wrapped-async-trade-or-null';
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
+import { ExecutionRevertedError } from 'viem';
 
 import { TransferSwapRequestInterface } from './chains/transfer-trade/models/transfer-swap-request-interface';
 import { CrossChainTxStatusConfig } from './models/cross-chain-tx-status-config';
@@ -66,13 +75,23 @@ export class RubicApiService {
         }
     }
 
-    public fetchSwapData<T>(
+    public async fetchSwapData<T>(
         body: SwapRequestInterface | TransferSwapRequestInterface
     ): Promise<SwapResponseInterface<T>> {
-        return Injector.httpClient.post<SwapResponseInterface<T>>(
-            `${this.apiUrl}/api/routes/swap`,
-            body
-        );
+        try {
+            const result = await Injector.httpClient.post<
+                SwapResponseInterface<T> | RubicApiErrorDto
+            >(`${this.apiUrl}/api/routes/swap`, body);
+            if ('code' in result) {
+                throw this.getApiError(result);
+            }
+            return result;
+        } catch (err) {
+            if (err instanceof RubicSdkError) {
+                throw err;
+            }
+            throw this.getApiError(err);
+        }
     }
 
     public fetchRoutes(body: QuoteRequestInterface): Promise<QuoteAllInterface> {
@@ -164,5 +183,34 @@ export class RubicApiService {
         return Injector.httpClient.get(
             `${this.apiUrl}/api/utility/authWalletMessage?walletAddress=${walletAddress}`
         );
+    }
+
+    private getApiError(result: RubicApiErrorDto): RubicSdkError {
+        switch (result.code) {
+            case 3003: {
+                return new InsufficientFundsError((result.data as { symbol: string }).symbol);
+            }
+            case 3004: {
+                return new InsufficientFundsGasPriceValueError();
+            }
+            case 3005: {
+                return new ExecutionRevertedError();
+            }
+            case 3006: {
+                return new UnsupportedReceiverAddressError();
+            }
+            case 4001: {
+                return new RubicSdkError('Meson only supports proxy swaps!');
+            }
+            case 4002: {
+                const method = result.reason.split('Selector - ')?.[1]?.slice(0, -1);
+                return new UnapprovedMethodError(method || 'Unknown');
+            }
+            case 4003: {
+                const contract = result.reason.split('Contract - ')[1]?.slice(0, -1);
+                return new UnapprovedContractError(contract || 'Unknown');
+            }
+        }
+        return new RubicSdkError(result?.reason || 'Unknown error');
     }
 }
