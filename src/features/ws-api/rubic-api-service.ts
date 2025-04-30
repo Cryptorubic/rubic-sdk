@@ -18,6 +18,7 @@ import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method
 import { Injector } from 'src/core/injector/injector';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
+import { SwapErrorResponseInterface } from 'src/features/ws-api/models/swap-error-response-interface';
 import { WrappedAsyncTradeOrNull } from 'src/features/ws-api/models/wrapped-async-trade-or-null';
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
 import { ExecutionRevertedError } from 'viem';
@@ -80,10 +81,10 @@ export class RubicApiService {
     ): Promise<SwapResponseInterface<T>> {
         try {
             const result = await Injector.httpClient.post<
-                SwapResponseInterface<T> | RubicApiErrorDto
+                SwapResponseInterface<T> | SwapErrorResponseInterface
             >(`${this.apiUrl}/api/routes/swap`, body);
-            if ('code' in result) {
-                throw this.getApiError(result);
+            if ('error' in result) {
+                throw this.getApiError(result.error);
             }
             return result;
         } catch (err) {
