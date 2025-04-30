@@ -15,6 +15,7 @@ import {
 } from 'src/common/errors';
 import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
 import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
+import { UnlistedError } from 'src/common/errors/proxy/unlisted-error';
 import { Injector } from 'src/core/injector/injector';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
@@ -92,7 +93,7 @@ export class RubicApiService {
                 throw err;
             }
             if ('error' in err) {
-                throw this.getApiError((err as SwapErrorResponseInterface).error);
+                throw this.getApiError((err as { error: SwapErrorResponseInterface }).error.error);
             }
             throw this.getApiError(err);
         }
@@ -213,6 +214,14 @@ export class RubicApiService {
             case 4003: {
                 const contract = result.reason.split('Contract - ')[1]?.slice(0, -1);
                 return new UnapprovedContractError(contract || 'Unknown');
+            }
+            case 4004: {
+                const contractAndSelector = result.reason.split('Selector - ')?.[1]?.slice(0, -1);
+                const [method, contract] = contractAndSelector?.split('. Contract - ') || [
+                    'Unknown',
+                    'Unknown'
+                ];
+                return new UnlistedError(contract || 'Unknown', method || 'Unknown');
             }
         }
         return new RubicSdkError(result?.reason || 'Unknown error');
