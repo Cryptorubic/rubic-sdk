@@ -77,6 +77,13 @@ export class RubicApiService {
         }
     }
 
+    public stopCalculation(): void {
+        if (this.latestQuoteParams) {
+            this.client.emit('stopCalculation');
+            this.latestQuoteParams = null;
+        }
+    }
+
     public async fetchSwapData<T>(
         body: SwapRequestInterface | TransferSwapRequestInterface
     ): Promise<SwapResponseInterface<T>> {
