@@ -91,6 +91,9 @@ export class RubicApiService {
             if (err instanceof RubicSdkError) {
                 throw err;
             }
+            if ('error' in err) {
+                throw this.getApiError((err as SwapErrorResponseInterface).error);
+            }
             throw this.getApiError(err);
         }
     }
