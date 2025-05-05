@@ -17,30 +17,21 @@ import { TransferSwapRequestInterface } from './chains/transfer-trade/models/tra
 import { CrossChainTxStatusConfig } from './models/cross-chain-tx-status-config';
 import { RubicApiErrorDto } from './models/rubic-api-error';
 import { SwapResponseInterface } from './models/swap-response-interface';
+import { rubicApiLinkMapping } from './constants/rubic-api-link-mapping';
+import { EnvType } from 'src/core/sdk/models/env-type';
 
 export class RubicApiService {
     private get apiUrl(): string {
-        const env = this.envType;
-        if (env === 'local') {
-            return 'http://localhost:3000';
-        }
-        if (env === 'dev') {
-            return 'https://dev1-api-v2.rubic.exchange';
-        }
-        if (env === 'dev2') {
-            return 'https://dev2-api-v2.rubic.exchange';
-        }
-        if (env === 'rubic') {
-            return 'https://rubic-api-v2.rubic.exchange';
-        }
-        return 'https://api-v2.rubic.exchange';
+        const rubicApiLink = rubicApiLinkMapping[this.envType];
+
+        return rubicApiLink ? rubicApiLink : 'https://api-v2.rubic.exchange';
     }
 
     private readonly client = this.getSocket();
 
     private latestQuoteParams: QuoteRequestInterface | null = null;
 
-    constructor(private readonly envType: string) {}
+    constructor(private readonly envType: EnvType) {}
 
     private getSocket(): Socket {
         const ioClient = io(this.apiUrl, {
