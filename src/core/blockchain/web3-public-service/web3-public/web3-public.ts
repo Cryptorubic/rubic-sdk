@@ -69,7 +69,7 @@ export abstract class Web3Public {
         const balanceWei = await this.getBalance(userAddress, token.address);
         const balance = Web3Pure.fromWei(balanceWei, token.decimals);
         if (balance.lt(requiredAmount)) {
-            throw new InsufficientFundsError(token, balance, requiredAmount);
+            throw new InsufficientFundsError(token.symbol);
         }
     }
 

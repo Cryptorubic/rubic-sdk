@@ -25,3 +25,4 @@ export interface SwapResponseInterface<T> {
     swapType: SwapType;
     useRubicContract: boolean;
 }
+
