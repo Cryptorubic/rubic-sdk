@@ -1,3 +1,4 @@
+import { SwapRequestInterface } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     RubicSdkError,
@@ -6,6 +7,7 @@ import {
     WrongReceiverAddressError
 } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
+import { TradeExpiredError } from 'src/common/errors/swap/trade-expired.error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
@@ -21,6 +23,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-type';
+import { SwapResponseInterface } from 'src/features/ws-api/models/swap-response-interface';
 
 /**
  * Abstract class for all instant trade providers' trades.
@@ -258,5 +261,27 @@ export abstract class OnChainTrade {
         if (shouldThrowError) {
             throw new UpdatedRatesError(oldWeiAmount, newWeiAmount);
         }
+    }
+
+    protected async fetchSwapData<T>(
+        body: SwapRequestInterface
+    ): Promise<SwapResponseInterface<T>> {
+        try {
+            const res = await Injector.rubicApiService.fetchSwapData<T>(body);
+            return res;
+        } catch (err) {
+            if (err instanceof TradeExpiredError) {
+                return this.refetchTrade<T>(body);
+            }
+
+            throw err;
+        }
+    }
+
+    private refetchTrade<T>(body: SwapRequestInterface): Promise<SwapResponseInterface<T>> {
+        return Injector.rubicApiService.fetchBestSwapData<T>({
+            ...body,
+            preferredProvider: this.type
+        });
     }
 }

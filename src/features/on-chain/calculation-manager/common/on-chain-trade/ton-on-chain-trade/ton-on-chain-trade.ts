@@ -156,9 +156,7 @@ export abstract class TonOnChainTrade extends OnChainTrade {
             id: this.apiResponse.id
         };
 
-        const swapData = await Injector.rubicApiService.fetchSwapData<TonTransactionConfig>(
-            swapRequestParams
-        );
+        const swapData = await this.fetchSwapData<TonTransactionConfig>(swapRequestParams);
 
         const toAmount = swapData.estimate.destinationWeiAmount;
 

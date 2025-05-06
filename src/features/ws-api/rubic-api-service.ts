@@ -16,7 +16,9 @@ import {
 import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
 import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
 import { UnlistedError } from 'src/common/errors/proxy/unlisted-error';
+import { TradeExpiredError } from 'src/common/errors/swap/trade-expired.error';
 import { Injector } from 'src/core/injector/injector';
+import { EnvType } from 'src/core/sdk/models/env-type';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
 import { SwapErrorResponseInterface } from 'src/features/ws-api/models/swap-error-response-interface';
@@ -25,11 +27,10 @@ import { TransformUtils } from 'src/features/ws-api/transform-utils';
 import { ExecutionRevertedError } from 'viem';
 
 import { TransferSwapRequestInterface } from './chains/transfer-trade/models/transfer-swap-request-interface';
+import { rubicApiLinkMapping } from './constants/rubic-api-link-mapping';
 import { CrossChainTxStatusConfig } from './models/cross-chain-tx-status-config';
 import { RubicApiErrorDto } from './models/rubic-api-error';
 import { SwapResponseInterface } from './models/swap-response-interface';
-import { rubicApiLinkMapping } from './constants/rubic-api-link-mapping';
-import { EnvType } from 'src/core/sdk/models/env-type';
 
 export class RubicApiService {
     private get apiUrl(): string {
@@ -102,6 +103,28 @@ export class RubicApiService {
             `${this.apiUrl}/api/routes/quoteAll`,
             body
         );
+    }
+
+    public async fetchBestSwapData<T>(
+        body: SwapRequestInterface | TransferSwapRequestInterface
+    ): Promise<SwapResponseInterface<T>> {
+        try {
+            const result = await Injector.httpClient.post<
+                SwapResponseInterface<T> | SwapErrorResponseInterface
+            >(`${this.apiUrl}/api/routes/swapBest`, body);
+            if ('error' in result) {
+                throw this.getApiError(result.error);
+            }
+            return result;
+        } catch (err) {
+            if (err instanceof RubicSdkError) {
+                throw err;
+            }
+            if ('error' in err) {
+                throw this.getApiError((err as { error: SwapErrorResponseInterface }).error.error);
+            }
+            throw this.getApiError(err);
+        }
     }
 
     public fetchCelerRefundData(): void {
@@ -220,6 +243,9 @@ export class RubicApiService {
                     'Unknown'
                 ];
                 return new UnlistedError(contract || 'Unknown', method || 'Unknown');
+            }
+            case 1004: {
+                return new TradeExpiredError();
             }
         }
         return new RubicSdkError(result?.reason || 'Unknown error');

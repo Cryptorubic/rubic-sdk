@@ -141,8 +141,9 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
             enableChecks: !testMode
         };
 
-        const { transaction, estimate } =
-            await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(swapRequestParams);
+        const { transaction, estimate } = await this.fetchSwapData<EvmEncodeConfig>(
+            swapRequestParams
+        );
 
         const toAmount = estimate.destinationWeiAmount;
 

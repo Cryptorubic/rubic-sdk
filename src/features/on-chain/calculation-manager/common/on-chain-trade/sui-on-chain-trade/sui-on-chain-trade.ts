@@ -225,9 +225,7 @@ export abstract class SuiOnChainTrade extends OnChainTrade {
             receiver: options?.receiverAddress || this.walletAddress,
             id: this.apiResponse.id
         };
-        const swapData = await Injector.rubicApiService.fetchSwapData<SuiEncodeConfig>(
-            swapRequestData
-        );
+        const swapData = await this.fetchSwapData<SuiEncodeConfig>(swapRequestData);
 
         const config = {
             transaction: swapData.transaction.transaction!
