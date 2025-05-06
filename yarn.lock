@@ -989,29 +989,29 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@0.7.11-alpha.wanchain.3":
-  version "0.7.11-alpha.wanchain.3"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.7.11-alpha.wanchain.3.tgz#b9e0c2b55a3674b0eb1ce72dd5240a3ae51907b7"
-  integrity sha512-9VDIOynenwal+Qg8XCYq9STKveCyJTloJAOcVHzF102NLfx7At+UFs+KyuNMJgHaqucYKwphHc5NjWpWHz4DZQ==
+"@cryptorubic/core@0.7.15":
+  version "0.7.15"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.7.15.tgz#ba945bdd034fb0690604ac8b1dc0f91c33a7d915"
+  integrity sha512-45ZGcq/5QosFbL5BnXPyVkFmxrC5SLqAQ7Z3Zyeo3aunH2fAjoAfJfexhy28qDk1g1an93VUOiNWc45aGTKnTA==
   dependencies:
     bignumber.js "9.1.2"
     jest-mock-promise "^2.0.2"
     tslib "^2.3.0"
 
-"@cryptorubic/tron-types@0.7.11-alpha.wanchain.3":
-  version "0.7.11-alpha.wanchain.3"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.7.11-alpha.wanchain.3.tgz#5295619a6eb70ea8f849155a5280d1f939e48d4c"
-  integrity sha512-K6rCs+fCGF53d90nqBbfglCqacandoziiUvsEic4I95hW4tOQcD9H3BJ2ZMH2elwwdPZgrEaDcFI/K4EZ6YE0g==
+"@cryptorubic/tron-types@0.7.15":
+  version "0.7.15"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.7.15.tgz#12df7149382fe091a4e27eac33e4c3607d24e86f"
+  integrity sha512-Dkb7NUAe7WUJRt2uEFd57nDjjuVMUeaSkBzoBvmBY5qx/3Vfip0n5VeA2kCUalvk1jEZQW2G1wj0Pt014UpDRw==
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@0.7.11-alpha.wanchain.3":
-  version "0.7.11-alpha.wanchain.3"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.7.11-alpha.wanchain.3.tgz#0a6f84982d6b5db8ade29c376265a35f6c7ec2a8"
-  integrity sha512-JYB0urSq5Wv7QgNN+ish8ucCXzYAYGml727f+q/wGlKaKg1uB6z0fMfpCg8jcgZXgf/u1BbeWk+Xj0CW87aJGw==
+"@cryptorubic/web3@0.7.15":
+  version "0.7.15"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.7.15.tgz#a0f679b4fa28fd30fc92eb026a7f4c3846f4c510"
+  integrity sha512-8yh9Uochh8mXHzIZPajCHO/Okrn53xcvl0cyYMHDC77xxfx3iMxGbuq5O+7D3IumdwlGWsA8/f/POnMzJAmq/w==
   dependencies:
-    "@cryptorubic/core" "0.7.11-alpha.wanchain.3"
-    "@cryptorubic/tron-types" "0.7.11-alpha.wanchain.3"
+    "@cryptorubic/core" "0.7.15"
+    "@cryptorubic/tron-types" "0.7.15"
     "@ethersproject/bignumber" "^5.7.0"
     "@mysten/sui" "^1.24.0"
     "@solana/spl-token" "0.2.0"

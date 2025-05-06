@@ -167,17 +167,12 @@ export abstract class TonOnChainTrade extends OnChainTrade {
 
     protected async checkNativeBalance(): Promise<void> {
         const balanceWei = await this.web3Public.getBalance(this.walletAddress);
-        const balanceNonWei = Web3Pure.fromWei(balanceWei, nativeTokensList.TON.decimals);
         const requiredBalanceNonWei = this.gasFeeInfo?.totalGas
             ? Web3Pure.fromWei(this.gasFeeInfo.totalGas, nativeTokensList.TON.decimals)
             : new BigNumber(0);
 
         if (balanceWei.lt(requiredBalanceNonWei)) {
-            throw new InsufficientFundsError(
-                nativeTokensList[BLOCKCHAIN_NAME.TON],
-                balanceNonWei,
-                requiredBalanceNonWei
-            );
+            throw new InsufficientFundsError(nativeTokensList[BLOCKCHAIN_NAME.TON].symbol);
         }
     }
 
