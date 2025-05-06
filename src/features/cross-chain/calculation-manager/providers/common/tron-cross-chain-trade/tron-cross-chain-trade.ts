@@ -174,9 +174,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade<TronTransactio
             enableChecks: !testMode
         };
 
-        const swapData = await Injector.rubicApiService.fetchSwapData<TronTransactionConfig>(
-            swapRequestParams
-        );
+        const swapData = await this.fetchSwapData<TronTransactionConfig>(swapRequestParams);
 
         const toAmount = swapData.estimate.destinationWeiAmount;
 
