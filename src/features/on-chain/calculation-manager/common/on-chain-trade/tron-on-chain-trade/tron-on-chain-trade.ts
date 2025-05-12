@@ -36,14 +36,14 @@ export abstract class TronOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
-    private readonly apiQuote: QuoteRequestInterface | null = null;
+    private readonly apiQuote: QuoteRequestInterface;
 
-    private readonly apiResponse: QuoteResponseInterface | null = null;
+    private readonly apiResponse: QuoteResponseInterface;
 
     constructor(
         integratorAddress: string,
-        apiQuote?: QuoteRequestInterface,
-        apiResponse?: QuoteResponseInterface
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface
     ) {
         super(integratorAddress);
         this.apiQuote = apiQuote || null;

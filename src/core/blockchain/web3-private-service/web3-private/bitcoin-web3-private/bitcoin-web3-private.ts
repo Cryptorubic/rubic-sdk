@@ -27,12 +27,12 @@ export class BitcoinWeb3Private extends Web3Private {
                         {
                             feeRate: 10,
                             from: this.wallet.address,
-                            recipient: txConfig.to,
+                            recipient: txConfig.depositAddress,
                             amount: {
                                 amount: txConfig.value,
                                 decimals: 8
                             },
-                            ...(txConfig.data && { memo: txConfig.data })
+                            ...(txConfig.memo && { memo: txConfig.memo })
                         }
                     ]
                 },

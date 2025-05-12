@@ -12,5 +12,6 @@ export const EIP1559CompatibleBlockchains: Record<BlockchainName, boolean> = {
     [BLOCKCHAIN_NAME.ARBITRUM]: true,
     [BLOCKCHAIN_NAME.ZK_SYNC]: true,
     [BLOCKCHAIN_NAME.SCROLL]: true,
-    [BLOCKCHAIN_NAME.OPTIMISM]: true
+    [BLOCKCHAIN_NAME.OPTIMISM]: true,
+    [BLOCKCHAIN_NAME.UNICHAIN]: true
 };

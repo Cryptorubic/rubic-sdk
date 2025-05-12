@@ -1,5 +1,5 @@
 export interface BitcoinTransferEncodedConfig {
-    data?: string;
-    to: string;
+    memo?: string;
+    depositAddress: string;
     value: string;
 }

@@ -22,6 +22,8 @@ import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/pr
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
+import { BitcoinTransferTxApiResp } from './models/bitcoin-trade-types';
+
 export abstract class BitcoinCrossChainTrade extends CrossChainTrade<
     BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig
 > {
@@ -79,9 +81,8 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<
                 }
                 transactionHash = hash;
             };
-            const isPsbtTrade = 'psbt' in txConfig;
 
-            if (isPsbtTrade) {
+            if (this.isPsbtConfig(txConfig)) {
                 await this.web3Private.sendPsbtTransaction(txConfig, { onTransactionHash });
             } else {
                 await this.web3Private.transfer(txConfig, { onTransactionHash });
@@ -155,14 +156,27 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<
         };
 
         const swapData = await Injector.rubicApiService.fetchSwapData<
-            BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig
+            BitcoinTransferTxApiResp | BitcoinPsbtEncodedConfig
         >(swapRequestData);
 
         this._uniqueInfo = swapData.uniqueInfo ?? {};
-
         const amount = swapData.estimate.destinationWeiAmount;
 
-        return { config: swapData.transaction, amount };
+        const config = this.isPsbtConfig(swapData.transaction)
+            ? (swapData.transaction as BitcoinPsbtEncodedConfig)
+            : ({
+                  depositAddress: swapData.transaction.depositAddress,
+                  value: swapData.transaction.value,
+                  memo: swapData.transaction.extraFields?.memo
+              } as BitcoinTransferEncodedConfig);
+
+        return { config, amount };
+    }
+
+    private isPsbtConfig(
+        txConfig: BitcoinTransferTxApiResp | BitcoinTransferEncodedConfig | BitcoinPsbtEncodedConfig
+    ): txConfig is BitcoinPsbtEncodedConfig {
+        return 'psbt' in txConfig;
     }
 
     public authWallet(): Promise<string> {

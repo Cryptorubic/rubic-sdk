@@ -266,7 +266,7 @@ export class ProxyCrossChainEvmTrade {
             [routerAddress, offset]
         );
         if (!result.isAvailable) {
-            throw new UnapprovedContractError(offset, routerAddress);
+            throw new UnapprovedContractError(offset);
         }
     }
 
@@ -287,7 +287,7 @@ export class ProxyCrossChainEvmTrade {
             );
         } catch {}
         if (!isRouterApproved) {
-            throw new UnapprovedContractError(method, routerAddress);
+            throw new UnapprovedContractError(routerAddress);
         }
 
         let isMethodApproved = false;
@@ -300,7 +300,7 @@ export class ProxyCrossChainEvmTrade {
             );
         } catch {}
         if (!isMethodApproved) {
-            throw new UnapprovedMethodError(method, routerAddress);
+            throw new UnapprovedMethodError(method);
         }
     }
 

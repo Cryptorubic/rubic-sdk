@@ -7,40 +7,42 @@ import {
 } from '@cryptorubic/core';
 import { catchError, concatMap, from, fromEvent, map, Observable, of } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import {
+    InsufficientFundsError,
+    InsufficientFundsGasPriceValueError,
+    RubicSdkError,
+    UnsupportedReceiverAddressError
+} from 'src/common/errors';
+import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
+import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
+import { UnlistedError } from 'src/common/errors/proxy/unlisted-error';
 import { Injector } from 'src/core/injector/injector';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
+import { SwapErrorResponseInterface } from 'src/features/ws-api/models/swap-error-response-interface';
 import { WrappedAsyncTradeOrNull } from 'src/features/ws-api/models/wrapped-async-trade-or-null';
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
+import { ExecutionRevertedError } from 'viem';
 
 import { TransferSwapRequestInterface } from './chains/transfer-trade/models/transfer-swap-request-interface';
 import { CrossChainTxStatusConfig } from './models/cross-chain-tx-status-config';
 import { RubicApiErrorDto } from './models/rubic-api-error';
 import { SwapResponseInterface } from './models/swap-response-interface';
+import { rubicApiLinkMapping } from './constants/rubic-api-link-mapping';
+import { EnvType } from 'src/core/sdk/models/env-type';
 
 export class RubicApiService {
     private get apiUrl(): string {
-        const env = this.envType;
-        if (env === 'local') {
-            return 'http://localhost:3000';
-        }
-        if (env === 'dev') {
-            return 'https://dev1-api-v2.rubic.exchange';
-        }
-        if (env === 'dev2') {
-            return 'https://dev2-api-v2.rubic.exchange';
-        }
-        if (env === 'rubic') {
-            return 'https://rubic-api-v2.rubic.exchange';
-        }
-        return 'https://api-v2.rubic.exchange';
+        const rubicApiLink = rubicApiLinkMapping[this.envType];
+
+        return rubicApiLink ? rubicApiLink : 'https://api-v2.rubic.exchange';
     }
 
     private readonly client = this.getSocket();
 
     private latestQuoteParams: QuoteRequestInterface | null = null;
 
-    constructor(private readonly envType: string) {}
+    constructor(private readonly envType: EnvType) {}
 
     private getSocket(): Socket {
         const ioClient = io(this.apiUrl, {
@@ -66,13 +68,33 @@ export class RubicApiService {
         }
     }
 
-    public fetchSwapData<T>(
+    public stopCalculation(): void {
+        if (this.latestQuoteParams) {
+            this.client.emit('stopCalculation');
+            this.latestQuoteParams = null;
+        }
+    }
+
+    public async fetchSwapData<T>(
         body: SwapRequestInterface | TransferSwapRequestInterface
     ): Promise<SwapResponseInterface<T>> {
-        return Injector.httpClient.post<SwapResponseInterface<T>>(
-            `${this.apiUrl}/api/routes/swap`,
-            body
-        );
+        try {
+            const result = await Injector.httpClient.post<
+                SwapResponseInterface<T> | SwapErrorResponseInterface
+            >(`${this.apiUrl}/api/routes/swap`, body);
+            if ('error' in result) {
+                throw this.getApiError(result.error);
+            }
+            return result;
+        } catch (err) {
+            if (err instanceof RubicSdkError) {
+                throw err;
+            }
+            if ('error' in err) {
+                throw this.getApiError((err as { error: SwapErrorResponseInterface }).error.error);
+            }
+            throw this.getApiError(err);
+        }
     }
 
     public fetchRoutes(body: QuoteRequestInterface): Promise<QuoteAllInterface> {
@@ -164,5 +186,42 @@ export class RubicApiService {
         return Injector.httpClient.get(
             `${this.apiUrl}/api/utility/authWalletMessage?walletAddress=${walletAddress}`
         );
+    }
+
+    private getApiError(result: RubicApiErrorDto): RubicSdkError {
+        switch (result.code) {
+            case 3003: {
+                return new InsufficientFundsError((result.data as { symbol: string }).symbol);
+            }
+            case 3004: {
+                return new InsufficientFundsGasPriceValueError();
+            }
+            case 3005: {
+                return new ExecutionRevertedError();
+            }
+            case 3006: {
+                return new UnsupportedReceiverAddressError();
+            }
+            case 4001: {
+                return new RubicSdkError('Meson only supports proxy swaps!');
+            }
+            case 4002: {
+                const method = result.reason.split('Selector - ')?.[1]?.slice(0, -1);
+                return new UnapprovedMethodError(method || 'Unknown');
+            }
+            case 4003: {
+                const contract = result.reason.split('Contract - ')[1]?.slice(0, -1);
+                return new UnapprovedContractError(contract || 'Unknown');
+            }
+            case 4004: {
+                const contractAndSelector = result.reason.split('Selector - ')?.[1]?.slice(0, -1);
+                const [method, contract] = contractAndSelector?.split('. Contract - ') || [
+                    'Unknown',
+                    'Unknown'
+                ];
+                return new UnlistedError(contract || 'Unknown', method || 'Unknown');
+            }
+        }
+        return new RubicSdkError(result?.reason || 'Unknown error');
     }
 }
