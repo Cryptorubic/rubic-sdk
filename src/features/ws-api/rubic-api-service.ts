@@ -191,7 +191,9 @@ export class RubicApiService {
     private getApiError(result: RubicApiErrorDto): RubicSdkError {
         switch (result.code) {
             case 3003: {
-                return new InsufficientFundsError((result.data as { symbol: string }).symbol);
+                return new InsufficientFundsError(
+                    (result.data as { tokenSymbol: string }).tokenSymbol
+                );
             }
             case 3004: {
                 return new InsufficientFundsGasPriceValueError();
