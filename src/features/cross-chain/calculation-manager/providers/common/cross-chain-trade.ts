@@ -1,4 +1,8 @@
-import { QuoteRequestInterface, QuoteResponseInterface } from '@cryptorubic/core';
+import {
+    QuoteRequestInterface,
+    QuoteResponseInterface,
+    SwapRequestInterface
+} from '@cryptorubic/core';
 import { UniqueProviderInfoInterface } from '@cryptorubic/core/src/lib/models/api/unique-provider-info.interface';
 import BigNumber from 'bignumber.js';
 import {
@@ -8,6 +12,7 @@ import {
     WrongReceiverAddressError
 } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
+import { TradeExpiredError } from 'src/common/errors/swap/trade-expired.error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
@@ -26,6 +31,8 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { TransferSwapRequestInterface } from 'src/features/ws-api/chains/transfer-trade/models/transfer-swap-request-interface';
+import { SwapResponseInterface } from 'src/features/ws-api/models/swap-response-interface';
 
 /**
  * Abstract class for all cross-chain providers' trades.
@@ -359,5 +366,29 @@ export abstract class CrossChainTrade<T = unknown> {
             this.checkAmountChange(amount, this.amountToCheck);
         }
         return config;
+    }
+
+    protected async fetchSwapData<T>(
+        body: SwapRequestInterface | TransferSwapRequestInterface
+    ): Promise<SwapResponseInterface<T>> {
+        try {
+            const res = await Injector.rubicApiService.fetchSwapData<T>(body);
+            return res;
+        } catch (err) {
+            if (err instanceof TradeExpiredError) {
+                return this.refetchTrade<T>(body);
+            }
+
+            throw err;
+        }
+    }
+
+    private refetchTrade<T>(
+        body: SwapRequestInterface | TransferSwapRequestInterface
+    ): Promise<SwapResponseInterface<T>> {
+        return Injector.rubicApiService.fetchBestSwapData<T>({
+            ...body,
+            preferredProvider: this.type
+        });
     }
 }

@@ -83,9 +83,7 @@ export abstract class TonCrossChainTrade extends CrossChainTrade<TonTransactionC
             enableChecks: !testMode
         };
 
-        const swapData = await Injector.rubicApiService.fetchSwapData<TonTransactionConfig>(
-            swapRequestParams
-        );
+        const swapData = await this.fetchSwapData<TonTransactionConfig>(swapRequestParams);
 
         this._uniqueInfo = swapData.uniqueInfo ?? {};
         const toAmount = swapData.estimate.destinationWeiAmount;
