@@ -1,6 +1,5 @@
 import { Token } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
-import { Injector } from 'src/core/injector/injector';
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainTransferTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/cross-chain-transfer-trade';
 import { CrossChainTransferData } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-transfer-trade/models/cross-chain-payment-info';
@@ -67,8 +66,9 @@ export class ApiCrossChainTransferTrade extends CrossChainTransferTrade {
             ...(fromAddress && { fromAddress }),
             ...(refundAddress && { refundAddress })
         };
-        const { estimate, transaction } =
-            await Injector.rubicApiService.fetchSwapData<CrossChainTransferConfig>(swapRequestData);
+        const { estimate, transaction } = await this.fetchSwapData<CrossChainTransferConfig>(
+            swapRequestData
+        );
 
         const amount = estimate.destinationTokenAmount;
 

@@ -226,9 +226,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             enableChecks: !testMode,
             ...(this.signature && { signature: this.signature })
         };
-        const swapData = await Injector.rubicApiService.fetchSwapData<EvmEncodeConfig>(
-            swapRequestData
-        );
+        const swapData = await this.fetchSwapData<EvmEncodeConfig>(swapRequestData);
 
         this._uniqueInfo = swapData.uniqueInfo ?? {};
         const amount = swapData.estimate.destinationWeiAmount;

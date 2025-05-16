@@ -67,7 +67,7 @@ export class RubicApiParser {
     }
 
     public static parseRubicApiErrors(err: RubicApiErrorDto): RubicSdkError {
-        if (err.code === 205 || err.code === 204) {
+        if (err.code === 2005 || err.code === 2004) {
             const data = err.data as {
                 tokenSymbol: string;
                 minAmount?: string;
@@ -81,7 +81,7 @@ export class RubicApiParser {
             }
         }
 
-        if (err.code === 206) {
+        if (err.code === 2006) {
             const decimals = err.reason.match(/\d+/)?.[0];
             return new MaxDecimalsError(Number(decimals));
         }
@@ -93,7 +93,7 @@ export class RubicApiParser {
         const parsedWarnings: RubicApiWarnings = { needAuthWallet: false };
 
         for (const warning of warnings) {
-            if (warning.code === 409) {
+            if (warning.code === 2007) {
                 parsedWarnings.needAuthWallet = true;
                 continue;
             }

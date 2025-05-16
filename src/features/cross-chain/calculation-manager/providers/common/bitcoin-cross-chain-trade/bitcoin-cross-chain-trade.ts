@@ -155,7 +155,7 @@ export abstract class BitcoinCrossChainTrade extends CrossChainTrade<
             ...(publicKey && { publicKey })
         };
 
-        const swapData = await Injector.rubicApiService.fetchSwapData<
+        const swapData = await this.fetchSwapData<
             BitcoinTransferTxApiResp | BitcoinPsbtEncodedConfig
         >(swapRequestData);
 

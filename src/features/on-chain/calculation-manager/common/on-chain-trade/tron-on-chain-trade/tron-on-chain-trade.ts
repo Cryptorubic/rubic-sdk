@@ -171,9 +171,9 @@ export abstract class TronOnChainTrade extends OnChainTrade {
             receiver: receiverAddress || this.walletAddress,
             id: this.apiResponse.id
         };
-        const { transaction, estimate } =
-            await Injector.rubicApiService.fetchSwapData<TronTransactionConfig>(swapRequestData);
-
+        const { transaction, estimate } = await this.fetchSwapData<TronTransactionConfig>(
+            swapRequestData
+        );
         const amount = estimate.destinationWeiAmount;
 
         return { tx: transaction, toAmount: amount };
