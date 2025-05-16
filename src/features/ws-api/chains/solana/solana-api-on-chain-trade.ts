@@ -41,7 +41,8 @@ export class SolanaApiOnChainTrade extends SolanaOnChainTrade {
                 gasFeeInfo: null,
                 withDeflation: { from: { isDeflation: false }, to: { isDeflation: false } }
             },
-            params.apiQuote.integratorAddress!
+            params.apiQuote.integratorAddress!,
+            params.shouldCalculateConsumedParams
         );
 
         this.type = params.apiResponse.providerType as OnChainTradeType;

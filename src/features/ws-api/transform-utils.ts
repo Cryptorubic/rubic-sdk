@@ -39,6 +39,7 @@ import { TronApiOnChainConstructor } from './chains/tron/tron-api-on-chain-const
 import { RubicApiError } from './models/rubic-api-error';
 import { RubicApiParser } from './utils/rubic-api-parser';
 import { RubicApiUtils } from './utils/rubic-api-utils';
+import { shouldCalculateConsumedParamsProviders } from './chains/solana/constants/should-calculate-consumed-params';
 
 export class TransformUtils {
     public static async transformCrossChain(
@@ -96,7 +97,13 @@ export class TransformUtils {
                 needProvidePubKey
             } as BitcoinApiCrossChainConstructor);
         } else if (chainType === CHAIN_TYPE.SOLANA) {
-            trade = new SolanaApiCrossChainTrade(tradeParams as SolanaApiCrossChainConstructor);
+            const shouldCalculateConsumedParams =
+                shouldCalculateConsumedParamsProviders.includes(tradeType);
+
+            trade = new SolanaApiCrossChainTrade({
+                ...tradeParams,
+                shouldCalculateConsumedParams
+            } as SolanaApiCrossChainConstructor);
         }
 
         return {
@@ -134,7 +141,12 @@ export class TransformUtils {
         } else if (chainType === CHAIN_TYPE.TRON) {
             trade = new TronApiOnChainTrade(tradeParams as TronApiOnChainConstructor);
         } else if (chainType === CHAIN_TYPE.SOLANA) {
-            trade = new SolanaApiOnChainTrade(tradeParams as SolanaApiOnChainConstructor);
+            const shouldCalculateConsumedParams =
+                shouldCalculateConsumedParamsProviders.includes(tradeType);
+            trade = new SolanaApiOnChainTrade({
+                ...tradeParams,
+                shouldCalculateConsumedParams
+            } as SolanaApiOnChainConstructor);
         } else if (chainType === CHAIN_TYPE.TON) {
             trade = new TonApiOnChainTrade({
                 ...(tradeParams as TonApiOnChainConstructor),
