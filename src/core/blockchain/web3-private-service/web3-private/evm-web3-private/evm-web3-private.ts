@@ -55,7 +55,10 @@ export class EvmWeb3Private extends Web3Private {
         if (err.code === -32603) {
             return new LowGasError();
         }
-        if (err.code === 4001) {
+        if (
+            err.code === 4001 ||
+            err.message.toLowerCase().includes('user denied transaction signature')
+        ) {
             return new UserRejectError();
         }
         try {
