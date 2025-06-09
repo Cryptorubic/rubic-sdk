@@ -989,29 +989,29 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@0.7.18-alpha-id-2007.0":
-  version "0.7.18-alpha-id-2007.0"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.7.18-alpha-id-2007.0.tgz#6146c12d0a042c30f46dc5a4af143a7c483475fd"
-  integrity sha512-zDBV9//+0db/teMWD3pnnF+Hy7EsSTxD+FgXcpZ1LGnV/HGfAfI/4cakyLru53mNidtLwjsXj8hDEa0UJbSJGw==
+"@cryptorubic/core@0.7.18":
+  version "0.7.18"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.7.18.tgz#9bfc22aac7a4914e3f2904c20c2d3dcee366a681"
+  integrity sha512-33yFoirov/ivdJQC50oOzdbM7DHKfb+PWGYaPeN08cZMwNxs5CiFXnCv8EF+zlVTIaRx+65SlM9cbqwhyA8x1A==
   dependencies:
     bignumber.js "9.1.2"
     jest-mock-promise "^2.0.2"
     tslib "^2.3.0"
 
-"@cryptorubic/tron-types@0.7.18-alpha-id-2007.0":
-  version "0.7.18-alpha-id-2007.0"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.7.18-alpha-id-2007.0.tgz#8b0cdfd185973d7dfc284d91364082ecf846e913"
-  integrity sha512-QeIugaR0N1MTPuT7NdymIf/eLyp5NNnEgZSN6aZUfAUfjI2AL28cE6d4vo1sHA3CzOE4hqNM9+UXcl7z19laBg==
+"@cryptorubic/tron-types@0.7.18":
+  version "0.7.18"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.7.18.tgz#8e58f99e3c4bce22059a5b0d140e19aea90e1aba"
+  integrity sha512-Co4FC7AYRBzU/lGOREaA8SXT0QQnhAljQf1TA6uXFDx5zQw3abmUpC8zi5thLP6OuJiz2NiOrnc6+8d7MTTYfQ==
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@0.7.18-alpha-id-2007.0":
-  version "0.7.18-alpha-id-2007.0"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.7.18-alpha-id-2007.0.tgz#91db545cc1311d1090d65e008927c62122b70381"
-  integrity sha512-tWYAUkPrRUJVdwHMcI3tIE1ZsrZ7OHWHvEZDJo8nzWcl78GuCumlTZjMGjl7/aja1cbkYppaq2Q8PZJgEl453w==
+"@cryptorubic/web3@0.7.18":
+  version "0.7.18"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.7.18.tgz#6e67f0164a1146f21a1f7e267dffdaa9394d3fc3"
+  integrity sha512-QNyGT5gQn22WB+J4wGS4AzidJBRcYrgE8R60qbgVVvSc9M0xnrVQ9FjGEkSvdIOGOxg0xxTzborytNCokgjspQ==
   dependencies:
-    "@cryptorubic/core" "0.7.18-alpha-id-2007.0"
-    "@cryptorubic/tron-types" "0.7.18-alpha-id-2007.0"
+    "@cryptorubic/core" "0.7.18"
+    "@cryptorubic/tron-types" "0.7.18"
     "@ethersproject/bignumber" "^5.7.0"
     "@mysten/sui" "^1.24.0"
     "@solana/spl-token" "0.2.0"

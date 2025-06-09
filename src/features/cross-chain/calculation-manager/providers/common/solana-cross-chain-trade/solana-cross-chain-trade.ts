@@ -1,4 +1,8 @@
-import { SwapRequestInterface } from '@cryptorubic/core';
+import {
+    QuoteRequestInterface,
+    QuoteResponseInterface,
+    SwapRequestInterface
+} from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
@@ -19,6 +23,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
+import { RubicStep } from '../models/rubicStep';
 
 export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: string }> {
     public abstract readonly from: PriceTokenAmount<SolanaBlockchainName>;
@@ -36,6 +41,19 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
      */
     public get estimatedGas(): BigNumber | null {
         return null;
+    }
+
+    private readonly shouldCalculateConsumedParams: boolean;
+
+    constructor(
+        providerAddress: string,
+        routePath: RubicStep[],
+        apiQuote: QuoteRequestInterface,
+        apiResponse: QuoteResponseInterface,
+        shouldCalculateConsumedParams: boolean
+    ) {
+        super(providerAddress, routePath, apiQuote, apiResponse);
+        this.shouldCalculateConsumedParams = shouldCalculateConsumedParams;
     }
 
     public async approve(
@@ -88,7 +106,10 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
                 transactionHash = hash;
             };
 
-            await this.web3Private.sendTransaction({ data, onTransactionHash });
+            await this.web3Private.sendTransaction(
+                { data, onTransactionHash },
+                this.shouldCalculateConsumedParams
+            );
 
             return transactionHash!;
         } catch (err) {
