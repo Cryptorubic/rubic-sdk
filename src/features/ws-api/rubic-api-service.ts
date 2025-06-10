@@ -5,8 +5,7 @@ import {
     WsQuoteRequestInterface,
     WsQuoteResponseInterface
 } from '@cryptorubic/core';
-import BigNumber from 'bignumber.js';
-import { catchError, concatMap, filter, from, fromEvent, map, Observable, of } from 'rxjs';
+import { catchError, concatMap, from, fromEvent, map, Observable, of } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import {
     InsufficientFundsError,
@@ -150,14 +149,6 @@ export class RubicApiService {
                 type: string;
             }
         >(this.client, 'events').pipe(
-            filter(({ trade }) => {
-                if (!trade) {
-                    return true;
-                }
-                const { from } = trade?.tokens!;
-
-                return new BigNumber(from?.amount!).eq(this.latestQuoteParams?.srcTokenAmount!);
-            }),
             concatMap(wsResponse => {
                 const { trade, total, calculated, data } = wsResponse;
                 let promise: Promise<
@@ -194,7 +185,8 @@ export class RubicApiService {
                     map(wrappedTrade => ({
                         total,
                         calculated,
-                        wrappedTrade
+                        wrappedTrade,
+                        ...(data && { tradeType: wsResponse.type })
                     }))
                 );
             })
