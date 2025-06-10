@@ -75,7 +75,6 @@ export class RubicApiUtils {
     ): Promise<ApiCrossChainConstructor<BlockchainName> | ApiOnChainConstructor<BlockchainName>> {
         const { fromToken, toToken } = RubicApiUtils.getFromToTokens(
             response.tokens,
-            quote.srcTokenAmount,
             response.estimate.destinationTokenAmount
         );
 
@@ -99,7 +98,6 @@ export class RubicApiUtils {
             from: TokenInerface;
             to: TokenInerface;
         },
-        fromAmount: string,
         toAmount: string
     ): {
         fromToken: PriceTokenAmount;
@@ -112,7 +110,7 @@ export class RubicApiUtils {
             ...tokens.from,
             address: fromTokenAddress,
             price: new BigNumber(tokens.from.price || NaN),
-            tokenAmount: new BigNumber(fromAmount)
+            tokenAmount: new BigNumber(tokens.from.amount!)
         });
         const toToken = new PriceTokenAmount({
             ...tokens.to,
