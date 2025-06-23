@@ -989,29 +989,29 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@0.7.18-alpha-relay.1":
-  version "0.7.18-alpha-relay.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.7.18-alpha-relay.1.tgz#9960c01940ceaf0dbe1707f89517fb2e2d416131"
-  integrity sha512-IWS6AxdotzmTFeLg0BssETqG0SB4x0PhzuKff2BolMyMucY+la5f2Znyht7F55mippcIeBHenpo4ISlJtzggZw==
+"@cryptorubic/core@0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.8.1.tgz#62f57cd5b0e0561d7da2186949e1d3f8d23b9d08"
+  integrity sha512-8Z1dc4bDagg9HY4Dl5uQNtIC+UTMoub/BH+WLHxsVl1G87brODVo4kCurVLxEpBAgAjizx7bq7/mdJY0mnes2Q==
   dependencies:
     bignumber.js "9.1.2"
     jest-mock-promise "^2.0.2"
     tslib "^2.3.0"
 
-"@cryptorubic/tron-types@0.7.18-alpha-relay.1":
-  version "0.7.18-alpha-relay.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.7.18-alpha-relay.1.tgz#0fcbf4c9e8afb6187517721840356addb00c76df"
-  integrity sha512-oNutnJtbwaEr6KcqK3XCikTF90kkOqCTqU1aT/MdxGCFVJauSF3tKHyykHc9+4P6y21KBzrTMUyq9XAKXIDpBA==
+"@cryptorubic/tron-types@0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.8.1.tgz#5b4d2854490b3cfaa67435f1262e40d40b924a83"
+  integrity sha512-tNf+lpG8JCGvGtxTmCU8HQcZnfRxOncsUMjhKxoYL641Esv9fIkZEK4/pEuMWqnuVkd2gJjYVSlcMj44znCCzQ==
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@0.7.18-alpha-relay.1":
-  version "0.7.18-alpha-relay.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.7.18-alpha-relay.1.tgz#bca5fa2d6c5cff844cabf875cc9029ee8c1d5760"
-  integrity sha512-IHIcM/X4J0Q4Q8T5FTJQYecOTpwKtV4n85AL9Vr9jxU9Hptc153cMUHDp4ED10x5xys8j+W9zUiEshHsnTFD/Q==
+"@cryptorubic/web3@0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.8.1.tgz#585e19e2fefda185351493ffffa1e3f0c90998f2"
+  integrity sha512-vJvdH0207gDQs5gqMFX5apC3jOeFc3yeLclnfGkOqnpTHZtPlbCd05VGTobZmETD3fwNRB+k360u3rUg+pw+Qw==
   dependencies:
-    "@cryptorubic/core" "0.7.18-alpha-relay.1"
-    "@cryptorubic/tron-types" "0.7.18-alpha-relay.1"
+    "@cryptorubic/core" "0.8.1"
+    "@cryptorubic/tron-types" "0.8.1"
     "@ethersproject/bignumber" "^5.7.0"
     "@mysten/sui" "^1.24.0"
     "@solana/spl-token" "0.2.0"
