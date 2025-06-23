@@ -47,7 +47,12 @@ export class RubicApiParser {
             ...feeInfoDto.gasTokenFees.nativeToken,
             price: new BigNumber(feeInfoDto.gasTokenFees.nativeToken.price!)
         });
-
+        const percentToken = feeInfoDto.percentFees.token
+            ? new PriceToken({
+                  ...feeInfoDto.percentFees.token,
+                  price: new BigNumber(feeInfoDto.percentFees.token.price!)
+              })
+            : nativeToken;
         const protocolFee = feeInfoDto.gasTokenFees.protocol;
         const providerFee = feeInfoDto.gasTokenFees.provider;
         return {
@@ -55,6 +60,10 @@ export class RubicApiParser {
                 fixedFee: {
                     amount: new BigNumber(protocolFee.fixedAmount),
                     token: nativeToken
+                },
+                platformFee: {
+                    percent: feeInfoDto.percentFees.percent,
+                    token: percentToken
                 }
             },
             provider: {

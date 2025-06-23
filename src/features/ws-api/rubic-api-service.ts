@@ -185,7 +185,8 @@ export class RubicApiService {
                     map(wrappedTrade => ({
                         total,
                         calculated,
-                        wrappedTrade
+                        wrappedTrade,
+                        ...(data && { tradeType: wsResponse.type })
                     }))
                 );
             })
