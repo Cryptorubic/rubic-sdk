@@ -989,29 +989,29 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@0.8.1":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.8.1.tgz#62f57cd5b0e0561d7da2186949e1d3f8d23b9d08"
-  integrity sha512-8Z1dc4bDagg9HY4Dl5uQNtIC+UTMoub/BH+WLHxsVl1G87brODVo4kCurVLxEpBAgAjizx7bq7/mdJY0mnes2Q==
+"@cryptorubic/core@0.8.3", "@cryptorubic/core@^0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.8.3.tgz#3c348b7f4f667a87a3acbf1bd39b568e63bd6cab"
+  integrity sha512-vV74L3rcaxLW+ENEnDNZmIQ7v9kCF9e7lo+ux3n6MjKqEeISRMwCHnl8X6Q5tqYM+lk5T0TsPCgiAO1t/y8E7A==
   dependencies:
     bignumber.js "9.1.2"
     jest-mock-promise "^2.0.2"
     tslib "^2.3.0"
 
-"@cryptorubic/tron-types@0.8.1":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.8.1.tgz#5b4d2854490b3cfaa67435f1262e40d40b924a83"
-  integrity sha512-tNf+lpG8JCGvGtxTmCU8HQcZnfRxOncsUMjhKxoYL641Esv9fIkZEK4/pEuMWqnuVkd2gJjYVSlcMj44znCCzQ==
+"@cryptorubic/tron-types@0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.8.3.tgz#1753b118ab559ad51777dd5322ab4f584530e8eb"
+  integrity sha512-+/+1dG31ToykKq9sZXJTaJ327UPZ3wJsFJNHVektaje2QISg0fLIaDxRIh2doq9ORG2dx0DfuZMIHHmriW6krA==
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@0.8.1":
-  version "0.8.1"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.8.1.tgz#585e19e2fefda185351493ffffa1e3f0c90998f2"
-  integrity sha512-vJvdH0207gDQs5gqMFX5apC3jOeFc3yeLclnfGkOqnpTHZtPlbCd05VGTobZmETD3fwNRB+k360u3rUg+pw+Qw==
+"@cryptorubic/web3@^0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.8.3.tgz#28e101cc39df05a3185c382d280e7d6ff7cfc35c"
+  integrity sha512-dQS7oCg/JwDBbMQINI6OpKyITtHOTZgQEmp7/2H52nMNCPckhTqV1ynoTeaYftK4XfB82Z8oomKoT6tJSnDAow==
   dependencies:
-    "@cryptorubic/core" "0.8.1"
-    "@cryptorubic/tron-types" "0.8.1"
+    "@cryptorubic/core" "0.8.3"
+    "@cryptorubic/tron-types" "0.8.3"
     "@ethersproject/bignumber" "^5.7.0"
     "@mysten/sui" "^1.24.0"
     "@solana/spl-token" "0.2.0"
