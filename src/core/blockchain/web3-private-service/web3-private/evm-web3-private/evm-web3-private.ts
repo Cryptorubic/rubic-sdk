@@ -360,14 +360,13 @@ export class EvmWeb3Private extends Web3Private {
         };
 
         try {
-            await contract.methods
-                .approve(spenderAddress, rawValue.toFixed(0))
-                .estimateGas(gasfullParams);
+            const data = contract.methods.approve(spenderAddress, rawValue.toFixed(0)).encodeABI();
+            await this.web3.eth.estimateGas({ ...gasfullParams, data });
         } catch (err) {
             if (err?.message?.includes('gas required exceeds allowance')) {
                 throw err;
             }
-            console.error(err);
+            console.debug(err);
         }
 
         return new Promise((resolve, reject) => {
