@@ -989,29 +989,29 @@
     near-api-js "^0.44.2"
     near-seed-phrase "^0.2.0"
 
-"@cryptorubic/core@0.8.9-alpha-wormhole.2":
-  version "0.8.9-alpha-wormhole.2"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.8.9-alpha-wormhole.2.tgz#8ded9d3483643a9ab16b9dc3cbf3f52458636486"
-  integrity sha512-bI6kt+MUgVWYUmygOHmk7FNLUSpgMFdcx6dfAmDxBZNM/qkzwO4GOoKna6Su+hUcCAzwj4/yPBso2vDcfRXd0Q==
+"@cryptorubic/core@0.8.9-alpha-wormhole.3":
+  version "0.8.9-alpha-wormhole.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/core/-/core-0.8.9-alpha-wormhole.3.tgz#a4df9cb853cf7b4a92b9603e298b3d81a0e443d6"
+  integrity sha512-sx62KyjV43wMBWNHsBmvh1WCXVxar8cES/iR9rfRQccMbr+O9TCvWP/kW86nQz6MamKUZM/E7Lqonl960wZB/w==
   dependencies:
     bignumber.js "9.1.2"
     jest-mock-promise "^2.0.2"
     tslib "^2.3.0"
 
-"@cryptorubic/tron-types@0.8.9-alpha-wormhole.2":
-  version "0.8.9-alpha-wormhole.2"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.8.9-alpha-wormhole.2.tgz#f5e756604f5f1a7f1e60b48cc9d70f7d2d8b3312"
-  integrity sha512-zMhdLd5EkTHw9BnbQDNbmTov+ycBlP6dlrZcmOW8Yg1P4n7UJcRSteolXFQ+8/jdmjt2A463fJH3FaKOL/BKDA==
+"@cryptorubic/tron-types@0.8.9-alpha-wormhole.3":
+  version "0.8.9-alpha-wormhole.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/tron-types/-/tron-types-0.8.9-alpha-wormhole.3.tgz#1f882535788aad34664c490d911a868a32f643e0"
+  integrity sha512-nGk4EHCJpbON0WN4EaTMx+KEHOWLowW7poE+Kn5GGWI75uzx0QbruXQYiWmBw9VY2mmVfXKJj8IN4MsJE26EOQ==
   dependencies:
     "@ethersproject/bignumber" "^5.7.0"
 
-"@cryptorubic/web3@0.8.9-alpha-wormhole.2":
-  version "0.8.9-alpha-wormhole.2"
-  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.8.9-alpha-wormhole.2.tgz#519cbaa2371add2144aced80d3fb7ad3a57a1d3f"
-  integrity sha512-ZeKDIsaTQLOq8urIkFG4pm6LIRYce/CVBtDDHEeeOxetXicytN1PZP914SkTZaN4Qk/wi1sGvVYZ5+7JbpRw+g==
+"@cryptorubic/web3@0.8.9-alpha-wormhole.3":
+  version "0.8.9-alpha-wormhole.3"
+  resolved "https://registry.yarnpkg.com/@cryptorubic/web3/-/web3-0.8.9-alpha-wormhole.3.tgz#94c8d5877b3857691aed871a87994e7f9d484ac6"
+  integrity sha512-dUlLHLEzdoiMHbPDhfvTWDfsADi1fzxo7C/OD59OQr3QCv53+PuyndKDkE7Oq9goGtIvNRUCJuipFp+1rI/bQw==
   dependencies:
-    "@cryptorubic/core" "0.8.9-alpha-wormhole.2"
-    "@cryptorubic/tron-types" "0.8.9-alpha-wormhole.2"
+    "@cryptorubic/core" "0.8.9-alpha-wormhole.3"
+    "@cryptorubic/tron-types" "0.8.9-alpha-wormhole.3"
     "@ethersproject/bignumber" "^5.7.0"
     "@mysten/sui" "^1.24.0"
     "@solana/spl-token" "0.2.0"
