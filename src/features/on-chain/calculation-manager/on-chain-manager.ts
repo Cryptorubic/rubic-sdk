@@ -100,9 +100,7 @@ export class OnChainManager {
         const routes = await Injector.rubicApiService.fetchRoutes(request);
 
         return Promise.all(
-            routes.routes.map(route =>
-                TransformUtils.transformOnChain(route, request, fullOptions.providerAddress)
-            )
+            routes.routes.map(route => TransformUtils.transformOnChain(route, request, null))
         );
     }
 
