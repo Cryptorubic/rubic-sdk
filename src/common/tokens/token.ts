@@ -1,9 +1,11 @@
+import { BlockchainsInfo, nativeTokensList } from '@cryptorubic/core';
 import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 import { nativeTokensStruct } from 'src/common/tokens/constants/native-token-struct';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
 import { wrappedAddress } from './constants/wrapped-addresses';
@@ -42,10 +44,17 @@ export class Token<T extends BlockchainName = BlockchainName> {
         }
 
         if (!Web3PublicService.isSupportedBlockchain(tokenBaseStruct.blockchain)) {
-            throw new RubicSdkError(
-                `${tokenBaseStruct.blockchain} blockchain is not supported in Token class`
-            );
+            const chainType = BlockchainsInfo.getChainType(tokenBaseStruct.blockchain);
+            if (!Web3Pure[chainType].isNativeAddress(tokenBaseStruct.address)) {
+                throw new RubicSdkError(
+                    `Only native tokens supported for deposit trades in not integrated chains.`
+                );
+            }
+
+            const nativeToken = nativeTokensList[tokenBaseStruct.blockchain];
+            return new Token({ ...nativeToken }) as Token<T>;
         }
+
         const web3Public = Injector.web3PublicService.getWeb3Public(tokenBaseStruct.blockchain);
         const tokenInfo = await web3Public.callForTokenInfo(tokenBaseStruct.address);
 
@@ -76,6 +85,7 @@ export class Token<T extends BlockchainName = BlockchainName> {
         if (!Web3PublicService.isSupportedBlockchain(blockchain)) {
             throw new RubicSdkError(`${blockchain} blockchain is not supported in Token class`);
         }
+
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const tokenInfo = await web3Public.callForTokensInfo(tokensAddresses);
 
