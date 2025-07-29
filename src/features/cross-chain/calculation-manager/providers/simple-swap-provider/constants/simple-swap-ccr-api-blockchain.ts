@@ -2,7 +2,6 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const simpleSwapEvmSupportedChains = {
     [BLOCKCHAIN_NAME.ETHEREUM]: 'eth',
-    [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethw',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'bsc',
     [BLOCKCHAIN_NAME.POLYGON]: 'matic',
     [BLOCKCHAIN_NAME.AVALANCHE]: 'avaxc', // avax

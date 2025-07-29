@@ -9,7 +9,6 @@ export const changeNowEvmSupportedBlockchain = {
     [BLOCKCHAIN_NAME.AVALANCHE]: 'avaxc',
     [BLOCKCHAIN_NAME.CELO]: 'celo',
     [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: 'etc',
-    [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethw',
     [BLOCKCHAIN_NAME.FANTOM]: 'ftm',
     [BLOCKCHAIN_NAME.IOTEX]: 'iotx',
     [BLOCKCHAIN_NAME.KLAYTN]: 'klay',
