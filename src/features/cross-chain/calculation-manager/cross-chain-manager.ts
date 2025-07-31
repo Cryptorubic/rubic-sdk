@@ -105,9 +105,7 @@ export class CrossChainManager {
         const routes = await Injector.rubicApiService.fetchRoutes(request);
 
         return Promise.all(
-            routes.routes.map(route =>
-                TransformUtils.transformCrossChain(route, request, providerOptions.providerAddress)
-            )
+            routes.routes.map(route => TransformUtils.transformCrossChain(route, request, null))
         );
 
         // const calculationPromises = providers.map(provider =>

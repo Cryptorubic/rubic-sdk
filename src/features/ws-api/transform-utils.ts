@@ -45,8 +45,7 @@ export class TransformUtils {
     public static async transformCrossChain(
         res: QuoteResponseInterface,
         quote: QuoteRequestInterface,
-        _integratorAddress: string,
-        err?: RubicApiError
+        err: RubicApiError | null
     ): Promise<WrappedCrossChainTrade> {
         if (!res && !err) {
             throw new NotSupportedTokensError();
@@ -116,8 +115,7 @@ export class TransformUtils {
     public static async transformOnChain(
         response: QuoteResponseInterface,
         quote: QuoteRequestInterface,
-        _integratorAddress: string,
-        err?: RubicApiError
+        err: RubicApiError | null
     ): Promise<WrappedOnChainTradeOrNull> {
         if (!response && !err) {
             throw new NotSupportedTokensError();
