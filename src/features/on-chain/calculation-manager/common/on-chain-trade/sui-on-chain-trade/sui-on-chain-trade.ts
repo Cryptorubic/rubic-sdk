@@ -244,7 +244,10 @@ export abstract class SuiOnChainTrade extends OnChainTrade {
         }
 
         const { tx, toAmount } = await this.getTransactionConfigAndAmount(options);
+
+        this._lastTo = this.to.clone({ weiAmount: new BigNumber(toAmount) });
         this.lastTransactionConfig = tx;
+
         setTimeout(() => {
             this.lastTransactionConfig = null;
         }, 15_000);

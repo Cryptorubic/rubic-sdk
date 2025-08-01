@@ -162,8 +162,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             options.receiverAddress,
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );
-        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
 
+        const method = options?.testMode ? 'sendTransaction' : 'trySendTransaction';
         const fromAddress = this.walletAddress;
 
         const { data, value, to } = await this.encode({ ...options, fromAddress });

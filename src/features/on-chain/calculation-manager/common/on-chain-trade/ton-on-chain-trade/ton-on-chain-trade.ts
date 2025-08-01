@@ -135,6 +135,7 @@ export abstract class TonOnChainTrade extends OnChainTrade {
         const { config, amount } = await this.getTransactionConfigAndAmount(
             options.receiverAddress
         );
+        this._lastTo = this.to.clone({ weiAmount: new BigNumber(amount) });
 
         if (!options.skipAmountCheck) {
             this.checkAmountChange(amount, this.to.stringWeiAmount);
