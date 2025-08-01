@@ -53,6 +53,16 @@ export abstract class OnChainTrade {
         this._apiFromAddress = value;
     }
 
+    protected _lastTo: PriceTokenAmount | null = null;
+
+    /* use to check latest recalculated output-token amount  */
+    public get lastTo(): PriceTokenAmount {
+        if (!this._lastTo) {
+            throw new RubicSdkError('_lastTo field is unavailable before swap() method call.');
+        }
+        return this._lastTo;
+    }
+
     /**
      * Type of instant trade provider.
      */

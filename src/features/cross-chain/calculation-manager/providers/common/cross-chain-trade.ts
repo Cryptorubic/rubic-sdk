@@ -46,6 +46,16 @@ export abstract class CrossChainTrade<T = unknown> {
         return this._uniqueInfo;
     }
 
+    protected _lastTo: PriceTokenAmount | null = null;
+
+    /* use to check latest recalculated output-token amount  */
+    public get lastTo(): PriceTokenAmount {
+        if (!this._lastTo) {
+            throw new RubicSdkError('_lastTo field is unavailable before swap() method call.');
+        }
+        return this._lastTo;
+    }
+
     /**
      * Type of calculated cross-chain trade.
      */
@@ -357,7 +367,10 @@ export abstract class CrossChainTrade<T = unknown> {
             receiverAddress,
             refundAddress
         );
+
+        this._lastTo = this.to.clone({ weiAmount: new BigNumber(amount) });
         this.lastTransactionConfig = config;
+
         setTimeout(() => {
             this.lastTransactionConfig = null;
         }, 15_000);
