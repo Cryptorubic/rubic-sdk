@@ -164,8 +164,8 @@ export class SolanaWeb3Public extends Web3Public {
     public async getBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
         const isToken = tokenAddress && !SolanaWeb3Pure.isNativeAddress(tokenAddress);
         if (isToken) {
-            const balance = await this.getTokensBalances(userAddress, [tokenAddress]);
-            return balance?.[0] || new BigNumber(0);
+            const balance = await this.getTokenBalanceByAtaAddress(userAddress, tokenAddress);
+            return balance;
         }
         const balance = await this.connection.getBalanceAndContext(
             new PublicKey(userAddress),
@@ -254,6 +254,23 @@ export class SolanaWeb3Public extends Web3Public {
             const tokenWithBalance = tokenInfo.get(tokenAddress);
             return new BigNumber(tokenWithBalance || NaN);
         });
+    }
+
+    public async getTokenBalanceByAtaAddress(
+        walletAddress: string,
+        tokenAddress: string
+    ): Promise<BigNumber> {
+        try {
+            const ata = await getAssociatedTokenAddress(
+                new PublicKey(tokenAddress),
+                new PublicKey(walletAddress)
+            );
+            const ataInfo = (await this.connection.getTokenAccountBalance(ata)).value;
+
+            return new BigNumber(ataInfo.amount);
+        } catch {
+            return new BigNumber(0);
+        }
     }
 
     public async getAllowance(): Promise<BigNumber> {
