@@ -345,6 +345,7 @@ export class EvmWeb3Private extends Web3Private {
         tokenAddress: string,
         spenderAddress: string,
         amount: BigNumber | 'infinity' = 'infinity',
+        fromBlockchain: EvmBlockchainName,
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
@@ -357,7 +358,7 @@ export class EvmWeb3Private extends Web3Private {
 
         const gasOptions = options.gasPriceOptions
             ? getGasOptions(options)
-            : await Injector.gasPriceApi.getGasPrice(BLOCKCHAIN_NAME.METIS);
+            : await Injector.gasPriceApi.getGasPrice(fromBlockchain);
 
         const gasfullParams = {
             ...gaslessParams,
