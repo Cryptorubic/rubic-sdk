@@ -134,6 +134,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             fromTokenAddress,
             this.contractSpender,
             approveAmount,
+            this.from.blockchain,
             options
         );
     }
