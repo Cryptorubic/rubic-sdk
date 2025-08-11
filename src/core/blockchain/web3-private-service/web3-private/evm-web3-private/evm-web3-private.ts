@@ -350,7 +350,7 @@ export class EvmWeb3Private extends Web3Private {
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
         const rawValue = amount === 'infinity' ? new BigNumber(2).pow(256).minus(1) : amount;
         const gaslessParams = { from: this.address };
-        options.gasPriceOptions;
+
         const gas = await contract.methods
             .approve(spenderAddress, rawValue.toFixed(0))
             .estimateGas(gaslessParams);
