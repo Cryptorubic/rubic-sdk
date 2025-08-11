@@ -1,4 +1,6 @@
+import { blockchainId } from '@cryptorubic/core';
 import BigNumber from 'bignumber.js';
+import { ethers } from 'ethers';
 import {
     FailedToCheckForTransactionReceiptError,
     InsufficientFundsGasPriceValueError,
@@ -348,26 +350,37 @@ export class EvmWeb3Private extends Web3Private {
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
         const rawValue = amount === 'infinity' ? new BigNumber(2).pow(256).minus(1) : amount;
         const gaslessParams = { from: this.address };
-
+        options.gasPriceOptions;
         const gas = await contract.methods
             .approve(spenderAddress, rawValue.toFixed(0))
             .estimateGas(gaslessParams);
 
+        const gasOptions = options.gasPriceOptions
+            ? getGasOptions(options)
+            : await Injector.gasPriceApi.getGasPrice(BLOCKCHAIN_NAME.METIS);
+
         const gasfullParams = {
             ...gaslessParams,
-            ...getGasOptions(options),
+            ...gasOptions,
             gas: Web3Private.stringifyAmount(gas, 1)
         };
 
         try {
-            await contract.methods
-                .approve(spenderAddress, rawValue.toFixed(0))
-                .estimateGas(gasfullParams);
+            const data = contract.methods.approve(spenderAddress, rawValue.toFixed(0)).encodeABI();
+
+            await this.web3.eth.call({
+                ...gasfullParams,
+                data,
+                to: tokenAddress
+            });
         } catch (err) {
-            if (err?.message?.includes('gas required exceeds allowance')) {
-                throw err;
+            if (
+                err?.message?.includes('gas required exceeds allowance') ||
+                err?.message?.includes('insufficient balance to pay for gas')
+            ) {
+                throw new InsufficientFundsGasPriceValueError();
             }
-            console.error(err);
+            console.debug(err);
         }
 
         return new Promise((resolve, reject) => {
