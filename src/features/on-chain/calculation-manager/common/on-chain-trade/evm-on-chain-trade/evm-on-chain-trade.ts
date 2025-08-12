@@ -190,6 +190,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             fromTokenAddress,
             this.spenderAddress,
             approveAmount,
+            this.from.blockchain,
             options
         );
     }
