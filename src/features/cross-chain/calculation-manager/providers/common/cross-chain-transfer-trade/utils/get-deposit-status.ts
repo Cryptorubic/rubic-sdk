@@ -40,34 +40,41 @@ export function getDepositStatus(
 }
 
 async function getExolixStatus(id: string): Promise<CrossChainDepositData> {
-    const { status, hashOut } = await Injector.httpClient.get<{
-        status: string;
-        hashOut: { hash: string };
-    }>(`https://exolix.com/api/v2/transactions/${id}`);
+    try {
+        const { status, hashOut } = await Injector.httpClient.get<{
+            status: string;
+            hashOut: { hash: string };
+        }>(`https://exolix.com/api/v2/transactions/${id}`);
 
-    if (status === 'success' || status === 'refunded') {
+        if (status === 'success' || status === 'refunded') {
+            return {
+                status: CROSS_CHAIN_DEPOSIT_STATUS.FINISHED,
+                dstHash: hashOut.hash
+            };
+        }
+
+        if (status === 'overdue') {
+            return {
+                status: CROSS_CHAIN_DEPOSIT_STATUS.FAILED,
+                dstHash: null
+            };
+        }
+
+        if (status === 'wait') {
+            return {
+                status: CROSS_CHAIN_DEPOSIT_STATUS.WAITING,
+                dstHash: null
+            };
+        }
+
         return {
-            status: CROSS_CHAIN_DEPOSIT_STATUS.FINISHED,
-            dstHash: hashOut.hash
+            status: status as CrossChainDepositStatus,
+            dstHash: hashOut?.hash || null
         };
-    }
-
-    if (status === 'overdue') {
-        return {
-            status: CROSS_CHAIN_DEPOSIT_STATUS.FAILED,
-            dstHash: null
-        };
-    }
-
-    if (status === 'wait') {
+    } catch {
         return {
             status: CROSS_CHAIN_DEPOSIT_STATUS.WAITING,
             dstHash: null
         };
     }
-
-    return {
-        status: status as CrossChainDepositStatus,
-        dstHash: hashOut?.hash || null
-    };
 }
