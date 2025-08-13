@@ -252,6 +252,6 @@ export class RubicApiService {
                 return new TradeExpiredError();
             }
         }
-        return new RubicSdkError(result?.reason || 'Unknown error');
+        return new RubicSdkError(JSON.stringify(result));
     }
 }
