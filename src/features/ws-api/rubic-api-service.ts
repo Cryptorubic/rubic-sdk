@@ -252,6 +252,6 @@ export class RubicApiService {
                 return new TradeExpiredError();
             }
         }
-        return new RubicSdkError(JSON.stringify(result));
+        return new RubicSdkError(JSON.stringify(err));
     }
 }
