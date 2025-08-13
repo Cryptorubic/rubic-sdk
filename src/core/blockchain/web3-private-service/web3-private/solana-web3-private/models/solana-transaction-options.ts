@@ -5,4 +5,9 @@ export interface SolanaTransactionOptions extends BasicTransactionOptions {
      * Encoded data, which will be executed in transaction.
      */
     data?: string;
+
+    sponsorParams?: {
+        tradeId: string;
+        feePayer: string; // Public key of the fee payer
+    };
 }

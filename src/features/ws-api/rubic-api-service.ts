@@ -212,6 +212,16 @@ export class RubicApiService {
         );
     }
 
+    public sendToRelay(id: string, data: string): Promise<{ signature: string }> {
+        return Injector.httpClient.post<{ signature: string }>(
+            `${this.apiUrl}/api/utility/solana/relay`,
+            {
+                data,
+                id
+            }
+        );
+    }
+
     private getApiError(result: RubicApiErrorDto): RubicSdkError {
         switch (result.code) {
             case 3003: {

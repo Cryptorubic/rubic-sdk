@@ -65,4 +65,9 @@ export interface SwapTransactionOptions {
      * Address for refund assets if error occurs
      */
     refundAddress?: string;
+
+    solanaSponsorParams?: {
+        tradeId: string;
+        feePayer: string; // Public key of the fee payer
+    };
 }

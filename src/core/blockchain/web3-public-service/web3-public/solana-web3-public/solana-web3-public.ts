@@ -37,7 +37,7 @@ import { SolanaTokensService } from './services/solana-tokens-service';
 export class SolanaWeb3Public extends Web3Public {
     private readonly HELIUS_API_URL = 'https://mainnet.helius-rpc.com';
 
-    constructor(private readonly connection: Connection) {
+    constructor(public readonly connection: Connection) {
         super(BLOCKCHAIN_NAME.SOLANA);
     }
 

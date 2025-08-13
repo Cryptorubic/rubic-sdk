@@ -8,7 +8,7 @@ import {
 export interface SolanaWeb3 {
     publicKey?: { toBytes(): Uint8Array };
     isConnected: boolean;
-    signTransaction(transaction: Transaction): Promise<Transaction>;
+    signTransaction(transaction: Transaction | VersionedTransaction): Promise<Transaction>;
     signAllTransactions(transactions: Transaction[]): Promise<Transaction[]>;
     signMessage(message: Uint8Array, encoding: string): Promise<{ signature: Uint8Array }>;
     sendTransaction(

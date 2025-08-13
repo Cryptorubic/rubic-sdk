@@ -1,6 +1,6 @@
 {
-    "name": "rubic-sdk",
-    "version": "6.0.0-alpha-new-sdk-fixes.59",
+    "name": "rubic-sdk-next",
+    "version": "6.0.0-alpha-new-sdk-fixes-.65",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -100,6 +100,7 @@
         "bignumber.js": "9.1.2",
         "bitcoin-address-validation": "2.2.1",
         "browserify-zlib": "^0.2.0",
+        "bs58": "^6.0.0",
         "cbridge-revert-manager": "1.1.0",
         "crc32": "^0.2.2",
         "ethers": "^5.6.8",

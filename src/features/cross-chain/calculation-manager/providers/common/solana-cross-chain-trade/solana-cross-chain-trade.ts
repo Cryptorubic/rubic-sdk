@@ -23,6 +23,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
+
 import { RubicStep } from '../models/rubicStep';
 
 export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: string }> {
@@ -107,7 +108,7 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
             };
 
             await this.web3Private.sendTransaction(
-                { data, onTransactionHash },
+                { data, onTransactionHash, sponsorParams: options.solanaSponsorParams },
                 this.shouldCalculateConsumedParams
             );
 
@@ -159,7 +160,9 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: stri
             fromAddress: this.walletAddress,
             receiver: receiverAddress,
             id: this.apiResponse.id,
-            enableChecks: !testMode
+            enableChecks: !testMode,
+            // @ts-ignore
+            sponsorGas: true
         };
 
         const { transaction, estimate } = await this.fetchSwapData<EvmEncodeConfig>(

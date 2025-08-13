@@ -199,7 +199,8 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
             await this.web3Private.sendTransaction(
                 {
                     data: transactionConfig.data,
-                    onTransactionHash
+                    onTransactionHash,
+                    sponsorParams: options.solanaSponsorParams
                 },
                 this.shouldCalculateConsumedParams
             );
@@ -231,7 +232,9 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
             ...this.apiQuote,
             fromAddress: this.walletAddress,
             receiver: options?.receiverAddress || this.walletAddress,
-            id: this.apiResponse.id
+            id: this.apiResponse.id,
+            // @ts-ignore
+            sponsorGas: true
         };
         const swapData = await this.fetchSwapData<EvmEncodeConfig>(swapRequestData);
 
