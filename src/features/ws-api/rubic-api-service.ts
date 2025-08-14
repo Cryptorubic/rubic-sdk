@@ -16,6 +16,7 @@ import {
 import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
 import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
 import { UnlistedError } from 'src/common/errors/proxy/unlisted-error';
+import { SimulationFailedError } from 'src/common/errors/swap/simulation-failed.error';
 import { TradeExpiredError } from 'src/common/errors/swap/trade-expired.error';
 import { Injector } from 'src/core/injector/injector';
 import { EnvType } from 'src/core/sdk/models/env-type';
@@ -24,7 +25,6 @@ import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-man
 import { SwapErrorResponseInterface } from 'src/features/ws-api/models/swap-error-response-interface';
 import { WrappedAsyncTradeOrNull } from 'src/features/ws-api/models/wrapped-async-trade-or-null';
 import { TransformUtils } from 'src/features/ws-api/transform-utils';
-import { ExecutionRevertedError } from 'viem';
 
 import { TransferSwapRequestInterface } from './chains/transfer-trade/models/transfer-swap-request-interface';
 import { rubicApiLinkMapping } from './constants/rubic-api-link-mapping';
@@ -84,7 +84,7 @@ export class RubicApiService {
                 SwapResponseInterface<T> | SwapErrorResponseInterface
             >(`${this.apiUrl}/api/routes/swap`, body);
             if ('error' in result) {
-                throw this.getApiError(result.error);
+                throw this.getApiError(result);
             }
             return result;
         } catch (err) {
@@ -92,7 +92,7 @@ export class RubicApiService {
                 throw err;
             }
             if ('error' in err) {
-                throw this.getApiError((err as { error: SwapErrorResponseInterface }).error.error);
+                throw this.getApiError((err as { error: SwapErrorResponseInterface }).error);
             }
             throw this.getApiError(err);
         }
@@ -113,7 +113,7 @@ export class RubicApiService {
                 SwapResponseInterface<T> | SwapErrorResponseInterface
             >(`${this.apiUrl}/api/routes/swapBest`, body);
             if ('error' in result) {
-                throw this.getApiError(result.error);
+                throw this.getApiError(result);
             }
             return result;
         } catch (err) {
@@ -121,7 +121,7 @@ export class RubicApiService {
                 throw err;
             }
             if ('error' in err) {
-                throw this.getApiError((err as { error: SwapErrorResponseInterface }).error.error);
+                throw this.getApiError((err as { error: SwapErrorResponseInterface }).error);
             }
             throw this.getApiError(err);
         }
@@ -212,7 +212,8 @@ export class RubicApiService {
         );
     }
 
-    private getApiError(result: RubicApiErrorDto): RubicSdkError {
+    private getApiError(err: SwapErrorResponseInterface): RubicSdkError {
+        const result = err.error;
         switch (result.code) {
             case 3003: {
                 return new InsufficientFundsError(
@@ -223,7 +224,7 @@ export class RubicApiService {
                 return new InsufficientFundsGasPriceValueError();
             }
             case 3005: {
-                return new ExecutionRevertedError();
+                return new SimulationFailedError(err);
             }
             case 3006: {
                 return new UnsupportedReceiverAddressError();
@@ -251,6 +252,6 @@ export class RubicApiService {
                 return new TradeExpiredError();
             }
         }
-        return new RubicSdkError(result?.reason || 'Unknown error');
+        return new RubicSdkError(JSON.stringify(err));
     }
 }
