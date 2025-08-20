@@ -145,7 +145,9 @@ export class TronWeb3Private extends Web3Private {
                 this.address
             );
         } catch (err) {
-            if (err !== 'this node does not support estimate energy') {
+            const errMessage = typeof err === 'object' ? err.message : err;
+
+            if (errMessage !== 'this node does not support estimate energy') {
                 throw new Error('Tron transaction simulation error');
             }
         }
