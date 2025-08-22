@@ -4,7 +4,8 @@ export const transferTradeSupportedProviders = [
     CROSS_CHAIN_TRADE_TYPE.CHANGELLY,
     CROSS_CHAIN_TRADE_TYPE.CHANGENOW,
     CROSS_CHAIN_TRADE_TYPE.SIMPLE_SWAP,
-    CROSS_CHAIN_TRADE_TYPE.EXOLIX
+    CROSS_CHAIN_TRADE_TYPE.EXOLIX,
+    CROSS_CHAIN_TRADE_TYPE.LETS_EXCHANGE
 ];
 
 export type TransferTradeSupportedProviders = (typeof transferTradeSupportedProviders)[number];

@@ -29,6 +29,7 @@ import { BitcoinApiCrossChainConstructor } from './chains/bitcoin/bitcoin-api-cr
 import { BitcoinApiCrossChainTrade } from './chains/bitcoin/bitcoin-api-cross-chain-trade';
 import { EvmApiCrossChainConstructor } from './chains/evm/evm-api-cross-chain-constructor';
 import { EvmApiOnChainConstructor } from './chains/evm/evm-api-on-chain-constructor';
+import { shouldCalculateConsumedParamsProviders } from './chains/solana/constants/should-calculate-consumed-params';
 import { SolanaApiCrossChainConstructor } from './chains/solana/solana-api-cross-chain-constructor';
 import { SolanaApiOnChainConstructor } from './chains/solana/solana-api-on-chain-constructor';
 import { TonApiCrossChainConstructor } from './chains/ton/ton-api-cross-chain-constructor';
@@ -39,7 +40,6 @@ import { TronApiOnChainConstructor } from './chains/tron/tron-api-on-chain-const
 import { RubicApiError } from './models/rubic-api-error';
 import { RubicApiParser } from './utils/rubic-api-parser';
 import { RubicApiUtils } from './utils/rubic-api-utils';
-import { shouldCalculateConsumedParamsProviders } from './chains/solana/constants/should-calculate-consumed-params';
 
 export class TransformUtils {
     public static async transformCrossChain(
