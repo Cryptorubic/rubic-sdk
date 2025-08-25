@@ -67,14 +67,16 @@ export class BitcoinWeb3Private extends Web3Private {
             this.wallet.core.request(
                 {
                     method: 'sign_psbt',
-                    params: {
-                        psbt: txConfig.psbt,
-                        signInputs: {
-                            [this.address]: txConfig.signInputs
-                        },
-                        allowedSignHash: 1,
-                        broadcast: true
-                    }
+                    params: [
+                        {
+                            psbt: txConfig.psbt,
+                            signInputs: {
+                                [this.address]: txConfig.signInputs
+                            },
+                            allowedSignHash: 1,
+                            broadcast: true
+                        }
+                    ]
                 },
                 (error, txHash) => {
                     if (error) {
