@@ -14,6 +14,14 @@ import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ton-w
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
 const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
+    // Tempo actually has no native coin, but we use TEMPO as a placeholder
+    [BLOCKCHAIN_NAME.TEMPO_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.TEMPO_TESTNET,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'TEMPO',
+        symbol: 'TEMPO',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.FUJI]: new Token({
         blockchain: BLOCKCHAIN_NAME.FUJI,
         address: EvmWeb3Pure.nativeTokenAddress,
